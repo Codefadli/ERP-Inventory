@@ -181,8 +181,22 @@
       "bases:Create new base": false
     }
   },
-  "active": "2c91c2363eebdd7a",
+  "active": "817cbeda3a21c9c7",
   "lastOpenFiles": [
+    "task/frontend",
+    "task/backend",
+    "task",
+    "project/Requirements.md.md",
+    "project/Database.md.md",
+    "project/Architecture.md.md",
+    "project/API.md.md",
+    "project",
+    "fadli_sAdmin/Instructions.md.md",
+    "fadli_sAdmin",
+    "Analyst/Specifications",
+    "Analyst/analyst.md.md",
+    "Analyst/analyst",
+    "Analyst",
     "analyst_erp/Analyst/analyst.md.md",
     "analyst_erp/fadli_sAdmin/Instructions.md.md",
     "analyst_erp/project/Database.md.md",
@@ -192,13 +206,7 @@
     "analyst_erp/task/backend",
     "analyst_erp/task",
     "analyst_erp/project/API.md.md",
-    "analyst_erp/project",
-    "analyst_erp/Analyst/Specifications",
-    "analyst_erp/Analyst/analyst",
-    "analyst_erp/Analyst",
     "fadli_sadmin.md",
-    "analyst_erp/fadli_sAdmin",
-    "Welcome.md",
-    "analyst_erp"
+    "Welcome.md"
   ]
 }
