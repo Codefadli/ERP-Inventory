@@ -183,6 +183,12 @@
   },
   "active": "817cbeda3a21c9c7",
   "lastOpenFiles": [
+    "project/Requirements.md",
+    "project/Database.md",
+    "project/Architecture.md",
+    "project/API.md",
+    "Analyst/analyst.md",
+    "fadli_sAdmin/Instructions.md",
     "task/frontend",
     "task/backend",
     "task",
@@ -204,7 +210,6 @@
     "analyst_erp/project/Requirements.md.md",
     "analyst_erp/task/frontend",
     "analyst_erp/task/backend",
-    "analyst_erp/task",
     "analyst_erp/project/API.md.md",
     "fadli_sadmin.md",
     "Welcome.md"
