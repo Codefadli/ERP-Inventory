@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed-dim":"#8ccff6","primary-container":"#347c9f","primary":"#0c6385","surface-container-highest":"#d3e4fe","on-tertiary":"#ffffff","error":"#ba1a1a","surface-container-low":"#eff4ff","secondary-fixed-dim":"#adc8f5","on-error":"#ffffff","on-primary-container":"#fcfcff","tertiary-container":"#0f7ea3","on-secondary-container":"#3e5980","on-tertiary-container":"#fbfdff","on-surface-variant":"#40484d","secondary":"#455f87","on-surface":"#0b1c30","on-primary":"#ffffff","on-background":"#0b1c30","surface-variant":"#d3e4fe","inverse-primary":"#8ccff6","surface-container-high":"#dce9ff","surface-container":"#e5eeff","surface-dim":"#cbdbf5","secondary-container":"#b5d0fd","on-secondary":"#ffffff","tertiary-fixed":"#c0e8ff","on-tertiary-fixed":"#001e2b","error-container":"#ffdad6","tertiary-fixed-dim":"#7bd1fa","on-secondary-fixed":"#001c3b","surface":"#f8f9ff","secondary-fixed":"#d5e3ff","on-error-container":"#93000a","surface-bright":"#f8f9ff","on-tertiary-fixed-variant":"#004d66","tertiary":"#006483","background":"#f8f9ff","on-primary-fixed-variant":"#004c69","primary-fixed":"#c4e7ff","on-primary-fixed":"#001e2c","surface-container-lowest":"#ffffff","surface-tint":"#126588","inverse-on-surface":"#eaf1ff","outline":"#70787e","on-secondary-fixed-variant":"#2d486d","inverse-surface":"#213145","outline-variant":"#c0c7ce"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-md":"1rem","gutter":"1.5rem","gutter-sm":"1rem","space-lg":"1.5rem","margin-sm":"1rem","space-xs":"0.25rem","margin":"2rem","space-sm":"0.5rem","space-xl":"2.5rem"},"fontFamily":{"headline-lg-mobile":["Plus Jakarta Sans"],"label-md":["Inter"],"body-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-sm":["Inter"],"body-lg":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"data-metric":["Plus Jakarta Sans"]},"fontSize":{"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"500"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"display-lg-mobile":["32px",{"lineHeight":"40px","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"display-lg":["48px",{"lineHeight":"56px","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"data-metric":["28px",{"lineHeight":"34px","fontWeight":"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-gutter flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm" data-path="beranda" href="#"><img alt="Logo Asro Inventory" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Vu_O2bcJnBWtCIc_snB85_C8IuokD_Dd5whISHNO2x541BXVXGTkqBogqgC-tJ5of5to6z8dmQv0p9ojwDL_pWHHBEB1EWfgETZy0GYw1yo1PyZqz26PHpucja7H3fK28cZbxOZVw8uuiQZrQO112WfR_rKjqX72N-0ZRtUMdi8l2qdES3sn_J6ciDM20fiZDYQ5-wbFwq-u_rUOq8jmBQ6BNWdLfiTY29eYamcZGos3GG3sTKK9-Si4TN"/><span class="font-title-md text-title-md text-on-surface tracking-tight">Asro Inventory</span></a><nav class="hidden xl:flex items-center gap-space-md" data-active-classes="text-primary font-title-md"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="fitur" href="#">Fitur</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="solusi" href="#">Solusi</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="modul-inventaris" href="#">Modul Inventaris</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="integrasi" href="#">Integrasi</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="harga" href="#">Harga</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="hubungi-kami" href="#">Hubungi Kami</a></nav></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant bg-surface-container-low px-space-sm py-space-xs rounded-lg"><span class="material-symbols-outlined text-[18px]">language</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold text-on-surface">ID</span><span class="text-outline-variant font-label-sm text-label-sm">/</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface cursor-pointer">EN</span></div><a class="hidden sm:inline-flex font-body-md text-body-md text-on-surface-variant hover:text-on-surface px-space-md py-space-sm transition-colors" data-path="login" href="#">Masuk</a><a class="inline-flex items-center justify-center bg-primary-fixed text-on-primary-fixed font-title-md text-title-md px-space-md py-space-sm rounded-lg hover:bg-primary-fixed-dim transition-all shadow-[0_1px_3px_0_rgba(30,58,95,0.04)]" data-path="registrasi" href="#">Coba Gratis 14 Hari</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<!-- AMBIENT BACKGROUND GLOWS -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[980px] h-[480px] bg-gradient-to-b from-primary-fixed-dim/20 via-surface-container-high/40 to-transparent blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-96 -left-32 w-80 h-80 bg-tertiary-fixed/30 rounded-full blur-2xl pointer-events-none -z-10"></div>
+<div class="absolute top-[800px] -right-24 w-96 h-96 bg-secondary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<!-- 1. HERO SECTION -->
+<section class="max-w-[1440px] mx-auto px-gutter pt-space-lg pb-space-xl">
+<div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+<!-- Badge Chip -->
+<div class="inline-flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full shadow-sm mb-space-md animate-pulse">
+<span class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-label-md text-label-md text-primary font-semibold tracking-wide">Platform Manajemen Inventaris Pintar No. 1 di Indonesia</span>
+</div>
+<!-- Headline -->
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight mb-space-md text-balance">
+          Kendali Penuh Stok &amp; Gudang Bisnis Anda dalam <span class="bg-gradient-to-r from-primary via-tertiary to-secondary bg-clip-text text-transparent">Satu Ekosistem Pintar</span>
+</h1>
+<!-- Subheading -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-space-lg text-balance">
+          Asro Inventory mengotomasi pelacakan stok multi-gudang, pemindaian barcode real-time, prediksi restock berbasis AI, dan sinkronisasi omnichannel tanpa batas.
+        </p>
+<!-- Dual CTA -->
+<div class="flex flex-col sm:flex-row items-center gap-space-md w-full sm:w-auto mb-space-xl">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs bg-primary text-on-primary px-space-xl py-3.5 rounded-xl font-title-md text-title-md hover:bg-tertiary shadow-md transition-all hover:scale-[1.02]" data-path="registrasi" href="#">
+<span>Mulai Uji Coba Gratis</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs bg-surface-container-lowest text-on-surface px-space-lg py-3.5 rounded-xl font-title-md text-title-md hover:bg-surface-container-low shadow-sm transition-all" onclick="document.getElementById('video-modal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span>Jadwalkan Demo Langsung</span>
+</button>
+</div>
+<!-- Trust Badges Bar -->
+<div class="flex flex-col items-center gap-space-sm pt-space-xs">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
+            Dipercaya oleh 2.500+ bisnis retail, manufaktur, dan e-commerce di Asia Tenggara
+          </p>
+<div class="flex flex-wrap items-center justify-center gap-space-md text-on-surface-variant opacity-85">
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[18px]">storefront</span>
+<span class="font-title-md text-body-md font-bold tracking-tight">TokoMaju</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[18px]">local_shipping</span>
+<span class="font-title-md text-body-md font-bold tracking-tight">LogisTek</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[18px]">factory</span>
+<span class="font-title-md text-body-md font-bold tracking-tight">IndoSumber</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
+<span class="font-title-md text-body-md font-bold tracking-tight">SentraPack</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[18px]">hub</span>
+<span class="font-title-md text-body-md font-bold tracking-tight">RetailNusantara</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hero Visual Showcase -->
+<div class="relative mt-space-xl max-w-5xl mx-auto">
+<!-- Main Workspace Preview Container -->
+<div class="relative bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden p-2 sm:p-4">
+<div class="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-surface-dim">
+<img alt="Logistics Command Center Asro Inventory pada monitor desktop dengan barcode scanner genggam" class="w-full h-full object-cover object-center scale-[1.01] hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiM-tJUog_P0gE9CjYlR6s-EVVEdUEAtb8AD5EHQF8Qj4M837N4TedJIhv3_4nkIHnjBXEktbI_rdRT-nckv9Aq0BLGZCaL0W4_Yuqka-bkzUdEX-1WuFzFQUDXphquRFey0h-yh5rwTOEu4tc2-oS1K3XTxEIriUe7oktX1FocRVKxLx1mHJqcHU9BqGGICm9ucGny1tisI-xHADlKTdhUIOHQNgzAyozSferZFf0s9WiYvNwjrkgYw"/>
+<!-- Dark Gradient Vignette for UI clarity -->
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/40 via-transparent to-transparent pointer-events-none"></div>
+</div>
+<!-- Floating Glassmorphism KPI Widget 1: Akurasi Stok -->
+<div class="absolute top-8 left-8 sm:left-10 bg-surface/90 backdrop-blur-md p-space-sm sm:p-space-md rounded-xl shadow-lg flex items-center gap-space-sm max-w-[240px] transform hover:-translate-y-1 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Akurasi Stok</span>
+<div class="flex items-baseline gap-1">
+<span class="font-data-metric text-title-md font-bold text-on-surface">99.8%</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">+4.2%</span>
+</div>
+</div>
+</div>
+<!-- Floating Glassmorphism KPI Widget 2: Otomasi Restock -->
+<div class="hidden md:flex absolute top-12 right-10 bg-surface/90 backdrop-blur-md p-space-sm sm:p-space-md rounded-xl shadow-lg items-center gap-space-sm transform hover:-translate-y-1 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[22px]">smart_toy</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Otomasi Restock</span>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Aktif (18 SKU Dipesan)</span>
+</div>
+</div>
+</div>
+<!-- Floating Glassmorphism KPI Widget 3: Audit Efficiency -->
+<div class="absolute bottom-6 right-6 sm:bottom-8 sm:right-10 bg-surface/90 backdrop-blur-md p-space-sm sm:p-space-md rounded-xl shadow-lg flex items-center gap-space-sm transform hover:-translate-y-1 transition-transform">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed shrink-0">
+<span class="material-symbols-outlined text-[22px]">schedule</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Efisiensi Audit Opname</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Hemat 70% Waktu</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. STATS & IMPACT METRICS BANNER -->
+<section class="max-w-[1440px] mx-auto px-gutter py-space-lg">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Volume SKU Harian</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+</div>
+</div>
+<p class="font-data-metric text-data-metric text-on-surface mb-1">15 Juta+</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Item terlacak real-time per hari</p>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Tingkat Ketepatan</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+</div>
+<p class="font-data-metric text-data-metric text-on-surface mb-1">99.8%</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Akurasi data inventaris real-time</p>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Kepuasan Pengguna</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-data-metric text-data-metric text-on-surface mb-1">4.8/5</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Dari 2.500+ ulasan terverifikasi</p>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Waktu Onboarding</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+</div>
+</div>
+<p class="font-data-metric text-data-metric text-on-surface mb-1">&lt; 30 Menit</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Waktu implementasi awal &amp; integrasi</p>
+</div>
+</div>
+</section>
+<!-- 3. KEY FEATURES / MODUL INVENTARIS -->
+<section class="max-w-[1440px] mx-auto px-gutter py-space-xl">
+<div class="text-center max-w-3xl mx-auto mb-space-xl">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-space-xs block">Modul Lengkap &amp; Skalabel</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-sm">
+          Solusi Lengkap Mengatasi Kerumitan Stok
+        </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          Dari penerimaan barang awal hingga pengiriman pesanan multibox, rancangan arsitektur modular Asro menyesuaikan skala operasional Anda.
+        </p>
+</div>
+<!-- Feature Grid (6 Cards) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">warehouse</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Pelacakan Multi-Gudang &amp; Rak</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Pantau perpindahan barang antar cabang, gudang penyangga regional, dan toko fisik secara instan dengan alokasi slot tingkat bin.
+          </p>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">qr_code_scanner</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Barcode &amp; QR Code Scanner</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Dukungan pemindaian cepat via smartphone dan scanner genggam industri Bluetooth untuk inbound, stock opname, dan cross-docking.
+          </p>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">autorenew</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Prediksi Restock Otomatis (AI)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Notifikasi stok menipis dan otomatisasi penerbitan Purchase Order kepada supplier sebelum persediaan mencapai level safety stock.
+          </p>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">timelapse</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Batch, Kadaluarsa &amp; Serial</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Lacak lot produksi manufaktur, peringatan dini tanggal kedaluwarsa barang FMCG/farmasi, dan penelusuran nomor serial elektronik unit per unit.
+          </p>
+</div>
+<!-- Card 5 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">query_stats</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Analitik Keuntungan &amp; Valuasi</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Analisis perputaran persediaan (turnover rate), identifikasi slow-moving SKU, valuasi FIFO/LIFO, serta margin keuntungan bersih secara real-time.
+          </p>
+</div>
+<!-- Card 6 -->
+<div class="group bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">sync_alt</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Sinkronisasi Omnichannel</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Terhubung langsung ke Tokopedia, Shopee, TikTok Shop, WooCommerce, dan ERP. Kurangi risiko overselling lewat alokasi terpusat.
+          </p>
+</div>
+</div>
+</section>
+<!-- 4. INTERACTIVE PRODUCT HIGHLIGHT / WORKFLOW -->
+<section class="max-w-[1440px] mx-auto px-gutter py-space-xl">
+<div class="bg-surface-container-low rounded-3xl p-space-lg lg:p-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
+<!-- Text & Steps Column -->
+<div class="lg:col-span-6 flex flex-col gap-space-lg">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-space-xs block">Alur Kerja Otomatis</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-sm">
+                4 Tahap Presisi Operasional dari Inbound hingga Kirim
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Eliminasi human error hingga 99% dengan pemindaian barcode tervalidasi di setiap stasiun kerja pergudangan.
+              </p>
+</div>
+<!-- Steps -->
+<div class="flex flex-col gap-space-md">
+<!-- Step 1 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-title-md font-bold shrink-0">
+                  1
+                </div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Inbound &amp; Penerimaan Cepat</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Pemindaian barcode PO langsung memvalidasi kuantitas item dan mencetak label batch otomatis.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary font-title-md font-bold shrink-0">
+                  2
+                </div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Penyimpanan &amp; Smart Putaway</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Sistem memetakan lokasi rak terdekat berdasarkan frekuensi pengambilan barang (fast-moving vs slow-moving).</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary font-title-md font-bold shrink-0">
+                  3
+                </div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Pemenuhan Pesanan (Wave Picking &amp; Packing)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Rute pemungutan barang paling hemat langkah dengan panduan visual layar scanner untuk mencegah salah kemas.</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary font-title-md font-bold shrink-0">
+                  4
+                </div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Pengiriman &amp; Auto Stock Sync</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Manifest cetak thermal, nomor resi otomatis dibuat, dan stok terpotong bersamaan di seluruh marketplace.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Workflow Graphic / Photo Column -->
+<div class="lg:col-span-6 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-md">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="w-3 h-3 rounded-full bg-surface-dim"></span>
+<span class="w-3 h-3 rounded-full bg-primary-fixed"></span>
+<span class="font-label-sm text-label-sm text-outline ml-2">Console Putaway Real-Time</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-primary font-semibold">Online: 42 Scanner</span>
+</div>
+<!-- Warehouse Visual Context -->
+<div class="relative rounded-xl overflow-hidden aspect-[4/3] bg-surface-dim mb-space-sm">
+<img class="w-full h-full object-cover" data-alt="Modern high-tech distribution center warehouse aisle with automated guided vehicles, tall pallet racks filled with organized cardboard packages, soft ambient daylight filtering from industrial clerestory windows, warm timber accents, clean pastel blue logistics dashboard overlays showing digital rack statuses and clean concrete floors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABT97qP-LFHARjKTLwJnFj83NXGR8qwTNJGWNGX-ot8GWdSzd8bPRXSosAzcsS9M0_ZabNTlUU7BwxHKYjdovlYQwnB8GabxAuzUzGDw-wjiYeEEEe37-T6P5byx2MEBuWXvbw4V5wTFdLwWe_LH8_cra98pMW193c4_K60sMksECyzdv8QH0jpyvcUJk1DMVcMWgDg2z-xC8oTHEu36V6SrfaZiBF7xEQ0_UyMEN5iL7xoRkvSTYELg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-on-primary">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-sm text-label-sm uppercase tracking-wide opacity-80">Gudang Utama Cikarang - Koridor B7</p>
+<p class="font-title-md text-title-md font-semibold">Tingkat Utilisasi Rak: 88.4%</p>
+</div>
+<div class="bg-surface-container-lowest/90 text-on-surface px-3 py-1.5 rounded-lg text-center backdrop-blur-sm">
+<span class="font-label-sm text-label-sm block text-outline">Kapasitas Sisa</span>
+<span class="font-title-md text-title-md font-bold text-primary">1.240 Palet</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Progress Spark -->
+<div class="bg-surface-container-low p-space-sm rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">insights</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Kecepatan Pick-to-Ship Hari Ini: <strong>14.2 mnt</strong></span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">28% Lebih Cepat</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. INTEGRATIONS SECTION -->
+<section class="max-w-[1440px] mx-auto px-gutter py-space-xl">
+<div class="text-center max-w-3xl mx-auto mb-space-xl">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-space-xs block">Konektivitas Tanpa Batas</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-sm">
+          Terhubung Mulus dengan Ekosistem Bisnis Anda
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Sinkronkan transaksi penjualan, keuangan, dan pengiriman kurir pihak ketiga secara otomatis tanpa perlu entri manual ganda.
+        </p>
+</div>
+<!-- Integrations Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-space-md">
+<!-- SAP -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            SAP
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">SAP ERP</span>
+<span class="font-label-sm text-[10px] text-outline">Enterprise</span>
+</div>
+<!-- Accurate -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            ACC
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Accurate</span>
+<span class="font-label-sm text-[10px] text-outline">Akuntansi</span>
+</div>
+<!-- Jurnal Mekari -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            JNL
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Jurnal</span>
+<span class="font-label-sm text-[10px] text-outline">Finansial</span>
+</div>
+<!-- Shopify -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            SPF
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Shopify</span>
+<span class="font-label-sm text-[10px] text-outline">E-Commerce</span>
+</div>
+<!-- Tokopedia -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            TKP
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Tokopedia</span>
+<span class="font-label-sm text-[10px] text-outline">Marketplace</span>
+</div>
+<!-- TikTok Shop -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            TTS
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">TikTok Shop</span>
+<span class="font-label-sm text-[10px] text-outline">Social Commerce</span>
+</div>
+<!-- POS Kasir -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            POS
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Kasir POS</span>
+<span class="font-label-sm text-[10px] text-outline">Toko Fisik</span>
+</div>
+<!-- JNE & J&T Logistik -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary font-bold text-title-md">
+            LOG
+          </div>
+<span class="font-title-md text-body-sm text-on-surface font-semibold">Kurir Kilat</span>
+<span class="font-label-sm text-[10px] text-outline">Auto Resi</span>
+</div>
+</div>
+</section>
+<!-- 6. CUSTOMER TESTIMONIALS & CASE STUDY -->
+<section class="max-w-[1440px] mx-auto px-gutter py-space-xl">
+<div class="text-center max-w-3xl mx-auto mb-space-xl">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-space-xs block">Kisah Sukses Pengguna</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-sm">
+          Dipercaya Pemimpin Industri Distribusi &amp; Retail
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Lihat bagaimana Asro Inventory mengubah operasi gudang yang padat menjadi alur kerja yang tenang, efisien, dan presisi.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Testimonial 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-primary mb-space-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic mb-space-lg">
+              “Efisiensi waktu stock opname meningkat hingga 80%. Sebelumnya butuh 3 hari tutup toko, sekarang cukup hitungan jam menggunakan scanner genggam Asro.”
+            </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Professional portrait headshot of an Indonesian male supply chain operations director in business casual attire with soft office lighting and a neutral cool grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ75gLtxN-SQhRkNxFXE7cEI_W3Z6etWvvWDZdTTau9fglUSlulGmEhUhN-PZyi6Kwr5o4rB4EuhypZLs3News1ucZeiwt23kjtsBJTA8fEjunaGtlzDJBTy74JFpTTbWK37F1K8YLOkpUgPw7Wb4qGRFXYw3PFeMXSdx7LTF6RGxlm7vwfMpnL5JsvrSdV8TV-GWj-JK9I8XD4feb2EwLwxghgmPxcHaFQrZDvi7KO_XTaHiZnsS9hQ"/>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">Bambang Hartono</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Head of Logistics, SentraPack Retail</p>
+</div>
+</div>
+</div>
+<!-- Testimonial 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-primary mb-space-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic mb-space-lg">
+              “Sinkronisasi multichannel-nya luar biasa cepat. Risiko pembatalan order karena stok kosong di Shopee &amp; Tokopedia sekarang 0%. Margin untung naik signifikan!”
+            </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Professional portrait headshot of an Indonesian female e-commerce business owner smiling confident with modern workspace lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr-ZjVj9QC-pYVEjUPrDHv0cAyyefahz-D0Jx_0MWLEuJPpBB-Vdp2zoBMfUFSReIqorwlU4Abqx9f2naOQpXBbRkdN-Q6QuhGVHy2_UVU7c4oMycKD4GZN2Nvf7ThOIw56PSZ4qN1Zz82KS-h2tpRj4xY2jN9WNCGSV8RBrXKJS7yXLueVhjFe4XD9gFGz7x4gBMaLLwdhf6bKPRN-yQoWBgGnP2lf3Gk0TFTdpbHWyEdkZBPjliO4A"/>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">Citra Anggraini</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">COO, RetailNusantara Group</p>
+</div>
+</div>
+</div>
+<!-- Testimonial 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-primary mb-space-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic mb-space-lg">
+              “Sistem auto reorder prediksi AI-nya sangat akurat. Kami berhasil memangkas biaya modal tertahan pada stok berlebih (overstock) hingga 35% dalam semester pertama.”
+            </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Professional headshot of a male warehouse manager wearing a high-visibility safety vest over a work shirt with warehouse shelves softly blurred in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1MCEBAae2IaYi4tlCo-kjJS47Bx9uWEGzwGE5z9WXJDZR5Kv5qCn7HISCM9OGw3WvxmWZ5LrZEwJDQDHSsc6UPOtWbUWmID6vBIrVY01POL99Uu0R2MnAslo_7GaXi9DnQJFy4QmqqPcBbuje-NhYHmw3TSbubwXUBiiC71Qk2SdmEvAC7ulohQuOhAAo_SqmAhPhhwoRmImWQ1fzu_sSwdXoaAzZ1Mqf25W3LzoRS7F9jKKd7BhfGA"/>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">Hendra Wibowo</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">VP Operation, LogisTek Solusi</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. FINAL CTA BANNER -->
+<section class="max-w-[1440px] mx-auto px-gutter pt-space-md pb-space-xl">
+<div class="bg-gradient-to-r from-surface-container-high via-surface-container-low to-primary-fixed/40 rounded-3xl p-space-lg lg:p-space-xl shadow-lg relative overflow-hidden">
+<div class="absolute -right-20 -bottom-20 w-96 h-96 bg-primary-fixed-dim/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-space-xs block">
+            Uji Coba 14 Hari Tanpa Kartu Kredit
+          </span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-md text-balance">
+            Siap Tingkatkan Efisiensi Gudang Anda Hari Ini?
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-space-lg max-w-xl text-balance">
+            Bergabunglah dengan ribuan pelaku bisnis yang telah menghemat ratusan jam kerja dan menekan kerugian selisih inventaris.
+          </p>
+<!-- Quick Signup Form -->
+<div class="flex flex-col sm:flex-row items-center gap-space-xs w-full max-w-lg mb-space-md">
+<input class="w-full bg-surface-container-lowest px-space-md py-3.5 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" placeholder="Masukkan alamat email bisnis Anda" type="email"/>
+<button class="w-full sm:w-auto shrink-0 bg-primary text-on-primary px-space-lg py-3.5 rounded-xl font-title-md text-title-md hover:bg-tertiary transition-all shadow-md">
+              Daftar Sekarang
+            </button>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<a class="inline-flex items-center gap-1 font-body-md text-body-md text-primary font-semibold hover:underline" data-path="hubungi-kami" href="#">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+<span>Konsultasi Gratis dengan Spesialis Solusi Asro</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Interactive Modal for Demo Video Schedule -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm" id="video-modal">
+<div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-space-lg shadow-xl relative animate-in fade-in zoom-in duration-200">
+<button class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface" onclick="document.getElementById('video-modal').classList.add('hidden')">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+<div class="flex items-center gap-space-sm mb-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">calendar_today</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold">Jadwalkan Live Demo Asro</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pilih waktu 20 menit bersama konsultan logistik kami.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm my-space-md">
+<label class="font-label-sm text-label-sm text-outline">Nama Lengkap</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded-lg font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary" placeholder="cth. Anton Wijaya" type="text"/>
+<label class="font-label-sm text-label-sm text-outline mt-1">Perusahaan &amp; Jumlah Gudang</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded-lg font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary" placeholder="cth. PT Maju Bersama (3 Gudang)" type="text"/>
+<label class="font-label-sm text-label-sm text-outline mt-1">Nomor WhatsApp</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded-lg font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary" placeholder="+62 812 3456 7890" type="tel"/>
+</div>
+<button class="w-full bg-primary text-on-primary py-3 rounded-xl font-title-md text-title-md hover:bg-tertiary transition-colors" onclick="document.getElementById('video-modal').classList.add('hidden')">
+        Konfirmasi Jadwal Demo
+      </button>
+</div>
+</div>
+</div>
+<script>
+  // Simple micro-interaction for closing modal on escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('video-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+  });
+</script></main><footer class="w-full bg-surface-container-low"><div class="max-w-[1440px] mx-auto px-gutter pt-space-xl pb-space-lg"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-gutter mb-space-xl"><div class="lg:col-span-4 flex flex-col gap-space-md"><div class="flex items-center gap-space-sm"><img alt="Logo Asro Inventory" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Vu_O2bcJnBWtCIc_snB85_C8IuokD_Dd5whISHNO2x541BXVXGTkqBogqgC-tJ5of5to6z8dmQv0p9ojwDL_pWHHBEB1EWfgETZy0GYw1yo1PyZqz26PHpucja7H3fK28cZbxOZVw8uuiQZrQO112WfR_rKjqX72N-0ZRtUMdi8l2qdES3sn_J6ciDM20fiZDYQ5-wbFwq-u_rUOq8jmBQ6BNWdLfiTY29eYamcZGos3GG3sTKK9-Si4TN"/><span class="font-title-md text-title-md text-on-surface tracking-tight">Asro Inventory</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-sm">Platform orkestrasi inventaris cerdas, pelacakan armada logistik multimodal, dan visibilitas gudang berbasis telemetry real-time untuk manufaktur dan distribusi skala enterprise.</p><div class="flex items-center gap-space-sm text-on-surface-variant"><div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer"><span class="material-symbols-outlined text-[18px]">public</span></div><div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer"><span class="material-symbols-outlined text-[18px]">send</span></div><div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer"><span class="material-symbols-outlined text-[18px]">hub</span></div><div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer"><span class="material-symbols-outlined text-[18px]">terminal</span></div></div></div><div class="lg:col-span-2 flex flex-col gap-space-sm"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Produk &amp; Fitur</span><ul class="flex flex-col gap-space-xs"><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Multi-Warehouse Hub</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Telemetry Pelacakan SKU</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Prediksi Permintaan AI</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Audit &amp; Stock Opname Otomatis</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Integrasi ERP &amp; POS</li></ul></div><div class="lg:col-span-2 flex flex-col gap-space-sm"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Solusi Industri</span><ul class="flex flex-col gap-space-xs"><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Gudang 3PL &amp; Fulfillment</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Distribusi FMCG</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Manufaktur Komponen</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Rantai Dingin Farmasi</li><li class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface cursor-pointer">Omnichannel Retail</li></ul></div><div class="lg:col-span-4 flex flex-col gap-space-md"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Buletin Rantai Pasok Global</span><p class="font-body-md text-body-md text-on-surface-variant">Dapatkan wawasan regulasi logistik, tren otomasi pergudangan, dan best practices efisiensi stok bulanan.</p><div class="flex items-center gap-space-xs"><div class="relative flex-1"><input class="w-full bg-surface-container-lowest px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan email korporat" type="email"/></div><button class="bg-primary text-on-primary px-space-md py-space-sm rounded-lg font-title-md text-title-md hover:bg-tertiary transition-colors">Langganan</button></div><div class="flex flex-wrap items-center gap-space-sm pt-space-xs"><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-space-xs rounded-lg"><span class="material-symbols-outlined text-[16px] text-tertiary">verified_user</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">ISO 27001 Certified</span></div><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-space-xs rounded-lg"><span class="material-symbols-outlined text-[16px] text-tertiary">cloud_done</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">SOC2 Type II</span></div><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-space-xs rounded-lg"><span class="material-symbols-outlined text-[16px] text-tertiary">security</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">TLS 1.3 Encrypted</span></div></div></div></div><div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-md"><p class="font-body-sm text-body-sm text-on-surface-variant">© 2025 PT Asro Inventaris Indonesia (Asro Inventory). Hak cipta dilindungi undang-undang.</p><div class="flex items-center gap-space-lg"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="kebijakan-privasi" href="#">Kebijakan Privasi</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="syarat-ketentuan" href="#">Syarat Layanan</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="kepatuhan-keamanan" href="#">Kepatuhan Keamanan</a></div></div></div></footer></body></html>

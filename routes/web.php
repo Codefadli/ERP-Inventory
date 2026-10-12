@@ -14,5 +14,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('landing.index');
+})->name('home');
+
+// Example routes for forms - implement controllers as needed
+Route::post('/register', function () {
+    // TODO: Implement registration logic
+    return back()->with('success', 'Registration submitted!');
+})->name('register');
+
+Route::post('/demo/schedule', function () {
+    // TODO: Implement demo scheduling logic
+    return back()->with('success', 'Demo scheduled successfully!');
+})->name('demo.schedule');
+
+Route::get('/contact', function () {
+    // TODO: Create contact page
+    return view('contact.index');
+})->name('contact');
