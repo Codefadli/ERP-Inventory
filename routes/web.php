@@ -14,8 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('landing.index');
+    return view('dashboard');
 })->name('home');
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
 // Example routes for forms - implement controllers as needed
 Route::post('/register', function () {

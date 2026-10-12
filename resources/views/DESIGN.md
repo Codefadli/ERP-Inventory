@@ -1,5 +1,5 @@
 ---
-name: Asro Inventory Design System
+name: Astro Logistics & Supply Engine
 colors:
   surface: '#f8f9ff'
   surface-dim: '#cbdbf5'
@@ -10,92 +10,80 @@ colors:
   surface-container-high: '#dce9ff'
   surface-container-highest: '#d3e4fe'
   on-surface: '#0b1c30'
-  on-surface-variant: '#40484d'
+  on-surface-variant: '#424653'
   inverse-surface: '#213145'
   inverse-on-surface: '#eaf1ff'
-  outline: '#70787e'
-  outline-variant: '#c0c7ce'
-  surface-tint: '#126588'
-  primary: '#0c6385'
+  outline: '#737785'
+  outline-variant: '#c3c6d6'
+  surface-tint: '#0958ca'
+  primary: '#00429d'
   on-primary: '#ffffff'
-  primary-container: '#347c9f'
-  on-primary-container: '#fcfcff'
-  inverse-primary: '#8ccff6'
-  secondary: '#455f87'
+  primary-container: '#0a58ca'
+  on-primary-container: '#ccd8ff'
+  inverse-primary: '#b0c6ff'
+  secondary: '#006398'
   on-secondary: '#ffffff'
-  secondary-container: '#b5d0fd'
-  on-secondary-container: '#3e5980'
-  tertiary: '#006483'
+  secondary-container: '#5bb8fe'
+  on-secondary-container: '#00476e'
+  tertiary: '#3f465c'
   on-tertiary: '#ffffff'
-  tertiary-container: '#0f7ea3'
-  on-tertiary-container: '#fbfdff'
+  tertiary-container: '#565e74'
+  on-tertiary-container: '#d0d8f2'
   error: '#ba1a1a'
   on-error: '#ffffff'
   error-container: '#ffdad6'
   on-error-container: '#93000a'
-  primary-fixed: '#c4e7ff'
-  primary-fixed-dim: '#8ccff6'
-  on-primary-fixed: '#001e2c'
-  on-primary-fixed-variant: '#004c69'
-  secondary-fixed: '#d5e3ff'
-  secondary-fixed-dim: '#adc8f5'
-  on-secondary-fixed: '#001c3b'
-  on-secondary-fixed-variant: '#2d486d'
-  tertiary-fixed: '#c0e8ff'
-  tertiary-fixed-dim: '#7bd1fa'
-  on-tertiary-fixed: '#001e2b'
-  on-tertiary-fixed-variant: '#004d66'
+  primary-fixed: '#d9e2ff'
+  primary-fixed-dim: '#b0c6ff'
+  on-primary-fixed: '#001945'
+  on-primary-fixed-variant: '#00419d'
+  secondary-fixed: '#cce5ff'
+  secondary-fixed-dim: '#93ccff'
+  on-secondary-fixed: '#001d31'
+  on-secondary-fixed-variant: '#004b73'
+  tertiary-fixed: '#dae2fd'
+  tertiary-fixed-dim: '#bec6e0'
+  on-tertiary-fixed: '#131b2e'
+  on-tertiary-fixed-variant: '#3f465c'
   background: '#f8f9ff'
   on-background: '#0b1c30'
   surface-variant: '#d3e4fe'
 typography:
-  display-lg:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 48px
-    fontWeight: '700'
-    lineHeight: 56px
-  display-lg-mobile:
+  headline-xl:
     fontFamily: Plus Jakarta Sans
     fontSize: 32px
     fontWeight: '700'
     lineHeight: 40px
+    letterSpacing: -0.02em
   headline-lg:
     fontFamily: Plus Jakarta Sans
-    fontSize: 32px
-    fontWeight: '600'
-    lineHeight: 40px
-  headline-lg-mobile:
-    fontFamily: Plus Jakarta Sans
     fontSize: 24px
     fontWeight: '600'
     lineHeight: 32px
+    letterSpacing: -0.015em
   headline-md:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 24px
-    fontWeight: '600'
-    lineHeight: 32px
-  headline-sm:
     fontFamily: Plus Jakarta Sans
     fontSize: 20px
     fontWeight: '600'
     lineHeight: 28px
-  title-md:
+    letterSpacing: -0.01em
+  headline-sm:
     fontFamily: Plus Jakarta Sans
     fontSize: 16px
     fontWeight: '600'
     lineHeight: 24px
   body-lg:
-    fontFamily: Plus Jakarta Sans
+    fontFamily: Inter
     fontSize: 16px
     fontWeight: '400'
     lineHeight: 24px
   body-md:
-    fontFamily: Plus Jakarta Sans
+    fontFamily: Inter
     fontSize: 14px
     fontWeight: '400'
     lineHeight: 20px
   body-sm:
-    fontFamily: Plus Jakarta Sans
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: '400'
     lineHeight: 16px
@@ -109,113 +97,128 @@ typography:
     fontSize: 11px
     fontWeight: '600'
     lineHeight: 14px
-  data-metric:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 28px
-    fontWeight: '700'
-    lineHeight: 34px
+    letterSpacing: 0.04em
+  mono-data:
+    fontFamily: JetBrains Mono
+    fontSize: 12px
+    fontWeight: '500'
+    lineHeight: 16px
+    letterSpacing: -0.01em
 rounded:
-  sm: 0.25rem
-  DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
+  sm: 0.125rem
+  DEFAULT: 0.25rem
+  md: 0.375rem
+  lg: 0.5rem
+  xl: 0.75rem
   full: 9999px
 spacing:
-  gutter: 1.5rem
-  gutter-sm: 1rem
-  margin: 2rem
-  margin-sm: 1rem
+  gutter: 1rem
+  gutter-dense: 0.5rem
+  margin: 1.5rem
+  margin-compact: 1rem
   space-xs: 0.25rem
   space-sm: 0.5rem
-  space-md: 1rem
-  space-lg: 1.5rem
-  space-xl: 2.5rem
+  space-md: 0.75rem
+  space-lg: 1.25rem
+  space-xl: 1.75rem
 ---
 
 ## Brand & Style
 
-This design system embodies a modern, precise enterprise SaaS aesthetic tailored for global inventory management, freight tracking, and intelligent supply chain operations. The emotional goal is calm control over complex logistics: transforming dense logistics manifests, warehouse telemetry, and demand forecasts into an uncluttered, reassuring workspace.
+The brand personality focuses on operational precision, uncompromising velocity, and structural clarity. Designed specifically for high-throughput enterprise logistics directors, floor dispatchers, and inventory controllers, the interface conveys reliability, high visibility, and frictionless control across massive supply chains.
 
-The style fuses **Corporate Modern** with **Soft Scandinavian Minimalism**. It avoids harsh terminal-like enterprise density in favor of luminous, breathable layouts, delicate cool-toned borders, and softly graded pastel backdrops. Visual noise is actively suppressed through light surfaces, gentle atmospheric tinting, and precise typographic cadence, projecting operational reliability, institutional trust, and modern analytical clarity.
+The visual style is **Corporate / Modern High-Density**:
+- High-efficiency spatial distribution engineered for dense desktop workstations.
+- Clean architectural lines, razor-sharp edge contrast, and micro-deliberate structural dividers.
+- Crisp white workspaces elevated by clinical corporate blues and precise data visualization markers.
+- Minimal visual noise to reduce operational cognitive fatigue during sustained 8-to-12-hour terminal usage.
 
 ## Colors
 
-The palette establishes an airy, cool-tinted enterprise environment centered on calm stability and high legibility across dense data interfaces.
+The palette leverages high-contrast corporate blues against crystalline white and slate canvas layers.
 
-- **Primary (`#3B82A6` - Steel Blue):** The primary brand anchor used for primary action buttons, key interactive active states, selected table rows, and key progress indicators.
-- **Secondary (`#1E3A5F` - Deep Slate Navy):** The structural anchor used for primary headings, high-priority telemetry metrics, deep navigation sidebars, and critical state indicators.
-- **Tertiary (`#7DD3FC` - Soft Sky / Powder Accent):** Applied conservatively to subtle background highlights, informational accents, active badge backgrounds, and interactive hover tints.
-- **Neutral (`#64748B` - Slate Gray):** Handles secondary body copy, muted meta information, and structural dividers.
-- **Canvas & Surface Palette:**
-  - Base canvas: Pure Crisp White (`#FFFFFF`) layered over an ambient backdrop of Pale Glacial Mist (`#F8FAFC`).
-  - Subtle Cool Borders: Defined by `#E2E8F0` and `#EDF2F7`, providing crisp containment without heavy contrast.
-  - Gradients: Reserved exclusively for hero dashboard metric cards and summary panels, using ultra-soft linear blends (e.g., `linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)`).
+### Role Assignments
+- **Primary (`#0A58CA`)**: Authoritative logistics blue. Applied strictly to primary actions, selected navigation items, key active state indicators, and major progress milestones.
+- **Secondary (`#0284C7`)**: High-visibility sky blue. Used for interactive hover states, secondary highlights, sorting indicators, and inbound movement tags.
+- **Tertiary (`#0F172A`)**: Deep structural slate. Governs top-tier typography, primary structural headers, and dark persistent sidebars.
+- **Neutral (`#64748B` with tint scale)**: Systematic utilitarian grays. Used for structural borders (`#E2E8F0`), secondary metadata (`#64748B`), and dense table alternating rows (`#F8FAFC`).
+- **Canvas Base (`#FFFFFF` & `#F8FAFC`)**: Canvas base is `#F8FAFC`, while elevated workspace surfaces, sheets, and active metric cards use `#FFFFFF`.
+
+### Status & Logistics Semantic Tokens
+- **Inbound Movement**: Fill `#E0F2FE`, Text & Border `#0284C7`.
+- **Outbound Movement**: Fill `#EDE9FE`, Text & Border `#6366F1`.
+- **Status: Approved**: Fill `#ECFDF5`, Text & Border `#059669`.
+- **Status: Pending**: Fill `#FFFBEB`, Text & Border `#D97706`.
+- **Status: Rejected / Discrepancy**: Fill `#FEF2F2`, Text & Border `#DC2626`.
 
 ## Typography
 
-The typographic hierarchy balances modern brand polish with high-density data utility.
+Typography prioritizes scanning speed and numeric legibility.
 
-- **Plus Jakarta Sans** provides a contemporary, open, and friendly architectural structure for high-level surfaces, titles, and summary KPIs. Its clear geometric apertures keep executive dashboards clean and legible.
-- **Inter** is designated for functional labels, status badges, compact table headers, and data grids where tracking and mechanical clarity are essential during multi-line scanning.
-- **Numerical Treatment:** All metric values, timestamps, and stock keeping units (SKUs) must use tabular lining figures (`font-variant-numeric: tabular-nums`) to preserve vertical alignment across supply chain ledgers and tables.
+- **Headlines (Plus Jakarta Sans)**: Used for high-level screen titles, modal headers, and key analytic card numbers. Delivers modern structure with authoritative presence.
+- **Body & Labels (Inter)**: Handles inventory listings, operational inputs, system feedback, and high-density interface controls with clear neutral glyphs.
+- **Data & SKU Font (JetBrains Mono)**: Applied explicitly to SKUs, barcode values, batch numbers, bin coordinates, timestamps, and inventory balance counts to ensure alignment and prevent character confusion (e.g., `0` vs `O`, `1` vs `l`).
 
 ## Layout & Spacing
 
-The layout uses a 12-column fluid grid system pinned inside a 1440px max-width container for desktop operations, paired with a permanent collapsible operational sidebar (260px expanded, 72px iconified).
+A desktop-first layout engine optimized for screen viewports between 1280px and 2560px.
 
-- **Desktop (>= 1200px):** 12 columns, `1.5rem` (`24px`) gutters, and `2rem` (`32px`) canvas margins. Suitable for side-by-side inventory breakdowns and real-time transit maps.
-- **Tablet (768px - 1199px):** 8 columns, `1rem` (`16px`) gutters, `1.5rem` (`24px`) margins. Sidebar transforms into an overlay sheet; KPI grids reflow into 2-column configurations.
-- **Mobile (< 768px):** 4 columns, `1rem` (`16px`) gutters, `1rem` (`16px`) canvas margins. Complex tables shift to swipeable cards or horizontal scroll drawers with pinned identifier columns.
-
-Vertical cadence relies on an 8px modular baseline. Content density levels inside data grids can be dynamically toggled between Compact (36px row height) and Comfortable (48px row height) while preserving consistent gutter geometry.
+### Layout Model
+- **Grid Architecture**: 12-column fluid grid system across operational workspaces, supported by an anchor rail navigation pattern (fixed 240px expanded / 64px collapsed).
+- **Desktop Rhythm**: Standard 16px (`1rem`) column gutters with 24px (`1.5rem`) outer canvas padding. High-density sub-views (e.g., bin-rack visualizers and SKU matching grids) switch to `gutter-dense` (8px).
+- **Breakpoint Rules**:
+  - `Desktop Wide (>= 1600px)`: Full 12-column layout with split table-and-side-sheet inspect panels without row occlusions.
+  - `Desktop Standard (1280px - 1599px)`: 12 columns; inspect sheets slide over table view with backdrop-blur overlay.
+  - `Tablet / Field Device (< 1280px)`: Sidebar collapses strictly to icon rail, multi-metric ribbons wrap to 2x2 grids, and tables drop auxiliary metadata columns.
 
 ## Elevation & Depth
 
-Depth in this design system is understated and pristine, favoring structural borders and ambient tinted shadows over dramatic drop shadows.
+Visual hierarchy is maintained via **low-contrast outlines** paired with **ambient micro-shadows**, ensuring clarity across multi-window operational workflows.
 
-- **Level 0 (Flat / Inset):** Filter chips, table header strips, and inactive inputs sit flush against canvas surfaces with a 1px border of `#E2E8F0`.
-- **Level 1 (Surface Cards & Panels):** Primary modules, inventory cards, and KPI panels rest on pure white with a 1px outline of `#EDF2F7` and an ambient, cool-tinted shadow: `box-shadow: 0 1px 3px 0 rgba(30, 58, 95, 0.04), 0 1px 2px -1px rgba(30, 58, 95, 0.02)`.
-- **Level 2 (Hover & Interactive Focus):** Card hovers and expanded row flyouts use an elevated shadow: `box-shadow: 0 4px 12px -2px rgba(59, 130, 166, 0.08), 0 2px 6px -1px rgba(30, 58, 95, 0.04)`.
-- **Level 3 (Overlays, Modals & Menus):** Dropdowns, quick-filters, and slide-over shipment details use a deep ambient shadow: `box-shadow: 0 16px 32px -8px rgba(30, 58, 95, 0.12), 0 4px 12px -2px rgba(30, 58, 95, 0.04)`, layered over an ambient backdrop blur (`backdrop-filter: blur(8px); background-color: rgba(248, 250, 252, 0.8)`).
+- **Level 0 (Flat Canvas)**: Hex `#F8FAFC` base background.
+- **Level 1 (Card / Table Containers)**: Solid `#FFFFFF` background with a crisp border `1px solid #E2E8F0`. Shadow: `0 1px 2px 0 rgba(15, 23, 42, 0.04)`.
+- **Level 2 (Popovers / Dropdowns / Quick Filter Menus)**: `#FFFFFF` surface, border `1px solid #CBD5E1`. Shadow: `0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05)`.
+- **Level 3 (Drawer / Side Inspection Sheets / Dialogs)**: `#FFFFFF` surface, border `1px solid #94A3B8`. Shadow: `0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)`.
 
 ## Shapes
 
-The system uses a balanced `Rounded` (Level 2) shape language, bringing modern softness while maintaining professional structure.
-
-- Standard buttons, input fields, dropdown triggers, and status badges take a `0.5rem` (`8px`) border radius.
-- Cards, modal containers, and dashboard preview panels apply `rounded-lg` at `1rem` (`16px`).
-- Floating utility toasts, pill filters, and active SKU tags use a fully pill-shaped profile (`9999px`) to create clear geometric contrast against rectangular data tables.
+The design system uses **Soft (Level 1)** shaping to preserve a clean, industrial, and high-density presentation:
+- Base controls (buttons, inputs, select triggers, table cells): `0.25rem` (4px).
+- Containers (metric cards, high-density data tables, modal dialogs): `0.5rem` (8px).
+- Flyout panels and full sheets: `0.75rem` (12px) max on detached corners.
+- Badges and status pills: strict exception using full pill radius (`9999px`) to create rapid visual differentiation against angular data tables.
 
 ## Components
 
 ### Buttons
-- **Primary:** Solid `#3B82A6` with crisp white text, `8px` border radius, and a subtle inset highlight border. On hover, shifts to `#2F6A88`.
-- **Secondary:** White background with a 1px `#E2E8F0` border and `#1E3A5F` text. On hover, transitions to a soft powder tint (`#F0F9FF`) with a `#3B82A6` border.
-- **Ghost / Tertiary:** Transparent background, `#64748B` label, shifting to `#F1F5F9` on hover.
+- **Primary**: Solid `#0A58CA` background, `#FFFFFF` text, `4px` radius, height `36px` (desktop compact). Hover: `#084298`. Active: `#063275`.
+- **Secondary / Outlined**: `#FFFFFF` background, `1px solid #CBD5E1`, text `#0F172A`. Hover: `#F8FAFC` background with border `#94A3B8`.
+- **Destructive**: `#DC2626` background, white text. For scrap, delete SKU, and critical inventory adjustments.
 
-### Stat Metrics & KPI Panels
-- Encased in pure white cards with an optional pastel gradient header band (sky blue to powder blue).
-- Features a small label above (`label-sm`, uppercase, `#64748B`), an oversized metric value (`data-metric`, `#1E3A5F`), and an inline status indicator chip displaying positive/negative trends.
+### Input Fields & Sleek Search Bars
+- Standard text input height is `36px` with `4px` border radius, padding `0 12px`, border `1px solid #CBD5E1`, text `#0F172A`, placeholder `#94A3B8`. Focus: `1px solid #0A58CA` with `0 0 0 2px rgba(10, 88, 202, 0.15)` ring.
+- **Warehouse Global Search Bar**: Prominent `40px` height with integrated shortcut pill (`⌘K` / `Ctrl+K`), left-aligned magnifying icon (`#64748B`), clear input button, and hot-key bin scanning mode toggle.
 
-### Chips & Status Badges
-- Semi-transparent pastel backgrounds paired with deep tonal text for supply chain states:
-  - *In Transit:* `#E0F2FE` background, `#0369A1` text.
-  - *Delivered / In Stock:* `#ECFDF5` background, `#047857` text.
-  - *Low Stock / Delayed:* `#FEF3C7` background, `#B45309` text.
-  - *Critical Out of Stock:* `#FEE2E2` background, `#B91C1C` text.
-- Height is fixed at 24px, padding is `0 8px`, with an `Inter` font weight of 600 at 11px.
+### High-Density Data Tables
+- Row height: strictly `40px` for high-density mode (option to toggle to `48px` standard).
+- Header: `#F8FAFC` background, text `#475569`, font size `11px`, bold uppercase, letter spacing `0.04em`, bottom border `1px solid #CBD5E1`.
+- Rows: `#FFFFFF` alternate with `#FAFAFA` (striped option), bottom border `1px solid #F1F5F9`. Hover state: `#F1F5F9` across the entire row with a left border highlight of `2px solid #0A58CA`.
+- Numeric and coordinate fields (SKU, Qty, Bin location) must strictly align right and render in `JetBrains Mono`.
 
-### Input Fields & Search Bars
-- Background of `#FFFFFF` with a 1px border of `#CBD5E1`.
-- Focus state features a crisp outer ring: `0 0 0 3px rgba(125, 211, 252, 0.4)` and a `#3B82A6` border.
-- Global SKU / Asset search includes a fixed left-aligned icon, subtle keyboard shortcut token (`⌘K`), and placeholder text styled in `#94A3B8`.
+### Inventory Status Badges & Chips
+- Structure: height `22px`, font size `11px`, font weight `600`, letter-spacing `0.02em`, pill-shaped (`9999px`), inline-flex alignment with micro status-dot (`6px` diameter).
+- **Inbound**: Background `#E0F2FE`, border `#BAE6FD`, text `#0369A1`.
+- **Outbound**: Background `#EDE9FE`, border `#DDD6FE`, text `#5B21B6`.
+- **Approval Pending**: Background `#FEF3C7`, border `#FDE68A`, text `#92400E`.
+- **Approval Approved**: Background `#DCFCE7`, border `#BBF7D0`, text `#166534`.
+- **Approval Rejected**: Background `#FEE2E2`, border `#FECACA`, text `#991B1B`.
 
-### Checkboxes & Radio Buttons
-- Checkboxes feature an 8px rounded profile (`rounded-sm`), 1.5px border in `#CBD5E1`. When selected, filled with `#3B82A6` with an etched white checkmark.
-- Radio indicators follow the same palette with a nested solid dot.
+### Quick Metric Cards
+- Background `#FFFFFF`, border `1px solid #E2E8F0`, padding `16px`, radius `8px`.
+- Visual structure: Top row contains micro-label (`12px`, `#64748B`, uppercase) and trend indicator chip (`+4.2% vs yesterday`). Center contains hero metric value (`28px`, `Plus Jakarta Sans`, bold, `#0F172A`). Bottom contains secondary metric description or progress bar showing warehouse capacity fill.
 
-### Data Tables
-- Header row styled in `#F8FAFC` with uppercase `Inter` labels (`11px`, `#64748B`).
-- Clean horizontal borders in `#F1F5F9`; vertical borders are omitted to minimize visual noise.
-- Row hover triggers an ultra-soft tint of `#F0F9FF`.
+### Checkboxes & Selection Controls
+- Size: `16px` by `16px` square with `3px` corner radius.
+- Unchecked: `1px solid #94A3B8`, background `#FFFFFF`.
+- Checked: `#0A58CA` background, `#FFFFFF` check icon.
+- Indeterminate state: `#0A58CA` background with white center horizontal bar for bulk table row selection.
