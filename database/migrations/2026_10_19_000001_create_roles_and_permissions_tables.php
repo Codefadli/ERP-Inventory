@@ -47,7 +47,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username', 50)->unique()->comment('Username untuk login');
-            $table->string('email')->unique()->comment('Email untuk login dan notifikasi');
+            $table->string('email', 191)->unique()->comment('Email untuk login dan notifikasi');
             $table->string('password')->comment('Password hash (bcrypt/argon2id)');
             $table->string('nama_lengkap', 150)->comment('Nama lengkap pegawai');
             $table->string('nip', 50)->nullable()->comment('Nomor Induk Pegawai');
