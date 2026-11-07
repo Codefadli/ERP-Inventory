@@ -26,6 +26,8 @@ class User extends Authenticatable
         'nip',
         'phone',
         'role_id',
+        'selected_city_id',
+        'selected_hub_id',
         'status',
         'failed_login_attempts',
         'locked_until',
@@ -68,6 +70,22 @@ class User extends Authenticatable
     public function tokens()
     {
         return $this->hasMany(UserToken::class);
+    }
+
+    /**
+     * Relasi: User belongs to selected City
+     */
+    public function selectedCity()
+    {
+        return $this->belongsTo(City::class, 'selected_city_id');
+    }
+
+    /**
+     * Relasi: User belongs to selected Hub
+     */
+    public function selectedHub()
+    {
+        return $this->belongsTo(Hub::class, 'selected_hub_id');
     }
 
     /**
@@ -140,6 +158,23 @@ class User extends Authenticatable
     public function isAuditor(): bool
     {
         return $this->hasRole('audit');
+    }
+
+    /**
+     * Check apakah user perlu memilih hub
+     * Admin, HR, dan Audit harus pilih hub
+     */
+    public function needsHubSelection(): bool
+    {
+        return $this->isSuperAdmin() || $this->isHR() || $this->isAuditor();
+    }
+
+    /**
+     * Check apakah user sudah memilih hub
+     */
+    public function hasSelectedHub(): bool
+    {
+        return !is_null($this->selected_hub_id) && !is_null($this->selected_city_id);
     }
 
     /**

@@ -13,6 +13,11 @@ use App\Http\Controllers\Auth\LoginController;
 // PUBLIC ROUTES (Guest only)
 // ============================================================================
 
+// Root redirect ke login untuk guest
+Route::get('/', function () {
+    return redirect()->route('login');
+})->middleware('guest')->name('home');
+
 Route::middleware('guest')->group(function () {
     // Login Routes
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -28,8 +33,15 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
-    // Default Dashboard (redirect based on role)
-    Route::get('/', function () {
+    // Hub Selection (untuk admin, hr, audit)
+    Route::prefix('hub-selection')->name('hub.selection.')->group(function () {
+        Route::get('/', [App\Http\Controllers\HubSelectionController::class, 'show'])->name('show');
+        Route::post('/', [App\Http\Controllers\HubSelectionController::class, 'store'])->name('store');
+        Route::get('/hubs-by-city', [App\Http\Controllers\HubSelectionController::class, 'getHubsByCity'])->name('hubs-by-city');
+    });
+    
+    // Default Dashboard (redirect based on role) - untuk authenticated user
+    Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
         
         if ($user->isSuperAdmin()) {
