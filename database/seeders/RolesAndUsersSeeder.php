@@ -64,9 +64,7 @@ class RolesAndUsersSeeder extends Seeder
 
         DB::table('roles')->insert($roles);
 
-        // 2. Seed Permissions (berdasarkan matriks slide 19-20)
         $permissions = [
-            // Barang dan Master
             ['code' => 'catalog.view', 'name' => 'Lihat Katalog & Stok', 'group' => 'barang', 'description' => 'Lihat katalog, stok, dan detail barang'],
             ['code' => 'dashboard.view', 'name' => 'Lihat Dashboard', 'group' => 'barang', 'description' => 'Lihat dashboard admin dengan ringkasan'],
             ['code' => 'master.view', 'name' => 'Lihat Master Data', 'group' => 'barang', 'description' => 'Lihat kategori, lokasi, supplier, divisi'],
@@ -75,30 +73,25 @@ class RolesAndUsersSeeder extends Seeder
             ['code' => 'master.delete', 'name' => 'Hapus Master/Barang', 'group' => 'barang', 'description' => 'Hapus master atau barang tanpa referensi'],
             ['code' => 'product.label', 'name' => 'Cetak Label', 'group' => 'barang', 'description' => 'Cetak barcode dan QR code'],
 
-            // Barang Masuk
             ['code' => 'transaction.view', 'name' => 'Lihat Riwayat Transaksi', 'group' => 'transaksi', 'description' => 'Lihat riwayat semua transaksi'],
             ['code' => 'receipt.create', 'name' => 'Catat Barang Masuk', 'group' => 'transaksi', 'description' => 'Catat dan posting barang masuk'],
             ['code' => 'receipt.void', 'name' => 'Batalkan Barang Masuk', 'group' => 'transaksi', 'description' => 'Void barang masuk yang sudah diposting'],
 
-            // Barang Keluar
             ['code' => 'issue.create', 'name' => 'Ajukan Barang Keluar', 'group' => 'transaksi', 'description' => 'Ajukan dan batalkan permintaan barang keluar'],
             ['code' => 'issue.approve', 'name' => 'Setujui Barang Keluar', 'group' => 'transaksi', 'description' => 'Setujui atau tolak permintaan barang keluar'],
             ['code' => 'issue.cancel_approved', 'name' => 'Batalkan Setelah Disetujui', 'group' => 'transaksi', 'description' => 'Batalkan barang keluar yang sudah disetujui'],
             ['code' => 'issue.handover', 'name' => 'Konfirmasi Serah Terima', 'group' => 'transaksi', 'description' => 'Konfirmasi penyerahan barang keluar'],
             ['code' => 'issue.print', 'name' => 'Cetak Bukti', 'group' => 'transaksi', 'description' => 'Cetak bukti serah terima / surat jalan'],
 
-            // Penyesuaian dan Opname
             ['code' => 'adjustment.create', 'name' => 'Buat Penyesuaian Stok', 'group' => 'transaksi', 'description' => 'Buat penyesuaian stok manual'],
             ['code' => 'adjustment.approve', 'name' => 'Setujui Penyesuaian', 'group' => 'transaksi', 'description' => 'Setujui atau tolak penyesuaian stok'],
             ['code' => 'opname.count', 'name' => 'Input Hasil Hitung', 'group' => 'transaksi', 'description' => 'Input hasil hitung stock opname'],
             ['code' => 'opname.manage', 'name' => 'Kelola Opname', 'group' => 'transaksi', 'description' => 'Buat sesi, review, kembalikan, batalkan opname'],
             ['code' => 'opname.approve', 'name' => 'Setujui Opname', 'group' => 'transaksi', 'description' => 'Setujui hasil stock opname'],
 
-            // Laporan
             ['code' => 'report.view', 'name' => 'Lihat Laporan', 'group' => 'laporan', 'description' => 'Lihat laporan dan analitik'],
             ['code' => 'report.export', 'name' => 'Ekspor Laporan', 'group' => 'laporan', 'description' => 'Ekspor laporan ke Excel/CSV/PDF'],
 
-            // Pengguna dan Sistem
             ['code' => 'user.view', 'name' => 'Lihat Pengguna', 'group' => 'sistem', 'description' => 'Lihat daftar pengguna'],
             ['code' => 'user.manage', 'name' => 'Kelola Pengguna', 'group' => 'sistem', 'description' => 'Tambah, ubah, aktifkan, nonaktifkan pengguna'],
             ['code' => 'role.manage', 'name' => 'Kelola Role', 'group' => 'sistem', 'description' => 'Kelola role dan permission'],
@@ -118,7 +111,6 @@ class RolesAndUsersSeeder extends Seeder
             $permissionIds[$permission['code']] = $id;
         }
 
-        // 3. Seed Role-Permission Mapping (berdasarkan matriks slide 19-20)
         $rolePermissions = [
             'super_admin' => [
                 'catalog.view', 'dashboard.view', 'master.view', 'master.manage', 'product.manage', 
@@ -161,7 +153,6 @@ class RolesAndUsersSeeder extends Seeder
             }
         }
 
-        // 4. Seed Users
         $users = [
             [
                 'username' => 'superadmin',
