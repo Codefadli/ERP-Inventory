@@ -81,7 +81,7 @@
 
                     <!-- User Dropdown -->
                     <div class="relative">
-                        <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none">
+                        <button onclick="toggleUserMenu(event)" class="flex items-center space-x-3 focus:outline-none">
                             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                                 <span class="text-sm font-semibold text-blue-700">{{ strtoupper(substr(auth()->user()->nama_lengkap, 0, 2)) }}</span>
                             </div>
@@ -95,13 +95,16 @@
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-200">
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-200 z-50">
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan</a>
                             <hr class="my-1">
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
                                     Logout
                                 </button>
                             </form>
@@ -117,7 +120,23 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed lg:sticky top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 overflow-y-auto transition-transform duration-300 -translate-x-full lg:translate-x-0">
             <nav class="p-4 space-y-1">
-                @yield('sidebar')
+                @php
+                    $userRole = strtolower(auth()->user()->role->name);
+                @endphp
+                
+                @if($userRole == 'audit')
+                    @include('homepage.partials.sidebar.audit-sidebar')
+                @elseif($userRole == 'super admin')
+                    @include('homepage.partials.sidebar.superadmin-sidebar')
+                @elseif($userRole == 'kepala gudang')
+                    @include('homepage.partials.sidebar.kepalagudang-sidebar')
+                @elseif($userRole == 'pegawai')
+                    @include('homepage.partials.sidebar.pegawai-sidebar')
+                @elseif($userRole == 'hr')
+                    @include('homepage.partials.sidebar.hr-sidebar')
+                @else
+                    @yield('sidebar')
+                @endif
             </nav>
         </aside>
 
@@ -181,7 +200,8 @@
             overlay.classList.toggle('hidden');
         }
 
-        function toggleUserMenu() {
+        function toggleUserMenu(event) {
+            event.stopPropagation();
             const menu = document.getElementById('userMenu');
             menu.classList.toggle('hidden');
         }
@@ -189,9 +209,10 @@
         // Close user menu when clicking outside
         document.addEventListener('click', function(event) {
             const userMenu = document.getElementById('userMenu');
-            const userButton = event.target.closest('button');
+            const userMenuButton = event.target.closest('[onclick*="toggleUserMenu"]');
             
-            if (!userButton && !userMenu.contains(event.target)) {
+            // Jangan tutup jika klik di dalam menu atau button toggle
+            if (!userMenuButton && !userMenu.contains(event.target)) {
                 userMenu.classList.add('hidden');
             }
         });
