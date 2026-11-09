@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengaturan — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+        <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+        <div class="hidden sm:block">
+          <h1 class="text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+          <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+        <div class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-map-marker-alt text-xs"></i>
+          <span class="hidden lg:inline">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
+          <span class="lg:hidden">Cakung DC-01</span>
+        </div>
+        <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-circle" style="font-size:6px"></i><span>Operasional Normal</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 lg:gap-4 ml-auto">
+        <div class="relative">
+          <input type="text" placeholder="Cari SKU, No. DO, Surat Jalan, Divisi..." class="w-40 lg:w-64 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+        <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-dropdown="notif">
+          <i class="fas fa-bell text-lg"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="relative">
+          <button class="flex items-center gap-2 pl-2 lg:pl-4 border-l border-gray-200" data-dropdown="profile">
+            <div class="text-right hidden md:block">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang</p>
+            </div>
+            <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">BS</div>
+          </button>
+          <div class="dropdown" data-dropdown-menu="profile">
+            <div class="p-3 border-b border-gray-100">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang · KG001</p>
+            </div>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+            <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-shield-alt w-4 mr-2"></i>Hak Akses: Operational Manager</a>
+            <div class="border-t border-gray-100"><a href="#" class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+      <p class="sidebar-section-label">Menu Utama</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+
+      <p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+
+      <p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+      <a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+      <a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+      <a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+
+      <p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+      <a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+      <a href="pengaturan.html" class="sidebar-item active"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
+      <span>Beranda</span><i class="fas fa-chevron-right text-xs"></i>
+      <span>Pengaturan &amp; Akun</span><i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-gray-900 font-medium">Pengaturan</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+      <div class="flex-1">
+        <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Pengaturan Akun &amp; Preferensi Approver</h1>
+        <p class="text-sm lg:text-base text-gray-600">Kelola preferensi alur persetujuan, notifikasi otorisasi, keamanan sesi, dan integrasi perangkat sistem terminal logistik.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="toast('Semua perubahan dikembalikan ke pengaturan default.','warn')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-undo"></i>Pulihkan Default</button>
+        <button onclick="toast('Semua perubahan pengaturan disimpan (Audit Trail SHA-256).','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"><i class="fas fa-save"></i>Simpan Semua Perubahan</button>
+      </div>
+    </div>
+
+    <!-- Profile mini bar -->
+    <div class="panel p-4 mb-6 flex flex-wrap items-center gap-4">
+      <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">BS</div>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-gray-900">Budi Santoso <span class="text-gray-500 font-normal text-sm">· Kepala Gudang / Approver</span></p>
+        <p class="text-xs text-gray-500">NIP: AST-DC01-77840 · Hub Cakung DC-01 · Wewenang: Rp 50 Juta (Level 2)</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="badge bg-green-100 text-green-700"><i class="fas fa-shield-alt"></i>2FA Terhubung</span>
+        <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-signature"></i>TTD Digital Terverifikasi</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="panel p-2 mb-6">
+      <div id="tabPengaturan" class="flex flex-wrap gap-1">
+        <button class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium" data-tab="preferensi"><i class="fas fa-sliders-h mr-1"></i>Preferensi</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="bot"><i class="fab fa-telegram mr-1"></i>Notifikasi &amp; Bot</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="keamanan"><i class="fas fa-lock mr-1"></i>Keamanan &amp; Sesi</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="tampilan"><i class="fas fa-palette mr-1"></i>Tampilan &amp; Bahasa</button>
+      </div>
+    </div>
+
+    <!-- ====== TAB: Preferensi ====== -->
+    <div data-tab-panel="preferensi" class="space-y-6">
+      <!-- Ambang batas & delegasi -->
+      <div class="panel p-4 lg:p-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-balance-scale text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Ambang Batas &amp; Delegasi Persetujuan</h3>
+          <span class="badge bg-blue-100 text-blue-700 ml-auto">Budi Santoso</span>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Kontrol batas nominal wewenang mandiri dan pendelegasian eskalasi otomatis.</p>
+
+        <!-- Wewenang Mutasi & Write-Off -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <p class="font-semibold text-gray-900 text-sm">Wewenang Mutasi &amp; Write-Off</p>
+              <p class="text-xs text-gray-500">Dual-Approval (Supervisor &amp; Head DC) · Status Otorisasi: Aktif</p>
+            </div>
+            <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-lock"></i>Rp 100.000.000</span>
+          </div>
+          <!-- Slider range -->
+          <div class="px-2">
+            <div class="relative h-2 bg-gray-200 rounded-full">
+              <div class="absolute h-2 bg-blue-600 rounded-full" style="left:2%;right:46%"></div>
+              <div class="absolute -top-1 w-4 h-4 bg-white border-2 border-blue-600 rounded-full" style="left:2%"></div>
+              <div class="absolute -top-1 w-4 h-4 bg-white border-2 border-blue-600 rounded-full" style="left:52%"></div>
+              <div class="absolute -top-1 w-4 h-4 bg-white border-2 border-red-600 rounded-full" style="left:96%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-3">
+              <span>Rp 10 Juta<br><span class="text-gray-400">(Minimum)</span></span>
+              <span class="font-semibold text-blue-700">Rp 50 Juta<br><span class="text-gray-400 font-normal">(Wewenang Mandiri)</span></span>
+              <span>Rp 250 Juta<br><span class="text-gray-400">(Plafon HR)</span></span>
+              <span class="text-red-600">Rp 500 Juta<br><span class="text-gray-400">(Maksimal Plafon HR)</span></span>
+            </div>
+          </div>
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-[#eff4ff] rounded-lg"><p class="text-gray-500">Kapasitas Log Audit Sesi</p><p class="font-bold text-gray-900">84% Terpakai</p></div>
+            <div class="p-3 bg-amber-50 rounded-lg"><p class="text-gray-500">Auto-archival tersisa</p><p class="font-bold text-gray-900">48 jam sebelum rotasi</p></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3"><i class="fas fa-info-circle mr-1"></i>Audit trail mencatat setiap modifikasi batas wewenang dengan enkripsi SHA-256 pada Ledger Pusat DC.</p>
+        </div>
+
+        <!-- Peringatan kritis -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <p class="font-semibold text-gray-900 text-sm mb-3">Peringatan Kritis &amp; Eskalasi Otomatis</p>
+          <div class="space-y-2">
+            <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded"><div><p class="text-sm text-gray-700">SLA Kadaluwarsa</p><p class="text-xs text-gray-500">Notifikasi saat tiket persetujuan mendekati batas SLA.</p></div><input type="checkbox" checked class="rounded text-blue-600"></label>
+            <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded"><div><p class="text-sm text-gray-700">ROP &lt; 30 Menit menipis</p><p class="text-xs text-gray-500">Eskalasi stok yang mendekati ambang batas ROP kritis.</p></div><input type="checkbox" checked class="rounded text-blue-600"></label>
+            <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded"><div><p class="text-sm text-gray-700">Deviasi Audit Fisik &gt; 0,2%</p><p class="text-xs text-gray-500">Eskalasi selisih stok opname melebihi toleransi.</p></div><input type="checkbox" checked class="rounded text-blue-600"></label>
+          </div>
+        </div>
+
+        <!-- Mode Delegasi -->
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fas fa-user-friends text-blue-600"></i>
+            <p class="font-semibold text-gray-900 text-sm">Mode Delegasi Otorisasi Sementara (Cuti / Perjalanan Tugas)</p>
+          </div>
+          <p class="text-xs text-gray-600 mb-3">Alihkan seluruh antrean persetujuan tiket secara otomatis ke kolega pengganti selama masa nonaktif.</p>
+          <div class="overflow-x-auto -mx-4 lg:mx-0 mb-3">
+            <table class="w-full min-w-[640px]">
+              <thead>
+                <tr class="border-b border-gray-200 bg-gray-50">
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Delegator</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Pengganti</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Rentang Periode</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-gray-100">
+                  <td class="px-3 py-3 text-sm"><p class="font-medium text-gray-900">Budi Santoso</p><p class="text-xs text-gray-400">KG001</p></td>
+                  <td class="px-3 py-3 text-sm"><p class="font-medium text-gray-900">Dewi Anggraini</p><p class="text-xs text-gray-500">HR Supervisor (DG-01)</p></td>
+                  <td class="px-3 py-3 text-sm text-gray-700">29 Peb 2024 sd 02 Mar 2024</td>
+                  <td class="px-3 py-3"><span class="badge bg-gray-100 text-gray-700">Selesai</span></td>
+                  <td class="px-3 py-3"><button onclick="toast('Membuka form delegasi baru...','success')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-plus"></i> Buat Baru</button></td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                  <td class="px-3 py-3 text-sm"><p class="font-medium text-gray-900">Budi Santoso</p><p class="text-xs text-gray-400">KG001</p></td>
+                  <td class="px-3 py-3 text-sm"><p class="font-medium text-gray-900">Rian Hidayat</p><p class="text-xs text-gray-500">Admin Logistik (DG-02)</p></td>
+                  <td class="px-3 py-3 text-sm text-gray-700">15 Apr 2025 sd 18 Apr 2025</td>
+                  <td class="px-3 py-3"><span class="badge bg-amber-100 text-amber-700"><i class="fas fa-clock"></i>Dijadwalkan</span></td>
+                  <td class="px-3 py-3"><button onclick="toast('Membuka form delegasi baru...','success')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-edit"></i> Ubah</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kepatuhan audit -->
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-balance-scale text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm">Kepatuhan Audit Logistik</h3>
+          <span class="badge bg-green-100 text-green-700 ml-auto"><i class="fas fa-check"></i>Terverifikasi</span>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Setiap perubahan konfigurasi sistem persetujuan dicatat secara otomatis dalam dokumen kepatuhan logistik AST-SPO-2024. Salinan log terenkripsi ditransmisikan ke Divisi Kepatuhan Internal DC Utama.</p>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-signature"></i>Tanda Tangan Digital Terverifikasi</span>
+          <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>Auto-archival: 48 jam sebelum rotasi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB: Notifikasi & Bot ====== -->
+    <div data-tab-panel="bot" style="display:none" class="space-y-6">
+      <div class="panel p-4 lg:p-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fab fa-telegram text-cyan-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Integrasi Bot &amp; Notifikasi Otorisasi</h3>
+          <span class="badge bg-green-100 text-green-700 ml-auto"><i class="fas fa-circle" style="font-size:5px"></i>Terhubung</span>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Terima ringkasan antrean mendesak via bot internal @AstroApproverBot.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="border border-gray-200 rounded-lg p-4">
+            <p class="text-xs text-gray-500 mb-1">Bot Telegram</p>
+            <p class="font-semibold text-gray-900 text-sm">@AstroApproverBot</p>
+            <div class="mt-3 flex items-center gap-2">
+              <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Aktif</span>
+              <button onclick="toast('Pengaturan bot dibuka di Telegram...','success')" class="text-xs text-blue-600 hover:underline ml-auto"><i class="fas fa-cog"></i> Kelola</button>
+            </div>
+          </div>
+          <div class="border border-gray-200 rounded-lg p-4">
+            <p class="text-xs text-gray-500 mb-1">Chat ID Telegram Terdaftar</p>
+            <p class="font-semibold text-gray-900 text-sm font-mono">saz9a9a72_0G</p>
+            <button onclick="toast('Form ubah Chat ID dibuka...','success')" class="text-xs text-blue-600 hover:underline mt-3"><i class="fas fa-edit"></i> Ubah Chat ID</button>
+          </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-4 mt-4">
+          <p class="font-semibold text-gray-900 text-sm mb-3">Frekuensi Digest Notifikasi</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 p-2 border-2 border-blue-600 rounded-lg bg-blue-50 cursor-pointer"><input type="radio" name="freq" checked class="text-blue-600"><span class="text-sm text-gray-700">Per Jam (Real-time)</span></label>
+            <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="freq" class="text-blue-600"><span class="text-sm text-gray-700">Harian</span></label>
+            <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="freq" class="text-blue-600"><span class="text-sm text-gray-700">Mingguan</span></label>
+            <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="freq" class="text-blue-600"><span class="text-sm text-gray-700">Nonaktif</span></label>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button onclick="toast('Pesan tes dikirim ke @AstroApproverBot...','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"><i class="fas fa-paper-plane"></i>Kirim Tes Pesan Bot</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB: Keamanan & Sesi ====== -->
+    <div data-tab-panel="keamanan" style="display:none" class="space-y-6">
+      <div class="panel p-4 lg:p-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-shield-alt text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Keamanan &amp; Kebijakan Sesi Otentikasi</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Proteksi kredensial kepala gudang tingkat tinggi untuk mencegah penyalahgunaan otorisasi inventaris.</p>
+
+        <!-- Timeout -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <p class="font-semibold text-gray-900 text-sm mb-1">Waktu Habis Sesi Otomatis (Inactivity Timeout)</p>
+          <p class="text-xs text-gray-500 mb-3">Protokol Keamanan Operasional — sesi otomatis terkunci saat tidak ada aktivitas.</p>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex flex-col items-center gap-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="timeout" class="text-blue-600"><span class="text-sm font-medium text-gray-700">15 Menit</span><span class="text-xs text-gray-400">Ketat</span></label>
+            <label class="flex flex-col items-center gap-1 p-3 border-2 border-blue-600 rounded-lg bg-blue-50 cursor-pointer"><input type="radio" name="timeout" checked class="text-blue-600"><span class="text-sm font-medium text-gray-700">30 Menit</span><span class="text-xs text-gray-400">Keseimbangan Aman</span></label>
+            <label class="flex flex-col items-center gap-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="timeout" class="text-blue-600"><span class="text-sm font-medium text-gray-700">60 Menit</span><span class="text-xs text-gray-400">Efisien</span></label>
+          </div>
+        </div>
+
+        <!-- 2FA -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-gray-900 text-sm">Verifikasi Dua Langkah (2FA) untuk Approval Kritis</p>
+              <p class="text-xs text-gray-500 mt-1">Wajib untuk persetujuan di atas plafon mandiri (Rp 50 Juta) dan emergency dispatch.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Terhubung</span>
+              <button onclick="toast('Pengaturan 2FA dibuka...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Kelola</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active sessions -->
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="font-semibold text-gray-900 text-sm">Histori Sesi Login Terminal Aktif</p>
+            <button onclick="toast('Semua sesi lain diputuskan. Sesi ini tetap aktif.','warn')" class="text-xs text-red-600 hover:underline"><i class="fas fa-times-circle"></i> Putuskan Semua Sesi Lain</button>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-green-50/40">
+              <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-laptop text-green-600"></i></div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900">MacBook Pro 16" · Chrome 129.0</p>
+                <p class="text-xs text-gray-500">IP 10.24.10.42 · Terminal Hub Cakung DC-01 (Kabel LAN LAN-04)</p>
+              </div>
+              <span class="badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Aktif Baru Saja</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
+              <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-mobile-screen text-blue-600"></i></div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900">Zebra TC52x Handheld Scanner Mobile</p>
+                <p class="text-xs text-gray-500">IP 10.24.12.18 · Zona Lorong B3 (Gudang Elektronik)</p>
+              </div>
+              <span class="badge bg-gray-100 text-gray-700">2 menit lalu</span>
+              <button onclick="toast('Sesi Zebra TC52x diputuskan.','warn')" class="text-xs text-red-600 hover:underline">Putuskan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB: Tampilan & Bahasa ====== -->
+    <div data-tab-panel="tampilan" style="display:none" class="space-y-6">
+      <div class="panel p-4 lg:p-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-palette text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Preferensi Antarmuka &amp; Ekspor Laporan</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Konfigurasi regional data, format berkas audit, dan notifikasi audio terminal.</p>
+
+        <!-- Format ekspor -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <p class="font-semibold text-gray-900 text-sm mb-3">Format Ekspor Default</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-3 border-2 border-blue-600 rounded-lg bg-blue-50 cursor-pointer">
+              <input type="radio" name="fmt" checked class="text-blue-600">
+              <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-excel text-green-600"></i></div>
+              <div><p class="text-sm font-medium text-gray-900">Excel (.xlsx)</p><p class="text-xs text-gray-500">Pivot Resmi</p></div>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="fmt" class="text-blue-600">
+              <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-pdf text-red-600"></i></div>
+              <div><p class="text-sm font-medium text-gray-900">PDF (.pdf)</p><p class="text-xs text-gray-500">Dokumen Resmi</p></div>
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i>Berlaku untuk semua timestamp manifes stok opname.</p>
+        </div>
+
+        <!-- Zona waktu -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <p class="font-semibold text-gray-900 text-sm mb-1">Zona Waktu Operasional</p>
+          <p class="text-xs text-gray-500 mb-3">Berlaku untuk semua timestamp manifes &amp; laporan.</p>
+          <select class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option selected>WIB (Asia/Jakarta — UTC+07:00)</option>
+            <option>WITA (Asia/Makassar — UTC+08:00)</option>
+            <option>WIT (Asia/Jayapura — UTC+09:00)</option>
+          </select>
+        </div>
+
+        <!-- Audio beeper -->
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-gray-900 text-sm">Notifikasi Suara pada Tiket Urgent (Audio Beeper)</p>
+              <p class="text-xs text-gray-500 mt-1">Memutar nada peringatan saat item ROP kritis masuk ke antrean.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom save bar -->
+    <div class="panel p-4 mt-6 flex flex-wrap items-center justify-between gap-3 bg-[#eff4ff]">
+      <p class="text-sm text-gray-600"><i class="fas fa-info-circle text-blue-600 mr-1"></i>Perubahan tersimpan ke Audit Trail Forensik (SHA-256) pada Ledger Pusat DC.</p>
+      <div class="flex items-center gap-2">
+        <button onclick="toast('Semua perubahan dikembalikan ke pengaturan default.','warn')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-undo"></i>Pulihkan Default</button>
+        <button onclick="toast('Semua perubahan pengaturan disimpan (Audit Trail SHA-256).','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"><i class="fas fa-save"></i>Simpan Semua Perubahan</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  initTabs('tabPengaturan');
+</script>
+</body>
+</html>

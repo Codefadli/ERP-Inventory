@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifikasi — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+        <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+        <div class="hidden sm:block">
+          <h1 class="text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+          <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+        <div class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-map-marker-alt text-xs"></i>
+          <span class="hidden lg:inline">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
+          <span class="lg:hidden">Cakung DC-01</span>
+        </div>
+        <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-circle" style="font-size:6px"></i><span>Operasional Normal</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 lg:gap-4 ml-auto">
+        <div class="relative">
+          <input type="text" placeholder="Cari SKU, No. DO, Surat Jalan, Divisi..." class="w-40 lg:w-64 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+        <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-dropdown="notif">
+          <i class="fas fa-bell text-lg"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="relative">
+          <button class="flex items-center gap-2 pl-2 lg:pl-4 border-l border-gray-200" data-dropdown="profile">
+            <div class="text-right hidden md:block">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang</p>
+            </div>
+            <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">BS</div>
+          </button>
+          <div class="dropdown" data-dropdown-menu="profile">
+            <div class="p-3 border-b border-gray-100">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang · KG001</p>
+            </div>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+            <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-shield-alt w-4 mr-2"></i>Hak Akses: Operational Manager</a>
+            <div class="border-t border-gray-100"><a href="#" class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+      <p class="sidebar-section-label">Menu Utama</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+
+      <p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+
+      <p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+      <a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+      <a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+      <a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+
+      <p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+      <a href="notifikasi.html" class="sidebar-item active"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+      <a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
+      <span>Beranda</span><i class="fas fa-chevron-right text-xs"></i>
+      <span>Pengaturan &amp; Akun</span><i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-gray-900 font-medium">Notifikasi</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+      <div class="flex-1">
+        <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Pusat Notifikasi &amp; Pemberitahuan</h1>
+        <p class="text-sm lg:text-base text-gray-600">Pemberitahuan langsung terkait antrean persetujuan mutasi, peringatan ambang batas ROP, dan otorisasi audit log gudang terintegrasi.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge bg-red-100 text-red-700"><i class="fas fa-circle" style="font-size:5px"></i>5 Belum Ditanggapi</span>
+        <button onclick="toast('Semua notifikasi ditandai sudah dibaca.','success')" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-check-double"></i>Tandai Semua Sudah Dibaca</button>
+        <button onclick="openModal('modalPref')" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-sliders-h"></i>Kelola Preferensi</button>
+      </div>
+    </div>
+
+    <!-- Top filter bar -->
+    <div class="panel p-4 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <input id="searchNotif" type="text" placeholder="Cari judul, SKU, No. transaksi, atau kata kunci notifikasi." class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+        <select id="fKanal" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Kanal: Semua</option>
+          <option value="inapp">In-App</option>
+          <option value="telegram">Telegram</option>
+          <option value="email">Email</option>
+          <option value="gateway">Gateway Telemetri</option>
+        </select>
+        <select id="fJenis" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Jenis: Semua</option>
+          <option value="mutasi">Mutasi &amp; Persetujuan</option>
+          <option value="rop">Peringatan Stok &amp; ROP</option>
+          <option value="otorisasi">Otorisasi &amp; Audit</option>
+          <option value="hak">Hak Akses</option>
+        </select>
+        <select id="fStatus" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Status: Semua</option>
+          <option value="unread">Belum Dibaca</option>
+          <option value="read">Sudah Dibaca</option>
+        </select>
+        <span class="text-sm text-gray-500 whitespace-nowrap">Urutan: <select class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm"><option>Terkini</option><option>Terdahulu</option><option>Prioritas</option></select></span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- ============ LEFT: notification list ============ -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- HARI INI -->
+        <div class="panel p-4 lg:p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-gray-900 text-sm lg:text-base">HARI INI — 18 OKTOBER 2025</h3>
+              <span class="badge bg-red-100 text-red-700">4 pembaruan prioritas</span>
+            </div>
+            <button onclick="toast('Grup HARI INI ditandai dibaca.','success')" class="text-xs text-blue-600 hover:underline">Tandai grup ini dibaca</button>
+          </div>
+          <div class="space-y-3">
+            <!-- Notif 1 -->
+            <div class="border-l-4 border-red-500 bg-red-50/40 rounded-r-lg p-3 hover:bg-red-50 transition" data-kanal="inapp" data-jenis="mutasi" data-status="unread">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-exchange-alt text-red-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-900 text-sm">Permintaan Mutasi Urgent Mendekati Batas SLA</p>
+                    <span class="badge bg-red-100 text-red-700"><i class="fas fa-bolt"></i>Urgent</span>
+                    <span class="text-xs text-gray-400 ml-auto">10 menit lalu</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Hub Cakung DC-01 ke Halim DC-02 mendekati batas waktu SLA otorisasi HR &amp; Dispatch (sisa &lt; 30 menit).</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">REF: REQ-2025-0381</span>
+                    <button onclick="toast('Membuka persetujuan REQ-2025-0381...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-arrow-right"></i> Tinjau Persetujuan</button>
+                    <button onclick="toast('Notifikasi ditandai dibaca.','success')" class="text-xs text-gray-500 hover:underline ml-auto">Tandai dibaca</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Notif 2 -->
+            <div class="border-l-4 border-amber-500 bg-amber-50/40 rounded-r-lg p-3 hover:bg-amber-50 transition" data-kanal="inapp" data-jenis="rop" data-status="unread">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-boxes text-amber-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-900 text-sm">Peringatan Stok &amp; ROP</p>
+                    <span class="badge bg-amber-100 text-amber-700"><i class="fas fa-exclamation"></i>ROP &lt; 30 Menit</span>
+                    <span class="text-xs text-gray-400 ml-auto">35 menit lalu</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Stok di Bawah Batas Reorder Point (ROP). SKU #CAM-600D di Bin Lokasi WH01-RACK-A4 tersisa 4 unit (ambang batas ROP: 25 unit). Kapasitas buffer tersisa 16%. Diperlukan tindakan pengadaan segera.</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">Level Penyangga (ROP: 25 Unit)</span>
+                    <button onclick="toast('Membuka detail stok SKU #CAM-600D...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-arrow-right"></i> Lihat Detail Stok</button>
+                    <button onclick="toast('Notifikasi ditandai dibaca.','success')" class="text-xs text-gray-500 hover:underline ml-auto">Tandai dibaca</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Notif 3 -->
+            <div class="border-l-4 border-green-500 bg-green-50/40 rounded-r-lg p-3 hover:bg-green-50 transition" data-kanal="email" data-jenis="otorisasi" data-status="unread">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-check-circle text-green-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-900 text-sm">Transaksi Otorisasi Mutasi Berhasil Disetujui</p>
+                    <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Disetujui</span>
+                    <span class="text-xs text-gray-400 ml-auto">1 jam lalu</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Surat Jalan elektronik SPO-WMS-019 telah terbit dan siap cetak untuk armada truk Box C-04. Pengeluaran logistik telah disinkronkan ke buku inventaris utama.</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">Otorisator: Budi Santoso (Admin HR)</span>
+                    <button onclick="toast('Menyiapkan unduhan manifest & QR SPO-WMS-019...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-download"></i> Unduh Manifest &amp; QR SPO</button>
+                    <button onclick="toast('Notifikasi ditandai dibaca.','success')" class="text-xs text-gray-500 hover:underline ml-auto">Tandai dibaca</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Notif 4 -->
+            <div class="border-l-4 border-indigo-500 bg-indigo-50/40 rounded-r-lg p-3 hover:bg-indigo-50 transition" data-kanal="telegram" data-jenis="otorisasi" data-status="unread">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-shield-alt text-indigo-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-900 text-sm">Log Audit Mingguan Terenkripsi Tersedia</p>
+                    <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-lock"></i>Audit Trail</span>
+                    <span class="text-xs text-gray-400 ml-auto">3 jam lalu</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Rekapitulasi log otorisasi minggu ke-42 telah selesai diverifikasi oleh hash SHA-256 (3fa2b0…890c). Semua 1.480 aktivitas mutasi dinyatakan valid tanpa deviasi anomali.</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">Status Integritas: 100% cacah</span>
+                    <button onclick="toast('Membuka dokumen audit minggu ke-42...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-arrow-right"></i> Buka Dokumen Audit</button>
+                    <button onclick="toast('Notifikasi ditandai dibaca.','success')" class="text-xs text-gray-500 hover:underline ml-auto">Tandai dibaca</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KEMARIN -->
+        <div class="panel p-4 lg:p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-gray-900 text-sm lg:text-base">KEMARIN — 17 OKTOBER 2025</h3>
+              <span class="badge bg-gray-100 text-gray-700">Telah ditinjau</span>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <!-- Notif 5 -->
+            <div class="border-l-4 border-gray-300 bg-gray-50/40 rounded-r-lg p-3 hover:bg-gray-50 transition" data-kanal="inapp" data-jenis="hak" data-status="read">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-user-shield text-gray-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-700 text-sm">Pembaruan Hak Akses Staf Lapangan</p>
+                    <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-key"></i>SEC-819</span>
+                    <span class="text-xs text-gray-400 ml-auto">Kemarin, 16:42 WIB</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Perubahan wewenang otorisasi cetak label manifest di lorong WH01 telah diperbarui oleh Admin Rian Hidayat untuk 3 operator barcode scanner.</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">AUID: 4SEC-819</span>
+                    <button onclick="toast('Membuka detail validasi otomatis SEC-819...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-arrow-right"></i> Validasi Otomatis</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Notif 6 -->
+            <div class="border-l-4 border-gray-300 bg-gray-50/40 rounded-r-lg p-3 hover:bg-gray-50 transition" data-kanal="inapp" data-jenis="mutasi" data-status="read">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-clipboard-check text-gray-600"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-700 text-sm">Rekonsiliasi Fisik Batch SO-2023-112 Selesai</p>
+                    <span class="badge bg-purple-100 text-purple-700"><i class="fas fa-balance-scale"></i>Opname</span>
+                    <span class="text-xs text-gray-400 ml-auto">Kemarin, 17:20 WIB</span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">Deviasi minus 3 unit pada Lorong B3 (Rak Elektronik) telah di-input ke modul Write-Off Minor. Menunggu tinjauan berkala dari Kepala Logistik Pusat.</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400">Supervisor: Dewi Anggraini</span>
+                    <button onclick="toast('Membuka berita acara SO-2023-112...','success')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-arrow-right"></i> Lihat Berita Acara</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Load more -->
+        <div class="flex flex-col items-center gap-3">
+          <span class="text-sm text-gray-500">Menampilkan 6 dari 12 notifikasi tersimpan</span>
+          <button onclick="toast('Memuat 6 notifikasi terdahulu...','success')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-history"></i>Muat Notifikasi Terdahulu</button>
+        </div>
+      </div>
+
+      <!-- ============ RIGHT: kanal pengiriman aktif ============ -->
+      <div class="space-y-6">
+        <div class="panel p-4 lg:p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-satellite-dish text-blue-600"></i>
+            <h3 class="font-bold text-gray-900 text-sm">Kanal Pengiriman Aktif</h3>
+            <span class="badge bg-green-100 text-green-700 ml-auto"><i class="fas fa-circle" style="font-size:5px"></i>Sinkron</span>
+          </div>
+          <p class="text-xs text-gray-600 mb-4">Pemberitahuan darurat diteruskan secara paralel ke kanal operasional resmi berikut.</p>
+          <div class="space-y-3">
+            <!-- In-App -->
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-desktop text-blue-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">In-App Alert Dashboard</p><p class="text-xs text-gray-500">Pop-up real-time &amp; banner</p></div>
+                <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Aktif</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">5 belum dibaca</p>
+            </div>
+            <!-- Telegram -->
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center"><i class="fab fa-telegram text-cyan-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Bot Telegram Lapangan</p><p class="text-xs text-gray-500">@AstroApproverBot</p></div>
+                <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Aktif</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">HR &amp; Dispatch queue</p>
+            </div>
+            <!-- Email -->
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center"><i class="fas fa-envelope text-indigo-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Email Kedinasan</p><p class="text-xs text-gray-500">budi.s@astro-dc.co.id</p></div>
+                <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Aktif</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Kelola Preferensi &amp; Jam Senyap</p>
+            </div>
+            <!-- Gateway -->
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-server text-amber-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Gateway Telemetri (Kafka)</p><p class="text-xs text-gray-500">Sinkronisasi real-time</p></div>
+                <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Aktif</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Throughput Sinyal Kafka (24 jam): 12,4k</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-100">
+            <p class="text-xs text-gray-500 mb-2">Sinkronisasi terakhir: 10:45:12 WIB · Node: dc01-edge-03</p>
+            <button onclick="toast('Memulai sinkronisasi ulang kanal notifikasi...','success')" class="w-full px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center justify-center gap-2"><i class="fas fa-sync-alt"></i>Sinkronkan Ulang Kanal</button>
+          </div>
+        </div>
+
+        <!-- Quick help -->
+        <div class="panel p-4 lg:p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-life-ring text-blue-600"></i>
+            <h3 class="font-bold text-gray-900 text-sm">Bantuan Otorisasi Urgent</h3>
+          </div>
+          <p class="text-xs text-gray-600 mb-3">Menemukan notifikasi yang tertahan lebih dari 60 menit tanpa persetujuan tim supervisor? Segera eskalasikan ke Dispatch Utama.</p>
+          <button onclick="toast('Eskalasi dikirim ke Dispatch Utama.','warn')" class="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center justify-center gap-2"><i class="fas fa-paper-plane"></i>Eskalasi ke Dispatcher Utama</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="panel p-4 lg:p-5">
+          <h3 class="font-bold text-gray-900 text-sm mb-3"><i class="fas fa-chart-pie text-blue-600 mr-2"></i>Ringkasan Notifikasi</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between"><span class="text-gray-600">Hari Ini</span><span class="font-semibold text-gray-900">4</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">Kemarin</span><span class="font-semibold text-gray-900">2</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">7 Hari Terakhir</span><span class="font-semibold text-gray-900">12</span></div>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100"><span class="text-gray-600">Belum Dibaca</span><span class="font-semibold text-red-600">5</span></div>
+            <div class="flex items-center justify-between"><span class="text-gray-600">Prioritas Urgent</span><span class="font-semibold text-red-600">2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL: preferensi ============ -->
+<div class="modal-overlay" id="modalPref">
+  <div class="modal-box" style="max-width:560px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-sliders-h mr-2 text-blue-600"></i>Kelola Preferensi Notifikasi</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4 space-y-3 text-sm">
+      <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"><span>Notifikasi Persetujuan &amp; Mutasi Urgent</span><input type="checkbox" checked class="rounded text-blue-600"></label>
+      <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"><span>Peringatan Stok &amp; ROP &lt; 30 Menit</span><input type="checkbox" checked class="rounded text-blue-600"></label>
+      <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"><span>Log Audit Mingguan Terenkripsi</span><input type="checkbox" checked class="rounded text-blue-600"></label>
+      <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"><span>Pembaruan Hak Akses Staf</span><input type="checkbox" class="rounded text-blue-600"></label>
+      <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"><span>Rekonsiliasi &amp; Write-off Minor</span><input type="checkbox" checked class="rounded text-blue-600"></label>
+      <div class="p-3 bg-[#eff4ff] rounded-lg">
+        <p class="text-xs font-medium text-gray-700 mb-2">Jam Senyap (Quiet Hours)</p>
+        <div class="flex items-center gap-2">
+          <input type="time" value="22:00" class="px-2 py-1 border border-gray-300 rounded text-sm">
+          <span class="text-gray-400">—</span>
+          <input type="time" value="06:00" class="px-2 py-1 border border-gray-300 rounded text-sm">
+          <span class="text-xs text-gray-500 ml-auto">Notifikasi urgent tetap aktif</span>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Batal</button>
+      <button data-close-modal onclick="toast('Preferensi notifikasi disimpan.','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Simpan Preferensi</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // filter notif list by kanal/jenis/status
+  function applyNotifFilter() {
+    var q = (document.getElementById('searchNotif').value || '').toLowerCase().trim();
+    var kanal = document.getElementById('fKanal').value;
+    var jenis = document.getElementById('fJenis').value;
+    var status = document.getElementById('fStatus').value;
+    document.querySelectorAll('[data-kanal]').forEach(function (el) {
+      var matchQ = !q || el.textContent.toLowerCase().indexOf(q) !== -1;
+      var matchK = !kanal || el.getAttribute('data-kanal') === kanal;
+      var matchJ = !jenis || el.getAttribute('data-jenis') === jenis;
+      var matchS = !status || el.getAttribute('data-status') === status;
+      el.style.display = (matchQ && matchK && matchJ && matchS) ? '' : 'none';
+    });
+  }
+  document.getElementById('searchNotif').addEventListener('input', applyNotifFilter);
+  document.getElementById('fKanal').addEventListener('change', applyNotifFilter);
+  document.getElementById('fJenis').addEventListener('change', applyNotifFilter);
+  document.getElementById('fStatus').addEventListener('change', applyNotifFilter);
+</script>
+</body>
+</html>

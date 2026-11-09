@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan &amp; Analitik — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+        <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+        <div class="hidden sm:block">
+          <h1 class="text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+          <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+        <div class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-map-marker-alt text-xs"></i>
+          <span class="hidden lg:inline">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
+          <span class="lg:hidden">Cakung DC-01</span>
+        </div>
+        <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center gap-2">
+          <i class="fas fa-circle" style="font-size:6px"></i><span>Operasional Normal</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 lg:gap-4 ml-auto">
+        <div class="relative">
+          <input type="text" placeholder="Cari SKU, No. DO, Surat Jalan, Divisi..." class="w-40 lg:w-64 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+        <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-dropdown="notif">
+          <i class="fas fa-bell text-lg"></i><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="relative">
+          <button class="flex items-center gap-2 pl-2 lg:pl-4 border-l border-gray-200" data-dropdown="profile">
+            <div class="text-right hidden md:block">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang</p>
+            </div>
+            <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">BS</div>
+          </button>
+          <div class="dropdown" data-dropdown-menu="profile">
+            <div class="p-3 border-b border-gray-100">
+              <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+              <p class="text-xs text-gray-500">Kepala Gudang · KG001</p>
+            </div>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+            <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+            <a href="#" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-shield-alt w-4 mr-2"></i>Hak Akses: Operational Manager</a>
+            <div class="border-t border-gray-100"><a href="#" class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+      <p class="sidebar-section-label">Menu Utama</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+
+      <p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+
+      <p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+      <a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+      <a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+      <a href="laporan-analitik.html" class="sidebar-item active"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+
+      <p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+      <a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+      <a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+      <a href="#" class="sidebar-item disabled"><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
+      <span>Manajemen Sistem</span><i class="fas fa-chevron-right text-xs"></i>
+      <span>Operasional &amp; Transaksi</span><i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-gray-900 font-medium">Laporan &amp; Analitik</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+      <div class="flex-1">
+        <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Laporan &amp; Analitik Inventaris (Operations Intelligence)</h1>
+        <p class="text-sm lg:text-base text-gray-600">Analisis perputaran persediaan (inventory turnover), pergerakan arus barang inbound/outbound, akurasi stok opname, serta efisiensi kapasitas rak Hub Cakung DC-01.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-calendar-alt"></i>30 Hari Terakhir (1 Feb – 2 Mar 2025)</span>
+        <button onclick="toast('Menyiapkan ekspor Laporan Analitik (XLSX)...','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"><i class="fas fa-file-export"></i><span>Export Laporan</span></button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-recycle text-blue-600"></i></div>
+          <span class="badge bg-green-100 text-green-700"><i class="fas fa-arrow-up"></i>Target</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">6,8X</h3>
+        <p class="text-sm text-gray-600 mb-2">Inventory Turnover Ratio (ITR)</p>
+        <p class="text-xs text-gray-500">Target SLA 6X /Thn (406×424)</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-coins text-green-600"></i></div>
+          <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>FiFo</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">Rp 4,82 <span class="text-sm font-normal text-gray-500">M</span></h3>
+        <p class="text-sm text-gray-600 mb-2">Total Valuasi Stok Aktif</p>
+        <p class="text-xs text-gray-500">32.450 Fisik + 1.240 SKU</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center"><i class="fas fa-truck text-indigo-600"></i></div>
+          <span class="badge bg-indigo-100 text-indigo-700">Net Outflow</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">14.280</h3>
+        <p class="text-sm text-gray-600 mb-2">Throughput Outbound/Bin</p>
+        <p class="text-xs text-gray-500">In: 12.410 + Out: 1.870</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-clipboard-check text-amber-600"></i></div>
+          <span class="badge bg-green-100 text-green-700">Hasil Siklus</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">99,2%</h3>
+        <p class="text-sm text-gray-600 mb-2">Akurasi Stok Opname (IRA)</p>
+        <p class="text-xs text-gray-500">Salisin &lt; 0,8% · Feb 2025</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="panel p-2 mb-6">
+      <div id="tabLaporan" class="flex flex-wrap gap-1">
+        <button class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium" data-tab="overview"><i class="fas fa-th-large mr-1"></i>Semua Laporan (Overview)</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="aging"><i class="fas fa-clock mr-1"></i>Perputaran &amp; Aging Stok</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="throughput"><i class="fas fa-truck mr-1"></i>Throughput Inbound/Outbound</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="abc"><i class="fas fa-medal mr-1"></i>Klasifikasi ABC &amp; Fast Moving</button>
+        <button class="tab-btn px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50" data-tab="kapasitas"><i class="fas fa-warehouse mr-1"></i>Kapasitas Rak Gudang</button>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="panel p-4 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+        <select id="fKategori" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Kategori: Semua Kategori</option>
+          <option value="elektronik it">Elektronik &amp; IT Hardware</option>
+          <option value="alat kerja">Alat Kerja &amp; Mesin</option>
+          <option value="packaging">Packaging &amp; Material</option>
+          <option value="k3">Perlengkapan K3 &amp; Uniform</option>
+          <option value="atk">ATK &amp; Inventaris Kantor</option>
+        </select>
+        <select id="fLokasi" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Lokasi: Semua</option>
+          <option value="cakung" selected>Hub Cakung DC-01 (Utama)</option>
+          <option value="halim">Hub Halim DC-02</option>
+        </select>
+        <select id="fDead" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Urgensi Dead Stock: Semua</option>
+          <option value="90">&gt; 90 Hari</option>
+          <option value="180">&gt; 180 Hari</option>
+        </select>
+        <div class="relative flex-1 min-w-[200px]">
+          <input id="searchSku" type="text" placeholder="Cari SKU, Nama Barang, Batch." class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB PANEL: overview (charts) ====== -->
+    <div data-tab-panel="overview">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <!-- Bar chart -->
+        <div class="panel p-4 lg:p-6 lg:col-span-2">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-chart-bar text-blue-600"></i>
+            <h3 class="font-bold text-gray-900 text-sm lg:text-base">Tren Arus Barang Bulanan (Inbound vs Outbound)</h3>
+            <span class="badge bg-blue-100 text-blue-700 ml-auto">8 Minggu</span>
+          </div>
+          <p class="text-xs text-gray-600 mb-4">Perbandingan volume unit barang masuk dan keluar per minggu dalam 8 minggu terakhir.</p>
+          <div style="height:300px"><canvas id="chartTren"></canvas></div>
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div class="p-2 bg-blue-50 rounded-lg"><p class="text-xs text-gray-500">Rata-rata Inbound</p><p class="text-sm font-bold text-blue-700">3.102 Qty / Minggu</p></div>
+            <div class="p-2 bg-indigo-50 rounded-lg"><p class="text-xs text-gray-500">Rata-rata Outbound</p><p class="text-sm font-bold text-indigo-700">3.570 Qty / Minggu</p></div>
+            <div class="p-2 bg-amber-50 rounded-lg"><p class="text-xs text-gray-500">Peak Dispatch Day</p><p class="text-sm font-bold text-amber-700">Selasa &amp; Kamis</p></div>
+          </div>
+        </div>
+        <!-- Doughnut chart -->
+        <div class="panel p-4 lg:p-6">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas fa-chart-pie text-indigo-600"></i>
+            <h3 class="font-bold text-gray-900 text-sm lg:text-base">Komposisi Valuasi Stok</h3>
+          </div>
+          <p class="text-xs text-gray-600 mb-4">Distribusi nilai aset persediaan yang tersimpan di seluruh zona rak Hub.</p>
+          <div style="height:240px"><canvas id="chartValuasi"></canvas></div>
+          <div class="mt-4 space-y-1.5 text-xs">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded" style="background:#2563eb"></span><span class="flex-1 text-gray-700">Elektronik &amp; IT Hardware</span><span class="font-semibold text-gray-900">Rp 2,02M</span><span class="text-gray-400">42%</span></div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded" style="background:#6366f1"></span><span class="flex-1 text-gray-700">Alat Kerja &amp; Mesin</span><span class="font-semibold text-gray-900">Rp 1,20M</span><span class="text-gray-400">25%</span></div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded" style="background:#f59e0b"></span><span class="flex-1 text-gray-700">Packaging &amp; Material</span><span class="font-semibold text-gray-900">Rp 867 Juta</span><span class="text-gray-400">18%</span></div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded" style="background:#16a34a"></span><span class="flex-1 text-gray-700">Perlengkapan K3 &amp; Uniform</span><span class="font-semibold text-gray-900">Rp 482 Juta</span><span class="text-gray-400">10%</span></div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded" style="background:#dc2626"></span><span class="flex-1 text-gray-700">ATK &amp; Inventaris Kantor</span><span class="font-semibold text-gray-900">Rp 241 Juta</span><span class="text-gray-400">5%</span></div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs font-semibold text-gray-700">TOTAL EVALUATED POOL</span>
+            <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>100% Sesuai SAP ERP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABC analysis table (shown in overview too as the key analytical table) -->
+      <div class="panel p-4 lg:p-6 mb-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-medal text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Analisis Performa SKU &amp; Klasifikasi ABC (Top Movers &amp; Aging)</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Peringkat kecepatan persediaan, Days on Hand (DOH), serta rekomendasi pengadaan stok otomatis.</p>
+        <div class="overflow-x-auto -mx-4 lg:mx-0">
+          <table id="tblAbc" class="w-full min-w-[980px]">
+            <thead>
+              <tr class="border-b border-gray-200 bg-gray-50">
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Kode SKU &amp; Nama Barang</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Kategori</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Stok On-Hand</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Avg Keluar/Bln</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">DOH</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Klasifikasi ABC</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Rekomendasi Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-row border-b border-gray-100" data-kategori="elektronik it">
+                <td class="px-4 py-4 align-top">
+                  <p class="font-semibold text-gray-900 text-sm">MacBook Pro 14" M1 Pro</p>
+                  <p class="text-xs text-gray-400 mt-1">SKU-LAP-0821 · Rak E-04</p>
+                </td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-purple-100 text-purple-700"><i class="fas fa-laptop"></i>Elektronik &amp; IT</span></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm font-bold text-gray-900">48 Unit</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">35 Unit/bln</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">41 Hari</p></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-green-100 text-green-700"><i class="fas fa-medal"></i>Kelas A (High Value)</span></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>ROP Terjaga (Aman)</span></td>
+                <td class="px-4 py-4 align-top"><button onclick="toast('Buka detail auto-reorder SKU-LAP-0821...','success')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-sync"></i> Auto-Reorder</button></td>
+              </tr>
+              <tr class="table-row border-b border-gray-100" data-kategori="alat kerja">
+                <td class="px-4 py-4 align-top">
+                  <p class="font-semibold text-gray-900 text-sm">Zebra TC21 Barcode Scanner</p>
+                  <p class="text-xs text-gray-400 mt-1">SKU-SCN-0055 · Batch B24</p>
+                </td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-blue-100 text-blue-700"><i class="fas fa-barcode"></i>Alat Kerja &amp; Hardware</span></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm font-bold text-gray-900">85 Unit</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">62 Unit/bln</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">38 Hari</p></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-green-100 text-green-700"><i class="fas fa-medal"></i>Kelas A (High Value)</span></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-amber-100 text-amber-700"><i class="fas fa-arrow-trend-up"></i>Permintaan Naik +18%</span></td>
+                <td class="px-4 py-4 align-top"><button onclick="toast('Buka detail auto-reorder SKU-SCN-0055...','success')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-sync"></i> Auto-Reorder</button></td>
+              </tr>
+              <tr class="table-row border-b border-gray-100" data-kategori="packaging">
+                <td class="px-4 py-4 align-top">
+                  <p class="font-semibold text-gray-900 text-sm">Bubble Wrap Roll 50m Heavy</p>
+                  <p class="text-xs text-gray-400 mt-1">SKU-PKG-0712</p>
+                </td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-orange-100 text-orange-700"><i class="fas fa-box"></i>Packaging</span></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm font-bold text-gray-900">320 Roll</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">410 Roll/bln</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">23 Hari</p></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-blue-100 text-blue-700"><i class="fas fa-bolt"></i>Kelas B (High Velocity)</span></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-red-100 text-red-700"><i class="fas fa-exclamation-triangle"></i>Perlu Restock &lt; 5 Hari</span></td>
+                <td class="px-4 py-4 align-top"><button onclick="toast('Membuat PR otomatis Bubble Wrap...','warn')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-shopping-cart"></i> Buat PR</button></td>
+              </tr>
+              <tr class="table-row border-b border-gray-100" data-kategori="k3">
+                <td class="px-4 py-4 align-top">
+                  <p class="font-semibold text-gray-900 text-sm">Sarung Tangan Antistatik ESD</p>
+                  <p class="text-xs text-gray-400 mt-1">SKU-HSE-4421 · Rack D-02</p>
+                </td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-orange-100 text-orange-700"><i class="fas fa-hard-hat"></i>K3 &amp; Keselamatan</span></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm font-bold text-gray-900">210 Box</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">45 Box/bln</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">140 Hari</p></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-medal"></i>Kelas C (Slow Moving)</span></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-amber-100 text-amber-700"><i class="fas fa-pause"></i>Review Pembelian / Slow</span></td>
+                <td class="px-4 py-4 align-top"><button onclick="toast('Buka review pembelian SKU-HSE-4421...','success')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-search"></i> Review</button></td>
+              </tr>
+              <tr class="table-row" data-kategori="elektronik it">
+                <td class="px-4 py-4 align-top">
+                  <p class="font-semibold text-gray-900 text-sm">Server Rack Mount Shelf 2U</p>
+                  <p class="text-xs text-gray-400 mt-1">SKU-SRV-8802 · Zona Gudang Cadangan</p>
+                </td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-purple-100 text-purple-700"><i class="fas fa-server"></i>Infrastruktur DC</span></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm font-bold text-gray-900">12 Unit</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">1 Unit/bln</p></td>
+                <td class="px-4 py-4 align-top whitespace-nowrap"><p class="text-sm text-gray-700">360 Hari</p></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-red-100 text-red-700"><i class="fas fa-skull"></i>Dead Stock (180 Hari)</span></td>
+                <td class="px-4 py-4 align-top"><span class="badge bg-red-100 text-red-700"><i class="fas fa-exclamation-circle"></i>Tanpa Pergerakan</span></td>
+                <td class="px-4 py-4 align-top"><button onclick="toast('Buka form relokasi/write-down SKU-SRV-8802...','warn')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-arrows-alt"></i> Relokasi / Write-down</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100">
+          <span class="text-sm text-gray-500">Menampilkan <span id="abcCount">5</span> dari 1.240 SKU Teranalisis</span>
+          <div id="abcPager" class="flex items-center gap-1">
+            <span class="text-xs text-gray-400 mr-2">Halaman 1 dari 248</span>
+            <button class="px-3 py-1 rounded text-sm bg-blue-600 text-white">1</button>
+            <button onclick="toast('Memuat halaman 2...','success')" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">2</button>
+            <button onclick="toast('Memuat halaman 3...','success')" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+            <span class="text-gray-400 px-1">...</span>
+            <button onclick="toast('Memuat halaman 248...','success')" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">248</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB PANEL: aging ====== -->
+    <div data-tab-panel="aging" style="display:none">
+      <div class="panel p-4 lg:p-6 mb-6">
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base mb-3"><i class="fas fa-clock text-blue-600 mr-2"></i>Analisis Aging Stok per Zona Rak</h3>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-3 border border-gray-200 rounded-lg"><p class="text-xs text-gray-500">Zona A &amp; High-Security</p><p class="text-lg font-bold text-gray-900">482 SKU</p><p class="text-xs text-green-600">Avg DOH 41 Hari</p></div>
+          <div class="p-3 border border-gray-200 rounded-lg"><p class="text-xs text-gray-500">Zona B &amp; Mezzanine</p><p class="text-lg font-bold text-gray-900">310 SKU</p><p class="text-xs text-green-600">Avg DOH 38 Hari</p></div>
+          <div class="p-3 border border-gray-200 rounded-lg"><p class="text-xs text-gray-500">Zona Pallet C-01</p><p class="text-lg font-bold text-gray-900">194 SKU</p><p class="text-xs text-amber-600">Avg DOH 140 Hari</p></div>
+          <div class="p-3 border border-gray-200 rounded-lg"><p class="text-xs text-gray-500">Racking D-02</p><p class="text-lg font-bold text-gray-900">142 SKU</p><p class="text-xs text-red-600">Avg DOH 360 Hari</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TAB PANEL: throughput ====== -->
+    <div data-tab-panel="throughput" style="display:none">
+      <div class="panel p-4 lg:p-6 mb-6">
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base mb-3"><i class="fas fa-truck text-indigo-600 mr-2"></i>Throughput Inbound vs Outbound Harian</h3>
+        <div style="height:280px"><canvas id="chartThroughput"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ====== TAB PANEL: abc ====== -->
+    <div data-tab-panel="abc" style="display:none">
+      <div class="panel p-4 lg:p-6">
+        <p class="text-sm text-gray-600">Tabel klasifikasi ABC tersedia pada panel Overview di atas. Gunakan filter kategori untuk menyaring kelas A/B/C.</p>
+      </div>
+    </div>
+
+    <!-- ====== TAB PANEL: kapasitas ====== -->
+    <div data-tab-panel="kapasitas" style="display:none">
+      <div class="panel p-4 lg:p-6">
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base mb-3"><i class="fas fa-warehouse text-blue-600 mr-2"></i>Utilisasi Kapasitas Rak per Zona</h3>
+        <div class="space-y-3">
+          <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-700">Zona A (Elektronik &amp; Laptop)</span><span class="font-semibold text-gray-900">85%</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-amber-500 h-2 rounded-full progress-bar" style="width:85%"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-700">Zona B (Audio &amp; Periferal)</span><span class="font-semibold text-gray-900">100%</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-red-500 h-2 rounded-full progress-bar" style="width:100%"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-700">Zona C (Storage &amp; SSD)</span><span class="font-semibold text-gray-900">40%</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full progress-bar" style="width:40%"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-700">Zona D (Kabel &amp; Aksesoris)</span><span class="font-semibold text-gray-900">72%</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full progress-bar" style="width:72%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 bottom cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-exclamation-triangle text-red-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Peringatan Dead Stock &amp; Aging</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Terdapat 8 SKU dengan usia simpan &gt; 180 hari senilai Rp 84,5 Juta tanpa pergerakan mutasi dalam 60 hari terakhir.</p>
+        <button onclick="toast('Memuat daftar 8 SKU Dead Stock...','warn')" class="text-blue-600 text-xs font-medium hover:underline">Lihat Daftar SKU Dead Stock <i class="fas fa-arrow-right ml-1"></i></button>
+      </div>
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-magic-wand-sparkles text-blue-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Optimasi ROP &amp; Safety Stock</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Algoritma prediktif mendeteksi lonjakan outbound pada 3 SKU kemasan untuk periode menjelang awal bulan operasional Hub.</p>
+        <button onclick="toast('Membuka jadwal pembelian ullang...','success')" class="text-blue-600 text-xs font-medium hover:underline">Buka Jadwal Pembelian Ulang <i class="fas fa-arrow-right ml-1"></i></button>
+      </div>
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-invoice-dollar text-green-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Integrasi Audit &amp; Finansial</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Laporan analitik telah diselaraskan dengan standar akuntansi persediaan FIFO &amp; Moving Average untuk laporan audit Q1 2025.</p>
+        <button onclick="toast('Menyiapkan Rekap Laporan Keuangan (XLSX)...','success')" class="text-blue-600 text-xs font-medium hover:underline">Unduh Rekap Laporan Keuangan (XLSX) <i class="fas fa-arrow-right ml-1"></i></button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  initTabs('tabLaporan');
+  // Bar chart: Tren Arus Barang 8 minggu
+  var ctxTren = document.getElementById('chartTren').getContext('2d');
+  new Chart(ctxTren, {
+    type: 'bar',
+    data: {
+      labels: ['M1','M2','M3','M4','M5','M6','M7','M-8 (Kini)'],
+      datasets: [
+        { label:'Inbound', data:[2850,3120,2950,3400,3020,3180,3260,3080], backgroundColor:'#2563eb', borderRadius:4 },
+        { label:'Outbound', data:[3200,3450,3380,3720,3580,3690,3640,3720], backgroundColor:'#6366f1', borderRadius:4 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'top', labels:{ boxWidth:12, font:{size:11} } } },
+      scales:{ y:{ beginAtZero:true, ticks:{ font:{size:10} } }, x:{ ticks:{ font:{size:11} } } }
+    }
+  });
+  // Doughnut: Komposisi Valuasi
+  var ctxVal = document.getElementById('chartValuasi').getContext('2d');
+  new Chart(ctxVal, {
+    type: 'doughnut',
+    data: {
+      labels: ['Elektronik & IT Hardware','Alat Kerja & Mesin','Packaging & Material','Perlengkapan K3 & Uniform','ATK & Inventaris Kantor'],
+      datasets: [{ data:[2020,1200,867,482,241], backgroundColor:['#2563eb','#6366f1','#f59e0b','#16a34a','#dc2626'], borderWidth:2, borderColor:'#fff' }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:function(c){ return c.label+': Rp '+c.raw+' Juta'; } } } }
+    }
+  });
+  // Throughput line chart (throughput tab)
+  var ctxTh = document.getElementById('chartThroughput');
+  if (ctxTh) new Chart(ctxTh.getContext('2d'), {
+    type:'line',
+    data:{ labels:['Sen','Sel','Rab','Kam','Jum','Sab'], datasets:[
+      { label:'Inbound', data:[1820,2140,1980,2310,2090,1180], borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.1)', fill:true, tension:.35 },
+      { label:'Outbound', data:[2100,2580,2240,2640,2410,1320], borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,.1)', fill:true, tension:.35 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:true } } }
+  });
+  // wire table filter
+  initTableFilter({ tableId:'tblAbc', searchId:'searchSku', countId:'abcCount',
+    selects:[{id:'fKategori',attr:'kategori'},{id:'fLokasi',attr:'lokasi'},{id:'fDead',attr:'dead'}] });
+</script>
+</body>
+</html>
