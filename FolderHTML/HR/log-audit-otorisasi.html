@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Audit & Otorisasi - Astro Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.5; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #EFF6FF;
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background-color: #DBEAFE;
+            border-left: 3px solid #2563EB;
+            font-weight: 600;
+            color: #2563EB;
+        }
+
+        .metric-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .filter-tag {
+            transition: all 0.2s ease;
+        }
+        
+        .filter-tag:hover {
+            background-color: #DBEAFE;
+            transform: scale(1.05);
+        }
+
+        .table-row {
+            transition: all 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background-color: #F9FAFB;
+            transform: scale(1.01);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hash-display {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(90deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        .badge-glow {
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .network-node {
+            transition: all 0.3s ease;
+        }
+
+        .network-node:hover {
+            transform: scale(1.2);
+        }
+
+        .network-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s linear forwards;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .count-up {
+            display: inline-block;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Responsive Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 256px 1fr;
+            min-height: calc(100vh - 64px);
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-left {
+                display: none;
+            }
+        }
+
+        .content-wrapper {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 0.5rem;
+        }
+
+        .tooltip:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="w-full px-4 lg:px-6 py-3">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 flex-shrink-0 animate-fade-in">
+                    <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg font-bold text-gray-900">Astro Inventory</h1>
+                        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+                    </div>
+                </div>
+
+                <!-- Center - Location & Status -->
+                <div class="flex items-center space-x-2 flex-shrink-0 animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
+                        <i class="fas fa-map-marker-alt text-xs"></i>
+                        <span class="hidden lg:inline">Jakarta (Pusat DC) > Hub Cakung DC-01 (Utama)</span>
+                        <span class="lg:hidden">Cakung DC-01</span>
+                    </div>
+                    <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
+                        <i class="fas fa-circle pulse-animation" style="font-size: 6px;"></i>
+                        <span class="hidden md:inline">Operational Normal</span>
+                        <span class="md:hidden">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Right - Search, Notification, Profile -->
+                <div class="flex items-center space-x-2 lg:space-x-4 ml-auto animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari SKU..." 
+                               class="w-40 lg:w-64 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    
+                    <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full pulse-animation"></span>
+                    </button>
+
+                    <div class="flex items-center space-x-2 pl-2 lg:pl-4 border-l border-gray-200">
+                        <div class="text-right hidden md:block">
+                            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+                            <p class="text-xs text-gray-500">HR Management</p>
+                        </div>
+                        <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            BS
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        
+        <!-- Sidebar Kiri -->
+        <aside class="sidebar-left bg-white border-r border-gray-200 overflow-y-auto sticky top-[64px] h-[calc(100vh-64px)]">
+            <nav class="p-4">
+                <!-- MENU UTAMA -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Menu Utama</p>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-th-large w-4"></i>
+                        <span>Dashboard HR</span>
+                    </a>
+                </div>
+
+                <!-- OPERASIONAL & PERSETUJUAN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.1s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Operasional & Persetujuan</p>
+                    <a href="#" class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock w-4"></i>
+                            <span>Antrean Persetujuan</span>
+                        </div>
+                        <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full pulse-animation">5</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-file-alt w-4"></i>
+                        <span>Detail Permintaan</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-history w-4"></i>
+                        <span>Riwayat Persetujuan</span>
+                    </a>
+                </div>
+
+                <!-- MANAJEMEN & LAPORAN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.2s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Manajemen & Laporan</p>
+                    <a href="laporan-inventaris-hr.html" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-chart-bar w-4"></i>
+                        <span>Laporan Inventaris</span>
+                    </a>
+                    <a href="#" class="sidebar-item active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm">
+                        <i class="fas fa-shield-alt w-4"></i>
+                        <span>Log Audit & Otorisasi</span>
+                    </a>
+                </div>
+
+                <!-- PENGATURAN & AKUN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.3s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Pengaturan & Akun</p>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-bell w-4"></i>
+                        <span>Notifikasi</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-cog w-4"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-user w-4"></i>
+                        <span>Profil Saya</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Konten Utama -->
+        <main class="content-wrapper p-4 lg:p-6 overflow-x-hidden">
+            
+            <!-- Breadcrumb -->
+            <div class="flex items-center space-x-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap animate-fade-in-up">
+                <a href="#" class="hover:text-blue-600 transition-colors">Beranda</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <a href="#" class="hover:text-blue-600 transition-colors">Manajemen & Laporan</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-gray-900 font-medium">Log Audit & Otorisasi</span>
+            </div>
+
+            <!-- Page Header -->
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                        <h1 class="text-xl lg:text-2xl font-bold text-gray-900">Log Audit, Integritas Kriptografis & Otorisasi</h1>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            <i class="fas fa-shield-alt mr-1"></i>ISO 27001
+                        </span>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            <i class="fas fa-fingerprint mr-1"></i>Verifikasi Hash SHA-256
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                        Rekam jejak digital immutable seluruh mutasi stok, akses data, approval, dan perubahan konfigurasi, 
+                        diverifikasi melalui enkripsi SHA-256 tersinkronisasi blockchain-style ledger. Sertifikasi ISO 27001 penuh aktif.
+                    </p>
+                </div>
+                <button class="btn-primary px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 text-sm whitespace-nowrap">
+                    <i class="fas fa-download"></i>
+                    <span>Ekspor Laporan Audit Tersegel</span>
+                </button>
+            </div>
+
+            <!-- Status Icons Bar -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-bounce-in" style="animation-delay: 0s">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900">Live Chain</span>
+                        </div>
+                        <span class="badge-glow bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">AKTIF</span>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-bounce-in" style="animation-delay: 0.1s">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chart-line text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 flex items-center">
+                                <span class="count-up" data-target="4">0</span>
+                                <span class="text-green-600 text-xs ml-2">+14.2%</span>
+                            </p>
+                            <p class="text-xs text-gray-500">bln ini</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-bounce-in" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-pink-600"></i>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900 count-up" data-target="2">0</span>
+                        </div>
+                        <span class="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs font-semibold">Perlu Review</span>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-bounce-in" style="animation-delay: 0.3s">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check-double text-cyan-600"></i>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900">Zero Conflict</span>
+                        </div>
+                        <span class="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-xs font-semibold">OK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                
+                <!-- Card 1 -->
+                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-link text-green-600"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-1"><span class="count-up" data-target="100">0</span>%</h3>
+                    <p class="text-sm text-gray-600 mb-2">Integritas Rantai Audit</p>
+                    <p class="text-xs text-gray-500">Semua 52 blok kriptografis valid terverifikasi</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-database text-blue-600"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-1"><span class="count-up" data-target="24810">0</span></h3>
+                    <p class="text-sm text-gray-600 mb-2">Total Entri Audit</p>
+                    <p class="text-xs text-gray-500">0 missing record, failover redundan aktif</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-circle text-orange-600"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-1"><span class="count-up" data-target="4">0</span></h3>
+                    <p class="text-sm text-gray-600 mb-2">Intervensi / Deviasi</p>
+                    <p class="text-xs text-gray-500">2 deviasi stok opname, 2 mutasi ditolak</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm animate-fade-in" style="animation-delay: 0.5s">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-shield text-purple-600"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-1"><span class="count-up" data-target="100">0</span>%</h3>
+                    <p class="text-sm text-gray-600 mb-2">Kepatuhan SOD HR & Gudang</p>
+                    <p class="text-xs text-gray-500">Tidak ada otorisasi peran tunggal ganda</p>
+                </div>
+            </div>
+
+            <!-- Merkle Root Banner -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 mb-6 shadow-lg animate-fade-in" style="animation-delay: 0.6s">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div class="flex items-start space-x-3 flex-1">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-lock text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <p class="text-white font-bold text-sm">MERKLE ROOT BLOK BERJALAN (#BLK-202505-09)</p>
+                                <span class="bg-green-500 text-white px-2 py-0.5 rounded text-xs font-semibold">SHA-256 Valid</span>
+                            </div>
+                            <div class="hash-display bg-white/10 rounded px-3 py-2 text-xs text-white font-mono break-all">
+                                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyHash()" class="btn-primary bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg flex items-center space-x-2 text-sm transition-all">
+                            <i class="fas fa-copy"></i>
+                            <span>Salin Digest</span>
+                        </button>
+                        <p class="text-xs text-white/80">Dienkripsi 30 dtk lalu</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm animate-fade-in-up" style="animation-delay: 0.7s">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option>Semua Hub (DC-01 s/d DC-05)</option>
+                        </select>
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option>Semua Tipe Event</option>
+                        </select>
+                        <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-all">Hari Ini</button>
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-all">7 Hari</button>
+                        <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-all">30 Hari</button>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-all flex items-center space-x-2">
+                            <i class="fas fa-calendar"></i>
+                            <span>Rentang</span>
+                        </button>
+                        <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
+                            <i class="fas fa-sync-alt text-gray-600"></i>
+                        </button>
+                        <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
+                            <i class="fas fa-filter text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="filter-tag bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs flex items-center space-x-2">
+                            <span><strong>Rentang:</strong> 7 Hari Terakhir</span>
+                            <button class="hover:text-blue-900"><i class="fas fa-times"></i></button>
+                        </span>
+                        <span class="filter-tag bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs flex items-center space-x-2">
+                            <span><strong>Hub:</strong> Semua DC</span>
+                            <button class="hover:text-blue-900"><i class="fas fa-times"></i></button>
+                        </span>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">Hapus Semua Filter</a>
+                </div>
+            </div>
+
+            <!-- Summary Box -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 animate-fade-in-up" style="animation-delay: 0.8s">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-book text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-blue-900 text-sm">Rincian Log Transaksi & Akses Terverifikasi</p>
+                            <p class="text-xs text-blue-700">Immutable ledger seluruh record secara real-time dengan micro-block timestamp WIB</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <p class="text-sm text-blue-700">Menampilkan 5 dari <span class="font-bold count-up" data-target="24810">0</span> log</p>
+                        <button class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-all">
+                            <i class="fas fa-sync-alt mr-1"></i>Segarkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4 lg:p-6 mb-6 shadow-sm animate-fade-in-up" style="animation-delay: 0.9s">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[1000px]">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Timestamp (WIB)</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Event ID & Hash SHA-256</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pelaku / Aktor</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tipe Operasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <!-- Row 1 -->
+                            <tr class="table-row border-b border-gray-100">
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 14:32:18</p>
+                                    <p class="text-xs text-gray-500">10 menit yang lalu</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098412</p>
+                                    <p class="text-xs text-gray-500 font-mono">7e8d5ff01...</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+                                            SR
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
+                                            <p class="text-xs text-gray-500">NIP 19850412 - HR Lead Approver</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Approval Mutasi Antar-Hub
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2 -->
+                            <tr class="table-row border-b border-gray-100">
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 13:45:02</p>
+                                    <p class="text-xs text-gray-500">1 jam yang lalu</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098408</p>
+                                    <p class="text-xs text-gray-500 font-mono">19ac32ff09...</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+                                            DA
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Dewi Anggraini</p>
+                                            <p class="text-xs text-gray-500">NIP 19930718 - Auditor Internal Logistik</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Selisih Opname (Discrepancy)
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3 -->
+                            <tr class="table-row border-b border-gray-100">
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 12:11:40</p>
+                                    <p class="text-xs text-gray-500">2 jam yang lalu</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098389</p>
+                                    <p class="text-xs text-gray-500 font-mono">cc9d216de8...</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+                                            BS
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+                                            <p class="text-xs text-gray-500">NIP 19850211 - Admin Utama / Super Admin</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Penyesuaian Master Bin WH
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- Row 4 -->
+                            <tr class="table-row border-b border-gray-100">
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 10:20:15</p>
+                                    <p class="text-xs text-gray-500">4 jam yang lalu</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098381</p>
+                                    <p class="text-xs text-gray-500 font-mono">33e1150c89...</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+                                            SR
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
+                                            <p class="text-xs text-gray-500">NIP 19850412 - HR Lead Approver</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Penolakan Mutasi Stok
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- Row 5 -->
+                            <tr class="table-row">
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 08:00:00</p>
+                                    <p class="text-xs text-gray-500">6 jam yang lalu</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098350</p>
+                                    <p class="text-xs text-gray-500 font-mono">a641f92c64...</p>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Sistem Otomatis</p>
+                                            <p class="text-xs text-gray-500">Service ID: ASTRO-CORE-AUTORUN</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Snapshot Integritas Harian
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span>Baris per halaman:</span>
+                        <select class="px-2 py-1 border border-gray-300 rounded">
+                            <option>10</option>
+                            <option>25</option>
+                            <option>50</option>
+                        </select>
+                    </div>
+                    <p class="text-sm text-gray-600">1 - 5 dari <span class="count-up" data-target="24810">0</span> rekaman</p>
+                    <div class="flex items-center space-x-1">
+                        <button class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">◄◄</button>
+                        <button class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">◄</button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">2</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">3</button>
+                        <span class="px-2 text-gray-400">...</span>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">496</button>
+                        <button class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">►</button>
+                        <button class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-all">►►</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Cards Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                
+                <!-- Card 1: SoD Matrix -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 1s">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-900">Matriks Segregation of Duties (SoD)</h3>
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">ISO Compliance</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Pemisahan ketat hak cipta, review stok fisik, dan approval transaksi keuangan</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2 text-sm">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span class="text-gray-700">Seti Opname vs Approver HR</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span class="text-gray-700">Seti Opname vs Pengelola Master SKU</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Network Diagram -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 1.1s">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-900">Distribusi Node Log Terdesentralisasi</h3>
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">6/6 Terhubung</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Setup log transaksi didistribusikan ke node mirror untuk high availability</p>
+                    
+                    <!-- Network Diagram SVG -->
+                    <svg class="w-full h-40" viewBox="0 0 200 120">
+                        <!-- Center Node -->
+                        <circle cx="100" cy="60" r="12" class="network-node fill-blue-500" />
+                        
+                        <!-- Outer Nodes -->
+                        <circle cx="100" cy="20" r="8" class="network-node fill-green-500" />
+                        <circle cx="160" cy="40" r="8" class="network-node fill-green-500" />
+                        <circle cx="160" cy="80" r="8" class="network-node fill-green-500" />
+                        <circle cx="100" cy="100" r="8" class="network-node fill-green-500" />
+                        <circle cx="40" cy="80" r="8" class="network-node fill-green-500" />
+                        <circle cx="40" cy="40" r="8" class="network-node fill-green-500" />
+                        
+                        <!-- Lines -->
+                        <line x1="100" y1="60" x2="100" y2="20" class="network-line stroke-blue-400" stroke-width="2" />
+                        <line x1="100" y1="60" x2="160" y2="40" class="network-line stroke-blue-400" stroke-width="2" style="animation-delay: 0.2s" />
+                        <line x1="100" y1="60" x2="160" y2="80" class="network-line stroke-blue-400" stroke-width="2" style="animation-delay: 0.4s" />
+                        <line x1="100" y1="60" x2="100" y2="100" class="network-line stroke-blue-400" stroke-width="2" style="animation-delay: 0.6s" />
+                        <line x1="100" y1="60" x2="40" y2="80" class="network-line stroke-blue-400" stroke-width="2" style="animation-delay: 0.8s" />
+                        <line x1="100" y1="60" x2="40" y2="40" class="network-line stroke-blue-400" stroke-width="2" style="animation-delay: 1s" />
+                    </svg>
+                </div>
+
+                <!-- Card 3: SHA-256 Test -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 1.2s">
+                    <h3 class="font-bold text-gray-900 mb-4">Uji Mandiri Integritas SHA-256</h3>
+                    <input type="text" placeholder="Masukkan ID transaksi / Hash..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 mb-3 transition-all">
+                    <p class="text-xs text-gray-600 mb-4">Verifikasi payload audit secara independen dengan SHA-256 signature</p>
+                    <button class="btn-primary w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Uji Validitas Ledger</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg animate-fade-in-up" style="animation-delay: 1.3s">
+                <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center transition-colors">
+                    <span>Lihat Regulasi Akses RBAC Lengkap</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <p class="text-sm text-gray-600">
+                    Latensi Replikasi Rata-rata <strong class="text-gray-900">18 ms</strong> (Sub-detik)
+                </p>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-check-circle text-green-400"></i>
+            <span id="toast-message">Hash berhasil disalin!</span>
+        </div>
+    </div>
+
+    <script>
+        // Count Up Animation
+        function animateCountUp() {
+            const counters = document.querySelectorAll('.count-up');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current).toLocaleString('id-ID');
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toLocaleString('id-ID');
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // Copy Hash Function
+        function copyHash() {
+            const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+            navigator.clipboard.writeText(hash).then(() => {
+                showToast('Hash berhasil disalin!');
+            });
+        }
+
+        // Show Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // Initialize animations on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                animateCountUp();
+            }, 500);
+        });
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.btn-primary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Smooth scroll for pagination
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

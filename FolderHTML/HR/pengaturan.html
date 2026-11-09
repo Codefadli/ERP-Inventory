@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Akun & Preferensi - Astro Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(45, 91, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(45, 91, 255, 0.8); }
+        }
+
+        @keyframes toggleSlide {
+            from { transform: translateX(0); }
+            to { transform: translateX(24px); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .animate-slide-down {
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #EFF6FF;
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background-color: #DBEAFE;
+            border-left: 3px solid #2563EB;
+            font-weight: 600;
+            color: #2563EB;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #CBD5E1;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #2563EB;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-slider.green {
+            background-color: #10B981;
+        }
+
+        /* Tab Navigation */
+        .tab-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-item:hover {
+            background-color: #EFF6FF;
+            transform: translateY(-2px);
+        }
+
+        .tab-item.active {
+            background-color: #2563EB;
+            color: white;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2563EB;
+        }
+
+        /* Card Hover Effects */
+        .settings-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button Effects */
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -3px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Progress Bar */
+        .progress-bar-fill {
+            animation: progressFill 1.5s ease-out forwards;
+        }
+
+        /* Radio Button Custom */
+        .radio-custom {
+            transition: all 0.2s ease;
+        }
+
+        .radio-custom:hover {
+            background-color: #F3F4F6;
+        }
+
+        .radio-custom.selected {
+            background-color: #EFF6FF;
+            border-color: #2563EB;
+        }
+
+        /* Device Card */
+        .device-card {
+            transition: all 0.2s ease;
+        }
+
+        .device-card:hover {
+            background-color: #F9FAFB;
+            transform: translateX(5px);
+        }
+
+        /* Badge Animation */
+        .badge-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Responsive Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 256px 1fr;
+            min-height: calc(100vh - 64px);
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-left {
+                display: none;
+            }
+        }
+
+        .content-wrapper {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Date Picker Style */
+        input[type="date"] {
+            transition: all 0.2s ease;
+        }
+
+        input[type="date"]:focus {
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="w-full px-4 lg:px-6 py-3">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 flex-shrink-0 animate-fade-in">
+                    <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg font-bold text-gray-900">Astro Inventory</h1>
+                        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+                    </div>
+                </div>
+
+                <!-- Center - Location & Status -->
+                <div class="flex items-center space-x-2 flex-shrink-0 animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
+                        <i class="fas fa-map-marker-alt text-xs"></i>
+                        <span class="hidden lg:inline">Jakarta (Pusat DC) > Hub Cakung DC-01 (Utama)</span>
+                        <span class="lg:hidden">Cakung DC-01</span>
+                    </div>
+                    <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
+                        <i class="fas fa-circle pulse-animation" style="font-size: 6px;"></i>
+                        <span class="hidden md:inline">Operational Normal</span>
+                        <span class="md:hidden">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Right - Search, Notification, Profile -->
+                <div class="flex items-center space-x-2 lg:space-x-4 ml-auto animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari SKU..." 
+                               class="w-40 lg:w-64 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    
+                    <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full pulse-animation flex items-center justify-center text-white text-xs font-bold">3</span>
+                    </button>
+
+                    <div class="flex items-center space-x-2 pl-2 lg:pl-4 border-l border-gray-200">
+                        <div class="text-right hidden md:block">
+                            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+                            <p class="text-xs text-gray-500">HR Management</p>
+                        </div>
+                        <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            BS
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        
+        <!-- Sidebar Kiri -->
+        <aside class="sidebar-left bg-white border-r border-gray-200 overflow-y-auto sticky top-[64px] h-[calc(100vh-64px)]">
+            <nav class="p-4">
+                <!-- MENU UTAMA -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Menu Utama</p>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-th-large w-4"></i>
+                        <span>Dashboard HR</span>
+                    </a>
+                </div>
+
+                <!-- OPERASIONAL & PERSETUJUAN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.1s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Operasional & Persetujuan</p>
+                    <a href="#" class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock w-4"></i>
+                            <span>Antrean Persetujuan</span>
+                        </div>
+                        <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full pulse-animation">3</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-file-alt w-4"></i>
+                        <span>Detail Permintaan</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-history w-4"></i>
+                        <span>Riwayat Persetujuan</span>
+                    </a>
+                </div>
+
+                <!-- MANAJEMEN & LAPORAN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.2s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Manajemen & Laporan</p>
+                    <a href="laporan-inventaris-hr.html" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-chart-bar w-4"></i>
+                        <span>Laporan Inventaris</span>
+                    </a>
+                    <a href="log-audit-otorisasi.html" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-shield-alt w-4"></i>
+                        <span>Log Audit & Otorisasi</span>
+                    </a>
+                </div>
+
+                <!-- PENGATURAN & AKUN -->
+                <div class="mb-6 animate-slide-in" style="animation-delay: 0.3s">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2 px-3">Pengaturan & Akun</p>
+                    <a href="notifikasi.html" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-bell w-4"></i>
+                        <span>Notifikasi</span>
+                    </a>
+                    <a href="#" class="sidebar-item active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm">
+                        <i class="fas fa-cog w-4"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 text-sm">
+                        <i class="fas fa-user w-4"></i>
+                        <span>Profil Saya</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Konten Utama -->
+        <main class="content-wrapper p-4 lg:p-6 overflow-x-hidden">
+            
+            <!-- Breadcrumb -->
+            <div class="flex items-center space-x-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap animate-fade-in-up">
+                <a href="#" class="hover:text-blue-600 transition-colors">Beranda</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <a href="#" class="hover:text-blue-600 transition-colors">Pengaturan & Akun</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-gray-900 font-medium">Pengaturan</span>
+            </div>
+
+            <!-- Page Header -->
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                        <h1 class="text-xl lg:text-2xl font-bold text-gray-900">Pengaturan Akun & Preferensi HR Approver</h1>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">v95.5.3</span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                        Kelola preferensi alur persetujuan, notifikasi otorisasi, keamanan sesi, dan integrasi perangkat sistem terminal logistik.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-all">
+                        <i class="fas fa-undo mr-2"></i>Pulihkan Default
+                    </button>
+                    <button class="btn-primary px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-2">
+                        <i class="fas fa-check"></i>
+                        <span>Simpan Semua Perubahan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap gap-2 mb-6 animate-slide-down" style="animation-delay: 0.2s">
+                <button class="tab-item active px-4 py-3 rounded-lg flex items-center space-x-2 text-sm font-semibold">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Preferensi Otorisasi</span>
+                </button>
+                <button class="tab-item px-4 py-3 border border-gray-200 rounded-lg flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifikasi & Bot</span>
+                    <span class="w-2 h-2 bg-red-500 rounded-full badge-dot"></span>
+                </button>
+                <button class="tab-item px-4 py-3 border border-gray-200 rounded-lg flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Keamanan & Sesi</span>
+                </button>
+                <button class="tab-item px-4 py-3 border border-gray-200 rounded-lg flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                    <i class="fas fa-palette"></i>
+                    <span>Tampilan & Bahasa</span>
+                </button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Column (2/3) -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Section 1: Ambang Batas & Delegasi -->
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900">Ambang Batas & Delegasi Persetujuan</h2>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Aktif Berlaku</span>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 mb-4">
+                            Kontrol batas nominal wewenang mandiri dan pendelegasian eskalasi otomatis.
+                        </p>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-2">Batas Otorisasi Mandiri (Single Approver)</h3>
+                            <p class="text-xs text-gray-600 mb-3">
+                                Nilai mutasi barang di atas ambang ini mewajibkan persetujuan ganda (Dual Approval Spr & Head DC).
+                            </p>
+                            
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs text-gray-500 mb-1">Minimum</p>
+                                    <p class="text-lg font-bold text-gray-900">Rp 10 Juta</p>
+                                </div>
+                                <div class="text-center p-3 bg-blue-50 rounded-lg border-2 border-blue-500">
+                                    <p class="text-xs text-blue-600 mb-1">Saat Ini</p>
+                                    <p class="text-lg font-bold text-blue-600">Rp 250 Juta</p>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs text-gray-500 mb-1">Maksimal Plafon HB</p>
+                                    <p class="text-lg font-bold text-gray-900">Rp 500 Juta</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                            <p class="text-xs text-blue-800">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Audit trail mencatat setiap modifikasi batas wewenang dengan enkripsi SHA-256 pada Ledger Pusat DC.
+                            </p>
+                        </div>
+
+                        <!-- Toggle 1 -->
+                        <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="text-sm font-semibold text-gray-900">Peringatan Kritis SLA Kadaluwarsa ROP</h3>
+                                    <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-semibold">< 30 Menit</span>
+                                </div>
+                                <p class="text-xs text-gray-600">
+                                    Kirim alert visual dashboard dan sinyal suara otomatis saat ada antrean mutasi stok mendesak yang mendekati batas SLA.
+                                </p>
+                            </div>
+                            <label class="toggle-switch ml-4">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 2 with Form -->
+                        <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Mode Delegasi Otorisasi Sementara (Cuti / Perjalanan Tugas)</h3>
+                                    <p class="text-xs text-gray-600">
+                                        Alihkan seluruh tangkai antrean persetujuan Anda secara otomatis ke kolega pengganti selama masa nonaktif.
+                                    </p>
+                                </div>
+                                <label class="toggle-switch ml-4">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider green"></span>
+                                </label>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-2">DELEGATOR PENGGANTI:</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 transition-all">
+                                        <option>Dewi Anggraini - HR Supervisor (DC-01)</option>
+                                        <option>Siti Rahmawati - HR Lead Approver</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-2">RENTANG PERIODE PENDELEGASIAN:</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <input type="date" value="2024-10-28" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 transition-all">
+                                        <input type="date" value="2024-10-28" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 transition-all">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Integrasi Bot Telegram -->
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.4s">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fab fa-telegram text-blue-500 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h2 class="text-lg font-bold text-gray-900">Integrasi Bot Telegram</h2>
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Terhubung</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">
+                                    Terima ringkasan antrean mendesak via bot internal @AstroApproverBot.
+                                </p>
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <p class="text-xs text-gray-500">Chat ID Terdaftar</p>
+                                        <p class="text-sm font-semibold text-gray-900">882948172_DC</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Frekuensi Digest</p>
+                                        <p class="text-sm font-semibold text-gray-900">Per Jam (Real-time)</p>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-all">
+                                    <i class="fas fa-paper-plane mr-2"></i>Kirim Tes Pesan Bot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Kepatuhan Audit -->
+                    <div class="settings-card bg-blue-50 border border-blue-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.5s">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-alt text-white text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-sm font-bold text-blue-900 mb-2">Kepatuhan Audit Logistik</h3>
+                                <p class="text-xs text-blue-800 mb-3">
+                                    Setiap perubahan konfigurasi sistem persetujuan dicatat untuk kepatuhan dokumen kepatuhan logistik AST-SPO-2024. 
+                                    Lihat entri historis di Ledger Pusat DC Portal Kepatuhan Internal DC Utama.
+                                </p>
+                                <a href="#" class="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center">
+                                    <i class="fas fa-link mr-1"></i>Tanda Tangan Digital Terverifikasi
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Keamanan & Sesi -->
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.6s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-lock text-green-600"></i>
+                                </div>
+                                <h2 class="text-lg font-bold text-gray-900">Keamanan & Kebijakan Sesi Otentikasi</h2>
+                            </div>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Enkripsi Sesi AMP</span>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 mb-4">
+                            Proteksi kredensial HR tingkat tinggi untuk mencegah penyalahgunaan otorisasi inventaris.
+                        </p>
+
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Waktu Habis Sesi Otomatis (Inactivity Timeout)</h3>
+                        
+                        <div class="space-y-2 mb-6">
+                            <div class="radio-custom p-3 border-2 border-gray-200 rounded-lg cursor-pointer">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="timeout" class="w-4 h-4 text-blue-600">
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-semibold text-gray-900">15 Menit</p>
+                                        <p class="text-xs text-gray-500">Proteksi Keamanan Ketat</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="radio-custom selected p-3 border-2 rounded-lg cursor-pointer">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="timeout" checked class="w-4 h-4 text-blue-600">
+                                    <div class="ml-3 flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <p class="text-sm font-semibold text-gray-900">30 Menit</p>
+                                            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">Direkomendasikan</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">Keseimbangan Aman & Efisien</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="radio-custom p-3 border-2 border-gray-200 rounded-lg cursor-pointer">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="timeout" class="w-4 h-4 text-blue-600">
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-semibold text-gray-900">60 Menit</p>
+                                        <p class="text-xs text-gray-500">Operasional Panjang di DC</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2FA Toggle -->
+                        <div class="flex items-start justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                            <div class="flex items-start space-x-3 flex-1">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-mobile-alt text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-sm font-semibold text-gray-900">Verifikasi Dua Langkah (2FA) untuk Approval Kritis</h3>
+                                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Terhubung</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">
+                                        Membutuhkan token OTP Google Authenticator saat menandatangani persetujuan di atas plafon tunggal mandiri.
+                                    </p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch ml-4">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Histori Sesi Login -->
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.7s">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900">Histori Sesi Login Terminal Aktif</h2>
+                            <button class="text-red-600 hover:text-red-700 text-sm font-semibold">
+                                <i class="fas fa-sync-alt mr-1"></i>Putuskan Semua Sesi Lain
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <!-- Device 1 -->
+                            <div class="device-card p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-laptop text-gray-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-sm font-semibold text-gray-900">MacBook Pro 16" • Chrome 129.0</p>
+                                                <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Aktif Aktif</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500">IP: 10.24.18.42</p>
+                                            <p class="text-xs text-gray-500">Terminal: Hub Cakung DC-01 (Kabul LAN L4N-04)</p>
+                                            <p class="text-xs text-green-600 font-semibold mt-1">Aktif Sesi Saja</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Device 2 -->
+                            <div class="device-card p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3 flex-1">
+                                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-barcode text-orange-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-sm font-semibold text-gray-900">Zebra TC52x Handheld Scanner</p>
+                                                <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-semibold">Mobile DC</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500">IP: 10.24.112.18</p>
+                                            <p class="text-xs text-gray-500">Zona: Lorong B3 (Gudang Elektronik)</p>
+                                            <p class="text-xs text-gray-500 mt-1">12 menit lalu</p>
+                                        </div>
+                                    </div>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-100 text-red-600 transition-all">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Preferensi Antarmuka -->
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in" style="animation-delay: 0.8s">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-calendar-alt text-purple-600"></i>
+                            </div>
+                            <h2 class="text-lg font-bold text-gray-900">Preferensi Antarmuka & Ekspor Laporan</h2>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 mb-4">
+                            Konfigurasi regional data, format berkas audit, dan notifikasi audio terminal.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Format Ekspor -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-download text-blue-600"></i>
+                                    <h3 class="text-sm font-semibold text-gray-900">Format Ekspor Default</h3>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="radio-custom selected p-3 border-2 rounded-lg cursor-pointer">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="export" checked class="w-4 h-4 text-blue-600">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-semibold text-gray-900">Excel (.xlsx)</p>
+                                                <p class="text-xs text-gray-500">Formula & Pivot</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="radio-custom p-3 border-2 border-gray-200 rounded-lg cursor-pointer">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="export" class="w-4 h-4 text-blue-600">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-semibold text-gray-900">PDF (.pdf)</p>
+                                                <p class="text-xs text-gray-500">Dokumen Resmi</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Zona Waktu -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-clock text-blue-600"></i>
+                                    <h3 class="text-sm font-semibold text-gray-900">Zona Waktu Operasional</h3>
+                                </div>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 mb-2 transition-all">
+                                    <option>WIB (Asia/Jakarta - UTC+07:00)</option>
+                                    <option>WITA (UTC+08:00)</option>
+                                    <option>WIT (UTC+09:00)</option>
+                                </select>
+                                <p class="text-xs text-gray-500">Berlaku untuk semua timestamp manifest stok opname.</p>
+                            </div>
+                        </div>
+
+                        <!-- Audio Beeper -->
+                        <div class="flex items-start justify-between p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+                            <div class="flex items-start space-x-3 flex-1">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-volume-up text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Notifikasi Suara pada Tiket Urgent (Audio Beeper)</h3>
+                                    <p class="text-xs text-gray-600">
+                                        Memainkan nada peringatan saat item ROP kritis masuk ke antrean.
+                                    </p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch ml-4">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column (1/3) - Profile Card -->
+                <div class="lg:col-span-1">
+                    <div class="settings-card bg-white border border-gray-200 rounded-lg p-6 shadow-sm sticky top-24 animate-scale-in" style="animation-delay: 0.3s">
+                        <div class="flex flex-col items-center mb-4">
+                            <div class="relative mb-3">
+                                <div class="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                                    BS
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900">Budi Santoso</h3>
+                            <p class="text-sm text-gray-500 mb-2">NIP: AST-DCOH-778AL</p>
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">Approver - Level 3</span>
+                        </div>
+
+                        <div class="space-y-3 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Wewenang Approval:</span>
+                                <span class="font-semibold text-gray-900">Mutasi & Write-Off</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Terminal Asosiasi:</span>
+                                <span class="font-semibold text-gray-900">Cakung DC-01</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Status Otorisasi:</span>
+                                <span class="font-semibold text-green-600">ISO-28000</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-between text-xs text-gray-600 mb-2">
+                                <span>Kapasitas Log Audit Sesi</span>
+                                <span class="font-bold text-orange-600">84% Terpakai</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                <div class="progress-bar-fill bg-orange-500 h-2 rounded-full" style="width: 84%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Auto-archive tersisa 48 jam sebelum rotasi bulanan.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script>
+        // Toggle Switch Animation
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const slider = this.nextElementSibling;
+                if (this.checked) {
+                    slider.style.backgroundColor = '#2563EB';
+                } else {
+                    slider.style.backgroundColor = '#CBD5E1';
+                }
+            });
+        });
+
+        // Tab Switching
+        document.querySelectorAll('.tab-item').forEach((tab, index) => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab-item').forEach(t => {
+                    t.classList.remove('active');
+                    t.classList.add('border', 'border-gray-200', 'text-gray-700');
+                });
+                this.classList.add('active');
+                this.classList.remove('border', 'border-gray-200', 'text-gray-700');
+            });
+        });
+
+        // Radio Button Selection
+        document.querySelectorAll('.radio-custom').forEach(radio => {
+            radio.addEventListener('click', function() {
+                const input = this.querySelector('input[type="radio"]');
+                const name = input.getAttribute('name');
+                
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                    r.closest('.radio-custom').classList.remove('selected');
+                });
+                
+                input.checked = true;
+                this.classList.add('selected');
+            });
+        });
+
+        // Save Button Animation
+        document.querySelector('.btn-primary').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            icon.classList.remove('fa-check');
+            icon.classList.add('fa-spinner', 'fa-spin');
+            
+            setTimeout(() => {
+                icon.classList.remove('fa-spinner', 'fa-spin');
+                icon.classList.add('fa-check');
+                
+                // Show success message
+                const toast = document.createElement('div');
+                toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in';
+                toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Perubahan berhasil disimpan!';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }, 1500);
+        });
+    </script>
+
+</body>
+</html>
