@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Server - ASTRO INVENTORY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            background: #F8FFFE;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 1000px; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+        }
+
+        .animate-fade-in-down {
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+
+        /* Card Hover Effects */
+        .metric-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 196, 140, 0.15);
+        }
+
+        .component-card {
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            background: #F0FDF9;
+        }
+
+        /* Accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+
+        .accordion-content.active {
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            animation: progressFill 1.5s ease-out forwards;
+        }
+
+        /* Uptime Bars */
+        .uptime-bar {
+            transition: all 0.3s ease;
+        }
+
+        .uptime-bar:hover {
+            transform: scaleY(1.2);
+            opacity: 0.8;
+        }
+
+        /* Status Indicators */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .status-dot.green { background: #10B981; }
+        .status-dot.yellow { background: #F59E0B; }
+        .status-dot.red { background: #EF4444; }
+
+        /* Map Container */
+        .map-container {
+            background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .map-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 animate-fade-in-down">
+                    <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-900">ASTRO INVENTORY</h1>
+                        <p class="text-xs text-gray-500">SISTEM INVENTARIS TERPADU</p>
+                    </div>
+                </div>
+
+                <!-- Menu -->
+                <div class="hidden md:flex items-center space-x-8 animate-fade-in-down stagger-1">
+                    <a href="#beranda" class="text-gray-700 hover:text-blue-600 transition-colors">Beranda</a>
+                    <a href="#status-server" class="text-blue-600 font-semibold">Status Server</a>
+                    <a href="#dokumentasi" class="text-gray-700 hover:text-blue-600 transition-colors">Dokumentasi & Bantuan</a>
+                </div>
+
+                <!-- CTA Button -->
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all animate-fade-in-down stagger-2">
+                    Masuk ke Portal
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12">
+        
+        <!-- Breadcrumb & Update Banner -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg p-4 animate-fade-in-down">
+                <div class="flex items-center space-x-2 text-sm">
+                    <i class="fas fa-home text-emerald-600"></i>
+                    <span class="text-gray-600">Beranda</span>
+                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                    <span class="text-gray-900 font-semibold">Pusat Dokumentasi & Bantuan</span>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-emerald-700">
+                    <i class="fas fa-clock"></i>
+                    <span class="font-medium">Pembaruan Terakhir: 14 Okt 2026, 09:30 WIB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-8 shadow-lg animate-scale-in">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center flex-shrink-0 float-animation">
+                            <i class="fas fa-check-circle text-emerald-500 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-white mb-2">Semua Sistem & Layanan Beroperasi Normal</h1>
+                            <p class="text-emerald-50 text-lg">
+                                Seluruh node gateway pergudangan, endpoint API perangkat scanner gudang, dan replikasi basis data berjalan prima tanpa gangguan.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 text-white text-right">
+                        <p class="text-2xl font-bold mb-1">99.98%</p>
+                        <p class="text-sm text-emerald-100">Uptime 90 hari</p>
+                        <p class="text-xs text-emerald-200 mt-2">Terakhir diperbarui<br>14.03.26 WIB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Card 1 -->
+                <div class="metric-card bg-white rounded-xl p-6 shadow-md border border-gray-200 animate-scale-in stagger-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sync-alt text-emerald-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2"><span class="counter" data-target="99.98">0</span>%</h3>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Global SLA Uptime</p>
+                    <p class="text-xs text-gray-500">Target: 99.95%</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="metric-card bg-white rounded-xl p-6 shadow-md border border-gray-200 animate-scale-in stagger-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tachometer-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Baik</span>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2"><span class="counter" data-target="18">0</span>ms</h3>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Rate-Limit Latency Node</p>
+                    <p class="text-xs text-gray-500">Konsisten di 4 Hub Logistik</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="metric-card bg-white rounded-xl p-6 shadow-md border border-gray-200 animate-scale-in stagger-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2">0</h3>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Insiden Aktif</p>
+                    <p class="text-xs text-gray-500">Tidak ada masalah terdaftar</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="metric-card bg-white rounded-xl p-6 shadow-md border border-gray-200 animate-scale-in stagger-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-expand-arrows-alt text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2"><span class="counter" data-target="2410">0</span></h3>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Throughput Transaksi</p>
+                    <p class="text-xs text-gray-500">/hari - Kapasitas normal 46%</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Uptime 90 Days -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-md border border-gray-200 animate-fade-in-up">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">HISTORI KETERSEDIAAN - Rentang Uptime 90 Hari Operasional</h2>
+                    <p class="text-gray-600 mb-4">Kombinasi ketersediaan untuk semua kluster master node dan gateway API pergudangan.</p>
+                    <div class="flex items-center space-x-6 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="status-dot green"></span>
+                            <span class="text-gray-700">Operational Penuh (>99%)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="status-dot yellow"></span>
+                            <span class="text-gray-700">Pemeliharaan Terscheduled</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="status-dot red"></span>
+                            <span class="text-gray-700">Gangguan</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Uptime Bars -->
+                <div class="flex items-end justify-between space-x-1 h-32 mb-3">
+                    <!-- Generate 90 bars -->
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-5/6" title="99.95% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-yellow-500 rounded-t h-4/6" title="Maintenance"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="100% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.97% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.98% - Operational"></div>
+                    <div class="uptime-bar flex-1 bg-emerald-500 rounded-t h-full" title="99.99% - Operational"></div>
+                </div>
+                
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>90 hari lalu</span>
+                    <span class="text-center">90 Hari Komputasi-core Availability</span>
+                    <span>Hari Ini</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latency Chart -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-md border border-gray-200 animate-fade-in-up">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Tren Latensi Jaringan Global (24 Jam Terakhir)</h2>
+                    <p class="text-gray-600">Periode: <span class="font-semibold text-gray-900">28ms</span> • Terendah: <span class="font-semibold text-emerald-600">11ms</span></p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Availability -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-md border border-gray-200 animate-fade-in-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">KETERSEDIAAN KOMPONEN & NODE</h2>
+                    <div class="flex space-x-3">
+                        <button onclick="expandAll()" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Buka Semua</button>
+                        <span class="text-gray-300">|</span>
+                        <button onclick="collapseAll()" class="text-sm text-gray-600 hover:text-gray-700 font-medium">Tutup Semua</button>
+                    </div>
+                </div>
+
+                <!-- Section A: Layanan Inti -->
+                <div class="border border-gray-200 rounded-lg mb-4">
+                    <button onclick="toggleAccordion('section-a')" class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-layer-group text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-lg font-bold text-gray-900">Layanan Inti Aplikasi & Katalog</h3>
+                                <p class="text-sm text-gray-600">API Master, Autentikasi, Workflow Engine</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center space-x-2">
+                                <span class="status-dot green"></span>
+                                <span class="text-sm font-semibold text-emerald-700">100% Operational</span>
+                            </span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-section-a"></i>
+                        </div>
+                    </button>
+                    <div id="section-a" class="accordion-content">
+                        <div class="px-6 pb-6 space-y-3">
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Portal Autentikasi & SSO (OAuth2 / RBAC Server)</h4>
+                                        <p class="text-xs text-gray-600">JWT Oracle, Active Directory Handler, Federation</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">14ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">100.0%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Master Data API & Katalog SKU</h4>
+                                        <p class="text-xs text-gray-600">Sinkronisasi katalog produk 8,650+ SKU aktif</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">18ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.99%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Modul Approval & Workflow Engine (Orchestrator)</h4>
+                                        <p class="text-xs text-gray-600">Multi-sign workflow untuk HR & Kepala Gudang</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">21ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.97%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Modul Transaksi Inbound & Outbound</h4>
+                                        <p class="text-xs text-gray-600">Pencatatan masuk/keluar barang real-time</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">17ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">100.0%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B: Gateway Multi-Hub -->
+                <div class="border border-gray-200 rounded-lg mb-4">
+                    <button onclick="toggleAccordion('section-b')" class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-server text-emerald-600 text-xl"></i>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-lg font-bold text-gray-900">Gateway & Infrastruktur Multi-Hub Logistik</h3>
+                                <p class="text-sm text-gray-600">4 Distribution Center Nasional</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center space-x-2">
+                                <span class="status-dot green"></span>
+                                <span class="text-sm font-semibold text-emerald-700">4 Hub Aktif</span>
+                            </span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-section-b"></i>
+                        </div>
+                    </button>
+                    <div id="section-b" class="accordion-content">
+                        <div class="px-6 pb-6 space-y-3">
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Gateway DC-01 Cakung (Pusat DC - Jakarta)</h4>
+                                        <p class="text-xs text-gray-600">Zona Utara + 83 Lane Scanner Relay</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">12ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.99%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Gateway DC-02 Rungkut (Surabaya Hub)</h4>
+                                        <p class="text-xs text-gray-600">Zona Priok + 24 Lane Scanner Relay</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">18ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.96%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Gateway DC-03 Gedebage (Bandung Hub)</h4>
+                                        <p class="text-xs text-gray-600">Zona Cimanggis + 46 Lane Scanner Relay</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">15ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.98%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Gateway DC-04 Belawan (Medan Hub)</h4>
+                                        <p class="text-xs text-gray-600">Zona Sumatera Utara</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Latensi: <strong class="text-blue-600">26ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.92%</strong></span>
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">Buffer Optimal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C: Database & Integration -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('section-c')" class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-database text-gray-600 text-xl"></i>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-lg font-bold text-gray-900">Integrasi Perangkat Keras & Kluster Database</h3>
+                                <p class="text-sm text-gray-600">Scanner, Notifikasi, PostgreSQL Cluster</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center space-x-2">
+                                <span class="status-dot green"></span>
+                                <span class="text-sm font-semibold text-emerald-700">Sinkronisasi Penuh</span>
+                            </span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-section-c"></i>
+                        </div>
+                    </button>
+                    <div id="section-c" class="accordion-content">
+                        <div class="px-6 pb-6 space-y-3">
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Scanner Handheld & Barcode/RFID Relay Service</h4>
+                                        <p class="text-xs text-gray-600">Zebra TC52x Integration Layer</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Queue: <strong class="text-blue-600">0 pending</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">100%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Service Notifikasi Dispatch & Email Gateway</h4>
+                                        <p class="text-xs text-gray-600">Telegram Bot + SMTP Relay</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Delay: <strong class="text-blue-600">< 2s</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">99.99%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="component-card bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 mb-1">Database Cluster & Replikasi PostgreSQL</h4>
+                                        <p class="text-xs text-gray-600">Master-Slave Replication dengan Failover Otomatis</p>
+                                    </div>
+                                    <div class="flex items-center space-x-6 text-sm">
+                                        <span class="text-gray-600">Lag: <strong class="text-blue-600">42ms</strong></span>
+                                        <span class="text-gray-600">Uptime: <strong class="text-emerald-600">100.0%</strong></span>
+                                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Node Distribution Maps -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-md border border-gray-200 animate-fade-in-up">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">INFRASTRUKTUR TERSEBAR - Distribusi Node Gateway Pergudangan</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="status-dot green"></span>
+                            <span class="text-sm text-gray-600">Status Tercapai: Tingkat Temperatur <strong>13.5.1.2</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Map 1: DC-01 Cakung -->
+                    <div class="map-container p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-gray-900">DC-01 Cakung</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span class="text-gray-600">12ms</span>
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">Normal</span>
+                            </div>
+                        </div>
+                        <div class="h-48 bg-blue-100 rounded-lg flex items-center justify-center relative">
+                            <i class="fas fa-map-marker-alt text-blue-600 text-4xl"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-32 h-32 border-2 border-blue-400 rounded-full opacity-20 animate-ping"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-3">Jakarta Timur - Kawasan Pulogadung</p>
+                    </div>
+
+                    <!-- Map 2: DC-02 Rungkut -->
+                    <div class="map-container p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-gray-900">DC-02 Rungkut</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span class="text-gray-600">18ms</span>
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">Normal</span>
+                            </div>
+                        </div>
+                        <div class="h-48 bg-blue-100 rounded-lg flex items-center justify-center relative">
+                            <i class="fas fa-map-marker-alt text-blue-600 text-4xl"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-32 h-32 border-2 border-blue-400 rounded-full opacity-20 animate-ping"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-3">Surabaya - Delta Industri Sidoarjo</p>
+                    </div>
+
+                    <!-- Map 3: DC-03 Gedebage -->
+                    <div class="map-container p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-gray-900">DC-03 Gedebage</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span class="text-gray-600">15ms</span>
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">Normal</span>
+                            </div>
+                        </div>
+                        <div class="h-48 bg-blue-100 rounded-lg flex items-center justify-center relative">
+                            <i class="fas fa-map-marker-alt text-blue-600 text-4xl"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-32 h-32 border-2 border-blue-400 rounded-full opacity-20 animate-ping"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-3">Bandung - Gedebage Logistic Park</p>
+                    </div>
+
+                    <!-- Map 4: DC-04 Belawan -->
+                    <div class="map-container p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-gray-900">DC-04 Belawan</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span class="text-gray-600">26ms</span>
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">Buffer Optimal</span>
+                            </div>
+                        </div>
+                        <div class="h-48 bg-blue-100 rounded-lg flex items-center justify-center relative">
+                            <i class="fas fa-map-marker-alt text-yellow-600 text-4xl"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-32 h-32 border-2 border-yellow-400 rounded-full opacity-20 animate-ping"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-3">Medan - Dipo Pelabuhan Belawan</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Log -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-md border border-gray-200 animate-fade-in-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">MAINTENANCE LOG & INCIDENT HISTORY</h2>
+                    <div class="flex space-x-3 text-sm">
+                        <button class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium">Semua Log</button>
+                        <button class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Pemeliharaan Terjadwal</button>
+                        <button class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Insiden (0)</button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    
+                    <!-- Log Entry 1 -->
+                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-wrench text-emerald-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">Optimalisasi Indeks Database PostgreSQL DC Cakung</h3>
+                                    <p class="text-sm text-gray-600 mb-3">
+                                        Pemeliharaan rutin indeks database PostgreSQL inventory kuartal 4. Shift-failover Zero-downtime berjalan tanpa berdampak ke pengguna akhir.
+                                    </p>
+                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <span><i class="far fa-clock mr-1"></i>18 Okt 2026 • 10:03 - 10:11 WIB</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">Downtime: 0 Menit</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">PIC: Tim DevOps Chief ASTRO</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">Impact: Zero-level-service</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold whitespace-nowrap">Selesai Sukses</span>
+                        </div>
+                    </div>
+
+                    <!-- Log Entry 2 -->
+                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-chart-bar text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">Pembaruan Firmware Access Point Gedung DC Gedebage</h3>
+                                    <p class="text-sm text-gray-600 mb-3">
+                                        Pembaruan firmware infrastruktur untuk 16 unit Industrial Wireless AP di zona staging outbound DC-03 untuk peningkatan stabilitas koneksi.
+                                    </p>
+                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                        <span><i class="far fa-clock mr-1"></i>02 Okt 2026 • 18:30 - 05:24 WIB</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">Downtime: 0 Menit</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">Fasilitas: Gedebage DC-03</span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded">Verifikasi: Kekuatan -51dBm Rata-rata</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold whitespace-nowrap">Selesai Sukses</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- SLA Guarantee Box -->
+                <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-blue-900 mb-2">Garansi Kepuasan SLA Enterprise 99.90%</h4>
+                            <p class="text-sm text-blue-800 mb-3">
+                                Beroperasi ASTRO 2026 dengan redundansi infrastruktur data center-first untuk menjamin ketersediaan layanan kontinyu.
+                            </p>
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                                <i class="fas fa-download mr-1"></i>
+                                Unduh Laporan Audit SLA (PDF)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between border-t border-gray-800 pt-8">
+                <p class="text-sm">ASTRO WMS Enterprise © 2026. All rights reserved.</p>
+                <div class="flex items-center space-x-6 text-sm">
+                    <a href="#" class="hover:text-blue-400 transition-colors">Pusat Dukungan</a>
+                    <a href="#" class="hover:text-blue-400 transition-colors">Infrastruktur Cloud</a>
+                    <a href="#" class="hover:text-blue-400 transition-colors">Status Kontrak Layanan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Counter Animation
+        function animateCounter(element) {
+            const target = parseFloat(element.getAttribute('data-target'));
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            const isDecimal = target % 1 !== 0;
+
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    element.textContent = isDecimal ? current.toFixed(2) : Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = isDecimal ? target.toFixed(2) : target;
+                }
+            };
+
+            updateCounter();
+        }
+
+        // Initialize counters
+        document.querySelectorAll('.counter').forEach(counter => {
+            animateCounter(counter);
+        });
+
+        // Accordion Functions
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            content.classList.toggle('active');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.classList.add('active');
+            });
+            document.querySelectorAll('[id^="icon-section-"]').forEach(icon => {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            });
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('[id^="icon-section-"]').forEach(icon => {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            });
+        }
+
+        // Latency Chart
+        const ctx = document.getElementById('latencyChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '24:00'],
+                datasets: [{
+                    label: 'Latensi (ms)',
+                    data: [18, 16, 14, 15, 17, 19, 21, 18, 16, 15, 17, 19, 18],
+                    borderColor: '#3B82F6',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + 'ms';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 30,
+                        ticks: {
+                            callback: function(value) {
+                                return value + 'ms';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
