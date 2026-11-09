@@ -125,7 +125,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:hr')->prefix('hr')->name('hr.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('homepage.admin', ['user' => auth()->user()]);
+            return view('hr_dashboard', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // Approval Queue (permission: issue.approve)
