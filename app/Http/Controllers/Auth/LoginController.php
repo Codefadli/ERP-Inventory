@@ -127,6 +127,12 @@ class LoginController extends Controller
      */
     protected function redirectAfterLogin(User $user)
     {
+        // Jika user perlu pilih hub dan belum pilih, redirect ke hub selection
+        if ($user->needsHubSelection() && !$user->hasSelectedHub()) {
+            return redirect()->route('hub.selection.show')
+                ->with('info', 'Silakan pilih kota dan hub operasional Anda.');
+        }
+
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard')->with('success', 'Selamat datang, ' . $user->nama_lengkap);
         }
