@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Operasional Pegawai - Astro Inventory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR (Presisi Sesuai Gambar Terbaru) -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 h-full">
+            
+            <!-- Logo & Brand Header -->
+            <div class="p-4 flex items-center space-x-3 border-b border-slate-100">
+                <div class="w-9 h-9 rounded-lg border-2 border-blue-600 flex items-center justify-center text-blue-600 font-bold text-lg">
+                    <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-sm leading-tight">Astro Inventory</h1>
+                    <p class="text-[11px] text-slate-400">Sistem Inventaris Terpadu</p>
+                </div>
+            </div>
+
+            <!-- Navigation Items Container -->
+            <div class="flex-1 overflow-y-auto px-3 py-3 space-y-4 text-xs font-medium text-slate-600">
+                
+                <!-- MENU UTAMA -->
+                <div>
+                    <p class="px-3 text-[10px] text-slate-400 font-semibold tracking-wider uppercase mb-1.5">MENU UTAMA</p>
+                    <a href="#" class="flex items-center space-x-2.5 px-3 py-2 rounded-md bg-blue-600 text-white font-semibold shadow-xs">
+                        <i class="fa-solid fa-table-cells-large text-sm w-4 text-center"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700 mt-1">
+                        <i class="fa-regular fa-square w-4 text-center text-slate-400"></i>
+                        <span>Data Barang</span>
+                    </a>
+                </div>
+
+                <!-- OPERASIONAL GUDANG -->
+                <div>
+                    <p class="px-3 text-[10px] text-slate-400 font-semibold tracking-wider uppercase mb-1.5">OPERASIONAL GUDANG</p>
+                    <div class="space-y-0.5">
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-solid fa-arrow-down-left w-4 text-center text-slate-400"></i>
+                            <span>Barang Masuk</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-solid fa-arrow-up-right w-4 text-center text-slate-400"></i>
+                            <span>Barang Keluar</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-regular fa-clipboard w-4 text-center text-slate-400"></i>
+                            <span>Stok Opname</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- MONITORING & LAPORAN -->
+                <div>
+                    <p class="px-3 text-[10px] text-slate-400 font-semibold tracking-wider uppercase mb-1.5">MONITORING & LAPORAN</p>
+                    <div class="space-y-0.5">
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-solid fa-rotate-left w-4 text-center text-slate-400"></i>
+                            <span>Riwayat Transaksi</span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-regular fa-circle-question w-4 text-center text-slate-400"></i>
+                                <span>Status Permintaan</span>
+                            </div>
+                            <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">2 Menunggu</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PENGATURAN & AKUN -->
+                <div>
+                    <p class="px-3 text-[10px] text-slate-400 font-semibold tracking-wider uppercase mb-1.5">PENGATURAN & AKUN</p>
+                    <div class="space-y-0.5">
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-regular fa-bell w-4 text-center text-slate-400"></i>
+                            <span>Notifikasi</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-solid fa-gear w-4 text-center text-slate-400"></i>
+                            <span>Pengaturan</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-2.5 px-3 py-1.5 rounded-md hover:bg-slate-50 text-slate-700">
+                            <i class="fa-regular fa-user w-4 text-center text-slate-400"></i>
+                            <span>Profil Saya</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Sidebar Status -->
+            <div class="p-3 border-t border-slate-100 text-[10px] space-y-1">
+                <div class="flex items-center space-x-1.5 text-slate-600 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Shift Pagi</span>
+                    <span class="text-slate-400">08:00 - 17:00</span>
+                </div>
+                <p class="text-slate-400 truncate">Hub Cakung DC-01 Online • Zona A & Staging Inbound</p>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- TOP BAR -->
+            <header class="bg-white border-b border-slate-200 h-14 flex items-center justify-between px-6 z-10 shrink-0">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 text-xs">
+                        <i class="fa-solid fa-location-dot text-slate-400"></i>
+                        <span class="font-medium text-slate-700">Jakarta (Pusat DC) > Hub Cakung DC-01 (Utama)</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Operasional Normal</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Search Input -->
+                    <div class="relative hidden md:block">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 text-xs">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" placeholder="Cari SKU, No. Barcode, Rak, Permintaan... (Ctrl+K)" class="bg-slate-50 border border-slate-200 text-xs rounded-lg pl-9 pr-4 py-1.5 w-72 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <!-- Notification -->
+                    <button class="text-slate-500 hover:text-slate-700 relative">
+                        <i class="fa-regular fa-bell text-base"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <!-- User Profile -->
+                    <div class="flex items-center space-x-2.5 border-l pl-4 border-slate-200">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                            AP
+                        </div>
+                        <div class="text-xs text-left">
+                            <p class="font-bold text-slate-800 leading-none">Agus Prasetyo</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Staf Operasional</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE DASHBOARD BODY -->
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-100 space-y-6">
+                
+                <!-- BREADCRUMB & HEADER TITLE -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mb-1">
+                            PORTAL OPERASIONAL PEGAWAI > DASHBOARD KERJA HARIAN • <span class="text-emerald-600 font-bold">HUB-CKG-01</span>
+                        </p>
+                        <h2 class="text-xl font-bold text-slate-900">Dashboard Operasional Pegawai</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Selamat datang kembali, Agus Prasetyo (NIK: STF-90214). Kelola penanganan fisik barang masuk, barang keluar, pemindaian barcode rak, dan verifikasi stok harian Hub Cakung DC-01.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center space-x-2 shadow-xs">
+                            <i class="fa-solid fa-barcode"></i>
+                            <span>Scan Barcode Cepat</span>
+                        </button>
+                        <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg flex items-center space-x-1.5 shadow-xs">
+                            <i class="fa-solid fa-check text-blue-600"></i>
+                            <span>Input Barang Masuk Baru</span>
+                        </button>
+                        <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold px-3 py-2 rounded-lg flex items-center space-x-1.5 shadow-xs">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i>
+                            <span>Permintaan Pengeluaran</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TOP 4 METRIC CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Card 1 -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-semibold text-slate-500">TUGAS MASUK HARI INI</span>
+                            <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                                SHIFT BERJALAN
+                            </span>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900 mb-1 flex items-baseline space-x-1">
+                            <span>18</span>
+                            <span class="text-xs text-slate-500 font-normal">Surat Jalan</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">● 14 Selesai di-Staging, 4 Menunggu QC</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-semibold text-slate-500">TUGAS KELUAR HARI INI</span>
+                            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                PRIORITAS HUB
+                            </span>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900 mb-1 flex items-baseline space-x-1">
+                            <span>26</span>
+                            <span class="text-xs text-slate-500 font-normal">Order Dispatch</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">● 21 Siap Muat Armada, 5 Picking</p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-semibold text-slate-500">JADWAL STOK OPNAME FISIK</span>
+                            <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                                2 JAM TERSISA
+                            </span>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900 mb-1 flex items-baseline space-x-1">
+                            <span>3</span>
+                            <span class="text-xs text-slate-500 font-normal">Rak Audit</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">● Rak A-04, B-12, C-02 • 15:30 WIB</p>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-semibold text-slate-500">PERMINTAAN MENUNGGU OTORISASI</span>
+                            <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200">
+                                DALAM REVIEW
+                            </span>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900 mb-1 flex items-baseline space-x-1">
+                            <span>2</span>
+                            <span class="text-xs text-slate-500 font-normal">Permintaan</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">● Menunggu persetujuan Kepala Gudang</p>
+                    </div>
+                </div>
+
+                <!-- HUB PEMINDAIAN BARCODE BANNER -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                                <i class="fa-solid fa-barcode text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="font-bold text-slate-900 text-sm">Hub Pemindaian Barcode & Terminal Handheld</h3>
+                                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                        Zebra TC21 Terhubung
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500">Pindai kode GS1-128, QR Code palet, atau masukkan nomor dokumen secara instan untuk verifikasi lokasi rak dan koli.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4 text-xs text-slate-500">
+                            <span class="flex items-center space-x-1">
+                                <i class="fa-solid fa-battery-three-quarters text-emerald-600"></i>
+                                <span>Batt: 88%</span>
+                            </span>
+                            <span class="flex items-center space-x-1">
+                                <i class="fa-solid fa-wifi text-blue-600"></i>
+                                <span>WiFi: HubCakung-5G</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+                        <!-- Input Search -->
+                        <div class="md:col-span-2 lg:col-span-2 relative">
+                            <input type="text" placeholder="Arahkan scanner handheld atau ketik SKU / Serial / No. DO / Lokasi Rak..." class="bg-slate-50 border border-slate-300 text-xs rounded-lg pl-3 pr-20 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="absolute inset-y-0 right-2 flex items-center text-[10px] font-bold text-slate-400">
+                                AUTO-SCAN
+                            </span>
+                        </div>
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Cari & Validasi</span>
+                        </button>
+                        <!-- Quick Action Buttons -->
+                        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium p-2 rounded-lg flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-down-left text-blue-600"></i>
+                            <div class="text-left leading-tight">
+                                <p class="font-bold">1. Inbound Cepat</p>
+                                <p class="text-[9px] text-slate-400">Check-In PO</p>
+                            </div>
+                        </button>
+                        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium p-2 rounded-lg flex items-center space-x-2">
+                            <i class="fa-solid fa-box text-blue-600"></i>
+                            <div class="text-left leading-tight">
+                                <p class="font-bold">2. Outbound Cepat</p>
+                                <p class="text-[9px] text-slate-400">Packing List</p>
+                            </div>
+                        </button>
+                        <button class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium p-2 rounded-lg flex items-center space-x-2">
+                            <i class="fa-solid fa-location-crosshairs text-blue-600"></i>
+                            <div class="text-left leading-tight">
+                                <p class="font-bold">3. Cek Lokasi Rak</p>
+                                <p class="text-[9px] text-slate-400">Bin Locator</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MIDDLE & BOTTOM SECTION -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left Area (Table Tasks & Filters) -->
+                    <div class="lg:col-span-2 space-y-4">
+                        
+                        <!-- Table Card -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+                            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm">Antrean Tugas Operasional Saya</h3>
+                                    <p class="text-xs text-slate-500">Daftar penugasan fisik shift aktif yang dialokasikan ke Anda.</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-xs text-slate-500 hover:text-slate-800 border border-slate-200 rounded-lg px-2.5 py-1 flex items-center space-x-1">
+                                        <i class="fa-solid fa-filter text-[10px]"></i>
+                                        <span>Filter Cepat</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Filter Tabs -->
+                            <div class="px-4 pt-3 flex items-center space-x-2 border-b border-slate-100 text-xs font-medium">
+                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-t-lg font-semibold">Semua Tugas (12)</button>
+                                <button class="text-slate-600 hover:text-slate-900 px-3 py-1.5">Barang Masuk (4)</button>
+                                <button class="text-slate-600 hover:text-slate-900 px-3 py-1.5">Barang Keluar (5)</button>
+                                <button class="text-slate-600 hover:text-slate-900 px-3 py-1.5">Stok Opname (3)</button>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-3 px-4">NO. DOKUMEN / TASK ID</th>
+                                            <th class="py-3 px-4">KATEGORI & DOKUMEN</th>
+                                            <th class="py-3 px-4">TARGET BARANG & QTY</th>
+                                            <th class="py-3 px-4">LOKASI GUDANG</th>
+                                            <th class="py-3 px-4">STATUS TUGAS</th>
+                                            <th class="py-3 px-4 text-center">AKSI</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <!-- Row 1 -->
+                                        <tr class="hover:bg-slate-50/80">
+                                            <td class="py-3 px-4 font-bold text-slate-900">
+                                                INB-2025-0894
+                                                <span class="block text-[10px] text-slate-400 font-normal">PO-ASTRO-88219</span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="bg-blue-50 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-blue-200">
+                                                    Inbound Dock 02
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <p class="font-semibold text-slate-800">15 Box Server Rack Unit 42U</p>
+                                                <p class="text-[10px] text-slate-400">Vendor: Schneider Indo Logistics</p>
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600">
+                                                Dock 02 / Staging Inbound
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="inline-flex items-center space-x-1 bg-blue-50 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-blue-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                                    <span>Sedang Dikerjakan</span>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">
+                                                <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded text-xs">Mulai Scan & Input</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Row 2 -->
+                                        <tr class="hover:bg-slate-50/80">
+                                            <td class="py-3 px-4 font-bold text-slate-900">
+                                                OUT-2025-0442
+                                                <span class="block text-[10px] text-slate-400 font-normal">SO-JKT-10902</span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-200">
+                                                    Outbound Staging
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <p class="font-semibold text-slate-800">50 Roll Lakban Industri Heavy Duty</p>
+                                                <p class="text-[10px] text-slate-400">Tujuan: Hub Bandung Barat DC-02</p>
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600">
+                                                Bay Staging 04
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                                    <span>Lanjut Packing</span>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">
+                                                <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold px-3 py-1 rounded text-xs">Lanjut Packing</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Row 3 -->
+                                        <tr class="hover:bg-slate-50/80">
+                                            <td class="py-3 px-4 font-bold text-slate-900">
+                                                SOP-RAK-B12
+                                                <span class="block text-[10px] text-slate-400 font-normal">Tenggat 15:30 WIB</span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="bg-red-50 text-red-600 text-[10px] font-semibold px-2 py-0.5 rounded border border-red-200">
+                                                    Audit Rak Fisik
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <p class="font-semibold text-slate-800">Audit 42 Barcode Aksesoris Jaringan</p>
+                                                <p class="text-[10px] text-slate-400">Siklus Audit Mingguan Zona B</p>
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600">
+                                                Rak B-12 Level 3
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="inline-flex items-center space-x-1 bg-red-50 text-red-600 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-red-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                                    <span>Menunggu Scan</span>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">
+                                                <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded text-xs">Input Hasil Fisik</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Row 4 -->
+                                        <tr class="hover:bg-slate-50/80">
+                                            <td class="py-3 px-4 font-bold text-slate-900">
+                                                INB-2025-0896
+                                                <span class="block text-[10px] text-slate-400 font-normal">PO-ASTRO-88224</span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="bg-blue-50 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-blue-200">
+                                                    Inbound Dock 01
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <p class="font-semibold text-slate-800">20 Unit Barcode Scanner Honeywell</p>
+                                                <p class="text-[10px] text-slate-400">Vendor: Metro Komputindo</p>
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600">
+                                                QC Staging Zona
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="inline-flex items-center space-x-1 bg-purple-50 text-purple-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-purple-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                                    <span>Verifikasi QC</span>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">
+                                                <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold px-3 py-1 rounded text-xs">Periksa QC</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Row 5 -->
+                                        <tr class="hover:bg-slate-50/80">
+                                            <td class="py-3 px-4 font-bold text-slate-900">
+                                                OUT-2025-0447
+                                                <span class="block text-[10px] text-slate-400 font-normal">DO-ARMADA-204</span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-200">
+                                                    Loading Bay 03
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <p class="font-semibold text-slate-800">8 Pallet Kardus Packaging Box uk. L</p>
+                                                <p class="text-[10px] text-slate-400">Armada: Isuzu Giga (B-9921-UKT)</p>
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600">
+                                                Pintu Muat C-01
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="inline-flex items-center space-x-1 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                    <span>Menunggu Muat</span>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">
+                                                <button class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold px-3 py-1 rounded text-xs">Check Muat</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Table Footer / Pagination -->
+                            <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                                <span>Menampilkan 1-5 dari 12 tugas aktif hari ini</span>
+                                <div class="flex items-center space-x-1">
+                                    <button class="px-2 py-1 rounded bg-white border border-slate-200 text-slate-400">Sebelumnya</button>
+                                    <button class="px-2.5 py-1 rounded bg-blue-600 text-white font-bold">1</button>
+                                    <button class="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700">2</button>
+                                    <button class="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700">3</button>
+                                    <button class="px-2 py-1 rounded bg-white border border-slate-200 text-slate-700">Selanjutnya</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Area (Status Permintaan & Target Shift) -->
+                    <div class="space-y-6">
+                        
+                        <!-- Status Permintaan Terakhir -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-900 text-sm">Status Permintaan Terakhir</h3>
+                                <a href="#" class="text-xs text-blue-600 hover:underline font-semibold">Saya Ajukan</a>
+                            </div>
+
+                            <div class="space-y-3 text-xs">
+                                <!-- Item 1 -->
+                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="font-bold text-slate-800">Permintaan Pallet Kayu Tambahan (20 Unit)</p>
+                                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">Disetujui</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500">Siap diambil di Gudang Logistik B (PIC: Budi Santoso)</p>
+                                    <div class="flex justify-between text-[10px] text-slate-400 pt-1">
+                                        <span>REQ-2025-0199</span>
+                                        <span>Hari Ini, 09:15 WIB</span>
+                                    </div>
+                                </div>
+
+                                <!-- Item 2 -->
+                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="font-bold text-slate-800">Permintaan Baterai Cadangan Scanner (4 Pcs)</p>
+                                        <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200">Review Spv</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500">Menunggu persetujuan Supervisor Shift (Pak Hendra Gunawan)</p>
+                                    <div class="flex justify-between text-[10px] text-slate-400 pt-1">
+                                        <span>REQ-2025-0203</span>
+                                        <span>Hari Ini, 10:40 WIB</span>
+                                    </div>
+                                </div>
+
+                                <!-- Item 3 -->
+                                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="font-bold text-slate-800">Permintaan Roll Barcode Thermal 100mm</p>
+                                        <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded">Selesai</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500">Barang telah diserahterimakan di Station Labeling 01</p>
+                                    <div class="flex justify-between text-[10px] text-slate-400 pt-1">
+                                        <span>REQ-2025-0185</span>
+                                        <span>Kemarin, 16:20 WIB</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 text-center">
+                                <a href="#" class="text-xs text-blue-600 hover:underline font-semibold">Lihat Semua Status Permintaan →</a>
+                            </div>
+                        </div>
+
+                        <!-- Target & Performa Shift -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-900 text-sm">Target & Performa Shift</h3>
+                                <span class="text-[10px] font-semibold text-emerald-600 flex items-center space-x-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>Live Real-Time</span>
+                                </span>
+                            </div>
+
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <div class="flex justify-between font-semibold mb-1">
+                                        <span class="text-slate-700">Target Scan Hari Ini</span>
+                                        <span class="text-blue-600">86% (342 / 400)</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 86%"></div>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1">58 item tersisa untuk memenuhi kuota harian shift.</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                        <p class="text-[10px] text-slate-400">AKURASI PICKING</p>
+                                        <p class="text-lg font-black text-slate-900">99.8%</p>
+                                        <p class="text-[9px] text-emerald-600">✓ 0 Discrepancy</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                        <p class="text-[10px] text-slate-400">WAKTU STAGING AVG</p>
+                                        <p class="text-lg font-black text-slate-900">14.2 m</p>
+                                        <p class="text-[9px] text-emerald-600">✓ -2.4m vs target</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1 pt-1 text-[11px] text-slate-500">
+                                    <div class="flex justify-between">
+                                        <span>Shift Pagi</span>
+                                        <span class="font-semibold text-slate-700">08:00 - 17:00 WIB</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Istirahat Siang</span>
+                                        <span class="font-semibold text-slate-700">12:00 - 13:00 WIB</span>
+                                    </div>
+                                    <div class="flex justify-between pt-1 border-t border-slate-100 text-slate-700">
+                                        <span>Tim Aktif di Hub:</span>
+                                        <span class="font-bold">6 Inbound • 8 Outbound • 4 Picker</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- BOTTOM HELP & SUPERVISOR CONTACT FOOTER -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-book-open text-base"></i>
+                        </div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-slate-900">Panduan SOP Lapangan</h4>
+                            <p class="text-[11px] text-slate-500">Instruksi kerja terstandarisasi untuk pemindaian serial barcode, pelabelan paket koli, dan aturan stacking beban maksimum rak.</p>
+                            <a href="#" class="text-blue-600 font-semibold text-[11px] hover:underline mt-1 block">Buka Dokumen SOP Digital →</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation text-base"></i>
+                        </div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-slate-900">Pencatatan Insiden & Rusak</h4>
+                            <p class="text-[11px] text-slate-500">Ditemukan kardus penyok, selisih fisik vs faktur DO, atau barcode tidak terbaca? Catat bukti foto dan laporkan ke karantina.</p>
+                            <a href="#" class="text-amber-600 font-semibold text-[11px] hover:underline mt-1 block">Laporkan Selisih / Kerusakan Fisik</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-headset text-base"></i>
+                        </div>
+                        <div class="text-xs w-full">
+                            <h4 class="font-bold text-slate-900">Kontak Supervisor Shift</h4>
+                            <p class="text-[11px] text-slate-500">Butuh otorisasi kunci gudang khusus atau kendala armada pengirim? Hubungi Kepala Shift melalui radio HT atau telepon darurat.</p>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <button class="bg-emerald-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded flex items-center space-x-1">
+                                    <i class="fa-solid fa-radio"></i>
+                                    <span>Radio HT Saluran 04</span>
+                                </button>
+                                <button class="bg-slate-100 text-slate-700 text-[10px] font-semibold px-2.5 py-1 rounded flex items-center space-x-1">
+                                    <i class="fa-brands fa-whatsapp text-emerald-600"></i>
+                                    <span>WhatsApp Tim</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
+    <link href="./css/main.css" rel="stylesheet" />
+    <title>Dashboard Audit - ASTRO Inventory</title>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-icon"></div>
+                </div>
+                <div class="logo-text">
+                    <h1 class="logo-title">Astro Inventory</h1>
+                    <p class="logo-subtitle">Sistem Inventaris Terpadu</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-section-title">MENU UTAMA</h3>
+                    <a href="#" class="nav-item active">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard Audit</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">PEMERIKSAAN & INVENTARIS</h3>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Data Barang</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🏢</span>
+                        <span class="nav-text">Data Gudang & Lokasi</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📥</span>
+                        <span class="nav-text">Barang Masuk</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📤</span>
+                        <span class="nav-text">Barang Keluar</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔄</span>
+                        <span class="nav-text">Mutasi Barang</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">✅</span>
+                        <span class="nav-text">Stok Opname</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">INVESTIGASI & KEPATUHAN</h3>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Log Aktivitas</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔍</span>
+                        <span class="nav-text">Temuan Audit</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">⚠️</span>
+                        <span class="nav-text">Tindak Lanjut Temuan</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📄</span>
+                        <span class="nav-text">Laporan Audit</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">PENGATURAN & AKUN</h3>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔔</span>
+                        <span class="nav-text">Notifikasi</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Pengaturan</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profil Saya</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <div class="location-breadcrumb">
+                    <span class="location-icon">📍</span>
+                    <span class="location-text">Jakarta (Pusat DC)</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="hub-name">Hub Cakung DC-01 (Utama)</span>
+                </div>
+
+                <div class="top-nav-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="Cari SKU, resi, transaksi..." class="search-input">
+                    </div>
+                    <div class="notification-icon">🔔</div>
+                    <div class="user-profile">
+                        <div class="user-avatar">BS</div>
+                        <div class="user-info">
+                            <span class="user-name">Budi Santoso</span>
+                            <span class="user-role">Admin Utama / Super Admin</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="operational-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">Operasional Normal</span>
+                </div>
+            </header>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-breadcrumb">
+                    <span class="breadcrumb-home">Beranda</span>
+                    <span class="breadcrumb-divider"></span>
+                    <span class="breadcrumb-current">DASHBOARD AUDIT (OVERVIEW)</span>
+                </div>
+
+                <h1 class="page-title">Dasbor Kepatuhan & Pusat Pemeriksaan Audit</h1>
+                <p class="page-description">
+                    Pemantauan integritas buku inventaris, deviasi stok fisik vs sistem, transparansi mutasi logistik, 
+                    dan rekam jejak kepatuhan ISO/IEC 27001 Hub Cakung DC-01.
+                </p>
+
+                <div class="page-actions">
+                    <button class="btn-secondary">
+                        <span class="btn-icon">📥</span>
+                        Ekspor Audit Trail (PDF/CSV)
+                    </button>
+                    <button class="btn-primary">
+                        <span class="btn-icon">🔬</span>
+                        Mulai Uji Petik Mandiri (Sample Test)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card metric-success">
+                    <div class="metric-header">
+                        <span class="metric-title">Tingkat Integritas Buku</span>
+                        <span class="metric-badge badge-success">Selaras</span>
+                    </div>
+                    <div class="metric-value">99.82%</div>
+                    <div class="metric-detail">
+                        <span class="detail-icon">✓</span>
+                        <span class="detail-text">Deviasi 0.18% di bawah toleransi 0.50%</span>
+                    </div>
+                    <div class="metric-decoration"></div>
+                </div>
+
+                <div class="metric-card metric-critical">
+                    <div class="metric-header">
+                        <span class="metric-title">Temuan Discrepancy Terbuka</span>
+                        <span class="metric-badge badge-critical">2 Kritis</span>
+                    </div>
+                    <div class="metric-value">4 <span class="metric-unit">Temuan</span></div>
+                    <div class="metric-detail">
+                        <span class="detail-text">2 Selisih opname, 1 mutasi, 1 fisik rusak</span>
+                    </div>
+                    <div class="metric-decoration"></div>
+                </div>
+
+                <div class="metric-card metric-progress">
+                    <div class="metric-header">
+                        <span class="metric-title">SKU Telah Diaudit (Q1)</span>
+                        <span class="metric-badge badge-info">79.1%</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <span class="metric-value-large">6,840</span>
+                        <span class="metric-value-small">/ 8,650 SKU</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 79.1%"></div>
+                    </div>
+                    <div class="metric-detail">
+                        <span class="detail-text">Sampling acak mingguan di 6 Zona DC</span>
+                    </div>
+                </div>
+
+                <div class="metric-card metric-neutral">
+                    <div class="metric-header">
+                        <span class="metric-title">Valuasi Potensi Risiko</span>
+                        <span class="metric-badge badge-neutral">Dalam Verifikasi</span>
+                    </div>
+                    <div class="metric-value">Rp 18,450,000</div>
+                    <div class="metric-detail">
+                        <span class="detail-text">0.038% dari total aset Rp 48.2 Miliar</span>
+                    </div>
+                    <div class="metric-decoration"></div>
+                </div>
+            </div>
+
+            <!-- Security Banner -->
+            <div class="security-banner">
+                <div class="security-left">
+                    <div class="security-icon">🔒</div>
+                    <div class="security-content">
+                        <div class="security-title">ZERO TAMPERING DETECTED</div>
+                        <div class="security-subtitle">
+                            Blok Audit: <strong>#AUDIT-2025-W12</strong> · 
+                            SHA256: <code>a7f9c2d8e4b3f6a1...</code>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-security">Validasi Hash</button>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Main Chart Section -->
+                <div class="chart-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Tren Temuan & Akurasi Rekonsiliasi</h2>
+                        <div class="time-filters">
+                            <button class="time-filter">7 Hari</button>
+                            <button class="time-filter active">14 Hari</button>
+                            <button class="time-filter">30 Hari</button>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color legend-blue"></span>
+                                <span class="legend-text">Tingkat Akurasi Buku (99.8%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color legend-red"></span>
+                                <span class="legend-text">Temuan Selisih Fisik (0-3/hari)</span>
+                            </div>
+                        </div>
+
+                        <!-- Simple Chart Visualization -->
+                        <div class="chart-canvas">
+                            <svg viewBox="0 0 800 300" class="chart-svg">
+                                <!-- Grid lines -->
+                                <line x1="0" y1="50" x2="800" y2="50" stroke="#e5e7eb" stroke-width="1"/>
+                                <line x1="0" y1="100" x2="800" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                                <line x1="0" y1="150" x2="800" y2="150" stroke="#e5e7eb" stroke-width="1"/>
+                                <line x1="0" y1="200" x2="800" y2="200" stroke="#e5e7eb" stroke-width="1"/>
+                                <line x1="0" y1="250" x2="800" y2="250" stroke="#e5e7eb" stroke-width="1"/>
+                                
+                                <!-- Accuracy line (blue) -->
+                                <path d="M 50,30 L 150,25 L 250,28 L 350,20 L 450,22 L 550,18 L 650,20 L 750,15" 
+                                      stroke="#3b82f6" stroke-width="3" fill="none"/>
+                                
+                                <!-- Findings line (red dashed) -->
+                                <path d="M 50,200 L 150,220 L 250,180 L 350,240 L 450,210 L 550,190 L 650,230 L 750,200" 
+                                      stroke="#ef4444" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+                                
+                                <!-- Data points -->
+                                <circle cx="350" cy="20" r="5" fill="#3b82f6"/>
+                                <circle cx="350" cy="240" r="5" fill="#ef4444"/>
+                            </svg>
+                            <div class="chart-x-axis">
+                                <span>01 Mar</span>
+                                <span>05 Mar</span>
+                                <span>10 Mar</span>
+                                <span>15 Mar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Priority Findings -->
+                    <div class="findings-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Temuan Prioritas Tinggi (Butuh Tindak Lanjut Segera)</h3>
+                            <span class="findings-count">2 temuan menunggu respons</span>
+                        </div>
+
+                        <div class="finding-card finding-critical">
+                            <div class="finding-header">
+                                <span class="finding-badge badge-critical">KRITIS</span>
+                                <span class="finding-id">#AUD-2025-041: Selisih Fisik Barang High-Value</span>
+                            </div>
+                            <div class="finding-body">
+                                <div class="finding-detail">
+                                    <strong>SKU:</strong> SD-EXT-1TB (Sandisk Extreme SSD)<br>
+                                    <strong>Lokasi:</strong> Lorong Rak C-02 (Level 3 / Bin 14)<br>
+                                    <strong>Selisih:</strong> <span class="text-danger">-3 Unit (Rp 3,750,000)</span><br>
+                                    <strong>Status:</strong> Menunggu pemeriksaan gudang (Ka. Gudang - Budi Hartono)
+                                </div>
+                                <div class="finding-meta">
+                                    <span class="finding-time">13 Mar 2025, 14:10 WIB</span>
+                                </div>
+                            </div>
+                            <div class="finding-actions">
+                                <button class="btn-outline">Investigasi Detail</button>
+                                <button class="btn-primary">Rekomendasi Penyelesaian</button>
+                            </div>
+                        </div>
+
+                        <div class="finding-card finding-warning">
+                            <div class="finding-header">
+                                <span class="finding-badge badge-warning">PERINGATAN</span>
+                                <span class="finding-id">#AUD-2025-039: Ketidaksesuaian Segel Kontainer Inbound</span>
+                            </div>
+                            <div class="finding-body">
+                                <div class="finding-detail">
+                                    <strong>Dokumen:</strong> PO-774 / Surat Jalan #SJ-8891<br>
+                                    <strong>Vendor:</strong> PT Mitra Logistik Sejahtera<br>
+                                    <strong>Status:</strong> Investigasi Vendor & CCTV Dock 4<br>
+                                    <strong>Catatan:</strong> Barang ditahan di Staging Area Karantina (hold 48 Jam)
+                                </div>
+                                <div class="finding-meta">
+                                    <span class="finding-time">12 Mar 2025, 08:35 WIB</span>
+                                </div>
+                            </div>
+                            <div class="finding-actions">
+                                <a href="#" class="link-primary">Buka Berita Acara →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Widgets -->
+                <aside class="widgets-sidebar">
+                    <!-- Physical Audit Card -->
+                    <div class="widget-card">
+                        <div class="widget-image">
+                            <div class="warehouse-placeholder"></div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="widget-header">
+                                <h4 class="widget-title">Audit Fisik Lapangan</h4>
+                                <span class="widget-badge badge-success">AKTIF</span>
+                            </div>
+                            <p class="widget-text">Verifikasi Q1-2025</p>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Card -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <span class="widget-icon">📅</span>
+                            <h4 class="widget-title">Jadwal Opname & Uji Petik</h4>
+                        </div>
+                        <div class="schedule-list">
+                            <div class="schedule-item">
+                                <div class="schedule-header">
+                                    <strong>Zona B (Elektronik & High-Value)</strong>
+                                    <span class="schedule-status">100% Selesai</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-success" style="width: 100%"></div>
+                                </div>
+                                <p class="schedule-detail">Rekonsiliasi verifikasi valid & terdokumentasi</p>
+                            </div>
+
+                            <div class="schedule-item">
+                                <div class="schedule-header">
+                                    <strong>Zona C (Gadget & Storage)</strong>
+                                    <span class="schedule-status">68% Berjalan</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-primary" style="width: 68%"></div>
+                                </div>
+                                <p class="schedule-detail">Uji petik 420 SKU berjalan oleh Tim B</p>
+                            </div>
+
+                            <div class="schedule-item">
+                                <div class="schedule-header">
+                                    <strong>Zona D (Perangkat Jaringan)</strong>
+                                    <span class="schedule-status">Terjadwal</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-neutral" style="width: 0%"></div>
+                                </div>
+                                <p class="schedule-detail">Sen, 09:00 WIB (Pemeriksa: Dewi A.)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribution Card -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h4 class="widget-title">Distribusi Temuan per Kategori</h4>
+                        </div>
+                        <div class="distribution-chart">
+                            <div class="distribution-item">
+                                <div class="distribution-label">
+                                    <span class="distribution-color bg-primary"></span>
+                                    <span class="distribution-name">Selisih Kuantitas Stok</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-fill bg-primary" style="width: 50%"></div>
+                                </div>
+                                <span class="distribution-value">2 Temuan (50%)</span>
+                            </div>
+
+                            <div class="distribution-item">
+                                <div class="distribution-label">
+                                    <span class="distribution-color bg-danger"></span>
+                                    <span class="distribution-name">Kerusakan Fisik Kemasan</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-fill bg-danger" style="width: 25%"></div>
+                                </div>
+                                <span class="distribution-value">1 Temuan (25%)</span>
+                            </div>
+
+                            <div class="distribution-item">
+                                <div class="distribution-label">
+                                    <span class="distribution-color bg-success"></span>
+                                    <span class="distribution-name">Keterlambatan Dokumen Admin</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-fill bg-success" style="width: 25%"></div>
+                                </div>
+                                <span class="distribution-value">1 Temuan (25%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log Card -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h4 class="widget-title">Log Aktivitas Audit Terkini</h4>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon activity-success">✓</div>
+                                <div class="activity-content">
+                                    <p class="activity-text">
+                                        Dewi Anggraini memverifikasi temuan #AUD-2025-041 untuk Ka. Gudang
+                                    </p>
+                                    <span class="activity-time">18 menit lalu</span>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-icon activity-danger">✗</div>
+                                <div class="activity-content">
+                                    <p class="activity-text">
+                                        Deteksi ketidaksesuaian berat Inbound - otomatis hold Dock 4 pada selisih 4.2 kg di PO-9081
+                                    </p>
+                                    <span class="activity-time">1 jam lalu</span>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-icon activity-success">✓</div>
+                                <div class="activity-content">
+                                    <p class="activity-text">
+                                        Pengesahan Blok Ledger Mingguan - Blok #AUDIT-2025-W12 ditandatangani secara kriptografis oleh Kepatuhan
+                                    </p>
+                                    <span class="activity-time">3 jam lalu</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-link">Lihat Riwayat Lengkap Seluruh Log →</button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -68,7 +68,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.admin', ['user' => auth()->user()]);
+            return view('homepage.admin', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // User Management (permission: user.manage)
@@ -98,7 +98,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:kepala_gudang')->prefix('gudang')->name('gudang.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.gudang', ['user' => auth()->user()]);
+            return view('homepage.admin', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // Master Data (permission: master.manage)
@@ -125,7 +125,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:hr')->prefix('hr')->name('hr.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.hr', ['user' => auth()->user()]);
+            return view('hr_dashboard', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // Approval Queue (permission: issue.approve)
@@ -141,7 +141,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:pegawai')->prefix('pegawai')->name('pegawai.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.pegawai', ['user' => auth()->user()]);
+            return view('homepage.admin', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // Barang Masuk (permission: receipt.create)
@@ -164,7 +164,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:audit')->prefix('audit')->name('audit.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.audit', ['user' => auth()->user()]);
+            return view('homepage.admin', ['user' => auth()->user()]);
         })->name('dashboard');
         
         // Audit Logs (permission: audit.view)
@@ -202,7 +202,7 @@ Route::middleware('auth')->group(function () {
     
     // Default Dashboard (fallback)
     Route::get('/dashboard', function () {
-        return view('dashboard.default', ['user' => auth()->user()]);
+        return view('homepage.dashboard', ['user' => auth()->user()]);
     })->name('dashboard');
 });
 
