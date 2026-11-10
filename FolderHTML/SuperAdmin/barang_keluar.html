@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaksi Barang Keluar — Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{brand:'#0b49d8',ink:'#17243b',canvas:'#f5f7fc',line:'#e8edf5'}}}};</script>
+  <style>
+    *{box-sizing:border-box}body{font-family:Inter,sans-serif}.nav-link{transition:background .15s ease,color .15s ease}.nav-link.active{background:#0b49d8;color:white}.nav-link:not(.active):hover{background:#f1f5fc;color:#123c9a}.sidebar-scroll::-webkit-scrollbar{width:4px}.sidebar-scroll::-webkit-scrollbar-thumb{background:#dce3ef;border-radius:10px}.reveal{animation:rise-in .4s cubic-bezier(.2,.8,.2,1) both}.delay-1{animation-delay:50ms}.delay-2{animation-delay:100ms}.delay-3{animation-delay:150ms}.data-row{animation:row-in .25s ease both}.soft-button{transition:transform .16s ease,box-shadow .16s ease}.soft-button:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(15,23,42,.08)}@keyframes rise-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes row-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+    #sidebar { width: 220px; }
+    #sidebar > a { height: 56px; gap: 8px; padding-inline: 12px; }
+    #sidebar > a > span:first-child { width: 32px; height: 32px; }
+    #sidebar > a > span:first-child i { width: 20px; height: 20px; }
+    #sidebar > a > span:last-child > span:first-child { font-size: 12px; }
+    #sidebar > a > span:last-child > span:last-child { font-size: 9px; }
+    #sidebar nav { gap: 16px; padding: 16px 8px; font-size: 11px; }
+    #sidebar nav section > p { margin-bottom: 6px; padding-inline: 8px; font-size: 9px; }
+    #sidebar nav a { height: 32px; gap: 8px; padding-inline: 8px; border-radius: 6px; font-size: 11px; }
+    #sidebar nav a > i { width: 16px; height: 16px; }
+    #sidebar nav a > span.ml-auto { height: 16px; min-width: 16px; font-size: 9px; }
+    #main-area > header { height: 56px; padding-inline: 16px; }
+    #main-area > header > div:first-child,
+    #main-area > header > div:last-child { gap: 12px; }
+    #main-area > header > div:first-child > div { gap: 8px; padding: 6px 10px; font-size: 10px; }
+    #main-area > header > div:first-child i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label { width: 224px; height: 32px; gap: 8px; padding-inline: 10px; }
+    #main-area > header > div:last-child label i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label input { font-size: 10px; }
+    #main-area > header > div:last-child > button { width: 32px; height: 32px; }
+    #main-area > header > div:last-child > button i { width: 16px; height: 16px; }
+    #main-area > header > div:last-child > div:last-child { gap: 8px; padding-left: 12px; }
+    #main-area > header > div:last-child > div:last-child > div:first-child { width: 32px; height: 32px; font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:first-child { font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:last-child { font-size: 9px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px !important; }
+    }@media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%) !important; transition: transform .2s ease; }
+      #sidebar.open { transform: translateX(0) !important; }
+      #sidebar-backdrop.show { display: block; }
+    }@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+      #records > tr.data-row { height: 60px; }
+  </style>
+  <style>
+    #sidebar { transition: transform .22s ease; }
+    @media (min-width: 768px) {
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
+      body.sidebar-collapsed #main-area { margin-left: 0 !important; }
+      #main-area > header { z-index: 60 !important; }
+      #main-area header #sidebar-toggle { display: flex !important; }
+    }
+    #main-area header #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #main-area header #sidebar-toggle:hover { background: #f1f5fc; }
+  </style>
+</head>
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
+    <a href="data_barang.html" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i class="fas fa-cube text-white text-lg"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p>
+        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard Admin</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Master Data & Inventaris</p>
+        <div class="space-y-0.5">
+          <a href="data_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="package" class="h-4 w-4"></i><span>Data Barang</span></a>
+          <a href="kategori_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="tags" class="h-4 w-4"></i><span>Kategori Barang</span></a>
+          <a href="data_gudang_lokasi.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="warehouse" class="h-4 w-4"></i><span>Data Gudang & Lokasi</span></a>
+          <a href="data_supplier.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="truck" class="h-4 w-4"></i><span>Data Supplier</span></a>
+          <a href="data_departemen.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="building-2" class="h-4 w-4"></i><span>Departemen</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional & Transaksi</p>
+        <div class="space-y-0.5">
+          <a href="barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a>
+          <a href="barang_keluar.html" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a>
+          <a href="mutasi_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-left-right" class="h-4 w-4"></i><span>Mutasi Barang</span></a>
+          <a href="stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-list" class="h-4 w-4"></i><span>Persetujuan Barang</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Manajemen Sistem</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="users" class="h-4 w-4"></i><span>Manajemen Pengguna</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Laporan & Analitik</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-clock" class="h-4 w-4"></i><span>Laporan & Riwayat</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4"></i><span>Log Aktivitas</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-circle" class="h-4 w-4"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen md:ml-[220px]">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
+        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight sm:block"><p class="text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
+    </header>
+    <main class="min-h-[calc(100vh-56px)] bg-canvas p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+        <div class="max-w-2xl"><p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional & Transaksi <span class="text-blue-700">&gt; Transaksi Barang Keluar (Outbound DC)</span></p><h1 class="text-[24px] font-bold leading-tight text-slate-800 md:text-[24px]">Transaksi Barang Keluar (Outbound DC)</h1><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Monitoring pengeluaran inventaris untuk distribusi antar-cabang, pemenuhan permintaan divisi internal, validasi Surat Jalan Keluar (DO/SJ), dan verifikasi serah terima logistik Hub Cabang DC-01.</p></div>
+        <div class="flex flex-wrap items-center gap-2"><span class="hidden rounded-full bg-blue-50 px-3 py-1 text-[10.5px] font-semibold text-blue-700 xl:inline-flex">5 Armada Antre Dispatch</span><button id="export-data" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Data Outbound</button><button data-toast="Jadwal dispatch armada diperbarui." class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700"><i data-lucide="calendar-clock" class="h-4 w-4 text-blue-600"></i>Jadwal Dispatch Armada</button><button id="add-record" class="soft-button flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white"><i data-lucide="plus" class="h-4 w-4"></i>Buat Pengeluaran Barang Baru</button></div>
+      </section>
+      <section aria-label="Ringkasan outbound" class="reveal delay-1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"><div><p class="text-[9.5px] font-semibold uppercase text-slate-500">Total Keluar Hari Ini</p><p class="mt-1.5 text-[24px] font-bold text-slate-800">1.180 <span class="text-[10.5px] font-medium text-slate-500">Unit</span></p><p class="mt-2.5 text-[10.5px] text-blue-700">↗ +8.4% vs kemarin</p></div><span class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i></span></article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"><div><p class="text-[9.5px] font-semibold uppercase text-slate-500">PO / DO Dalam Proses</p><p class="mt-1.5 text-[24px] font-bold text-slate-800">11 <span class="text-[10.5px] font-medium text-slate-500">Berkas DO</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">7 Selesai Packing · 4 Sedang Picking</p></div><span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="clipboard-list" class="h-4 w-4"></i></span></article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"><div><p class="text-[9.5px] font-semibold uppercase text-slate-500">Akurasi Picking & QC Outbound</p><p class="mt-1.5 text-[24px] font-bold text-slate-800">99.8%</p><p class="mt-2.5 text-[10.5px] text-emerald-700">✓ 1.178 Unit Lolos · 2 Unit SKU</p></div><span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="shield-check" class="h-4 w-4"></i></span></article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3 shadow-sm"><div><p class="text-[9.5px] font-semibold uppercase text-amber-700">Perlu Loading Dock</p><p class="mt-1.5 text-[24px] font-bold text-slate-800">240 <span class="text-[10.5px] font-medium text-slate-500">Unit</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">Menunggu Muat / Dispatch</p></div><span class="flex h-8 w-8 items-center justify-center rounded-md bg-amber-100 text-amber-700"><i data-lucide="truck" class="h-4 w-4"></i></span></article>
+      </section>
+      <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm"><div class="mb-3 flex flex-wrap items-center justify-between gap-2"><div><h2 class="flex items-center gap-2 text-[12px] font-semibold text-slate-800"><i data-lucide="truck" class="h-4 w-4 text-blue-600"></i>Status Slot Loading Dock & Antrean Armada Outbound</h2><p class="ml-6 text-[10.5px] text-slate-500">Hub Cabang DC-01 · 4 Loading Bays Tersedia dengan Sistem Sensor Pallet</p></div><button data-toast="Jadwal dispatch dan CCTV dock Hub DC-01." class="text-[10.5px] font-semibold text-blue-600">Lihat Jadwal Dispatch & Live CCTV Gate →</button></div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-lg bg-blue-50/70 p-3"><div class="flex justify-between text-[10.5px]"><b>DOCK 01</b><span class="text-blue-700">Proses Muat</span></div><b class="mt-2 block text-[12px]">Hub Surabaya DC-02</b><p class="text-[10.5px] text-slate-500">Armada: Truk Tronton (B 9821 XZ)</p><div class="mt-2 h-1 rounded bg-blue-100"><div class="h-full w-[85%] rounded bg-blue-600"></div></div></article>
+        <article class="rounded-lg bg-blue-50/70 p-3"><div class="flex justify-between text-[10.5px]"><b>DOCK 02</b><span class="text-violet-700">Verifikasi DO</span></div><b class="mt-2 block text-[12px]">Divisi Operasional & IT Pusat</b><p class="text-[10.5px] text-slate-500">Unit: Laptop & PC · 120 Unit</p><div class="mt-2 h-1 rounded bg-blue-100"><div class="h-full w-[92%] rounded bg-violet-600"></div></div></article>
+        <article class="rounded-lg bg-blue-50/70 p-3"><div class="flex justify-between text-[10.5px]"><b>DOCK 03</b><span class="text-amber-700">Staging Pallet</span></div><b class="mt-2 block text-[12px]">Hub Bandung DC-03</b><p class="text-[10.5px] text-slate-500">Armada: Blind Van (B 9033 H)</p><div class="mt-2 h-1 rounded bg-blue-100"><div class="h-full w-[45%] rounded bg-amber-500"></div></div></article>
+        <article class="rounded-lg bg-blue-50/70 p-3"><div class="flex justify-between text-[10.5px]"><b>DOCK 04</b><span class="text-slate-600">Menunggu Truk</span></div><b class="mt-2 block text-[12px]">Divisi Maintenance & GA</b><p class="text-[10.5px] text-slate-500">Pick-up Internal DC</p><div class="mt-2 h-1 rounded bg-blue-100"><div class="h-full w-[12%] rounded bg-slate-400"></div></div></article>
+      </div></section>
+      <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm"><div class="flex flex-wrap items-center gap-2">
+        <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 xl:max-w-[390px]"><i data-lucide="search" class="h-4 w-4"></i><input id="search-input" type="search" placeholder="Cari nomor DO, surat jalan, divisi, barang..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none"></label>
+        <select id="destination-filter" class="h-10 rounded-md bg-blue-50 px-3 text-[12px]"><option value="">Semua Tujuan (Divisi & Cabang Hub)</option><option>Hub Surabaya</option><option>Hub Bandung</option><option>Divisi</option></select><select id="status-filter" class="h-10 rounded-md bg-blue-50 px-3 text-[12px]"><option value="">Status Pengeluaran (Semua)</option><option>Selesai Dispatch</option><option>Selesai Diserahkan</option><option>Proses Muat Dock 01</option><option>Sedang Picking</option><option>Verifikasi DO</option><option>Menunggu Pengambilan</option></select><select id="route-filter" class="h-10 rounded-md bg-blue-50 px-3 text-[12px]"><option value="">Jenis Pengiriman: Semua (Internal/Ekspedisi)</option><option>Ekspedisi</option><option>Internal</option></select><button id="reset-filters" aria-label="Reset filter" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+      </div><div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]"><span class="mr-1 font-semibold text-slate-600">FILTER CEPAT:</span><button data-quick="all" class="rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white">Semua Outbound (16)</button><button data-quick="Selesai Dispatch" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px]">Selesai & Dikirim</button><button data-quick="Sedang Picking" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px]">Sedang Proses Muat</button><button data-quick="Menunggu Pengambilan" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px]">Tahap Picking & Packing</button><button data-quick="Verifikasi DO" class="rounded-full bg-red-50 px-3 py-1 text-[10.5px] text-red-600">Tertunda / Butuh Persetujuan</button></div></section>
+      <section class="reveal delay-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div class="flex items-center justify-between px-3 pb-2 pt-3"><h2 class="text-[12px] font-semibold">Daftar Transaksi Outbound Terjadwal Hari Ini <span class="ml-1 rounded bg-blue-50 px-1.5 py-1 text-[10.5px] text-blue-700">16 TRANSAKSI</span></h2><button id="refresh-list" aria-label="Segarkan" class="rounded p-1 text-slate-500"><i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i></button></div><div class="overflow-x-auto"><table class="w-full min-w-[1300px] table-fixed text-left"><thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase whitespace-nowrap text-slate-600"><tr><th class="w-[50px] px-2"><input id="select-all" type="checkbox" aria-label="Pilih semua" class="h-4 w-4 accent-blue-600"></th><th class="w-[150px] px-2">No. DO & Surat Jalan</th><th class="w-[200px] px-2">Tujuan & Penerima</th><th class="w-[260px] px-2">Detail Komoditas / Barang</th><th class="w-[180px] px-2">Total Qty & Kemasan</th><th class="w-[140px] px-2">Gate / Staging Rak Asal</th><th class="w-[220px] px-2">Status Dispatch & QC</th><th class="w-[100px] px-2 text-center">Aksi</th></tr></thead><tbody id="records" class="divide-y divide-slate-100 text-[12px]"></tbody></table></div><footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px]"><span id="row-count" aria-live="polite"></span><div class="flex items-center gap-1"><button id="prev" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] disabled:opacity-40">Sebelumnya</button><div id="pages" class="flex gap-1"></div><button id="next" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] disabled:opacity-40">Berikutnya</button></div></footer></section>
+      <section class="reveal delay-3 mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3"><h2 class="text-[12px] font-semibold">Pindai Barcode Surat Jalan (e-DO)</h2><p class="mt-1 text-[10.5px] text-slate-500">Pemindaian barcode dan tanda tangan digital sebelum dispatch.</p><button data-toast="Scanner handheld Zebra siap digunakan." class="mt-3 text-[10.5px] font-semibold text-blue-600">Buka Scanner →</button></article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3"><h2 class="text-[12px] font-semibold">Standar Prosedur Double-Check</h2><p class="mt-1 text-[10.5px] text-slate-500">Verifikasi kuantitas, SKU, dan tujuan penerima sebelum barang keluar.</p><button data-toast="Checklist outbound siap ditinjau." class="mt-3 text-[10.5px] font-semibold text-blue-600">Unduh Checklist →</button></article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3"><h2 class="text-[12px] font-semibold">Integrasi Berita Acara Digital (e-BAP)</h2><p class="mt-1 text-[10.5px] text-slate-500">Tanda tangan digital penerima dan dokumentasi serah terima.</p><button data-toast="Log integrasi e-BAP diperbarui." class="mt-3 text-[10.5px] font-semibold text-blue-600">Log Berita Acara →</button></article>
+      </section>
+    </main>
+  </div>
+  <div id="record-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 p-4"><form id="record-form" class="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-xl bg-white p-4 shadow-xl"><div class="mb-4 flex justify-between"><div><h2 class="text-[12px] font-bold">Buat Pengeluaran Barang Baru</h2><p class="mt-1 text-[10.5px] text-slate-500">Catat permintaan dan tujuan barang keluar.</p></div><button type="button" id="close-modal" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button></div><div class="grid gap-3 sm:grid-cols-2"><label class="text-[12px]">Nomor DO<input name="do" required maxlength="24" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label><label class="text-[12px]">Tujuan / Divisi<input name="destination" required maxlength="70" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label><label class="text-[12px] sm:col-span-2">Nama barang<input name="product" required maxlength="100" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label><label class="text-[12px]">Jumlah<input name="quantity" required maxlength="40" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label><label class="text-[12px]">Lokasi asal<input name="location" required maxlength="40" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label><label class="text-[12px] sm:col-span-2">Penerima<input name="recipient" required maxlength="70" class="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"></label></div><div class="mt-5 flex justify-end gap-2"><button type="button" id="cancel-modal" class="h-10 rounded-md border border-slate-200 px-4 text-[12px]">Batal</button><button class="h-10 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white">Simpan Outbound</button></div></form></div>
+  <div id="toast" role="status" class="fixed bottom-4 right-4 z-[80] hidden rounded-lg bg-slate-900 px-4 py-3 text-[12px] text-white shadow-lg"></div>
+  <script>
+    lucide.createIcons();
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-backdrop').classList.toggle('show')}
+    const records=[
+      {id:'DO-2025-0641',sj:'SJ-441/OUT-JKT',destination:'Hub Surabaya DC-02',recipient:'PIC: Rani S. · JNE Cargo Express',item:'Macbook Pro M1 & Workstation',category:'Komputer & Laptop',qty:'60 Unit',pack:'5 Box High-Security',location:'WH01-ZA-RA02',status:'Selesai Dispatch',route:'Ekspedisi'},
+      {id:'DO-2025-0642',sj:'SJ-441/OUT-JKT',destination:'Divisi IT & Infrastruktur',recipient:'PIC: Adrian P. · Internal',item:'Mechanical Keyboard RGB & Mouse',category:'Periferal Komputer',qty:'45 Unit',pack:'3 Dus Karton',location:'WH01-ZB-RB01',status:'Selesai Diserahkan',route:'Internal'},
+      {id:'DO-2025-0643',sj:'SJ-441/OUT-JKT',destination:'Hub Bandung DC-03',recipient:'PIC: Hendra K. · NCS Logistics',item:'Sony WH-1000XM4 & Audio System',category:'Audio & Sound',qty:'120 Unit',pack:'10 Box (Pallet 2)',location:'WH01-ZB-RB02',status:'Proses Muat Dock 01',route:'Ekspedisi'},
+      {id:'DO-2025-0644',sj:'SJ-441/OUT-JKT',destination:'Divisi Operasional & Hub',recipient:'PIC: Dedi S. · Kurir Internal',item:'Barcode Scanner Zebra & Label Roll',category:'Tools & Scanner',qty:'35 Unit',pack:'2 Box Heavy',location:'WH02-RB-01',status:'Sedang Picking',route:'Internal'},
+      {id:'DO-2025-0645',sj:'SJ-441/OUT-JKT',destination:'Hub Semarang DC-04',recipient:'PIC: Eko P. · JNE',item:'Sandisk SSD NVMe 1TB & HDD 4TB',category:'Storage & Media',qty:'200 Unit',pack:'15 Box Anti-Static',location:'WH02-ZC-RC01',status:'Verifikasi DO',route:'Ekspedisi'},
+      {id:'DO-2025-0646',sj:'SJ-441/OUT-JKT',destination:'Divisi Quality Control & Lab',recipient:'PIC: Rina M. · Internal',item:'Canon 60D Body & Optical Lens',category:'Kamera & Optik',qty:'15 Unit',pack:'2 Hardcase Transit',location:'WH01-ZA-RA01',status:'Menunggu Pengambilan',route:'Internal'},
+      {id:'DO-2025-0647',sj:'SJ-441/OUT-JKT',destination:'CV Digital Mandiri (RMA)',recipient:'PIC: Maya A. · Supplier Return',item:'RAM DDR5 & Mainboard ATX',category:'Komponen Komputer',qty:'8 Unit',pack:'1 Small Box Segel',location:'QC-QUARANTINE-02',status:'Selesai Dispatch',route:'Ekspedisi'},
+      {id:'DO-2025-0648',sj:'SJ-441/OUT-JKT',destination:'Divisi Maintenance & GA',recipient:'PIC: Bambang S. · Internal',item:'Perkakas Maintenance & Safety',category:'Tools & Safety',qty:'24 Unit',pack:'4 Koli',location:'WH02-ZD-RD01',status:'Sedang Picking',route:'Internal'},
+      {id:'DO-2025-0649',sj:'SJ-441/OUT-JKT',destination:'Hub Surabaya DC-02',recipient:'PIC: Yusuf M. · JNE Cargo',item:'Router WiFi 6 & Switch 24-Port',category:'Jaringan & Komunikasi',qty:'40 Unit',pack:'4 Box Anti-Static',location:'WH01-ZC-RC04',status:'Selesai Dispatch',route:'Ekspedisi'}
+    ];
+    const host=document.getElementById('records'),search=document.getElementById('search-input'),global=document.getElementById('global-search'),dest=document.getElementById('destination-filter'),status=document.getElementById('status-filter'),route=document.getElementById('route-filter'),size=7;let filtered=[...records],page=1,quick='all',timer;
+    const esc=(s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function render(){const start=(page-1)*size,items=filtered.slice(start,start+size);host.innerHTML=items.map((r,i)=>{const tone=r.status.startsWith('Selesai')?'bg-emerald-50 text-emerald-700':r.status==='Verifikasi DO'?'bg-violet-50 text-violet-700':r.status==='Proses Muat Dock 01'?'bg-blue-50 text-blue-700':r.status==='Sedang Picking'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-700';return `<tr class="data-row h-[60px] hover:bg-slate-50" style="animation-delay:${i*20}ms" data-id="${esc(r.id)}"><td class="px-2"><input type="checkbox" class="row-check h-4 w-4 accent-blue-600" aria-label="Pilih ${esc(r.id)}"></td><td class="px-2"><b class="text-blue-700">${esc(r.id)}</b><span class="block text-[10.5px] text-slate-500">${esc(r.sj)}</span><span class="text-[10.5px] text-slate-500">09:40 WIB</span></td><td class="px-2"><b class="block text-[12px]">${esc(r.destination)}</b><span class="block truncate text-[10.5px] text-slate-500">${esc(r.recipient)}</span></td><td class="px-2"><b class="block text-[12px]">${esc(r.item)}</b><span class="text-[10.5px] text-slate-500">${esc(r.category)}</span></td><td class="px-2"><b class="block text-[12px]">${esc(r.qty)}</b><span class="text-[10.5px] text-slate-500">${esc(r.pack)}</span></td><td class="px-2"><span class="rounded bg-blue-50 px-1.5 py-1 text-[10.5px] text-blue-700">${esc(r.location)}</span><span class="mt-1 block text-[10.5px] text-slate-500">${esc(r.route)} · Staging</span></td><td class="px-2"><span class="rounded-full ${tone} px-2 py-1 text-[10.5px] font-semibold">${esc(r.status)}</span><span class="mt-1 block text-[10.5px] text-slate-500">QC & serah terima valid</span></td><td class="px-2 text-center"><button data-view aria-label="Lihat ${esc(r.id)}" class="rounded p-1.5 text-blue-600 hover:bg-slate-100"><i data-lucide="eye" class="h-4 w-4"></i></button></td></tr>`}).join('');lucide.createIcons();document.getElementById('row-count').textContent=filtered.length?`Menampilkan ${start+1} - ${Math.min(start+size,filtered.length)} dari ${filtered.length} transaksi outbound hari ini`:'Tidak ada transaksi yang sesuai';const pages=Math.max(1,Math.ceil(filtered.length/size)),box=document.getElementById('pages');box.innerHTML='';for(let n=1;n<=pages;n++){const b=document.createElement('button');b.textContent=n;b.className=`h-8 min-w-8 rounded px-2 text-[12px] ${n===page?'bg-blue-600 text-white':'hover:bg-blue-50'}`;b.addEventListener('click',()=>{page=n;render()});box.append(b)}document.getElementById('prev').disabled=page===1;document.getElementById('next').disabled=page===pages}
+    function apply(){const q=(search.value+' '+global.value).trim().toLowerCase();filtered=records.filter(r=>(!q||Object.values(r).join(' ').toLowerCase().includes(q))&&(!dest.value||r.destination.includes(dest.value))&&(!status.value||r.status===status.value)&&(!route.value||r.route===route.value)&&(quick==='all'||r.status===quick));page=1;render()}
+    [search,global].forEach(x=>x.addEventListener('input',apply));[dest,status,route].forEach(x=>x.addEventListener('change',apply));document.getElementById('prev').onclick=()=>{if(page>1){page--;render()}};document.getElementById('next').onclick=()=>{if(page<Math.ceil(filtered.length/size)){page++;render()}};
+    document.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{quick=b.dataset.quick;search.value='';global.value='';dest.value='';status.value='';route.value='';document.querySelectorAll('[data-quick]').forEach(x=>x.className=x===b?'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white':'rounded-full bg-slate-100 px-3 py-1 text-[10.5px]');apply()});
+    document.getElementById('reset-filters').onclick=()=>{search.value='';global.value='';dest.value='';status.value='';route.value='';quick='all';document.querySelectorAll('[data-quick]').forEach((x,i)=>x.className=i===0?'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white':'rounded-full bg-slate-100 px-3 py-1 text-[10.5px]');apply()};
+    document.getElementById('select-all').onchange=e=>document.querySelectorAll('.row-check').forEach(x=>x.checked=e.target.checked);host.addEventListener('change',e=>{if(e.target.matches('.row-check')&&!e.target.checked)document.getElementById('select-all').checked=false});
+    function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(timer);timer=setTimeout(()=>t.classList.add('hidden'),2500)}document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
+    const modal=document.getElementById('record-modal'),form=document.getElementById('record-form');document.getElementById('add-record').onclick=()=>{modal.classList.remove('hidden');modal.classList.add('flex');document.body.classList.add('overflow-hidden');form.elements.do.focus()};function close(){modal.classList.add('hidden');modal.classList.remove('flex');document.body.classList.remove('overflow-hidden')}['close-modal','cancel-modal'].forEach(id=>document.getElementById(id).onclick=close);modal.onclick=e=>{if(e.target===modal)close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});form.onsubmit=e=>{e.preventDefault();if(!form.reportValidity())return;const f=new FormData(form);records.unshift({id:String(f.get('do')).trim().toUpperCase(),sj:'SJ baru dicatat',destination:String(f.get('destination')).trim(),recipient:String(f.get('recipient')).trim(),item:String(f.get('product')).trim(),category:'Outbound baru',qty:String(f.get('quantity')).trim(),pack:'Kemasan diverifikasi saat picking',location:String(f.get('location')).trim().toUpperCase(),status:'Sedang Picking',route:'Internal'});form.reset();close();quick='all';document.getElementById('transaction-total')?.replaceChildren();apply();toast('Permintaan outbound dicatat dan masuk antrean picking.')};
+    document.getElementById('export-data').onclick=()=>{const cols=['No DO','Surat Jalan','Tujuan','Penerima','Barang','Kategori','Jumlah','Kemasan','Lokasi','Status','Rute'];const cell=v=>`"${String(v).replace(/"/g,'""')}"`;const csv=[cols,...filtered.map(r=>[r.id,r.sj,r.destination,r.recipient,r.item,r.category,r.qty,r.pack,r.location,r.status,r.route])].map(r=>r.map(cell).join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8'}));a.download='transaksi-barang-keluar.csv';a.click();URL.revokeObjectURL(a.href)};
+    document.getElementById('refresh-list').onclick=()=>{apply();toast('Daftar outbound diperbarui.')};host.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b){const r=records.find(x=>x.id===b.closest('tr').dataset.id);toast(`Detail ${r.id} · ${r.destination}`)}});render();
+  </script>
+  <script>
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggleButton = document.querySelector('#main-area header button[aria-label="Buka menu"]');
+      if (!sidebar || !toggleButton) return;
+      toggleButton.id = 'sidebar-toggle';
+      toggleButton.setAttribute('aria-controls', 'sidebar');
+      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+      const sync = () => {
+        const open = isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+        toggleButton.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('title', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('aria-expanded', String(open));
+        const icon = toggleButton.querySelector('[data-lucide], svg');
+        const iconName = open ? 'x' : 'menu';
+        if (icon && icon.getAttribute('data-lucide') !== iconName) {
+          icon.setAttribute('data-lucide', iconName);
+          if (window.lucide) window.lucide.createIcons();
+        }
+        backdrop?.classList.toggle('show', isMobile() && open);
+      };
+      window.toggleSidebar = (close = false) => {
+        if (isMobile()) sidebar.classList.toggle('open', close ? false : !sidebar.classList.contains('open'));
+        else document.body.classList.toggle('sidebar-collapsed', close ? true : !document.body.classList.contains('sidebar-collapsed'));
+        sync();
+      };
+      window.addEventListener('resize', sync);
+      sync();
+    })();
+  </script>
+</body>
+</html>

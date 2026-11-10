@@ -6,16 +6,30 @@
     <title>Detail Permintaan #TRX-2025-0891 - Astro Inventory</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+                }
+            }
+        };
+    </script>
+
     <style>
         * {
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: Inter, sans-serif;
             overflow-x: hidden;
         }
 
@@ -61,28 +75,11 @@
         .animate-slide-in { animation: slideIn 0.5s ease-out; }
         .pulse-animation { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-        /* Sidebar Styling */
-        .sidebar-item {
-            transition: all 0.2s ease;
-        }
-        
-        .sidebar-item:hover {
-            background-color: #EFF6FF;
-            transform: translateX(4px);
-        }
-        
-        .sidebar-item.active {
-            background-color: #DBEAFE;
-            border-left: 3px solid #2563EB;
-            font-weight: 600;
-            color: #2563EB;
-        }
-
         /* Interactive Elements */
         .dashboard-card {
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .dashboard-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
@@ -110,152 +107,99 @@
             animation: progressFill 1.2s ease-out forwards;
         }
 
-        /* Responsive Layout Grid */
-        .main-layout {
-            display: grid;
-            grid-template-columns: 256px 1fr;
-            min-height: calc(100vh - 64px);
+        .nav-link { transition: background .15s ease, color .15s ease; }
+        .nav-link.active { background: #0b49d8; color: white; }
+        .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+        #sidebar { width: 220px; transition: transform .22s ease; }
+        #main-area > header { height: 56px; padding-inline: 16px; }
+        #main-area > header > div:first-child,
+        #main-area > header > div:last-child { gap: 12px; }
+        #main-area > header > div:first-child > div { gap: 8px; padding: 6px 10px; font-size: 10px; }
+        #main-area > header > div:first-child i { width: 14px; height: 14px; }
+        #main-area > header > div:last-child label { width: 224px; height: 32px; gap: 8px; padding-inline: 10px; }
+        #main-area > header > div:last-child label i { width: 14px; height: 14px; }
+        #main-area > header > div:last-child label input { font-size: 10px; }
+        #main-area > header > div:last-child > button { width: 32px; height: 32px; }
+        #main-area > header > div:last-child > button i { width: 16px; height: 16px; }
+        #main-area > header > div:last-child > div:last-child { gap: 8px; padding-left: 12px; }
+        #main-area > header > div:last-child > div:last-child > div:first-child { width: 32px; height: 32px; font-size: 10px; }
+        #main-area > header > div:last-child > div:last-child p:first-child { font-size: 10px; }
+        #main-area > header > div:last-child > div:last-child p:last-child { font-size: 9px; }
+        #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+        #sidebar-toggle:hover { background: #f1f5fc; }
+        @media (min-width: 768px) {
+            body { zoom: 1.15; }
+            #sidebar { transform: translateX(0) !important; }
+            #main-area { margin-left: 220px !important; }
+            body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
+            body.sidebar-collapsed #main-area { margin-left: 0 !important; }
+            #main-area > header { z-index: 60 !important; }
+            #sidebar-toggle { display: flex !important; }
         }
-
-        @media (max-width: 1024px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-            .sidebar-left {
-                display: none;
-            }
+        @media (max-width: 767px) {
+            #sidebar { transform: translateX(-100%) !important; }
+            #sidebar.open { transform: translateX(0) !important; }
+            #sidebar-backdrop.show { display: block; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    
-    <!-- Navbar / Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div class="w-full px-4 lg:px-6 py-3">
-            <div class="flex items-center justify-between gap-4 flex-wrap">
-                
-                <!-- Left: Logo & Brand -->
-                <div class="flex items-center space-x-3 flex-shrink-0 animate-fade-in">
-                    <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center">
-                        <i class="fas fa-cube text-white text-lg"></i>
-                    </div>
-                    <div class="hidden sm:block">
-                        <h1 class="text-base font-bold text-gray-900 leading-tight">Astro Inventory</h1>
-                        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
-                    </div>
-                </div>
-
-                <!-- Center: Location & Status Badges -->
-                <div class="flex items-center space-x-2 flex-shrink-0 animate-fade-in" style="animation-delay: 0.1s">
-                    <div class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2">
-                        <i class="fas fa-map-marker-alt text-xs text-blue-500"></i>
-                        <span class="hidden lg:inline">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
-                        <span class="lg:hidden">Cakung DC-01</span>
-                    </div>
-                    <div class="bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2">
-                        <i class="fas fa-circle text-green-500 pulse-animation" style="font-size: 8px;"></i>
-                        <span>Operasional Normal</span>
-                    </div>
-                </div>
-
-                <!-- Right: Search Bar, Notifications & User Info -->
-                <div class="flex items-center space-x-3 ml-auto animate-fade-in" style="animation-delay: 0.2s">
-                    <div class="relative">
-                        <input type="text" placeholder="Cari SKU, resi, transaksi..." 
-                               class="w-40 lg:w-64 pl-9 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
-                    </div>
-                    
-                    <a href="notifikasi.html" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all" title="Pusat Notifikasi">
-                        <i class="fas fa-bell text-base"></i>
-                        <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full pulse-animation flex items-center justify-center text-white text-[10px] font-bold">5</span>
-                    </a>
-
-                    <div class="flex items-center space-x-2 pl-3 border-l border-gray-200">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="text-left hidden md:block">
-                            <p class="text-xs font-bold text-gray-900 leading-tight">Budi Santoso</p>
-                            <p class="text-[10px] text-gray-500">HR Management / Approver</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar(true)"></div>
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
+    <a href="#" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"> <i class="fas fa-cube text-white text-lg"></i></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">MENU UTAMA</p>
+        <a href="index.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4 shrink-0"></i><span>Dashboard HR</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">OPERASIONAL & PERSETUJUAN</p>
+        <div class="space-y-0.5">
+          <a href="antrean-persetujuan.html" class="nav-link flex h-8 items-center justify-between gap-2 rounded-md px-2 text-slate-600"><span class="flex min-w-0 items-center gap-2"><i data-lucide="arrow-left-right" class="h-4 w-4 shrink-0"></i><span>Antrean Persetujuan</span></span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+          <a href="#" aria-current="page" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="file-text" class="h-4 w-4 shrink-0"></i><span>Detail Permintaan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4 shrink-0"></i><span>Riwayat Persetujuan</span></a>
         </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">MANAJEMEN & LAPORAN</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4 shrink-0"></i><span>Laporan Inventaris</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="shield-check" class="h-4 w-4 shrink-0"></i><span>Log Audit & Otorisasi</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">PENGATURAN & AKUN</p>
+        <div class="space-y-0.5">
+          <a href="notifikasi.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4 shrink-0"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4 shrink-0"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-round" class="h-4 w-4 shrink-0"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+  <div id="main-area" class="min-h-screen md:ml-[220px]">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
+        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight sm:block"><p class="text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
     </header>
+    <main class="min-h-[calc(100vh-56px)] bg-canvas p-4 lg:p-5 overflow-x-hidden">
 
-    <!-- Main Layout Grid -->
-    <div class="main-layout">
-        
-        <!-- Sidebar Left -->
-        <aside class="sidebar-left bg-white border-r border-gray-200 overflow-y-auto sticky top-[64px] h-[calc(100vh-64px)]">
-            <nav class="p-4 space-y-6">
-                <!-- MENU UTAMA -->
-                <div class="animate-slide-in" style="animation-delay: 0s">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">MENU UTAMA</p>
-                    <a href="index.html" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-th-large w-4"></i>
-                        <span>Dashboard HR</span>
-                    </a>
-                </div>
-
-                <!-- OPERASIONAL & PERSETUJUAN -->
-                <div class="animate-slide-in" style="animation-delay: 0.1s">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">OPERASIONAL & PERSETUJUAN</p>
-                    <a href="antrean-persetujuan.html" class="sidebar-item flex items-center justify-between px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-clock w-4"></i>
-                            <span>Antrean Persetujuan</span>
-                        </div>
-                        <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full pulse-animation">5</span>
-                    </a>
-                    <a href="#" class="sidebar-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-xs">
-                        <i class="fas fa-file-alt w-4"></i>
-                        <span>Detail Permintaan</span>
-                    </a>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-history w-4"></i>
-                        <span>Riwayat Persetujuan</span>
-                    </a>
-                </div>
-
-                <!-- MANAJEMEN & LAPORAN -->
-                <div class="animate-slide-in" style="animation-delay: 0.2s">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">MANAJEMEN & LAPORAN</p>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-chart-line w-4"></i>
-                        <span>Laporan Inventaris</span>
-                    </a>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-shield-alt w-4"></i>
-                        <span>Log Audit & Otorisasi</span>
-                    </a>
-                </div>
-
-                <!-- PENGATURAN & AKUN -->
-                <div class="animate-slide-in" style="animation-delay: 0.3s">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">PENGATURAN & AKUN</p>
-                    <a href="notifikasi.html" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-bell w-4"></i>
-                        <span>Notifikasi</span>
-                    </a>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-cog w-4"></i>
-                        <span>Pengaturan</span>
-                    </a>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-xs text-gray-700">
-                        <i class="fas fa-user-circle w-4"></i>
-                        <span>Profil Saya</span>
-                    </a>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="p-4 lg:p-6 overflow-x-hidden">
-            
             <!-- Top Header & Breadcrumbs -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 animate-fade-in-up">
                 <div class="flex items-center space-x-2 text-xs text-gray-500 overflow-x-auto whitespace-nowrap">
@@ -317,10 +261,10 @@
 
             <!-- Two Column Main Layout Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 <!-- Left 2 Columns: Detailed Specifications & Compliance -->
                 <div class="lg:col-span-2 space-y-6">
-                    
+
                     <!-- Card 1: Spesifikasi Mutasi Antar-Hub -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm animate-fade-in-left" style="animation-delay: 0.2s">
                         <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
@@ -345,7 +289,7 @@
                                     </h4>
                                     <p class="text-[10px] text-gray-500 mt-0.5">Zona Elektrik A4 &bull; Jakarta Timur</p>
                                 </div>
-                                
+
                                 <div class="md:col-span-1 flex flex-col items-center justify-center py-1">
                                     <i class="fas fa-arrow-right text-blue-500 text-lg hidden md:block"></i>
                                     <i class="fas fa-arrow-down text-blue-500 text-lg md:hidden"></i>
@@ -560,7 +504,7 @@
 
                 <!-- Right Column: Approval Action Panel & Tracking Widgets -->
                 <div class="space-y-6">
-                    
+
                     <!-- HR Action Box -->
                     <div class="bg-white border-2 border-blue-600 rounded-xl p-5 shadow-md animate-fade-in-right" style="animation-delay: 0.2s">
                         <h3 class="text-sm font-bold text-gray-900 flex items-center space-x-2 mb-3">
@@ -571,7 +515,7 @@
                         <form class="space-y-3">
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Catatan Otorisator / Alasan (Opsional)</label>
-                                <textarea rows="3" 
+                                <textarea rows="3"
                                           placeholder="Masukkan instruksi khusus serah terima barang atau catatan otorisasi..."
                                           class="w-full text-xs p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
                             </div>
@@ -607,7 +551,7 @@
 
                         <!-- Vertical Step Timeline -->
                         <div class="relative border-l-2 border-blue-500 ml-3 space-y-5">
-                            
+
                             <!-- Step 1 -->
                             <div class="relative pl-5">
                                 <div class="absolute -left-[9px] top-0.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[9px]">
@@ -699,7 +643,7 @@
                     <!-- Dokumen Lampiran Otorisasi -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm animate-fade-in-right" style="animation-delay: 0.5s">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">DOKUMEN LAMPIRAN OTORISASI</h3>
-                        
+
                         <div class="space-y-2">
                             <a href="#" class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg hover:bg-blue-50/50 hover:border-blue-300 transition-all text-xs">
                                 <div class="flex items-center space-x-2.5">
@@ -745,8 +689,39 @@
                 </button>
             </div>
 
-        </main>
-    </div>
-
+    </main>
+  </div>
+  <script>
+    lucide.createIcons();
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggleButton = document.querySelector('#main-area header button[aria-label="Buka menu"]');
+      if (!sidebar || !toggleButton) return;
+      toggleButton.id = 'sidebar-toggle';
+      toggleButton.setAttribute('aria-controls', 'sidebar');
+      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+      const sync = () => {
+        const open = isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+        toggleButton.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+        toggleButton.setAttribute('title', open ? 'Tutup menu' : 'Buka menu');
+        toggleButton.setAttribute('aria-expanded', String(open));
+        const icon = toggleButton.querySelector('[data-lucide], svg');
+        const iconName = open ? 'x' : 'menu';
+        if (icon && !icon.classList.contains(`lucide-${iconName}`)) {
+          toggleButton.innerHTML = `<i data-lucide="${iconName}" class="h-5 w-5"></i>`;
+          lucide.createIcons();
+        }
+        backdrop.classList.toggle('show', isMobile() && open);
+      };
+      window.toggleSidebar = (close = false) => {
+        if (isMobile()) sidebar.classList.toggle('open', close ? false : !sidebar.classList.contains('open'));
+        else document.body.classList.toggle('sidebar-collapsed', close ? true : !document.body.classList.contains('sidebar-collapsed'));
+        sync();
+      };
+      window.addEventListener('resize', sync);
+      sync();
+    })();
+  </script>
 </body>
 </html>

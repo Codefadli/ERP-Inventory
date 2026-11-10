@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Supplier — Astro Inventory</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: '#0b49d8',
+            ink: '#17243b',
+            canvas: '#f5f7fc',
+            line: '#e8edf5'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    .nav-link { transition: background .15s ease, color .15s ease; }
+    .nav-link.active { background: #0b49d8; color: white; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .reveal-delay-1 { animation-delay: 50ms; }
+    .reveal-delay-2 { animation-delay: 100ms; }
+    .reveal-delay-3 { animation-delay: 150ms; }
+    .supplier-row { animation: row-in .25s ease both; }
+    #supplier-rows > tr.supplier-row { height: 60px; }
+    .soft-button { transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+    .soft-button:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15, 23, 42, .08); }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes row-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+    #sidebar { width: 220px; }
+    #sidebar > a { height: 56px; gap: 8px; padding-inline: 12px; }
+    #sidebar > a > span:first-child { width: 32px; height: 32px; }
+    #sidebar > a > span:first-child i { width: 20px; height: 20px; }
+    #sidebar > a > span:last-child > span:first-child { font-size: 12px; }
+    #sidebar > a > span:last-child > span:last-child { font-size: 9px; }
+    #sidebar nav { gap: 16px; padding: 16px 8px; font-size: 11px; }
+    #sidebar nav section > p { margin-bottom: 6px; padding-inline: 8px; font-size: 9px; }
+    #sidebar nav a { height: 32px; gap: 8px; padding-inline: 8px; border-radius: 6px; font-size: 11px; }
+    #sidebar nav a > i { width: 16px; height: 16px; }
+    #sidebar nav a > span.ml-auto { height: 16px; min-width: 16px; font-size: 9px; }
+    #main-area > header { height: 56px; padding-inline: 16px; }
+    #main-area > header > div:first-child,
+    #main-area > header > div:last-child { gap: 12px; }
+    #main-area > header > div:first-child > div { gap: 8px; padding: 6px 10px; font-size: 10px; }
+    #main-area > header > div:first-child i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label { width: 224px; height: 32px; gap: 8px; padding-inline: 10px; }
+    #main-area > header > div:last-child label i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label input { font-size: 10px; }
+    #main-area > header > div:last-child > button { width: 32px; height: 32px; }
+    #main-area > header > div:last-child > button i { width: 16px; height: 16px; }
+    #main-area > header > div:last-child > div:last-child { gap: 8px; padding-left: 12px; }
+    #main-area > header > div:last-child > div:last-child > div:first-child { width: 32px; height: 32px; font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:first-child { font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:last-child { font-size: 9px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px !important; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%) !important; transition: transform .2s ease; }
+      #sidebar.open { transform: translateX(0) !important; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+  <style>
+    #sidebar { transition: transform .22s ease; }
+    @media (min-width: 768px) {
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
+      body.sidebar-collapsed #main-area { margin-left: 0 !important; }
+      #main-area > header { z-index: 60 !important; }
+      #main-area header #sidebar-toggle { display: flex !important; }
+    }
+    #main-area header #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #main-area header #sidebar-toggle:hover { background: #f1f5fc; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
+    <a href="data_barang.html" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i class="fas fa-cube text-white text-lg"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p>
+        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard Admin</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Master Data & Inventaris</p>
+        <div class="space-y-0.5">
+          <a href="data_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="package" class="h-4 w-4"></i><span>Data Barang</span></a>
+          <a href="kategori_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="tags" class="h-4 w-4"></i><span>Kategori Barang</span></a>
+          <a href="data_gudang_lokasi.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="warehouse" class="h-4 w-4"></i><span>Data Gudang & Lokasi</span></a>
+          <a href="data_supplier.html" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="truck" class="h-4 w-4"></i><span>Data Supplier</span></a>
+          <a href="data_departemen.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="building-2" class="h-4 w-4"></i><span>Departemen</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional & Transaksi</p>
+        <div class="space-y-0.5">
+          <a href="barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a>
+          <a href="barang_keluar.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a>
+          <a href="mutasi_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-left-right" class="h-4 w-4"></i><span>Mutasi Barang</span></a>
+          <a href="stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-list" class="h-4 w-4"></i><span>Persetujuan Barang</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Manajemen Sistem</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="users" class="h-4 w-4"></i><span>Manajemen Pengguna</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Laporan & Analitik</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-clock" class="h-4 w-4"></i><span>Laporan & Riwayat</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4"></i><span>Log Aktivitas</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-circle" class="h-4 w-4"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen md:ml-[220px]">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
+        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight sm:block"><p class="text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-56px)] bg-canvas p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Manajemen Data Supplier & Mitra Pemasok</span></p>
+          <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Manajemen Data Supplier & Mitra Pemasok</h1>
+          <p class="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-500">Direktori pemasok vendor resmi, kontak PIC, evaluasi performa SLA pengiriman (Lead Time), status kontrak, dan riwayat pesanan (PO) Hub Cabang DC-01.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="export-suppliers" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Data Vendor</button>
+          <button id="evaluate-sla" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="clipboard-check" class="h-4 w-4 text-emerald-600"></i>Evaluasi SLA & Rating</button>
+          <button id="add-supplier" class="soft-button flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="plus" class="h-4 w-4"></i>Tambah Supplier Baru</button>
+        </div>
+      </section>
+
+      <section aria-label="Ringkasan supplier" class="reveal reveal-delay-1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Supplier Aktif</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">48 <span class="text-[10.5px] font-medium text-slate-500">Mitra</span></p><p class="mt-2.5 text-[10.5px] text-slate-500"><span class="font-semibold text-blue-700">↗ +4 Mitra Baru Q1</span></p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="shield-check" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kategori Pasokan</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">12 <span class="text-[10.5px] font-medium text-slate-500">Sektor</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">Elektronik, IT, Audio, Packaging, Studio</p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-600"><i data-lucide="boxes" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Rata-Rata Lead Time</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">2.4 <span class="text-[10.5px] font-medium text-slate-500">Hari</span></p><p class="mt-2.5"><span class="rounded bg-emerald-50 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-700">96.8% On-Time Delivery SLA</span></p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="timer" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-red-100 bg-red-50/40 px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Perlu Tinjauan Kontrak</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">3 <span class="text-[10.5px] font-medium text-slate-500">Vendor</span></p><p class="mt-2.5"><span class="rounded bg-red-50 px-2.5 py-1 text-[10.5px] font-semibold text-red-600">Berakhir &lt; 30 Hari</span></p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-red-100 text-red-600"><i data-lucide="bell-ring" class="h-4 w-4"></i></span>
+        </article>
+      </section>
+
+      <section class="reveal reveal-delay-2 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="flex min-w-[240px] flex-1 items-center gap-3">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white"><i data-lucide="shield-check" class="h-4 w-4"></i></span>
+          <div><h2 class="text-[12px] font-semibold text-slate-800">Segmentasi Klasifikasi Mitra Hub Cabang DC-01</h2><p class="text-[10.5px] text-slate-500">Kepatuhan SLA, volume pengadaan berkala, dan performa inbound pass QC</p></div>
+        </div>
+        <div class="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
+          <div class="flex items-center justify-between gap-2 rounded-md bg-blue-50 px-3 py-2 text-[10.5px]"><span class="font-semibold text-slate-700">Tier 1 Strategic</span><span class="font-bold text-blue-700">99.0% SLA</span></div>
+          <div class="flex items-center justify-between gap-2 rounded-md bg-emerald-50 px-3 py-2 text-[10.5px]"><span class="font-semibold text-slate-700">Tier 2 Preferred</span><span class="font-bold text-emerald-700">95.0% SLA</span></div>
+          <div class="flex items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-[10.5px]"><span class="font-semibold text-slate-700">Tier 3 Standard</span><span class="font-bold text-slate-600">91.0% SLA</span></div>
+        </div>
+      </section>
+
+      <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 xl:max-w-[430px]">
+            <i data-lucide="search" class="h-4 w-4"></i><input id="supplier-search" type="search" placeholder="Cari nama, PT/CV supplier, kode vendor, nama PIC, email..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"><i data-lucide="scan-search" class="h-4 w-4 text-blue-500"></i>
+          </label>
+          <select id="category-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Semua Kategori Produk</option></select>
+          <select id="contract-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Status Kemitraan (Aktif)</option><option value="Mitra Strategis">Mitra Strategis</option><option value="Preferred">Preferred</option><option value="Optimal">Optimal</option><option value="Review Kontrak">Review Kontrak</option></select>
+          <select id="rating-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Rating Performa (Semua)</option><option value="high">4.5 ke atas</option><option value="low">Di bawah 4.5</option></select>
+          <button id="more-filters" class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] text-slate-700"><i data-lucide="list-filter" class="h-4 w-4"></i>Filter Lanjutan</button>
+          <button id="reset-filters" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
+          <span class="mr-1 font-semibold uppercase text-slate-600">FILTER CEPAT:</span>
+          <button data-quick-filter="all" class="rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white">Semua Supplier (48)</button>
+          <button data-quick-filter="tier1" class="rounded-full bg-blue-50 px-3 py-1 text-[10.5px] font-semibold text-blue-700">Tier 1 Prioritas (12)</button>
+          <button data-quick-filter="electronics" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Elektronik & Gadget (16)</button>
+          <button data-quick-filter="accessories" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Aksesoris & Storage (12)</button>
+          <button data-quick-filter="contracts" class="rounded-full bg-red-50 px-3 py-1 text-[10.5px] font-semibold text-red-600">Kontrak Segera Habis (3)</button>
+        </div>
+      </section>
+
+      <section class="reveal reveal-delay-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1300px] table-fixed border-collapse text-left">
+            <thead class="h-11 whitespace-nowrap bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="w-[48px] px-2"><input id="select-all" type="checkbox" aria-label="Pilih semua supplier" class="h-4 w-4 accent-blue-600"></th>
+                <th class="w-[270px] px-2">Kode & Nama Supplier</th>
+                <th class="w-[180px] px-2">Kategori & Pasokan</th>
+                <th class="w-[240px] px-2">Kontak PIC & Lokasi</th>
+                <th class="w-[165px] px-2">Lead Time & OTD SLA</th>
+                <th class="w-[165px] px-2">Status Kontrak</th>
+                <th class="w-[150px] px-2">Rating Performa</th>
+                <th class="w-[100px] px-2 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="supplier-rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
+          </table>
+        </div>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <span id="row-count" aria-live="polite">Menampilkan 1 - 7 dari 48 supplier terdaftar</span>
+          <div class="flex items-center gap-1">
+            <button id="previous-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600 disabled:opacity-40">‹ Sebelumnya</button>
+            <div id="pagination" class="flex items-center gap-1"></div>
+            <button id="next-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600 disabled:opacity-40">Selanjutnya ›</button>
+          </div>
+        </footer>
+      </section>
+
+      <section class="reveal reveal-delay-3 mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white"><i data-lucide="network" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Portal Vendor Self-Service</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Kelola hak akses portal supplier terpadu untuk pra-notifikasi pengiriman (ASN), pemantauan antrean dock, dan sinkronisasi E-Faktur.</p></div></div>
+          <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="font-semibold text-emerald-700">39 Mitra Terhubung</span><button data-action="portal" class="font-semibold text-blue-600 hover:text-blue-800">Kelola Akses →</button></div>
+        </article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="zap" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Notifikasi ROP ke Supplier</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Sistem otomatis mengirimkan draf Purchase Order (PO) begitu kuantitas stok berada di bawah minimum berdasarkan histori konsumsi.</p></div></div>
+          <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="text-slate-500">Batas Aman 7 Hari Pasokan</span><button data-action="rop" class="font-semibold text-blue-600 hover:text-blue-800">Konfigurasi ROP →</button></div>
+        </article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="file-check-2" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Audit Mutu & SLA Berkala</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Tingkat kelulusan QC inbound sebesar 98.9% tanpa komplain retur. Penilaian performa supplier menggunakan matriks SLA presisi.</p></div></div>
+          <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="font-semibold text-emerald-700">Tingkat Retur &lt; 0.9%</span><button data-action="audit" class="font-semibold text-blue-600 hover:text-blue-800">Lihat Laporan QC →</button></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="supplier-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 p-4">
+    <form id="supplier-form" class="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-xl bg-white p-4 shadow-xl">
+      <div class="mb-4 flex items-start justify-between">
+        <div><h2 class="text-[12px] font-bold text-slate-800">Tambah Supplier Baru</h2><p class="mt-1 text-[10.5px] text-slate-500">Lengkapi informasi pemasok untuk direktori vendor.</p></div>
+        <button type="button" id="close-modal" class="rounded p-1 text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label class="text-[12px] font-medium text-slate-700 sm:col-span-2">Nama perusahaan<input name="name" required maxlength="80" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="PT Contoh Nusantara"></label>
+        <label class="text-[12px] font-medium text-slate-700">Kategori pasokan<input name="category" required maxlength="50" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Elektronik & Optik"></label>
+        <label class="text-[12px] font-medium text-slate-700">Nama PIC<input name="contact" required maxlength="60" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Nama penanggung jawab"></label>
+        <label class="text-[12px] font-medium text-slate-700">Email PIC<input name="email" type="email" required maxlength="100" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="pic@perusahaan.co.id"></label>
+        <label class="text-[12px] font-medium text-slate-700">Nomor telepon<input name="phone" type="tel" required maxlength="24" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="+62 21 5555 0000"></label>
+        <label class="text-[12px] font-medium text-slate-700 sm:col-span-2">Lokasi<input name="location" required maxlength="80" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Jakarta, Indonesia"></label>
+      </div>
+      <p id="modal-error" class="mt-3 hidden text-[10.5px] text-red-600"></p>
+      <div class="mt-5 flex justify-end gap-2"><button type="button" id="cancel-modal" class="h-10 rounded-md border border-slate-200 px-4 text-[12px] font-medium text-slate-600 hover:bg-slate-50">Batal</button><button type="submit" class="h-10 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700">Simpan Supplier</button></div>
+    </form>
+  </div>
+  <div id="toast" role="status" class="fixed bottom-4 right-4 z-[80] hidden rounded-lg bg-slate-900 px-4 py-3 text-[12px] text-white shadow-lg"></div>
+
+  <script>
+    lucide.createIcons();
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-backdrop').classList.toggle('show');
+    }
+
+    const suppliers = [
+      { code: 'SUP-ELK-0101', name: 'PT Surya Elektronik Nusantara', category: 'Elektronik & Optik', goods: 'Kamera, Lensa, Audio Visual', contact: 'Hendra Wijaya', email: 'hendra.w@surya-elektronik.co.id', phone: '+62 21-2345-6789', location: 'Kelapa Gading, Jakarta Utara', days: 1.8, sla: 99.2, contract: 'Mitra Strategis', rating: 4.9, reviews: 210, tier: 'SE', color: 'bg-blue-100 text-blue-700' },
+      { code: 'SUP-HDW-0044', name: 'CV Digital Mandiri Perkasa', category: 'Hardware & IT Server', goods: 'Laptop, Workstation, Server Rack', contact: 'Meysa Agustin', email: 'meysa.a@digitalmandiri.co.id', phone: '+62 22-8012-6542', location: 'Margahayu, Bandung, Jawa Barat', days: 2.1, sla: 98.5, contract: 'Mitra Strategis', rating: 4.8, reviews: 172, tier: 'DM', color: 'bg-slate-100 text-slate-700' },
+      { code: 'SUP-AUD-0098', name: 'PT Bintang Audio Prima', category: 'Audio & Aksesoris', goods: 'Headset, Sound System, Mikrofon', contact: 'Ricky Pratama', email: 'ricky.p@bintangaudio.co.id', phone: '+62 812-1122-3344', location: 'Sunter Agung, Jakarta Utara', days: 2.8, sla: 97.0, contract: 'Optimal', rating: 4.6, reviews: 115, tier: 'BA', color: 'bg-emerald-100 text-emerald-700' },
+      { code: 'SUP-STR-0128', name: 'PT Global Storage Solusindo', category: 'Media Penyimpanan', goods: 'SSD NVMe, HDD Enterprise, Flashdisk', contact: 'Dian Kusuma', email: 'dian.k@globalstorage.co.id', phone: '+62 812-5556-7788', location: 'Kebayoran Baru, Jakarta Selatan', days: 2.0, sla: 97.4, contract: 'Mitra Strategis', rating: 4.8, reviews: 195, tier: 'GS', color: 'bg-blue-50 text-blue-700' },
+      { code: 'SUP-OPT-0715', name: 'CV Jaya Optik Instruments', category: 'Aksesoris Fotografi', goods: 'Tripod, Studio Lighting, Filter', contact: 'Bambang S.', email: 'bambang.s@jayaoptik.co.id', phone: '+62 877-7788-0000', location: 'Bandung, Jawa Barat', days: 3.5, sla: 92.1, contract: 'Review Kontrak', rating: 4.2, reviews: 51, tier: 'JO', color: 'bg-red-100 text-red-700' },
+      { code: 'SUP-ACC-0188', name: 'PT Mega Periferal Indonesia', category: 'Periferal & Hub', goods: 'Keyboard, Mouse, Docking Station', contact: 'Citra Lestari', email: 'citra.l@megaperiferal.co.id', phone: '+62 811-4433-2222', location: 'Sunter, Jakarta Utara', days: 2.2, sla: 96.0, contract: 'Optimal', rating: 4.7, reviews: 90, tier: 'MP', color: 'bg-indigo-100 text-indigo-700' },
+      { code: 'SUP-PKG-0220', name: 'CV Logistik Pack Sentosa', category: 'Packaging & Consumables', goods: 'Bubble Wrap, Dus Karton, Label Barcode', contact: 'Eko Wahyudi', email: 'eko.w@packsentosa.co.id', phone: '+62 812-3322-5500', location: 'Tangerang, Banten', days: 1.2, sla: 98.0, contract: 'Mitra Strategis', rating: 4.9, reviews: 340, tier: 'LP', color: 'bg-blue-100 text-blue-700' },
+      { code: 'SUP-IT-0241', name: 'PT Solusi Komputasi Terpadu', category: 'Hardware & IT Server', goods: 'Komponen PC, RAM, Mainboard', contact: 'Nadia Putri', email: 'nadia.p@solusikomputasi.co.id', phone: '+62 21-8899-1100', location: 'Jakarta Pusat', days: 2.6, sla: 95.1, contract: 'Preferred', rating: 4.5, reviews: 76, tier: 'SK', color: 'bg-violet-100 text-violet-700' },
+      { code: 'SUP-CAM-0250', name: 'PT Lensa Citra Abadi', category: 'Elektronik & Optik', goods: 'Kamera Mirrorless, Lensa Prime', contact: 'Dimas Saputra', email: 'dimas.s@lensacitra.co.id', phone: '+62 22-7777-2233', location: 'Bandung, Jawa Barat', days: 2.4, sla: 96.3, contract: 'Preferred', rating: 4.6, reviews: 83, tier: 'LC', color: 'bg-cyan-100 text-cyan-700' },
+      { code: 'SUP-OFF-0264', name: 'CV Karya Office Digital', category: 'Packaging & Consumables', goods: 'Tinta, Kertas, Perlengkapan Label', contact: 'Sari Wulandari', email: 'sari.w@karyaoffice.co.id', phone: '+62 31-9988-4455', location: 'Surabaya, Jawa Timur', days: 3.0, sla: 93.8, contract: 'Preferred', rating: 4.4, reviews: 64, tier: 'KO', color: 'bg-amber-100 text-amber-700' }
+    ];
+
+    const supplierRows = document.getElementById('supplier-rows');
+    const searchInput = document.getElementById('supplier-search');
+    const globalSearch = document.getElementById('global-search');
+    const categoryFilter = document.getElementById('category-filter');
+    const contractFilter = document.getElementById('contract-filter');
+    const ratingFilter = document.getElementById('rating-filter');
+    const pageSize = 7;
+    let currentPage = 1;
+    let filteredSuppliers = [...suppliers];
+    let activeQuickFilter = 'all';
+    let registeredSupplierCount = 48;
+    let toastTimer;
+
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+
+    function renderRows() {
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = filteredSuppliers.slice(start, start + pageSize);
+      supplierRows.innerHTML = pageItems.map((supplier, index) => {
+        const safe = Object.fromEntries(Object.entries(supplier).map(([key, value]) => [key, typeof value === 'string' ? escapeHtml(value) : value]));
+        const contractTone = safe.contract === 'Review Kontrak' ? 'bg-red-50 text-red-700' : safe.contract === 'Optimal' ? 'bg-emerald-50 text-emerald-700' : safe.contract === 'Preferred' ? 'bg-slate-100 text-slate-700' : 'bg-blue-50 text-blue-700';
+        const slaTone = safe.sla >= 95 ? 'bg-emerald-600' : 'bg-red-500';
+        return `<tr class="supplier-row hover:bg-slate-50/70" style="animation-delay:${Math.min(index * 25, 150)}ms" data-code="${safe.code}">
+          <td class="px-2"><input type="checkbox" aria-label="Pilih ${safe.name}" class="supplier-checkbox h-4 w-4 accent-blue-600"></td>
+          <td class="px-2"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${safe.color} text-[9.5px] font-bold">${safe.tier}</span><span class="min-w-0"><b class="block truncate text-[12px] font-semibold text-slate-800">${safe.name}</b><span class="block truncate text-[10.5px] text-slate-500">${safe.code}</span></span></div></td>
+          <td class="px-2"><b class="block truncate text-[12px] font-medium text-slate-700">${safe.category}</b><span class="mt-0.5 block truncate text-[10.5px] text-slate-500">${safe.goods}</span></td>
+          <td class="px-2"><b class="block truncate text-[12px] font-medium text-slate-700">${safe.contact}</b><span class="block truncate text-[10.5px] text-slate-500">${safe.phone}</span><span class="block truncate text-[10.5px] text-slate-500">${safe.location}</span></td>
+          <td class="px-2"><div class="flex items-center justify-between gap-1 text-[10.5px]"><b class="whitespace-nowrap text-slate-700">${safe.days.toFixed(1)} Hari</b><span class="rounded bg-emerald-50 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-700">${safe.sla.toFixed(1)}% OTD</span></div><div class="mt-1 h-1 rounded-full bg-slate-100"><div class="h-full rounded-full ${slaTone}" style="width:${safe.sla}%"></div></div></td>
+          <td class="px-2"><span class="rounded-full ${contractTone} px-2.5 py-1 text-[10.5px] font-semibold">${safe.contract}</span><span class="mt-1 block truncate text-[10.5px] text-slate-500">${safe.contract === 'Review Kontrak' ? 'Berakhir dalam 18 hari' : 'Aktif hingga Mei 2027'}</span></td>
+          <td class="px-2"><div class="flex items-center gap-1 text-[10.5px]"><i data-lucide="star" class="h-3.5 w-3.5 fill-amber-400 text-amber-400"></i><b class="text-slate-700">${safe.rating.toFixed(1)}</b><span class="text-slate-500">/ 5.0</span></div><span class="block text-[10.5px] text-emerald-700">${safe.reviews} PO selesai</span></td>
+          <td class="px-2"><div class="flex items-center justify-center gap-1 text-slate-500"><button data-row-action="view" aria-label="Lihat ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="eye" class="h-4 w-4"></i></button><button data-row-action="edit" aria-label="Edit ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="square-pen" class="h-4 w-4"></i></button><button data-row-action="more" aria-label="Opsi ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="ellipsis-vertical" class="h-4 w-4"></i></button></div></td>
+        </tr>`;
+      }).join('');
+      lucide.createIcons();
+      const end = Math.min(start + pageSize, filteredSuppliers.length);
+      document.getElementById('row-count').textContent = filteredSuppliers.length
+        ? filteredSuppliers.length === suppliers.length
+          ? `Menampilkan ${start + 1} - ${end} dari ${suppliers.length} contoh supplier (${registeredSupplierCount} terdaftar)`
+          : `Menampilkan ${start + 1} - ${end} dari ${filteredSuppliers.length} supplier sesuai filter`
+        : 'Tidak ada supplier yang sesuai dengan filter';
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const pagination = document.getElementById('pagination');
+      const totalPages = Math.max(1, Math.ceil(filteredSuppliers.length / pageSize));
+      pagination.innerHTML = '';
+      const visiblePages = new Set([1, 2, 3, currentPage, totalPages]);
+      [...visiblePages].filter((page) => page <= totalPages).sort((a, b) => a - b).forEach((page, index, pages) => {
+        if (index && page - pages[index - 1] > 1) {
+          const ellipsis = document.createElement('span');
+          ellipsis.className = 'px-1 text-slate-400';
+          ellipsis.textContent = '…';
+          pagination.append(ellipsis);
+        }
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = String(page);
+        button.setAttribute('aria-label', `Halaman ${page}`);
+        button.setAttribute('aria-current', page === currentPage ? 'page' : 'false');
+        button.className = `h-8 min-w-8 rounded px-2 text-[12px] ${page === currentPage ? 'bg-blue-600 font-semibold text-white' : 'text-slate-600 hover:bg-blue-50'}`;
+        button.addEventListener('click', () => { currentPage = page; renderRows(); });
+        pagination.append(button);
+      });
+      document.getElementById('previous-page').disabled = currentPage <= 1;
+      document.getElementById('next-page').disabled = currentPage >= totalPages;
+    }
+
+    function applyFilters() {
+      const query = `${searchInput.value} ${globalSearch.value}`.trim().toLowerCase();
+      filteredSuppliers = suppliers.filter((supplier) => {
+        const matchesSearch = !query || Object.values(supplier).join(' ').toLowerCase().includes(query);
+        const matchesCategory = !categoryFilter.value || supplier.category === categoryFilter.value;
+        const matchesContract = !contractFilter.value || supplier.contract === contractFilter.value;
+        const matchesRating = !ratingFilter.value || (ratingFilter.value === 'high' ? supplier.rating >= 4.5 : supplier.rating < 4.5);
+        const matchesQuickFilter = activeQuickFilter === 'all'
+          || (activeQuickFilter === 'tier1' && supplier.contract === 'Mitra Strategis')
+          || (activeQuickFilter === 'electronics' && ['Elektronik & Optik', 'Hardware & IT Server'].includes(supplier.category))
+          || (activeQuickFilter === 'accessories' && ['Aksesoris Fotografi', 'Audio & Aksesoris', 'Media Penyimpanan', 'Periferal & Hub'].includes(supplier.category))
+          || (activeQuickFilter === 'contracts' && supplier.contract === 'Review Kontrak');
+        return matchesSearch && matchesCategory && matchesContract && matchesRating && matchesQuickFilter;
+      });
+      currentPage = 1;
+      renderRows();
+    }
+
+    [...new Set(suppliers.map((supplier) => supplier.category))].sort().forEach((category) => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categoryFilter.append(option);
+    });
+
+    [searchInput, globalSearch].forEach((input) => input.addEventListener('input', applyFilters));
+    [categoryFilter, contractFilter, ratingFilter].forEach((select) => select.addEventListener('change', applyFilters));
+    document.getElementById('previous-page').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderRows(); } });
+    document.getElementById('next-page').addEventListener('click', () => {
+      if (currentPage < Math.ceil(filteredSuppliers.length / pageSize)) { currentPage++; renderRows(); }
+    });
+    document.getElementById('reset-filters').addEventListener('click', () => {
+      searchInput.value = '';
+      globalSearch.value = '';
+      categoryFilter.value = '';
+      contractFilter.value = '';
+      ratingFilter.value = '';
+      activeQuickFilter = 'all';
+      document.querySelectorAll('[data-quick-filter]').forEach((button, index) => button.className = index === 0
+        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
+        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
+      applyFilters();
+    });
+    document.querySelectorAll('[data-quick-filter]').forEach((button, index) => {
+      button.addEventListener('click', () => {
+        searchInput.value = '';
+        categoryFilter.value = '';
+        contractFilter.value = '';
+        ratingFilter.value = '';
+        activeQuickFilter = button.dataset.quickFilter;
+        document.querySelectorAll('[data-quick-filter]').forEach((item) => item.className = item === button
+          ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
+          : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
+        applyFilters();
+      });
+    });
+    document.getElementById('select-all').addEventListener('change', (event) => {
+      document.querySelectorAll('.supplier-checkbox').forEach((checkbox) => { checkbox.checked = event.target.checked; });
+    });
+    supplierRows.addEventListener('change', (event) => {
+      if (event.target.matches('.supplier-checkbox') && !event.target.checked) document.getElementById('select-all').checked = false;
+    });
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    const supplierModal = document.getElementById('supplier-modal');
+    const supplierForm = document.getElementById('supplier-form');
+    function closeSupplierModal() {
+      supplierModal.classList.add('hidden');
+      supplierModal.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+    }
+    document.getElementById('add-supplier').addEventListener('click', () => {
+      supplierModal.classList.remove('hidden');
+      supplierModal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      supplierForm.elements.name.focus();
+    });
+    ['close-modal', 'cancel-modal'].forEach((id) => document.getElementById(id).addEventListener('click', closeSupplierModal));
+    supplierModal.addEventListener('click', (event) => { if (event.target === supplierModal) closeSupplierModal(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !supplierModal.classList.contains('hidden')) closeSupplierModal(); });
+    supplierForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!supplierForm.reportValidity()) return;
+      const formData = new FormData(supplierForm);
+      const name = String(formData.get('name')).trim();
+      const supplier = {
+        code: `SUP-NEW-${String(Date.now()).slice(-4)}`,
+        name,
+        category: String(formData.get('category')).trim(),
+        goods: 'Supplier baru',
+        contact: String(formData.get('contact')).trim(),
+        email: String(formData.get('email')).trim(),
+        phone: String(formData.get('phone')).trim(),
+        location: String(formData.get('location')).trim(),
+        days: 0,
+        sla: 0,
+        contract: 'Preferred',
+        rating: 0,
+        reviews: 0,
+        tier: name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+        color: 'bg-blue-100 text-blue-700'
+      };
+      suppliers.unshift(supplier);
+      registeredSupplierCount++;
+      if (![...categoryFilter.options].some((option) => option.value === supplier.category)) {
+        const categoryOption = document.createElement('option');
+        categoryOption.value = supplier.category;
+        categoryOption.textContent = supplier.category;
+        categoryFilter.append(categoryOption);
+      }
+      categoryFilter.value = '';
+      contractFilter.value = '';
+      ratingFilter.value = '';
+      searchInput.value = '';
+      globalSearch.value = '';
+      activeQuickFilter = 'all';
+      closeSupplierModal();
+      supplierForm.reset();
+      applyFilters();
+      showToast('Supplier berhasil ditambahkan ke daftar.');
+    });
+
+    document.getElementById('export-suppliers').addEventListener('click', () => {
+      const columns = ['Kode Supplier', 'Nama Supplier', 'Kategori', 'Produk Pasokan', 'PIC', 'Email', 'Telepon', 'Lokasi', 'Lead Time (Hari)', 'OTD SLA (%)', 'Status Kontrak', 'Rating', 'PO Selesai'];
+      const csvCell = (value) => `"${String(value).replace(/"/g, '""')}"`;
+      const csv = [columns, ...filteredSuppliers.map((supplier) => [
+        supplier.code, supplier.name, supplier.category, supplier.goods, supplier.contact, supplier.email,
+        supplier.phone, supplier.location, supplier.days, supplier.sla, supplier.contract, supplier.rating, supplier.reviews
+      ])].map((row) => row.map(csvCell).join(',')).join('\r\n');
+      const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'data-supplier.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('evaluate-sla').addEventListener('click', () => showToast('Evaluasi SLA & rating supplier terbaru sudah ditampilkan.'));
+    document.getElementById('more-filters').addEventListener('click', () => {
+      ratingFilter.focus();
+      showToast('Pilih rentang rating untuk menyaring performa supplier.');
+    });
+    supplierRows.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-row-action]');
+      if (!button) return;
+      const row = button.closest('tr');
+      const supplier = suppliers.find((item) => item.code === row.dataset.code);
+      if (!supplier) return;
+      const action = button.dataset.rowAction;
+      showToast(action === 'view' ? `Detail supplier ${supplier.name}` : action === 'edit' ? `Mode edit untuk ${supplier.name}` : `Opsi supplier ${supplier.name}`);
+    });
+    document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
+      const messages = {
+        portal: 'Pengaturan akses Portal Vendor Self-Service',
+        rop: 'Pengaturan notifikasi ROP supplier',
+        audit: 'Laporan audit mutu dan SLA berkala'
+      };
+      showToast(messages[button.dataset.action]);
+    }));
+
+    renderRows();
+  </script>
+  <script>
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggleButton = document.querySelector('#main-area header button[aria-label="Buka menu"]');
+      if (!sidebar || !toggleButton) return;
+      toggleButton.id = 'sidebar-toggle';
+      toggleButton.setAttribute('aria-controls', 'sidebar');
+      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+      const sync = () => {
+        const open = isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+        toggleButton.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('title', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('aria-expanded', String(open));
+        const icon = toggleButton.querySelector('[data-lucide], svg');
+        const iconName = open ? 'x' : 'menu';
+        if (icon && icon.getAttribute('data-lucide') !== iconName) {
+          icon.setAttribute('data-lucide', iconName);
+          if (window.lucide) window.lucide.createIcons();
+        }
+        backdrop?.classList.toggle('show', isMobile() && open);
+      };
+      window.toggleSidebar = (close = false) => {
+        if (isMobile()) sidebar.classList.toggle('open', close ? false : !sidebar.classList.contains('open'));
+        else document.body.classList.toggle('sidebar-collapsed', close ? true : !document.body.classList.contains('sidebar-collapsed'));
+        sync();
+      };
+      window.addEventListener('resize', sync);
+      sync();
+    })();
+  </script>
+</body>
+</html>
