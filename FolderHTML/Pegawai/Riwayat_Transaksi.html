@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riwayat Transaksi &amp; Log Aktivitas Staf | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* ============================================================
+     ASTRO INVENTORY — DESIGN SYSTEM (inline, self-contained)
+     ============================================================ */
+  :root{
+    --ai-blue:#2563eb;
+    --ai-blue-dark:#1d4ed8;
+    --ai-green:#16a34a;
+    --ai-red:#dc2626;
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#0f172a}
+
+  /* --- Card --- */
+  .ai-card{background:#fff;border:1px solid #e2e8f0;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+  .ai-card-hover{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .ai-card-hover:hover{transform:translateY(-3px);box-shadow:0 12px 28px -8px rgba(37,99,235,.18);border-color:#bfdbfe}
+
+  /* --- Buttons --- */
+  .ai-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:.75rem;
+    padding:.625rem 1rem;font-size:.875rem;font-weight:600;line-height:1.25rem;cursor:pointer;
+    transition:all .2s ease;border:1px solid transparent;white-space:nowrap}
+  .ai-btn:active{transform:scale(.97)}
+  .ai-btn-primary{background:#2563eb;color:#fff}
+  .ai-btn-primary:hover{background:#1d4ed8;box-shadow:0 6px 16px -4px rgba(37,99,235,.5)}
+  .ai-btn-secondary{background:#fff;color:#334155;border-color:#cbd5e1}
+  .ai-btn-secondary:hover{background:#f8fafc;border-color:#94a3b8}
+  .ai-btn-soft{background:#eff6ff;color:#1d4ed8;border-color:#dbeafe}
+  .ai-btn-soft:hover{background:#dbeafe}
+  .ai-btn-danger{background:#fef2f2;color:#dc2626;border-color:#fee2e2}
+  .ai-btn-danger:hover{background:#fee2e2}
+  .ai-btn-icon{padding:.5rem;border-radius:.625rem}
+
+  /* --- Badge & chip --- */
+  .ai-badge{display:inline-flex;align-items:center;gap:.375rem;border-radius:9999px;
+    padding:.25rem .625rem;font-size:.6875rem;font-weight:700;line-height:1}
+  .ai-badge-green{background:#dcfce7;color:#15803d}
+  .ai-badge-red{background:#fee2e2;color:#b91c1c}
+  .ai-badge-blue{background:#dbeafe;color:#1d4ed8}
+  .ai-badge-gray{background:#f1f5f9;color:#475569}
+  .ai-chip{display:inline-flex;align-items:center;gap:.25rem;border-radius:.375rem;
+    padding:.1875rem .5rem;font-size:.6875rem;font-weight:600;line-height:1.1;white-space:nowrap}
+  .ai-chip-blue{background:#eff6ff;color:#2563eb;border:1px solid #dbeafe}
+  .ai-chip-gray{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+  .ai-chip-red{background:#fef2f2;color:#dc2626;border:1px solid #fee2e2}
+
+  /* --- Input --- */
+  .ai-input{width:100%;border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;
+    padding:.625rem 1rem;font-size:.875rem;color:#0f172a;outline:none;transition:border-color .2s,box-shadow .2s}
+  .ai-input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  select.ai-input{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:2.25rem}
+
+  /* --- Table --- */
+  .ai-table{width:100%;border-collapse:collapse;font-size:.8125rem}
+  .ai-table thead th{background:#f8fafc;color:#64748b;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.6875rem;font-weight:700;text-align:left;padding:.875rem 1rem;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+  .ai-table tbody td{padding:1rem;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+  .ai-table tbody tr{transition:background .2s ease}
+  .ai-table tbody tr:hover{background:#f8fafc}
+  .ai-table tbody tr.ai-row-danger{background:#fef5f5;border-left:4px solid #ef4444}
+  .ai-table tbody tr.ai-row-danger:hover{background:#fdecec}
+  @keyframes aiPulseRed{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.30)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+  .ai-row-danger .ai-badge-red{animation:aiPulseRed 2.2s ease-in-out infinite}
+
+  /* --- Pills (tabs) --- */
+  .ai-pill{display:inline-flex;align-items:center;gap:.5rem;border-radius:9999px;
+    padding:.5rem 1rem;font-size:.8125rem;font-weight:600;color:#475569;cursor:pointer;
+    border:1px solid transparent;background:transparent;transition:all .2s ease;white-space:nowrap}
+  .ai-pill:hover{background:#f1f5f9;color:#0f172a}
+  .ai-pill-active,.ai-pill-active:hover{background:#2563eb;color:#fff;box-shadow:0 4px 12px -2px rgba(37,99,235,.45)}
+  .ai-pill .ai-pill-count{background:rgba(148,163,184,.18);color:inherit;border-radius:9999px;
+    padding:.125rem .5rem;font-size:.6875rem;font-weight:700}
+  .ai-pill-active .ai-pill-count{background:rgba(255,255,255,.25)}
+
+  /* --- Bar --- */
+  .ai-bar{height:.5rem;border-radius:9999px;background:#e2e8f0;overflow:hidden}
+  .ai-bar>span{display:block;height:100%;border-radius:9999px;background:#2563eb;width:0;transition:width 1.2s ease}
+
+  /* --- Reveal --- */
+  .ai-reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .ai-reveal.in{opacity:1;transform:translateY(0)}
+
+  /* --- Modal --- */
+  .ai-modal-overlay{position:fixed;inset:0;z-index:80;background:rgba(15,23,42,.55);
+    display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
+  .ai-modal{background:#fff;border-radius:1.25rem;max-width:520px;width:100%;max-height:90vh;overflow:auto;
+    box-shadow:0 24px 60px -12px rgba(15,23,42,.4);animation:aiModalIn .25s ease}
+  @keyframes aiModalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  /* --- Toast --- */
+  #aiToasts{position:fixed;bottom:1.25rem;right:1.25rem;z-index:100;display:flex;flex-direction:column;gap:.5rem}
+  .ai-toast{display:flex;align-items:center;gap:.625rem;background:#0f172a;color:#fff;
+    border-radius:.75rem;padding:.75rem 1rem;font-size:.8125rem;font-weight:500;min-width:260px;max-width:360px;
+    box-shadow:0 12px 30px -8px rgba(15,23,42,.5);animation:aiToastIn .3s ease}
+  .ai-toast.ai-toast-green{background:#14532d}
+  .ai-toast.ai-toast-red{background:#7f1d1d}
+  .ai-toast.ai-toast-blue{background:#1e3a8a}
+  @keyframes aiToastIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+  .ai-toast.out{opacity:0;transform:translateX(24px);transition:all .3s ease}
+
+  /* --- Sidebar --- */
+  .ai-nav{display:flex;align-items:center;gap:.75rem;padding:.625rem .875rem;border-radius:.75rem;
+    font-size:.875rem;font-weight:600;color:#475569;cursor:pointer;transition:all .2s ease;text-decoration:none}
+  .ai-nav:hover{background:#eff6ff;color:#1d4ed8}
+  .ai-nav.ai-nav-active{background:#2563eb;color:#fff;box-shadow:0 6px 14px -4px rgba(37,99,235,.5)}
+  .ai-nav.ai-nav-active:hover{background:#1d4ed8;color:#fff}
+
+  /* --- Pagination --- */
+  .ai-page{display:inline-flex;align-items:center;justify-content:center;min-width:2rem;height:2rem;
+    padding:0 .375rem;border-radius:.5rem;font-size:.8125rem;font-weight:600;color:#475569;
+    border:1px solid transparent;cursor:pointer;transition:all .2s ease}
+  .ai-page:hover{background:#eff6ff;color:#1d4ed8}
+  .ai-page.ai-page-active{background:#2563eb;color:#fff}
+  .ai-page.ai-page-active:hover{background:#1d4ed8;color:#fff}
+
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+</style>
+<script>
+/* ============================================================
+   ASTRO INVENTORY — APP SHELL (inline, self-contained)
+   Sidebar / topbar non-navigatif + util interaksi halaman
+   ============================================================ */
+(function(){
+  'use strict';
+
+  /* ---------- Mini icon renderer (pengganti lucide CDN) ---------- */
+  var AI_ICONS = {
+    'layout-dashboard':'<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    'package':'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/>',
+    'arrow-down-left':'<path d="M17 7 7 17"/><path d="M17 17H7V7"/>',
+    'arrow-up-right':'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    'clipboard-check':'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
+    'history':'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    'clipboard-list':'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+    'bell':'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    'settings':'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    'user-circle':'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.66V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.66"/>',
+    'help-circle':'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    'check-circle':'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    'scan-barcode':'<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8"/><path d="M11 8v8"/><path d="M15 8v8"/><path d="M17 8v8"/>',
+    'file-text':'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    'alert-triangle':'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    'calendar':'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    'chevron-down':'<path d="m6 9 6 6 6-6"/>',
+    'chevron-left':'<path d="m15 18-6-6 6-6"/>',
+    'chevron-right':'<path d="m9 18 6-6-6-6"/>',
+    'printer':'<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+    'download':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    'broadcast':'<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"/>',
+    'search':'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    'barcode':'<path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/>',
+    'clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    'sliders-horizontal':'<path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><circle cx="12" cy="4" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="14" cy="20" r="2"/>',
+    'map-pin':'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    'rotate-ccw':'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+    'shield-check':'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/>',
+    'lock':'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    'file-edit':'<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/>',
+    'award':'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+    'camera':'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    'x':'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    'trending-up':'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    'building':'<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/>'
+  };
+
+  function aiIcons(root){
+    (root||document).querySelectorAll('i[data-lucide]').forEach(function(el){
+      var body = AI_ICONS[el.getAttribute('data-lucide')];
+      if(!body){ return; }
+      var cls = el.getAttribute('class') || 'w-4 h-4';
+      var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+      svg.setAttribute('viewBox','0 0 24 24');
+      svg.setAttribute('fill','none');
+      svg.setAttribute('stroke','currentColor');
+      svg.setAttribute('stroke-width','2');
+      svg.setAttribute('stroke-linecap','round');
+      svg.setAttribute('stroke-linejoin','round');
+      svg.setAttribute('class',cls);
+      svg.innerHTML = body;
+      el.replaceWith(svg);
+    });
+  }
+
+  /* ---------- Toast ---------- */
+  function aiToast(msg, type){
+    var wrap = document.getElementById('aiToasts');
+    if(!wrap){ return; }
+    var t = document.createElement('div');
+    t.className = 'ai-toast' + (type ? ' ai-toast-' + type : '');
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(function(){
+      t.classList.add('out');
+      setTimeout(function(){ t.remove(); }, 320);
+    }, 3000);
+  }
+  window.aiToast = aiToast;
+
+  /* ---------- Count-up ---------- */
+  function aiCountUp(root){
+    (root||document).querySelectorAll('[data-count]').forEach(function(el){
+      if(el.dataset.counted){ return; }
+      el.dataset.counted = '1';
+      var target = parseFloat(el.getAttribute('data-count')) || 0;
+      var fmt = el.getAttribute('data-count-format') === 'id';
+      var dur = 1300, start = null;
+      function step(ts){
+        if(!start){ start = ts; }
+        var p = Math.min((ts - start) / dur, 1);
+        p = 1 - Math.pow(1 - p, 3);
+        var v = Math.round(target * p);
+        el.textContent = fmt ? v.toLocaleString('id-ID') : String(v);
+        if(p < 1){ requestAnimationFrame(step); }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ---------- Reveal ---------- */
+  function aiReveal(){
+    var els = document.querySelectorAll('.ai-reveal:not(.in)');
+    if(!('IntersectionObserver' in window)){
+      els.forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var d = parseInt(e.target.getAttribute('data-delay') || '0', 10);
+          setTimeout(function(){ e.target.classList.add('in'); }, d);
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:.12});
+    els.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ---------- Refresh hook untuk konten dinamis ---------- */
+  window.aiRefresh = function(){
+    aiIcons(document);
+    aiReveal();
+    aiCountUp(document);
+  };
+
+  /* ---------- Modal ---------- */
+  window.aiOpenModal = function(id){
+    var m = document.getElementById(id);
+    if(m){ m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+  };
+  window.aiCloseModal = function(id){
+    var m = document.getElementById(id);
+    if(m){ m.style.display = 'none'; document.body.style.overflow = ''; }
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    /* Sidebar aktif berdasarkan body[data-active] (non-navigatif) */
+    var active = document.body.getAttribute('data-active');
+    document.querySelectorAll('[data-nav]').forEach(function(a){
+      if(a.getAttribute('data-nav') === active){ a.classList.add('ai-nav-active'); }
+    });
+
+    /* Placeholder topbar dari body[data-search] */
+    var q = document.getElementById('aiGlobalSearch');
+    if(q && document.body.getAttribute('data-search')){ q.placeholder = document.body.getAttribute('data-search'); }
+
+    /* Toast global: data-toast / data-toast-type */
+    document.addEventListener('click', function(ev){
+      var el = ev.target.closest('[data-toast]');
+      if(el){
+        ev.preventDefault();
+        aiToast(el.getAttribute('data-toast'), el.getAttribute('data-toast-type') || 'blue');
+      }
+    });
+
+    /* Tutup modal via overlay / tombol [data-close-modal] */
+    document.addEventListener('click', function(ev){
+      var closer = ev.target.closest('[data-close-modal]');
+      if(closer){ aiCloseModal(closer.getAttribute('data-close-modal')); return; }
+      if(ev.target.classList && ev.target.classList.contains('ai-modal-overlay')){
+        aiCloseModal(ev.target.id);
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        document.querySelectorAll('.ai-modal-overlay').forEach(function(m){ m.style.display = 'none'; });
+        document.body.style.overflow = '';
+      }
+    });
+
+    window.aiRefresh();
+  });
+})();
+</script>
+</head>
+<body data-role="pegawai" data-active="riwayat" data-search="Cari SKU, No. DO, Surat Jalan, Rak, Picking List... (⌘K)">
+
+<div id="aiToasts"></div>
+
+<div class="flex min-h-screen">
+
+  <!-- ================= SIDEBAR (non-navigatif) ================= -->
+  <aside class="w-64 shrink-0 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-40">
+    <div class="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+        <i data-lucide="package" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="font-bold text-slate-900 leading-tight">Astro Inventory</div>
+        <div class="text-[11px] text-slate-400 font-medium">Sistem Inventaris Terpadu</div>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <div class="px-3 pb-2 text-[10px] font-bold tracking-widest text-slate-400">MENU UTAMA</div>
+      <a class="ai-nav" data-nav="dashboard" href="javascript:void(0)"><i data-lucide="layout-dashboard" class="w-4 h-4"></i>Dashboard</a>
+      <a class="ai-nav" data-nav="barang" href="javascript:void(0)"><i data-lucide="package" class="w-4 h-4"></i>Data Barang</a>
+
+      <div class="px-3 pt-4 pb-2 text-[10px] font-bold tracking-widest text-slate-400">OPERASIONAL GUDANG</div>
+      <a class="ai-nav" data-nav="masuk" href="javascript:void(0)"><i data-lucide="arrow-down-left" class="w-4 h-4"></i>Barang Masuk</a>
+      <a class="ai-nav" data-nav="keluar" href="javascript:void(0)"><i data-lucide="arrow-up-right" class="w-4 h-4"></i>Barang Keluar</a>
+      <a class="ai-nav" data-nav="opname" href="javascript:void(0)"><i data-lucide="clipboard-check" class="w-4 h-4"></i>Stok Opname</a>
+
+      <div class="px-3 pt-4 pb-2 text-[10px] font-bold tracking-widest text-slate-400">MONITORING &amp; LAPORAN</div>
+      <a class="ai-nav" data-nav="riwayat" href="javascript:void(0)"><i data-lucide="history" class="w-4 h-4"></i>Riwayat Transaksi</a>
+      <a class="ai-nav" data-nav="permintaan" href="javascript:void(0)">
+        <i data-lucide="clipboard-list" class="w-4 h-4"></i>Status Permintaan
+        <span class="ml-auto bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">2 Menunggu</span>
+      </a>
+
+      <div class="px-3 pt-4 pb-2 text-[10px] font-bold tracking-widest text-slate-400">PENGATURAN &amp; AKUN</div>
+      <a class="ai-nav" data-nav="notifikasi" href="javascript:void(0)"><i data-lucide="bell" class="w-4 h-4"></i>Notifikasi</a>
+      <a class="ai-nav" data-nav="pengaturan" href="javascript:void(0)"><i data-lucide="settings" class="w-4 h-4"></i>Pengaturan</a>
+      <a class="ai-nav" data-nav="profil" href="javascript:void(0)"><i data-lucide="user-circle" class="w-4 h-4"></i>Profil Saya</a>
+    </nav>
+
+    <div class="m-3 rounded-xl bg-slate-50 border border-slate-200 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          <span class="text-sm font-bold text-slate-800">Shift Pagi</span>
+        </div>
+        <span class="text-[11px] font-semibold text-slate-500">08:00 - 17:00</span>
+      </div>
+      <div class="mt-2 text-[11px] font-bold text-blue-600">Hub Cakung DC-01 Online</div>
+      <div class="text-[11px] text-slate-400">Zona A &amp; Staging Inbound</div>
+    </div>
+  </aside>
+
+  <!-- ================= KONTEN UTAMA ================= -->
+  <div class="flex-1 ml-64 min-w-0">
+
+    <!-- TOPBAR (non-navigatif) -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+      <div class="flex items-center gap-4 px-6 py-3">
+        <button class="hidden md:inline-flex items-center gap-2 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 hover:bg-slate-100 transition" data-toast="Pemilih lokasi gudang dibuka (demo)" data-toast-type="blue">
+          <i data-lucide="building" class="w-4 h-4 text-blue-600"></i>
+          Jakarta (Pusat DC) <span class="text-slate-300">›</span> <span class="text-slate-500">Hub Cakung DC-01 (Utama)</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+        </button>
+        <div class="flex-1 max-w-xl relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="aiGlobalSearch" type="text" class="ai-input pl-10 bg-slate-50" placeholder="Cari SKU, No. DO, Surat Jalan, Rak, Picking List... (⌘K)">
+        </div>
+        <div class="ml-auto flex items-center gap-3">
+          <button class="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" data-toast="Pusat bantuan dibuka (demo)">
+            <i data-lucide="help-circle" class="w-5 h-5"></i>
+          </button>
+          <button class="relative w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" data-toast="3 notifikasi belum dibaca" data-toast-type="blue">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">3</span>
+          </button>
+          <div class="flex items-center gap-2.5 pl-2">
+            <div class="text-right leading-tight">
+              <div class="text-sm font-bold text-slate-800">Agus Prasetyo</div>
+              <div class="text-[11px] text-slate-400">Staf Operasional</div>
+            </div>
+            <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white">
+              <i data-lucide="user-circle" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="p-6 space-y-5">
+
+      <!-- ===== BREADCRUMB + SINKRONISASI ===== -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <nav class="text-[11px] font-bold tracking-wide flex flex-wrap items-center gap-2">
+          <span class="text-slate-400">PORTAL OPERASIONAL PEGAWAI</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-slate-400">MONITORING &amp; LAPORAN</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-blue-600">RIWAYAT TRANSAKSI STAF OPERASIONAL</span>
+        </nav>
+        <span class="ai-badge bg-green-100 text-green-700">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          Sinkronisasi Cloud Real-time (DC Cakung DC-01)
+        </span>
+      </div>
+
+      <!-- ===== KARTU HEADER ===== -->
+      <section class="ai-card ai-reveal p-6 flex flex-col lg:flex-row lg:items-center gap-5">
+        <div class="flex-1 min-w-0">
+          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Riwayat Transaksi &amp; Log Aktivitas Staf</h1>
+          <p class="mt-2 text-sm text-slate-500 leading-relaxed max-w-2xl">Catatan riwayat seluruh pergerakan barang, pemindaian barcode, serah terima PO inbound, dispatch outbound, dan audit stok opname yang telah Anda selesaikan selama bertugas.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="ai-btn ai-btn-secondary" data-toast="Filter periode shift dibuka (demo)">
+            <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+            Shift Pagi: 08:00 - Sekarang
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+          </button>
+          <button class="ai-btn ai-btn-secondary" data-toast="Rekap shift sedang disiapkan (PDF)..." data-toast-type="blue">
+            <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
+            Cetak Rekap Shift (PDF)
+          </button>
+          <button class="ai-btn ai-btn-primary" data-toast="Log transaksi diunduh (CSV / Excel)" data-toast-type="green">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            + Unduh Log Transaksi (CSV / Excel)
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== 4 KARTU STATISTIK ===== -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <!-- Total transaksi -->
+        <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="0">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Total Transaksi Selesai</div>
+              <div class="mt-2 text-4xl font-extrabold text-slate-900 leading-none"><span data-count="48">0</span></div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="ai-badge ai-badge-green"><i data-lucide="trending-up" class="w-3 h-3"></i>+12%</span>
+            <span class="text-xs text-slate-500 font-medium">dari target shift pagi</span>
+          </div>
+        </div>
+        <!-- Item diproses -->
+        <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="80">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Total Item Diproses</div>
+              <div class="mt-2 text-4xl font-extrabold text-slate-900 leading-none"><span data-count="3850" data-count-format="id">0</span> <span class="text-base font-semibold text-slate-400">Unit</span></div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center text-green-600 shrink-0">
+              <i data-lucide="scan-barcode" class="w-6 h-6"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="ai-badge ai-badge-green"><i data-lucide="shield-check" class="w-3 h-3"></i>94.2%</span>
+            <span class="text-xs text-slate-500 font-medium">Akurasi scan handheld</span>
+          </div>
+        </div>
+        <!-- Dokumen disahkan -->
+        <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="160">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Dokumen Disahkan</div>
+              <div class="mt-2 text-4xl font-extrabold text-slate-900 leading-none"><span data-count="16">0</span> <span class="text-base font-semibold text-slate-400">SJ / DO</span></div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="clipboard-check" class="w-6 h-6"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="ai-badge ai-badge-blue">10 Inbound</span>
+            <span class="ai-badge ai-badge-gray">6 Outbound</span>
+          </div>
+        </div>
+        <!-- Catatan selisih -->
+        <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="240">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Catatan Selisih</div>
+              <div class="mt-2 text-4xl font-extrabold text-red-600 leading-none"><span data-count="1">0</span> <span class="text-base font-semibold text-slate-400">Insiden</span></div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+              <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+            <span class="text-xs font-semibold text-red-600">Dilaporkan ke Supervisor (BAS Selesai)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB PILLS + FILTER ===== -->
+      <section class="ai-card ai-reveal" data-delay="100">
+        <!-- Tabs -->
+        <div class="flex flex-wrap items-center gap-2 p-4" data-tabs="trx">
+          <button class="ai-pill ai-pill-active" data-filter="all">Semua Transaksi <span class="ai-pill-count">48</span></button>
+          <button class="ai-pill" data-filter="inbound">Barang Masuk / Inbound <span class="ai-pill-count">22</span></button>
+          <button class="ai-pill" data-filter="outbound">Barang Keluar / Outbound <span class="ai-pill-count">16</span></button>
+          <button class="ai-pill" data-filter="audit">Stok Opname / Audit <span class="ai-pill-count">6</span></button>
+          <button class="ai-pill" data-filter="relokasi">Relokasi / Mutasi Bin <span class="ai-pill-count">4</span></button>
+          <span class="ml-auto ai-badge ai-badge-gray">
+            <i data-lucide="broadcast" class="w-3.5 h-3.5 text-green-500"></i>
+            Pemindai Handheld: Zebra TC21 Active
+          </span>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="border-t border-slate-100 p-4 flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[280px]">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <input id="trxSearch" type="text" class="ai-input pl-10 pr-20" placeholder="Cari No. Transaksi, No. PO / DO, Nama SKU, Rak Bin, atau Plat Armada... (⌘F)">
+            <button id="btnScan" class="ai-btn ai-btn-primary absolute right-2 top-1/2 -translate-y-1/2 !py-1.5 !px-3 text-xs">
+              <i data-lucide="barcode" class="w-3.5 h-3.5"></i>SCAN
+            </button>
+          </div>
+          <div class="relative w-44">
+            <i data-lucide="clock" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <select id="filterShift" class="ai-input pl-9">
+              <option value="all">Shift: Semua</option>
+              <option value="pagi" selected>Shift: Pagi (08-17)</option>
+              <option value="sore">Shift: Sore (17-01)</option>
+              <option value="malam">Shift: Malam (01-08)</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+          <div class="relative w-44">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <select id="filterStatus" class="ai-input pl-9">
+              <option value="all">Semua Status</option>
+              <option value="selesai">Selesai / Lolos QC</option>
+              <option value="selisih">Ada Selisih</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+          <div class="relative w-44">
+            <i data-lucide="map-pin" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            <select id="filterZona" class="ai-input pl-9">
+              <option value="all">Semua Zona</option>
+              <option value="zona-a">Zona A</option>
+              <option value="zona-b">Zona B</option>
+              <option value="zona-c">Zona C</option>
+              <option value="staging">Staging / Dock</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
+          <button id="btnRefresh" class="ai-btn ai-btn-secondary ai-btn-icon" title="Refresh data">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== TABEL RIWAYAT ===== -->
+      <section class="ai-card ai-reveal overflow-hidden" data-delay="160">
+        <div class="overflow-x-auto">
+          <table class="ai-table min-w-[1100px]">
+            <thead>
+              <tr>
+                <th>No &amp; Waktu</th>
+                <th>No. Ref &amp; Tipe Transaksi</th>
+                <th>No. Dokumen &amp; Rekanan</th>
+                <th>Rincian Barang &amp; Bin Location</th>
+                <th class="text-center">Jumlah</th>
+                <th>Status &amp; QC</th>
+                <th>Terminal &amp; PIC</th>
+                <th class="text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="trxBody">
+
+              <!-- Baris 1 -->
+              <tr data-type="inbound" data-status="selesai" data-shift="pagi" data-zona="zona-a">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">14:15 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-blue-600 whitespace-nowrap">TRX-INB-2025-0912</div>
+                  <span class="ai-chip ai-chip-blue mt-1">↓ INBOUND PO</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">PO-2025-0894</div>
+                  <div class="text-[11px] text-slate-500">PT Schneider Electric Indo</div>
+                  <div class="text-[11px] text-slate-400">B 9812 UZ • Tronton Box</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Box Server Rack 42U APC Schneider</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span class="ai-chip ai-chip-gray">SKU-IT-0921</span>
+                    <span class="ai-chip ai-chip-gray">ZONA-A &gt; RAK-04</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">15 Unit</div>
+                  <div class="text-[11px] font-bold text-green-600">100% Sesuai</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-green"><i data-lucide="check-circle" class="w-3 h-3"></i>Selesai &amp; Lolos QC</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Serah terima dock selesai</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Dock 02 Inbound</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-soft !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-INB-2025-0912" data-time="14:15 WIB • 12 Okt 2025" data-type="↓ Inbound PO"
+                    data-doc="PO-2025-0894 • PT Schneider Electric Indo"
+                    data-item="Box Server Rack 42U APC Schneider (SKU-IT-0921 • ZONA-A &gt; RAK-04)"
+                    data-qty="15 Unit" data-status="Selesai &amp; Lolos QC"
+                    data-pic="Agus Prasetyo • TC21 #4 • Dock 02 Inbound">Detail</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Bukti serah terima TRX-INB-2025-0912 dicetak" data-toast-type="blue" title="Cetak bukti">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Baris 2 -->
+              <tr data-type="outbound" data-status="selesai" data-shift="pagi" data-zona="staging">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">13:40 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-blue-600 whitespace-nowrap">TRX-OUT-2025-0447</div>
+                  <span class="ai-chip ai-chip-blue mt-1">↑ OUTBOUND DISPATCH</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">DO-2025-0447</div>
+                  <div class="text-[11px] text-slate-500">Hub Bandung DC-02 (Cileunyi)</div>
+                  <div class="text-[11px] text-slate-400">D 8841 AB • CDD Wingbox</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Pallet Kardus Corrugated Box Heavy L</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span class="ai-chip ai-chip-gray">SKU-PKG-0447</span>
+                    <span class="ai-chip ai-chip-gray">STAGING-DOCK-04</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">80 Unit</div>
+                  <div class="text-[11px] text-slate-400 font-medium">4 Pallet (@20)</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-green"><i data-lucide="check-circle" class="w-3 h-3"></i>Terverifikasi Muat</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Segel Pintu: SG-88910</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Staging Bay 04</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-soft !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-OUT-2025-0447" data-time="13:40 WIB • 12 Okt 2025" data-type="↑ Outbound Dispatch"
+                    data-doc="DO-2025-0447 • Hub Bandung DC-02 (Cileunyi)"
+                    data-item="Pallet Kardus Corrugated Box Heavy L (SKU-PKG-0447 • STAGING-DOCK-04)"
+                    data-qty="80 Unit (4 Pallet @20)" data-status="Terverifikasi Muat • Segel SG-88910"
+                    data-pic="Agus Prasetyo • TC21 #4 • Staging Bay 04">Detail</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Surat jalan DO-2025-0447 dicetak" data-toast-type="blue" title="Cetak SJ">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Baris 3 (SELISIH - merah) -->
+              <tr class="ai-row-danger" data-type="audit" data-status="selisih" data-shift="pagi" data-zona="zona-b">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">12:10 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-red-600 whitespace-nowrap">TRX-SOP-2025-0120</div>
+                  <span class="ai-chip ai-chip-red mt-1">AUDIT OPNAME</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">AUD-B12-04</div>
+                  <div class="text-[11px] text-slate-500">Audit Siklus Rak Harian</div>
+                  <div class="text-[11px] font-bold text-red-600">BAS-2025-091 Terbit</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Barcode Scanner Zebra TC21 Android 11</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span class="ai-chip ai-chip-gray">SKU-SCN-2041</span>
+                    <span class="ai-chip ai-chip-red">RAK-B-12 (T-03)</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">22 Unit</div>
+                  <div class="text-[11px] font-bold text-red-600">Selisih: -3 Pcs</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-red"><i data-lucide="alert-triangle" class="w-3 h-3"></i>Ada Selisih (-3 Pcs)</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Telah diapprove SPV</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Zona Rak B-12</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-danger !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-SOP-2025-0120" data-time="12:10 WIB • 12 Okt 2025" data-type="Audit Opname"
+                    data-doc="AUD-B12-04 • BAS-2025-091 Terbit"
+                    data-item="Barcode Scanner Zebra TC21 Android 11 (SKU-SCN-2041 • RAK-B-12 (T-03))"
+                    data-qty="22 Unit • Selisih: -3 Pcs" data-status="Ada Selisih (-3 Pcs) • Telah diapprove SPV"
+                    data-pic="Agus Prasetyo • TC21 #4 • Zona Rak B-12">Tinjau BAS</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Kamera dibuka: ambil foto bukti kondisi rak B-12" data-toast-type="blue" title="Foto bukti">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Baris 4 -->
+              <tr data-type="outbound" data-status="selesai" data-shift="pagi" data-zona="staging">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">11:25 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-blue-600 whitespace-nowrap">TRX-OUT-2025-0445</div>
+                  <span class="ai-chip ai-chip-blue mt-1">↑ OUTBOUND DISPATCH</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">DO-2025-0445</div>
+                  <div class="text-[11px] text-slate-500">Divisi IT Kantor Pusat Jakarta</div>
+                  <div class="text-[11px] text-slate-400">Internal Transfer • Armada Blindvan</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Bubble Wrap Roll 50m Heavy Duty</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span class="ai-chip ai-chip-gray">SKU-PKG-0112</span>
+                    <span class="ai-chip ai-chip-gray">STAGING-A-EXP</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">25 Roll</div>
+                  <div class="text-[11px] font-bold text-green-600">100% Sesuai</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-green"><i data-lucide="check-circle" class="w-3 h-3"></i>Terverifikasi Muat</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Driver: Hendra Sukma</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Staging A</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-soft !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-OUT-2025-0445" data-time="11:25 WIB • 12 Okt 2025" data-type="↑ Outbound Dispatch"
+                    data-doc="DO-2025-0445 • Divisi IT Kantor Pusat Jakarta"
+                    data-item="Bubble Wrap Roll 50m Heavy Duty (SKU-PKG-0112 • STAGING-A-EXP)"
+                    data-qty="25 Roll" data-status="Terverifikasi Muat • Driver: Hendra Sukma"
+                    data-pic="Agus Prasetyo • TC21 #4 • Staging A">Detail</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Surat jalan DO-2025-0445 dicetak" data-toast-type="blue" title="Cetak SJ">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Baris 5 -->
+              <tr data-type="relokasi" data-status="selesai" data-shift="pagi" data-zona="zona-b">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">10:30 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-600 whitespace-nowrap">TRX-REL-2025-0081</div>
+                  <span class="ai-chip ai-chip-gray mt-1">↔ RELOKASI BIN</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">MUT-2025-881</div>
+                  <div class="text-[11px] text-slate-500">Optimasi Slotting Rak B</div>
+                  <div class="text-[11px] text-slate-400">Instrumen Sistem Al Astro</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Lakban Industri Heavy Duty 2 Inch</div>
+                  <div class="mt-1 flex flex-wrap items-center gap-1">
+                    <span class="ai-chip ai-chip-gray">ZONA-A →</span>
+                    <span class="ai-chip ai-chip-gray">RAK-B-08 (T-02)</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">85 Roll</div>
+                  <div class="text-[11px] font-bold text-green-600">Sukses Pindah</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-green"><i data-lucide="check-circle" class="w-3 h-3"></i>Relokasi Sukses</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Barcode bin tujuan matched</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Rak B-08</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-soft !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-REL-2025-0081" data-time="10:30 WIB • 12 Okt 2025" data-type="↔ Relokasi Bin"
+                    data-doc="MUT-2025-881 • Optimasi Slotting Rak B"
+                    data-item="Lakban Industri Heavy Duty 2 Inch (ZONA-A → RAK-B-08 (T-02))"
+                    data-qty="85 Roll" data-status="Relokasi Sukses • Barcode bin tujuan matched"
+                    data-pic="Agus Prasetyo • TC21 #4 • Rak B-08">Detail</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Berita acara mutasi MUT-2025-881 dibuka" data-toast-type="blue" title="Dokumen mutasi">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Baris 6 -->
+              <tr data-type="inbound" data-status="selesai" data-shift="pagi" data-zona="zona-c">
+                <td>
+                  <div class="font-bold text-slate-800 whitespace-nowrap">09:15 WIB</div>
+                  <div class="text-[11px] text-slate-400">12 Okt 2025</div>
+                </td>
+                <td>
+                  <div class="font-bold text-blue-600 whitespace-nowrap">TRX-INB-2025-0910</div>
+                  <span class="ai-chip ai-chip-blue mt-1">↓ INBOUND PO</span>
+                </td>
+                <td>
+                  <div class="font-bold text-slate-800">PO-2025-0890</div>
+                  <div class="text-[11px] text-slate-500">PT Belden Network Asia</div>
+                  <div class="text-[11px] text-slate-400">B 9012 KAA • Engkel Box</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-800">Kabel UTP Cat6 Patch Cord 3M High Grade</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span class="ai-chip ai-chip-gray">SKU-NET-4022</span>
+                    <span class="ai-chip ai-chip-gray">RAK-C-02 (T-01)</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="font-bold text-slate-800 whitespace-nowrap">140 Unit</div>
+                  <div class="text-[11px] font-bold text-green-600">100% Sesuai</div>
+                </td>
+                <td>
+                  <span class="ai-badge ai-badge-green"><i data-lucide="check-circle" class="w-3 h-3"></i>Selesai &amp; Masuk Rak</span>
+                  <div class="text-[11px] text-slate-400 mt-1">Serah terima dock 01</div>
+                </td>
+                <td>
+                  <div class="font-semibold text-slate-700 whitespace-nowrap">Agus Prasetyo</div>
+                  <div class="text-[11px] text-slate-400">TC21 #4 • Inbound Dock 01</div>
+                </td>
+                <td class="text-right whitespace-nowrap">
+                  <button class="ai-btn ai-btn-soft !py-1.5 !px-3 text-xs btn-detail"
+                    data-trx="TRX-INB-2025-0910" data-time="09:15 WIB • 12 Okt 2025" data-type="↓ Inbound PO"
+                    data-doc="PO-2025-0890 • PT Belden Network Asia"
+                    data-item="Kabel UTP Cat6 Patch Cord 3M High Grade (SKU-NET-4022 • RAK-C-02 (T-01))"
+                    data-qty="140 Unit" data-status="Selesai &amp; Masuk Rak • Serah terima dock 01"
+                    data-pic="Agus Prasetyo • TC21 #4 • Inbound Dock 01">Detail</button>
+                  <button class="ai-btn ai-btn-secondary ai-btn-icon !py-1.5" data-toast="Bukti serah terima TRX-INB-2025-0910 dicetak" data-toast-type="blue" title="Cetak bukti">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Empty state -->
+              <tr id="trxEmpty" style="display:none">
+                <td colspan="8" class="text-center py-12">
+                  <div class="text-slate-400 font-semibold text-sm">Tidak ada transaksi yang cocok dengan filter.</div>
+                  <div class="text-slate-400 text-xs mt-1">Coba ubah kata kunci, status, atau pilih shift lain.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer tabel -->
+        <div class="border-t border-slate-100 px-5 py-3.5 flex flex-wrap items-center gap-3 bg-slate-50/60">
+          <div id="trxInfo" class="text-xs font-semibold text-slate-500">Menampilkan 1 - 6 dari 48 total transaksi shift ini</div>
+          <div class="mx-2 hidden sm:block w-px h-5 bg-slate-200"></div>
+          <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            Baris per halaman:
+            <select id="perPage" class="ai-input !w-16 !py-1 !px-2 text-xs">
+              <option value="10" selected>10</option>
+              <option value="6">6</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="ml-auto flex items-center gap-1" id="trxPagination">
+            <button class="ai-page" data-page="prev"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button class="ai-page ai-page-active" data-page="1">1</button>
+            <button class="ai-page" data-page="2">2</button>
+            <button class="ai-page" data-page="3">3</button>
+            <span class="px-1 text-slate-400 text-sm">...</span>
+            <button class="ai-page" data-page="8">8</button>
+            <button class="ai-page" data-page="next"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 3 KARTU BAWAH ===== -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 pb-2">
+        <!-- Integritas data -->
+        <div class="ai-card ai-card-hover ai-reveal p-5 flex flex-col" data-delay="0">
+          <div class="flex items-start gap-3 pb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900">Integritas Data Transaksi Lapangan</h3>
+              <p class="mt-2 text-xs text-slate-500 leading-relaxed">Setiap aksi pemindaian barcode tercatat secara kriptografis dan terhubung langsung dengan server DC Cakung untuk mencegah duplikasi surat jalan.</p>
+            </div>
+          </div>
+          <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-green-600">Log Hash: SHA-256 Validated</span>
+            <i data-lucide="lock" class="w-4 h-4 text-green-600"></i>
+          </div>
+        </div>
+        <!-- Koreksi data -->
+        <div class="ai-card ai-card-hover ai-reveal p-5 flex flex-col" data-delay="80">
+          <div class="flex items-start gap-3 pb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="file-edit" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900">Koreksi Data / Pembatalan Transaksi</h3>
+              <p class="mt-2 text-xs text-slate-500 leading-relaxed">Jika ada kesalahan input qty atau nomor dokumen pada shift berjalan, segera laporkan ke Supervisor Shift (Bambang H.) sebelum pukul 17:00 WIB.</p>
+            </div>
+          </div>
+          <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">Batas Toleransi Koreksi: 30 Menit</span>
+            <a href="javascript:void(0)" class="text-xs font-bold text-blue-600 hover:text-blue-700 transition" data-toast="Pesan ke SPV Shift (Bambang H.) dibuka" data-toast-type="blue">Hubungi SPV →</a>
+          </div>
+        </div>
+        <!-- Rekap bulanan -->
+        <div class="ai-card ai-card-hover ai-reveal p-5 flex flex-col" data-delay="160">
+          <div class="flex items-start gap-3 pb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="award" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900">Unduh Rekap Bulanan Pribadi</h3>
+              <p class="mt-2 text-xs text-slate-500 leading-relaxed">Laporan transaksi bulanan staf dapat diunduh untuk keperluan validasi KPI bulanan, slip lembur operasional, serta portofolio kepatuhan penanganan DC.</p>
+            </div>
+          </div>
+          <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">Periode Berjalan: Oktober 2025</span>
+            <a href="javascript:void(0)" class="text-xs font-bold text-blue-600 hover:text-blue-700 transition" data-toast="Rekap bulanan Oktober 2025 diunduh" data-toast-type="green">Unduh Rekap ↓</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ================= MODAL DETAIL TRANSAKSI ================= -->
+<div id="trxModal" class="ai-modal-overlay" style="display:none">
+  <div class="ai-modal">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div>
+        <h3 class="font-extrabold text-slate-900">Detail Transaksi</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Ringkasan log aktivitas shift berjalan</p>
+      </div>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 transition" data-close-modal="trxModal">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div class="px-6 py-5 space-y-3 text-sm">
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">No. Transaksi</span><span id="mTrx" class="font-bold text-blue-600 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">Waktu</span><span id="mTime" class="font-semibold text-slate-700 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">Tipe</span><span id="mType" class="font-semibold text-slate-700 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">No. Dokumen</span><span id="mDoc" class="font-semibold text-slate-700 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">Barang</span><span id="mItem" class="font-semibold text-slate-700 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">Jumlah</span><span id="mQty" class="font-bold text-slate-800 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">Status &amp; QC</span><span id="mStatus" class="font-semibold text-slate-700 text-right">-</span></div>
+      <div class="flex justify-between gap-4"><span class="text-slate-400 font-semibold shrink-0">PIC / Terminal</span><span id="mPic" class="font-semibold text-slate-700 text-right">-</span></div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+      <button class="ai-btn ai-btn-secondary" data-close-modal="trxModal">Tutup</button>
+      <button class="ai-btn ai-btn-primary" data-toast="Detail transaksi dicetak" data-toast-type="blue"><i data-lucide="printer" class="w-4 h-4"></i>Cetak Detail</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   LOGIKA KHUSUS HALAMAN: RIWAYAT TRANSAKSI
+   ============================================================ */
+(function(){
+  'use strict';
+
+  var tbody      = document.getElementById('trxBody');
+  var rows       = Array.prototype.slice.call(tbody.querySelectorAll('tr[data-type]'));
+  var emptyRow   = document.getElementById('trxEmpty');
+  var infoEl     = document.getElementById('trxInfo');
+  var searchEl   = document.getElementById('trxSearch');
+  var shiftEl    = document.getElementById('filterShift');
+  var statusEl   = document.getElementById('filterStatus');
+  var zonaEl     = document.getElementById('filterZona');
+  var perPageEl  = document.getElementById('perPage');
+
+  var state = { tab:'all', shift:'pagi', status:'all', zona:'all', q:'', perPage:10 };
+
+  function toast(msg, type){
+    if(typeof window.aiToast === 'function'){ window.aiToast(msg, type); }
+  }
+
+  /* ---------- Filter gabungan ---------- */
+  function applyFilters(){
+    var visible = 0;
+    rows.forEach(function(row){
+      var ok = true;
+      if(state.tab !== 'all' && row.getAttribute('data-type') !== state.tab){ ok = false; }
+      if(ok && state.shift !== 'all' && row.getAttribute('data-shift') !== state.shift){ ok = false; }
+      if(ok && state.status !== 'all' && row.getAttribute('data-status') !== state.status){ ok = false; }
+      if(ok && state.zona !== 'all' && row.getAttribute('data-zona') !== state.zona){ ok = false; }
+      if(ok && state.q){
+        var hay = (row.getAttribute('data-search') || row.textContent).toLowerCase();
+        if(hay.indexOf(state.q) === -1){ ok = false; }
+      }
+      if(ok && visible >= state.perPage){ ok = false; } /* slice baris per halaman */
+      row.style.display = ok ? '' : 'none';
+      if(ok){ visible++; }
+    });
+    emptyRow.style.display = (visible === 0) ? '' : 'none';
+    if(visible === 0){
+      infoEl.textContent = 'Menampilkan 0 - 0 dari 48 total transaksi shift ini';
+    } else {
+      infoEl.textContent = 'Menampilkan 1 - ' + visible + ' dari 48 total transaksi shift ini' +
+        ((state.tab !== 'all' || state.status !== 'all' || state.zona !== 'all' || state.q) ? ' (terfilter)' : '');
+    }
+  }
+
+  /* ---------- Tab pills ---------- */
+  document.querySelectorAll('[data-tabs="trx"] .ai-pill').forEach(function(pill){
+    pill.addEventListener('click', function(){
+      document.querySelectorAll('[data-tabs="trx"] .ai-pill').forEach(function(p){ p.classList.remove('ai-pill-active'); });
+      pill.classList.add('ai-pill-active');
+      state.tab = pill.getAttribute('data-filter');
+      state.perPage = parseInt(perPageEl.value, 10) || 10;
+      applyFilters();
+      toast('Filter aktif: ' + pill.textContent.replace(/\s*\d+\s*$/,'').trim(), 'blue');
+    });
+  });
+
+  /* ---------- Search live ---------- */
+  searchEl.addEventListener('input', function(){
+    state.q = searchEl.value.trim().toLowerCase();
+    applyFilters();
+  });
+
+  /* ---------- Dropdown filter ---------- */
+  statusEl.addEventListener('change', function(){
+    state.status = statusEl.value;
+    applyFilters();
+    toast('Status difilter: ' + statusEl.options[statusEl.selectedIndex].text, 'blue');
+  });
+
+  shiftEl.addEventListener('change', function(){
+    state.shift = shiftEl.value;
+    state.perPage = parseInt(perPageEl.value, 10) || 10;
+    applyFilters();
+    if(shiftEl.value !== 'pagi'){
+      toast('Tidak ada transaksi pada ' + shiftEl.options[shiftEl.selectedIndex].text + ' — data Anda tercatat di Shift Pagi', 'blue');
+    } else {
+      toast('Menampilkan transaksi Shift Pagi (08-17)', 'green');
+    }
+  });
+
+  zonaEl.addEventListener('change', function(){
+    state.zona = zonaEl.value;
+    applyFilters();
+    toast('Zona difilter: ' + zonaEl.options[zonaEl.selectedIndex].text, 'blue');
+  });
+
+  /* ---------- Baris per halaman ---------- */
+  perPageEl.addEventListener('change', function(){
+    state.perPage = parseInt(perPageEl.value, 10) || 10;
+    applyFilters();
+    toast('Baris per halaman: ' + perPageEl.value, 'blue');
+  });
+
+  /* ---------- Refresh ---------- */
+  document.getElementById('btnRefresh').addEventListener('click', function(){
+    state = { tab:'all', shift:'pagi', status:'all', zona:'all', q:'', perPage:parseInt(perPageEl.value,10) || 10 };
+    searchEl.value = ''; statusEl.value = 'all'; zonaEl.value = 'all'; shiftEl.value = 'pagi';
+    document.querySelectorAll('[data-tabs="trx"] .ai-pill').forEach(function(p, i){
+      p.classList.toggle('ai-pill-active', i === 0);
+    });
+    applyFilters();
+    toast('Data riwayat transaksi disegarkan dari server DC-01', 'green');
+  });
+
+  /* ---------- SCAN ---------- */
+  document.getElementById('btnScan').addEventListener('click', function(){
+    toast('Handheld Zebra TC21 siap — pindai barcode SKU / dokumen', 'green');
+  });
+
+  /* ---------- Modal detail ---------- */
+  document.querySelectorAll('.btn-detail').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('mTrx').textContent    = btn.getAttribute('data-trx');
+      document.getElementById('mTime').textContent   = btn.getAttribute('data-time');
+      document.getElementById('mType').textContent   = btn.getAttribute('data-type');
+      document.getElementById('mDoc').textContent    = btn.getAttribute('data-doc');
+      document.getElementById('mItem').textContent   = btn.getAttribute('data-item');
+      document.getElementById('mQty').textContent    = btn.getAttribute('data-qty');
+      document.getElementById('mStatus').innerHTML   = btn.getAttribute('data-status');
+      document.getElementById('mPic').textContent    = btn.getAttribute('data-pic');
+      window.aiOpenModal('trxModal');
+    });
+  });
+
+  /* ---------- Pagination (visual + toast) ---------- */
+  var pages = document.querySelectorAll('#trxPagination .ai-page[data-page]');
+  pages.forEach(function(pg){
+    pg.addEventListener('click', function(){
+      var v = pg.getAttribute('data-page');
+      if(v === 'prev' || v === 'next'){
+        var activeEl = document.querySelector('#trxPagination .ai-page-active');
+        var cur = parseInt(activeEl ? activeEl.getAttribute('data-page') : '1', 10);
+        if(isNaN(cur)){ cur = 1; }
+        var target = v === 'prev' ? Math.max(1, cur - 1) : Math.min(8, cur + 1);
+        var targetBtn = document.querySelector('#trxPagination .ai-page[data-page="' + target + '"]');
+        if(targetBtn){ targetBtn.click(); }
+        return;
+      }
+      pages.forEach(function(p){ p.classList.remove('ai-page-active'); });
+      pg.classList.add('ai-page-active');
+      toast('Menampilkan halaman ' + v + ' dari riwayat transaksi (demo data: halaman 1)', 'blue');
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    applyFilters();
+  });
+})();
+</script>
+</body>
+</html>
