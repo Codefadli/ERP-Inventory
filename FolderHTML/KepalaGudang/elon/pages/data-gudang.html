@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Data Gudang &amp; Lokasi | Astro Inventory</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link rel="stylesheet" href="../styles/global.css" />
+  </head>
+  <body data-active="data-gudang" class="bg-slate-50 text-slate-900">
+    <div id="app" class="flex min-h-screen"></div>
+    <template id="page">
+      <div>
+        <p class="text-[11px] text-slate-500">
+          MASTER DATA &amp; INVENTARIS &gt; MANAJEMEN GUDANG &amp; LOKASI RAK
+        </p>
+        <div class="flex flex-wrap items-start justify-between gap-3 mt-1">
+          <div>
+            <h1 class="text-2xl font-bold">
+              Manajemen Data Gudang &amp; Lokasi Rak
+            </h1>
+            <p class="text-sm text-slate-600 max-w-2xl">
+              Pemetaan fasilitas penyimpanan Hub Cakung DC-01, konfigurasi zona
+              gudang, kapasitas rak/bin, dan status utilitas lorong pallet.
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn">Ekspor Layout Denah</button
+            ><button class="btn">Audit Okupansi Rak</button
+            ><button class="btn btn-primary">
+              + Tambah Fasilitas / Rak Baru
+            </button>
+          </div>
+        </div>
+      </div>
+      <section class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="card">
+          <p class="text-xs text-slate-500">Total Gudang Aktif</p>
+          <p class="text-3xl font-bold mt-1">6 Gedung</p>
+          <p class="text-xs text-slate-500 mt-1">+1 fasilitas baru Q1</p>
+        </div>
+        <div class="card">
+          <p class="text-xs text-slate-500">Total Zona &amp; Lorong</p>
+          <p class="text-3xl font-bold mt-1">24 Zona</p>
+          <p class="text-xs text-slate-500 mt-1">Terbagi Zona A s/d F</p>
+        </div>
+        <div class="card">
+          <p class="text-xs text-slate-500">Kapasitas Rak &amp; Bin</p>
+          <p class="text-3xl font-bold mt-1">1.840 Slot</p>
+          <p class="text-xs text-slate-500 mt-1">
+            1.435 terisi (78% rata-rata)
+          </p>
+        </div>
+        <div class="card">
+          <p class="text-xs text-slate-500">Slot Kritis / Hampir Penuh</p>
+          <p class="text-3xl font-bold mt-1">8 Rak</p>
+          <p class="text-xs text-red-700 mt-1">
+            Okupansi &gt; 90%, perlu relokasi
+          </p>
+        </div>
+      </section>
+      <section>
+        <h2 class="font-bold mb-2">Peta Okupansi Zona Hub Cakung DC-01</h2>
+        <div class="grid md:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div class="card">
+            <div class="flex justify-between text-xs">
+              <b>Zona A</b><span class="badge b-red">92% Penuh</span>
+            </div>
+            <p class="text-xs text-slate-500 my-2">
+              Elektronik &amp; High-Value
+            </p>
+            <div class="bar red"><i style="width: 92%"></i></div>
+          </div>
+          <div class="card">
+            <div class="flex justify-between text-xs">
+              <b>Zona B</b><span class="badge b-blue">64% Penuh</span>
+            </div>
+            <p class="text-xs text-slate-500 my-2">Aksesoris &amp; Periferal</p>
+            <div class="bar"><i style="width: 64%"></i></div>
+          </div>
+          <div class="card">
+            <div class="flex justify-between text-xs">
+              <b>Zona C</b><span class="badge b-green">85% Penuh</span>
+            </div>
+            <p class="text-xs text-slate-500 my-2">Komponen Komputer</p>
+            <div class="bar green"><i style="width: 85%"></i></div>
+          </div>
+          <div class="card">
+            <div class="flex justify-between text-xs">
+              <b>Zona D</b><span class="badge b-blue">45% Penuh</span>
+            </div>
+            <p class="text-xs text-slate-500 my-2">Tools &amp; Heavy Pallet</p>
+            <div class="bar"><i style="width: 45%"></i></div>
+          </div>
+          <div class="card">
+            <div class="flex justify-between text-xs">
+              <b>Zona E</b><span class="badge b-blue">70% Penuh</span>
+            </div>
+            <p class="text-xs text-slate-500 my-2">
+              Staging &amp; Inbound Buffer
+            </p>
+            <div class="bar"><i style="width: 70%"></i></div>
+          </div>
+        </div>
+      </section>
+      <div class="card flex flex-wrap gap-2">
+        <input
+          class="flex-1 min-w-[220px] bg-slate-100 rounded-lg px-3 py-2 text-xs"
+          placeholder="Cari kode gudang, zona, lorong, nomor rak..."
+        /><select class="btn font-normal">
+          <option>Semua Gudang</option></select
+        ><select class="btn font-normal">
+          <option>Semua Tipe Penyimpanan</option></select
+        ><select class="btn font-normal">
+          <option>Status Okupansi (Semua)</option>
+        </select>
+      </div>
+      <section class="card p-0 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[900px]">
+            <thead>
+              <tr>
+                <th class="th">KODE &amp; NAMA LOKASI</th>
+                <th class="th">TIPE RAK / STORAGE</th>
+                <th class="th">KAPASITAS MAKS.</th>
+                <th class="th">KETERISIAN &amp; OKUPANSI</th>
+                <th class="th">SKU TERSIMPAN</th>
+                <th class="th">STATUS</th>
+                <th class="th">AKSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td">
+                  <b class="sku">WH01-ZA-RA01</b><br />Rak Lorong A-01
+                </td>
+                <td class="td">
+                  Heavy-Duty Shelf<br /><span class="text-slate-500"
+                    >Steel Tier (Lantai 1-4)</span
+                  >
+                </td>
+                <td class="td">400 Unit</td>
+                <td class="td">
+                  370 Unit (92%)
+                  <div class="bar red"><i style="width: 92%"></i></div>
+                </td>
+                <td class="td">18 SKU · Kamera &amp; Optik</td>
+                <td class="td">
+                  <span class="badge b-red">Hampir Penuh</span>
+                </td>
+                <td class="td">
+                  <span class="text-blue-700 font-semibold">Detail</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="td">
+                  <b class="sku">WH01-ZA-RA02</b><br />Rak Lorong A-02
+                </td>
+                <td class="td">
+                  High-Security Cage<br /><span class="text-slate-500"
+                    >Kunci RFID &amp; Kamera CCTV</span
+                  >
+                </td>
+                <td class="td">250 Unit</td>
+                <td class="td">
+                  210 Unit (84%)
+                  <div class="bar green"><i style="width: 84%"></i></div>
+                </td>
+                <td class="td">12 SKU · Laptop Bisnis</td>
+                <td class="td"><span class="badge b-green">Optimal</span></td>
+                <td class="td">
+                  <span class="text-blue-700 font-semibold">Detail</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="td">
+                  <b class="sku">WH01-ZB-RB01</b><br />Rak Lorong B-01
+                </td>
+                <td class="td">
+                  Multi-Tier Bin<br /><span class="text-slate-500"
+                    >Small Parts Bins</span
+                  >
+                </td>
+                <td class="td">600 Unit</td>
+                <td class="td">
+                  360 Unit (60%)
+                  <div class="bar"><i style="width: 60%"></i></div>
+                </td>
+                <td class="td">45 SKU · Aksesoris &amp; Kabel</td>
+                <td class="td"><span class="badge b-green">Optimal</span></td>
+                <td class="td">
+                  <span class="text-blue-700 font-semibold">Detail</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="td">
+                  <b class="sku">WH01-ZB-RB02</b><br />Rak Lorong B-02
+                </td>
+                <td class="td">
+                  Multi-Tier Bin<br /><span class="text-slate-500"
+                    >Small Parts Bins</span
+                  >
+                </td>
+                <td class="td">600 Unit</td>
+                <td class="td">
+                  280 Unit (46%)
+                  <div class="bar"><i style="width: 46%"></i></div>
+                </td>
+                <td class="td">32 SKU · Smartwatch &amp; Audio</td>
+                <td class="td"><span class="badge b-blue">Luang</span></td>
+                <td class="td">
+                  <span class="text-blue-700 font-semibold">Detail</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="td">
+                  <b class="sku">WH03-ZE-RE01</b><br />Dock Staging Rak E-01
+                </td>
+                <td class="td">
+                  Temporary Flow Rack<br /><span class="text-slate-500"
+                    >Gravity Roller Staging</span
+                  >
+                </td>
+                <td class="td">200 Unit</td>
+                <td class="td">
+                  150 Unit (75%)
+                  <div class="bar"><i style="width: 75%"></i></div>
+                </td>
+                <td class="td">9 SKU · Antrean QC Inbound</td>
+                <td class="td">
+                  <span class="badge b-amber">Area Transit</span>
+                </td>
+                <td class="td">
+                  <span class="text-blue-700 font-semibold">Detail</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="p-3 text-xs text-slate-500 border-t border-slate-100">
+          Menampilkan 1 - 5 dari 24 lokasi rak utama
+        </p>
+      </section>
+    </template>
+    <script>
+      // Memuat layout bersama (butuh server lokal, mis. Live Server)
+      fetch("../layouts/MainLayout.html")
+        .then((r) => r.text())
+        .then((h) => {
+          document.getElementById("app").innerHTML = h;
+          document
+            .getElementById("content")
+            .append(document.getElementById("page").content);
+          document
+            .querySelector('[data-nav="' + document.body.dataset.active + '"]')
+            ?.classList.add("nav-active");
+        });
+    </script>
+  </body>
+</html>
