@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Barang — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ============================================================
+   ASTRO Inventory — Shared Design System
+   Tailwind CDN + Font Awesome. Component-level styles only.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+}
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar-left {
+  width: 256px; flex-shrink: 0;
+  background: #ffffff; border-right: 1px solid #e5eeff;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.main-area { flex: 1; min-width: 0; }
+@media (max-width: 1024px) { .sidebar-left { display: none; } }
+
+/* ---------- Sidebar items ---------- */
+.sidebar-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem;
+  font-size: .875rem; color: #334155; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background-color: #eff6ff; }
+.sidebar-item.active {
+  background-color: #0044ce; border-left: 3px solid #0033b8;
+  font-weight: 600; color: #ffffff;
+}
+.sidebar-item.active:hover { background-color: #0040d8; }
+/* non-referenced items: visually normal (reference fidelity), behaviorally inactive */
+.sidebar-item.disabled { opacity: 1; cursor: not-allowed; }
+.sidebar-item.disabled:hover { background-color: transparent; }
+.sidebar-section-label {
+  font-size: .6875rem; font-weight: 700; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 0 .75rem; margin: 0.625rem 0 0.375rem;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+
+/* ---------- Cards ---------- */
+.metric-card { transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,.15); }
+.panel { background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+
+/* ---------- Tables ---------- */
+.table-row { transition: background-color .15s ease; }
+.table-row:hover { background-color: #f9fafb; }
+
+/* ---------- Filter chips ---------- */
+.filter-tag { transition: background-color .15s ease; }
+.filter-tag:hover { background-color: #dbeafe; }
+
+/* ---------- Progress ---------- */
+.progress-bar { transition: width .5s ease; }
+
+/* ---------- Tabs ---------- */
+.tab-btn { transition: all .15s ease; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+
+/* ---------- Badges ---------- */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* ---------- Modal ---------- */
+.modal-overlay { position:fixed; inset:0; background:rgba(11,28,48,.55); display:none; align-items:flex-start; justify-content:center; z-index:80; padding: 5vh 1rem 1rem; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:.75rem; width:100%; max-width:640px; box-shadow:0 20px 50px -10px rgba(0,0,0,.35); animation: modalIn .18s ease; }
+@keyframes modalIn { from{opacity:0; transform:translateY(12px) scale(.98);} to{opacity:1; transform:none;} }
+
+/* ---------- Dropdown ---------- */
+.dropdown { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 10px 25px -5px rgba(0,0,0,.18); min-width:260px; z-index:70; display:none; }
+.dropdown.open { display:block; }
+
+/* ---------- Toast ---------- */
+#toast-container { position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.5rem; }
+.toast { background:#fff; border:1px solid #e5eeff; border-left:4px solid #2563eb; border-radius:.5rem; padding:.75rem 1rem; box-shadow:0 8px 20px -6px rgba(0,0,0,.2); font-size:.875rem; color:#0b1c30; animation: toastIn .2s ease; max-width:340px; }
+.toast.success { border-left-color:#16a34a; }
+.toast.warn { border-left-color:#f59e0b; }
+.toast.error { border-left-color:#dc2626; }
+@keyframes toastIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;} }
+
+/* ---------- Mobile sidebar drawer ---------- */
+.drawer-backdrop { position:fixed; inset:0; background:rgba(11,28,48,.45); z-index:60; display:none; }
+.drawer-backdrop.open { display:block; }
+@media (max-width:1024px){
+  .sidebar-left.drawer { display:block; position:fixed; top:0; left:0; height:100vh; z-index:61; transform:translateX(-100%); transition:transform .25s ease; }
+  .sidebar-left.drawer.open { transform:translateX(0); }
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar-left::-webkit-scrollbar { width:6px; }
+.sidebar-left::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ---------- Misc helpers ---------- */
+.anim-fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+</style>
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+      <div class="hidden sm:block">
+        <h1 class="text-base lg:text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+      </div>
+      <div class="hidden xl:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
+        <i class="fas fa-building"></i><span>Jakarta (Pusat DC) &rsaquo;</span>
+        <b>Hub Cakung DC-01 (Utama)</b>
+      </div>
+      <span class="hidden lg:inline-flex badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Operasional Normal</span>
+    </div>
+    <div class="flex items-center gap-2 lg:gap-3">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        <input type="text" data-header-search placeholder="Cari SKU, resi, transaksi..." class="hidden md:block w-64 xl:w-80 pl-9 pr-10 py-2 text-sm bg-gray-100 border border-transparent rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        <kbd class="hidden md:flex absolute right-2.5 top-2 text-[10px] text-gray-400 border border-gray-300 bg-white rounded px-1.5 py-0.5">&#8984;K</kbd>
+      </div>
+      <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition" data-dropdown="notif">
+        <i class="fas fa-bell text-lg"></i><span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+      </button>
+      <div class="dropdown" data-dropdown-menu="notif" style="min-width:320px">
+        <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="text-sm font-bold text-gray-900">Notifikasi</p>
+          <span class="badge bg-blue-100 text-blue-700">3 Baru</span>
+        </div>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exchange-alt text-blue-600 mr-2 w-3"></i>Mutasi Antar-Hub Menunggu Otorisasi</p>
+          <p class="text-xs text-gray-500">Permintaan alokasi darurat 150 unit ke Halim DC-02</p>
+          <p class="text-[11px] text-gray-400 mt-1">10 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exclamation-triangle text-amber-500 mr-2 w-3"></i>Stok di Bawah Batas ROP</p>
+          <p class="text-xs text-gray-500">SKU-CAM-600D tersisa 4 unit dari ambang ROP 25</p>
+          <p class="text-[11px] text-gray-400 mt-1">35 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-check-circle text-green-600 mr-2 w-3"></i>Otorisasi Mutasi Disetujui</p>
+          <p class="text-xs text-gray-500">Surat Jalan SPO-WMS-019 siap cetak</p>
+          <p class="text-[11px] text-gray-400 mt-1">1 jam lalu</p>
+        </a>
+      </div>
+      <div class="relative">
+        <button class="flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-gray-200" data-dropdown="profile">
+          <div class="text-right hidden md:block">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin</p>
+          </div>
+          <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">BS</div>
+        </button>
+        <div class="dropdown" data-dropdown-menu="profile">
+          <div class="p-3 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin &middot; DC-01</p>
+          </div>
+          <a href="#" data-disabled class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+          <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+          <a href="notifikasi.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-bell w-4 mr-2"></i>Notifikasi</a>
+          <div class="border-t border-gray-100"><a href="#" data-disabled class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+<p class="sidebar-section-label">Menu Utama</p>
+<a href="kepalagudang(dashboard).html" class="sidebar-item"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+<p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+<a href="data-barang.html" class="sidebar-item active"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+<a href="data-gudang.html" class="sidebar-item"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+<p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+<a href="barang-masuk.html" class="sidebar-item"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+<a href="barang-keluar.html" class="sidebar-item"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+<a href="mutasi-barang.html" class="sidebar-item"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+<a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+<a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+<a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+<p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+<a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+<a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+<a href="#" class="sidebar-item disabled" data-disabled><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+
+    </nav>
+    <div class="mx-3 my-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+      <p class="text-[11px] font-bold text-blue-700 mb-1"><i class="fas fa-headset mr-1"></i>Bantuan DC-01</p>
+      <p class="text-[10px] text-blue-700/70 mb-2">Hotline Logistik &amp; Tim WMS aktif 24/7.</p>
+      <button class="w-full text-[11px] py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" data-toast="Menghubungi hotline pusat...">Hubungi</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+<!-- Breadcrumb -->
+<div class="flex items-center gap-2 text-xs text-gray-500 mb-3 flex-wrap">
+  <span class="font-semibold tracking-wide">MASTER DATA &amp; INVENTARIS</span><i class="fas fa-chevron-right text-[9px]"></i>
+  <span class="text-blue-600 font-semibold">KATALOG SKU TERPADU</span>
+</div>
+
+<!-- Page header -->
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
+  <div class="flex-1">
+    <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Data Master Barang &amp; Inventaris</h1>
+    <p class="text-sm text-gray-600 max-w-2xl">Katalog terpusat seluruh SKU produk, klasifikasi kategori, status stok multi-gudang, harga acuan, dan unit penyimpanan fisik Hub DC-01.</p>
+  </div>
+  <div class="flex flex-wrap items-start gap-2">
+    <button data-toast="Menyiapkan berkas Ekspor Data master (XLSX)..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-download text-blue-600"></i><b>Ekspor Data</b></button>
+    <button data-toast="Form Import Batch (CSV / ERP sync) dibuka di panel baru." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-upload text-blue-600"></i><b>Import Batch</b></button>
+    <button data-open-modal="modalTambah" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2 transition shadow-sm"><i class="fas fa-plus-circle"></i><b>+ Tambah Barang Baru</b></button>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <p class="text-[11px] font-bold text-gray-500 tracking-wide">TOTAL SKU TERDAFTAR</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="8650" data-num="dot"></span></p>
+      </div>
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-archive text-blue-600"></i></div>
+    </div>
+    <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-trend-up"></i>+142 SKU</span> <span class="text-xs text-gray-500">baru bulan ini</span>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <p class="text-[11px] font-bold text-gray-500 tracking-wide">TOTAL UNIT FISIK</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="428500" data-num="dot"></span></p>
+      </div>
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-check-double text-blue-600"></i></div>
+    </div>
+    <p class="text-xs text-gray-600"><span class="inline-flex items-center gap-1 text-emerald-700 font-semibold"><i class="fas fa-circle" style="font-size:5px"></i>98,4%</span> Akurasi stok audit</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <p class="text-[11px] font-bold text-red-500 tracking-wide">STOK KRITIS (ROP)</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="24"></span> <span class="text-sm font-semibold text-gray-500">SKU</span></p>
+      </div>
+      <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-500"></i></div>
+    </div>
+    <p class="text-xs font-bold text-red-600"><i class="fas fa-exclamation mr-1"></i>Perlu PO &amp; Restock Segera</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <p class="text-[11px] font-bold text-gray-500 tracking-wide">OUT OF STOCK</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="3"></span> <span class="text-sm font-semibold text-gray-500">SKU</span></p>
+      </div>
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-cart-shopping text-blue-600"></i></div>
+    </div>
+    <p class="text-xs text-gray-600"><i class="fas fa-truck-fast text-blue-600 mr-1"></i>Dalam rute inbound supplier</p>
+  </div>
+</div>
+
+<!-- Search & filters -->
+<div class="panel p-4 lg:p-5 mb-4 anim-fade-up">
+  <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+    <div class="flex-1 relative">
+      <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-400"></i>
+      <input id="searchReq" type="text" placeholder="Cari SKU, nama produk, barcode EAN, brand..." class="w-full pl-10 pr-12 py-2.5 bg-gray-100 border border-transparent rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+      <button data-toast="Mode scan barcode handheld aktiv" class="absolute right-3 top-3 text-blue-600 hover:text-blue-800 p-0.5"><i class="fas fa-barcode text-lg"></i></button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <select id="fKategori" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Semua Kategori</option><option value="kamera">Kamera &amp; Optik</option><option value="wearable">Wearable Gadget</option><option value="laptop">Laptop &amp; Komputer</option><option value="aksesoris">Aksesoris Komputer</option><option value="audio">Audio &amp; Sound</option><option value="storage">Storage Drive</option>
+      </select>
+      <select id="fStatus" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Semua Status Stok</option><option value="aman">Stok Aman</option><option value="menipis">Stok Menipis</option><option value="habis">Stok Habis</option>
+      </select>
+      <select id="fGudang" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Semua Lokasi Gudang</option><option value="wh01">WH01</option><option value="wh02">WH02</option><option value="wh03">WH03</option>
+      </select>
+      <button data-toast="Panel filter lanjutan (multi-kolom) dibuka..." class="px-3.5 py-2.5 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm font-semibold text-gray-700 transition"><i class="fas fa-sliders mr-1 text-blue-600"></i><b>Filter</b></button>
+      <button data-refresh data-toast="Ringkasan katalog diperbarui." class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm text-blue-600 transition"><i class="fas fa-rotate"></i></button>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-2 mt-4" id="chipGroup">
+    <span class="text-xs font-semibold text-gray-600 mr-1">Filter Cepat:</span>
+    <button data-chip="all" data-toast="Menampilkan seluruh katalog SKU terpadu." class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Semua Barang (8.650)</button>
+    <button data-chip="aman" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Stok Aman (8.412)</button>
+    <button data-chip="menipis" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition"><span class="text-red-500">&#9679;</span> <span class="text-red-600">Stok Menipis (24)</span></button>
+    <button data-chip="habis" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Stok Habis (3)</button>
+    <button data-chip="fast" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition"><span class="text-emerald-600">Fast Moving (1.240)</span></button>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="panel overflow-hidden mb-6 anim-fade-up">
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[1100px]" id="tblReq">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200 text-[11px] uppercase tracking-wide text-gray-500">
+          <th class="px-4 py-3 w-10"><input type="checkbox" id="cbPilihSemua" class="rounded border-gray-300"></th>
+          <th class="px-4 py-3 text-left font-bold">Kode SKU &amp; EAN</th>
+          <th class="px-4 py-3 text-left font-bold">Nama Barang &amp; Brand</th>
+          <th class="px-4 py-3 text-left font-bold">Kategori</th>
+          <th class="px-4 py-3 text-left font-bold">Lokasi Rak / Bin</th>
+          <th class="px-4 py-3 text-left font-bold">Stok Fisik (ROP)</th>
+          <th class="px-4 py-3 text-left font-bold">Satuan</th>
+          <th class="px-4 py-3 text-left font-bold">Nilai Aset / Unit</th>
+          <th class="px-4 py-3 text-left font-bold">Status</th>
+          <th class="px-4 py-3 text-right font-bold">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <!-- Row 1 -->
+        <tr data-status="menipis" data-kategori="kamera" data-gudang="wh01" data-sku="SKU-CAM-600D" data-nama="Canon 60D DSLR Camera Body" data-brand="Canon Inc." data-ean="899273618290" data-rak="WH01-RA-02" data-stok="4 Unit (ROP: 25)" data-satuan="Unit" data-harga="Rp 8.500.000" data-kuantitas="16% dari ROP" data-flag="fast" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-CAM-600D</p><p class="text-xs text-gray-500">899273618290</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-camera text-sm"></i></div><div><p class="font-semibold text-gray-900">Canon 60D DSLR Camera Body</p><p class="text-xs text-gray-500">Brand: Canon Inc.</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Kamera &amp; Optik</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-02</span></td>
+          <td class="px-4 py-3 min-w-[130px]"><p class="font-bold text-red-600">4 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="16"><div class="h-1.5 bg-red-600 rounded-full" style="width:16%"></div></div><p class="text-[10px] text-gray-500">ROP: 25</p></td>
+          <td class="px-4 py-3">Unit</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 8.500.000</td>
+          <td class="px-4 py-3"><span class="badge bg-red-100 text-red-700"><i class="fas fa-circle" style="font-size:5px"></i>Menipis</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-CAM-600D" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-CAM-600D dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-CAM-600D dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 2 -->
+        <tr data-status="menipis" data-kategori="kamera" data-gudang="wh01" data-sku="SKU-CAM-NIK8" data-nama="Nikon Reel Optical Pro X" data-brand="Nikon Corp" data-ean="899273618412" data-rak="WH01-RA-03" data-stok="7 Unit (ROP: 20)" data-satuan="Unit" data-harga="Rp 12.450.000" data-kuantitas="35% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-CAM-NIK8</p><p class="text-xs text-gray-500">899273618412</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-camera-retro text-sm"></i></div><div><p class="font-semibold text-gray-900">Nikon Reel Optical Pro X</p><p class="text-xs text-gray-500">Brand: Nikon Corp</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Kamera &amp; Optik</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-03</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-red-600">7 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="35"><div class="h-1.5 bg-red-600 rounded-full" style="width:35%"></div></div><p class="text-[10px] text-gray-500">ROP: 20</p></td>
+          <td class="px-4 py-3">Unit</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 12.450.000</td>
+          <td class="px-4 py-3"><span class="badge bg-red-100 text-red-700"><i class="fas fa-circle" style="font-size:5px"></i>Menipis</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-CAM-NIK8" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-CAM-NIK8 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-CAM-NIK8 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 3 -->
+        <tr data-status="aman" data-flag="fast" data-kategori="wearable" data-gudang="wh01" data-sku="SKU-WTC-AP40" data-nama="Titan Smart Watch Classic Silver" data-brand="Titan Gear" data-ean="899120491023" data-rak="WH01-RA-02-T3" data-stok="180 Pcs (ROP: 40)" data-satuan="Pcs" data-harga="Rp 1.850.000" data-kuantitas="450% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-WTC-AP40</p><p class="text-xs text-gray-500">899120491023</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-stopwatch text-sm"></i></div><div><p class="font-semibold text-gray-900">Titan Smart Watch Classic Silver</p><p class="text-xs text-gray-500">Brand: Titan Gear</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Wearable Gadget</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-02-T3</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-green-700">180 Pcs</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="82"><div class="h-1.5 bg-green-600 rounded-full" style="width:82%"></div></div><p class="text-[10px] text-gray-500">ROP: 40</p></td>
+          <td class="px-4 py-3">Pcs</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 1.850.000</td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Stok Aman</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-WTC-AP40" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-WTC-AP40 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-WTC-AP40 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 4 -->
+        <tr data-status="aman" data-flag="fast" data-kategori="laptop" data-gudang="wh01" data-sku="SKU-LAP-M102" data-nama="Macbook Pro M1 2020 Space Gray" data-brand="Apple" data-ean="899553102450" data-rak="WH01-RA-01" data-stok="100 Unit (ROP: 15)" data-satuan="Unit" data-harga="Rp 16.200.000" data-kuantitas="667% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-LAP-M102</p><p class="text-xs text-gray-500">899553102450</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-laptop text-sm"></i></div><div><p class="font-semibold text-gray-900">Macbook Pro M1 2020 Space Gray</p><p class="text-xs text-gray-500">Brand: Apple</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Laptop &amp; Komputer</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-01</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-green-700">100 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="76"><div class="h-1.5 bg-green-600 rounded-full" style="width:76%"></div></div><p class="text-[10px] text-gray-500">ROP: 15</p></td>
+          <td class="px-4 py-3">Unit</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 16.200.000</td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Stok Aman</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-LAP-M102" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-LAP-M102 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-LAP-M102 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 5 -->
+        <tr data-status="aman" data-flag="fast" data-kategori="aksesoris" data-gudang="wh01" data-sku="SKU-ACC-KB05" data-nama="Mechanical Keyboard RGB Wireless" data-brand="Keychron" data-ean="899661002341" data-rak="WH01-RA-02-T1" data-stok="210 Unit (ROP: 50)" data-satuan="Unit" data-harga="Rp 1.450.000" data-kuantitas="420% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-ACC-KB05</p><p class="text-xs text-gray-500">899661002341</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-keyboard text-sm"></i></div><div><p class="font-semibold text-gray-900">Mechanical Keyboard RGB Wireless</p><p class="text-xs text-gray-500">Brand: Keychron</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Aksesoris Komputer</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-02-T1</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-green-700">210 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="88"><div class="h-1.5 bg-green-600 rounded-full" style="width:88%"></div></div><p class="text-[10px] text-gray-500">ROP: 50</p></td>
+          <td class="px-4 py-3">Unit</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 1.450.000</td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Stok Aman</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-ACC-KB05" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-ACC-KB05 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-ACC-KB05 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 6 -->
+        <tr data-status="aman" data-flag="fast" data-kategori="audio" data-gudang="wh01" data-sku="SKU-AUD-SN09" data-nama="Sony Wireless Headphone WH-1000XM4" data-brand="Sony" data-ean="899778219011" data-rak="WH01-RA-04" data-stok="120 Unit (ROP: 25)" data-satuan="Unit" data-harga="Rp 3.899.000" data-kuantitas="480% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-AUD-SN09</p><p class="text-xs text-gray-500">899778219011</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-headphones text-sm"></i></div><div><p class="font-semibold text-gray-900">Sony Wireless Headphone WH-1000XM4</p><p class="text-xs text-gray-500">Brand: Sony</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Audio &amp; Sound</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-04</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-green-700">120 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="80"><div class="h-1.5 bg-green-600 rounded-full" style="width:80%"></div></div><p class="text-[10px] text-gray-500">ROP: 25</p></td>
+          <td class="px-4 py-3">Unit</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 3.899.000</td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Stok Aman</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-AUD-SN09" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-AUD-SN09 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-AUD-SN09 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+        <!-- Row 7 -->
+        <tr data-status="habis" data-kategori="storage" data-gudang="wh01" data-sku="SKU-STR-SD01" data-nama="Sandisk Extreme Portable SSD 1TB" data-brand="SanDisk" data-ean="899881920381" data-rak="WH01-RA-01-T2" data-stok="0 Unit (ROP: 30)" data-satuan="Box" data-harga="Rp 2.100.000" data-kuantitas="0% dari ROP" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">SKU-STR-SD01</p><p class="text-xs text-gray-500">899881920381</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-hard-drive text-sm"></i></div><div><p class="font-semibold text-gray-900">Sandisk Extreme Portable SSD 1TB</p><p class="text-xs text-gray-500">Brand: SanDisk</p></div></div></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-50 text-blue-700">Storage Drive</span></td>
+          <td class="px-4 py-3"><span class="badge bg-gray-100 text-gray-700"><i class="fas fa-location-dot text-blue-500"></i>WH01-RA-01-T2</span></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-600">0 Unit</p><div class="progress-bar bg-gray-200 rounded-full h-1.5 my-1" style="width:100%" data-w="0"><div class="h-1.5 bg-gray-400 rounded-full" style="width:0%"></div></div><p class="text-[10px] text-gray-500">ROP: 30</p></td>
+          <td class="px-4 py-3">Box</td><td class="px-4 py-3 font-semibold whitespace-nowrap">Rp 2.100.000</td>
+          <td class="px-4 py-3"><span class="badge bg-slate-200 text-slate-600"><i class="fas fa-circle" style="font-size:5px"></i>Habis</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="SKU-STR-SD01" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Formulir edit SKU-STR-SD01 dibuka..." class="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Edit"><i class="fas fa-pen"></i></button>
+            <button data-toast="QR &amp; label barcode SKU-STR-SD01 dicetak ke printer Zebra." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="QR / Label"><i class="fas fa-qrcode"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+    <p>Menampilkan <b class="text-gray-800">1 - 7</b> dari <b class="text-gray-800">8.650</b> total barang &nbsp;|&nbsp; Baris: <select class="px-2 py-1 border border-gray-300 rounded bg-white text-xs"><option>10</option><option>25</option><option>50</option></select></p>
+    <div class="flex items-center gap-1">
+      <button data-toast="Anda sudah berada di halaman pertama." data-toast-type="warn" class="px-2.5 py-1 border border-gray-300 rounded text-gray-400 hover:bg-gray-50">‹ Sebelumnya</button>
+      <button class="px-3 py-1 bg-blue-600 text-white rounded font-semibold">1</button>
+      <button data-toast="Menampilkan halaman 2 katalog SKU..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
+      <button data-toast="Menampilkan halaman 3 katalog SKU..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">3</button>
+      <span class="px-1 text-gray-400">...</span>
+      <button data-toast="Melompat ke halaman terakhir (865)..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">865</button>
+      <button data-toast="Menampilkan halaman berikutnya katalog SKU..." class="px-2.5 py-1 border border-gray-300 rounded hover:bg-gray-50 text-blue-600">Selanjutnya ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: detail barang ============ -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-box" style="max-width:640px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-box-open mr-2 text-blue-600"></i>Detail Master Barang</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5" id="detailBody"><p class="text-sm text-gray-500">Memuat detail...</p></div>
+  </div>
+</div>
+
+<!-- ============ MODAL: tambah barang ============ -->
+<div class="modal-overlay" id="modalTambah">
+  <div class="modal-box" style="max-width:560px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-blue-600"></i>Tambah Barang Baru (SKU Baru)</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="col-span-2"><label class="text-xs font-semibold text-gray-600">Nama Barang</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="cth: Canon EOS R6 Mark II Body"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Kode SKU</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="SKU-XXX-000"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Barcode EAN</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="899..."></div>
+        <div><label class="text-xs font-semibold text-gray-600">Kategori</label>
+          <select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Kamera &amp; Optik</option><option>Laptop &amp; Komputer</option><option>Audio &amp; Sound</option><option>Storage Drive</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Nilai Aset / Unit (Rp)</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="8.500.000"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Lokasi Rak / Bin Awal</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="WH01-RA-01"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Reorder Point (ROP)</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="25"></div>
+      </div>
+      <div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700"><i class="fas fa-circle-info mr-1"></i>SKU baru otomatis tervalidasi unik global &amp; tercatat di Log Audit Master Data.</div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Batal</button>
+      <button data-close-modal data-saved-toast="SKU baru berhasil dibuat & tercatat di katalog terpadu." class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-save mr-1"></i>Simpan SKU</button>
+    </div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   ASTRO Inventory — Shared interaction layer
+   Vanilla JS, no deps. Tailwind handles layout/visuals.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Toast ---------- */
+  function toast(msg, type) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+  }
+  window.toast = toast;
+
+  /* ---------- Mobile sidebar drawer ---------- */
+  function initDrawer() {
+    const trig = document.querySelector('[data-drawer-trigger]');
+    const sb = document.querySelector('.sidebar-left');
+    const back = document.querySelector('.drawer-backdrop');
+    if (!trig || !sb) return;
+    function open() { sb.classList.add('drawer','open'); if(back) back.classList.add('open'); }
+    function close() { sb.classList.remove('open'); if(back) back.classList.remove('open'); }
+    trig.addEventListener('click', function(){ sb.classList.contains('open') ? close() : open(); });
+    if (back) back.addEventListener('click', close);
+  }
+
+  /* ---------- Dropdowns (notification / profile) ---------- */
+  function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach(function (btn) {
+      const target = btn.getAttribute('data-dropdown');
+      const menu = document.querySelector('[data-dropdown-menu="' + target + '"]');
+      if (!menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown.open').forEach(function (m){ if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.dropdown.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+    document.querySelectorAll('.dropdown').forEach(function (m){ m.addEventListener('click', function(e){ e.stopPropagation(); }); });
+  }
+
+  /* ---------- Disabled sidebar items ---------- */
+  function initDisabledNav() {
+    document.querySelectorAll('.sidebar-item.disabled').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        toast('Halaman belum tersedia (tidak memiliki referensi PNG).', 'warn');
+      });
+    });
+  }
+
+  /* ---------- Modals ---------- */
+  window.openModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('open');
+  };
+  window.closeModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  };
+  function initModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) {
+      m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const m = b.closest('.modal-overlay'); if (m) m.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+  }
+
+  /* ---------- Tabs ---------- */
+  window.initTabs = function (container) {
+    const root = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!root) return;
+    const btns = root.querySelectorAll('[data-tab]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const name = b.getAttribute('data-tab');
+        btns.forEach(function (x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        panels.forEach(function (p){
+          p.style.display = (p.getAttribute('data-tab-panel') === name) ? '' : 'none';
+        });
+      });
+    });
+  };
+
+  /* ---------- Table filtering / search ---------- */
+  /* Rows carry data attributes; selects/search filter them. */
+  window.initTableFilter = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    const search = opts.searchId ? document.getElementById(opts.searchId) : null;
+    const selects = (opts.selects || []).map(function (s) {
+      return { el: document.getElementById(s.id), attr: s.attr };
+    });
+
+    function visible(r) {
+      if (search) {
+        const q = (search.value || '').toLowerCase().trim();
+        if (q && r.textContent.toLowerCase().indexOf(q) === -1) return false;
+      }
+      for (let i = 0; i < selects.length; i++) {
+        const v = selects[i].el ? selects[i].el.value : '';
+        if (v && (r.getAttribute('data-' + selects[i].attr) || '').toLowerCase() !== String(v).toLowerCase()) return false;
+      }
+      if (opts.checkboxId) {
+        const cb = document.getElementById(opts.checkboxId);
+        if (cb && cb.checked) {
+          const flag = r.getAttribute('data-flag') || '';
+          if (flag.indexOf('anomali') === -1) return false;
+        }
+      }
+      return true;
+    }
+    function apply() {
+      let count = 0;
+      rows.forEach(function (r) {
+        const ok = visible(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      const info = document.getElementById(opts.countId);
+      if (info) info.textContent = count;
+    }
+    if (search) search.addEventListener('input', apply);
+    selects.forEach(function (s){ if (s.el) s.el.addEventListener('change', apply); });
+    if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.addEventListener('change', apply); }
+    const reset = opts.resetId ? document.getElementById(opts.resetId) : null;
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      selects.forEach(function (s){ if (s.el) s.el.value = ''; });
+      if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.checked = false; }
+      apply();
+    });
+    apply();
+    return { reapply: apply };
+  };
+
+  /* ---------- Client-side pagination (simple) ---------- */
+  window.initPagination = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    let perPage = opts.perPage || 10;
+    let page = 1;
+    const wrap = document.getElementById(opts.controlsId);
+    function filteredRows() {
+      return allRows.filter(function (r){ return r.style.display !== 'none'; });
+    }
+    function render() {
+      const fr = filteredRows();
+      const pages = Math.max(1, Math.ceil(fr.length / perPage));
+      if (page > pages) page = pages;
+      fr.forEach(function (r, idx) {
+        const start = (page - 1) * perPage;
+        r.style.display = (idx >= start && idx < start + perPage) ? '' : 'none';
+      });
+      if (wrap) {
+        const info = opts.infoId ? document.getElementById(opts.infoId) : null;
+        if (info) {
+          const from = fr.length ? (page - 1) * perPage + 1 : 0;
+          const to = Math.min(page * perPage, fr.length);
+          info.textContent = 'Menampilkan ' + from + ' - ' + to + ' dari ' + fr.length + ' ' + (opts.unit || 'data');
+        }
+        let html = '';
+        const prev = page <= 1;
+        html += '<button ' + (prev ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (prev ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50') + ' data-pg="' + (page - 1) + '">Sebelumnya</button>';
+        for (let p = 1; p <= pages; p++) {
+          html += '<button class="px-3 py-1 rounded text-xs lg:text-sm ' + (p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '" data-pg="' + p + '">' + p + '</button>';
+        }
+        const next = page >= pages;
+        html += '<button ' + (next ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (next ? 'text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200') + ' data-pg="' + (page + 1) + '">Berikutnya</button>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('[data-pg]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = parseInt(b.getAttribute('data-pg'), 10); if (!isNaN(v)) { page = v; render(); }
+          });
+        });
+      }
+    }
+    return { render: render, setPage: function (p) { page = p; render(); } };
+  };
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    initDrawer();
+    initDropdowns();
+    initDisabledNav();
+    initModals();
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Shared page interactions (inline ke semua halaman baru)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Animated counters ---------- */
+  function fmtNum(v, style) {
+    if (style === 'dot') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return String(Math.round(v));
+  }
+  window.animCount = function (el) {
+    var raw = el.getAttribute('data-count');
+    var target = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+    var styleDot = el.getAttribute('data-num') === 'dot';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var dec = parseFloat(el.getAttribute('data-dec') || '0');
+    var dur = 1100, t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var v = (dec ? target * eased : target * eased);
+      el.innerHTML = (dec ? v.toFixed(dec).replace('.', ',') : fmtNum(v, styleDot)) + (p > .55 ? suffix : '');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  };
+  function startCounters() {
+    document.querySelectorAll('[data-count]').forEach(function (el) { animCount(el); });
+  }
+
+  /* ---------- Animated progress bars ---------- */
+  function startBars() {
+    document.querySelectorAll('.progress-bar[data-w]').forEach(function (b, i) {
+      setTimeout(function () { b.style.width = b.getAttribute('data-w') + '%'; }, 120 + i * 45);
+    });
+  }
+
+  /* ---------- Modal helper buttons ---------- */
+  function initModalButtons() {
+    document.querySelectorAll('[data-open-modal]').forEach(function (b) {
+      b.addEventListener('click', function () { openModal(b.getAttribute('data-open-modal')); });
+    });
+    document.querySelectorAll('[data-saved-toast]').forEach(function (b) {
+      b.addEventListener('click', function () { toast(b.getAttribute('data-saved-toast'), 'success'); });
+    });
+  }
+
+  /* ---------- Toast-bound buttons ---------- */
+  function initToastButtons() {
+    document.querySelectorAll('[data-toast]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var msg = b.getAttribute('data-toast');
+        var type = b.getAttribute('data-toast-type') || 'success';
+        toast(msg, type);
+      });
+    });
+  }
+
+  /* ---------- Refresh spin ---------- */
+  function initRefresh() {
+    document.querySelectorAll('[data-refresh]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var icon = b.querySelector('i');
+        if (icon) { icon.style.transition = 'transform .6s'; icon.style.transform = 'rotate(360deg)'; }
+        b.classList.add('pointer-events-none');
+        setTimeout(function () {
+          if (icon) { icon.style.transition = 'none'; icon.style.transform = 'none'; }
+          b.classList.remove('pointer-events-none');
+        }, 620);
+        toast(b.getAttribute('data-toast') || 'Data berhasil disegarkan.', 'success');
+        if (window.__applyFilters) setTimeout(function () { window.__applyFilters(); }, 300);
+      });
+    });
+  }
+
+  /* ---------- Chip active toggling ---------- */
+  window.setChip = function (groupEl, btn) {
+    groupEl.querySelectorAll('[data-chip]').forEach(function (x) {
+      x.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+    });
+    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+  };
+
+  window.initChipGroup = function (groupId, onStart) {
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('[data-chip]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setChip(group, b);
+        window.__activeChip = b.getAttribute('data-chip');
+        if (window.__applyFilters) window.__applyFilters();
+        if (b.getAttribute('data-toast')) toast(b.getAttribute('data-toast'), 'info');
+      });
+    });
+    var first = group.querySelector('[data-chip]');
+    if (first) { setChip(group, first); window.__activeChip = first.getAttribute('data-chip'); }
+    if (onStart) onStart();
+  };
+
+  /* ---------- Kbd focus helper ---------- */
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      var s = document.querySelector('[data-header-search]');
+      if (s) { e.preventDefault(); s.focus(); }
+    }
+  });
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    startCounters();
+    startBars();
+    initToastButtons();
+    initModalButtons();
+    initRefresh();
+    var hs = document.querySelector('[data-header-search]');
+    if (hs) hs.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') toast('Pencarian "' + hs.value.trim() + '" — menampilkan hasil di halaman terkait.', 'info');
+    });
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Interaksi khusus: Data Master Barang & Inventaris
+   ============================================================ */
+(function () {
+  'use strict';
+  var search = document.getElementById('searchReq');
+  var fKategori = document.getElementById('fKategori');
+  var fStatus = document.getElementById('fStatus');
+  var fGudang = document.getElementById('fGudang');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#tblReq tbody tr'));
+
+  function rowStatusOK(r) {
+    var chip = window.__activeChip || 'all';
+    if (chip === 'all') return true;
+    if (chip === 'fast') return r.getAttribute('data-flag') === 'fast';
+    return r.getAttribute('data-status') === chip;
+  }
+
+  function apply() {
+    var q = (search.value || '').toLowerCase().trim();
+    var kat = fKategori.value.toLowerCase();
+    var stat = fStatus.value.toLowerCase();
+    var gud = fGudang.value.toLowerCase();
+    rows.forEach(function (r) {
+      var ok = rowStatusOK(r);
+      if (ok && kat && r.getAttribute('data-kategori') !== kat) ok = false;
+      if (ok && stat && r.getAttribute('data-status') !== stat) ok = false;
+      if (ok && gud && r.getAttribute('data-gudang') !== gud) ok = false;
+      if (ok && q) {
+        var hay = (r.getAttribute('data-sku') + ' ' + r.getAttribute('data-nama') + ' ' + r.getAttribute('data-ean') + ' ' + r.getAttribute('data-brand')).toLowerCase();
+        if (hay.indexOf(q) === -1) ok = false;
+      }
+      r.style.display = ok ? '' : 'none';
+    });
+  }
+  window.__applyFilters = apply;
+
+  [search, fKategori, fStatus, fGudang].forEach(function (el) {
+    el.addEventListener('input', apply);
+    el.addEventListener('change', apply);
+  });
+
+  window.initChipGroup('chipGroup', apply);
+
+  /* select-all checkbox */
+  var cbAll = document.getElementById('cbPilihSemua');
+  cbAll.addEventListener('change', function () {
+    document.querySelectorAll('.row-cb').forEach(function (cb) {
+      cb.checked = cbAll.checked;
+      cb.closest('tr').classList.toggle('bg-blue-50/60', cbAll.checked);
+    });
+    if (cbAll.checked) toast('Semua baris dipilih — siap untuk aksi batch (update stok / cetak label).', 'info');
+  });
+
+  /* highlight baris saat di-checklist */
+  document.querySelectorAll('.row-cb').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      cb.closest('tr').classList.toggle('bg-blue-50/60', cb.checked);
+    });
+  });
+
+  /* ============ Modal detail barang ============ */
+  window.openDetail = function (sku) {
+    var r = rows.filter(function (x){ return x.getAttribute('data-sku') === sku; })[0];
+    if (!r) return;
+    var d = r.getAttribute.bind(r);
+    var stokBadge = d('data-status') === 'aman' ? '<span class="badge bg-green-100 text-green-700">Stok Aman</span>'
+      : d('data-status') === 'menipis' ? '<span class="badge bg-red-100 text-red-700">Menipis</span>'
+      : '<span class="badge bg-slate-200 text-slate-600">Habis</span>';
+    document.getElementById('detailBody').innerHTML =
+      '<div class="grid grid-cols-2 gap-3 text-sm">' +
+      '<div><p class="text-xs text-gray-500">Kode SKU</p><p class="font-bold text-blue-700">' + d('data-sku') + '</p><p class="text-xs text-gray-500">EAN ' + d('data-ean') + '</p></div>' +
+      '<div class="text-right">' + stokBadge + '</div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Nama Barang</p><p class="text-gray-900 font-semibold">' + d('data-nama') + '</p><p class="text-xs text-gray-500">Brand: ' + d('data-brand') + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Lokasi Rak / Bin</p><p class="text-gray-900">' + d('data-rak') + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Stok Fisik</p><p class="text-gray-900 font-semibold">' + d('data-stok') + '</p><p class="text-xs text-gray-500">' + d('data-kuantitas') + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Satuan</p><p class="text-gray-900">' + d('data-satuan') + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Nilai Aset / Unit</p><p class="text-gray-900 font-semibold">' + d('data-harga') + '</p></div>' +
+      '</div>' +
+      '<div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700"><i class="fas fa-warehouse mr-1"></i>Kartu stok multi-gudang &amp; riwayat kartu persekutuan tersedia di modul Kartu Stok.</div>' +
+      '<div class="mt-4 flex justify-end gap-2"><button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Tutup</button><button data-close-modal class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-pen mr-1"></i>Edit SKU</button></div>';
+    openModal('modalDetail');
+  };
+
+  /* tombol aksi per baris */
+  document.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () { openDetail(b.getAttribute('data-detail')); });
+  });
+
+  apply();
+})();
+
+</script>
+</body>
+</html>
