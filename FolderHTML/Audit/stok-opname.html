@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stok Opname (Audit Fisik) — Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+    } } };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    /* Sidebar (220px, sama dengan Data Barang) */
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .nav-label { margin-bottom: 6px; padding: 0 8px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+    .nav-link { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #475569; transition: background .15s ease, color .15s ease; }
+    .nav-link svg, .nav-link i { width: 16px; height: 16px; flex: none; }
+    .nav-link.active { background: #0b49d8; color: #fff; font-weight: 500; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    /* Komponen bersama */
+    .card { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+    .ctl { height: 40px; border-radius: 6px; background: #eff6ff; padding: 0 12px; font-size: 12px; color: #334155; outline: none; border: 0; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; line-height: 1.25; text-align: center; transition: background .15s ease; }
+    .btn svg { width: 14px; height: 14px; flex: none; }
+    .btn-p { background: #2563eb; color: #fff; } .btn-p:hover { background: #1d4ed8; }
+    .btn-s { background: #fff; color: #334155; border: 1px solid #e2e8f0; } .btn-s:hover { background: #f8fafc; }
+    .qf { border-radius: 9999px; padding: 4px 12px; font-weight: 600; transition: box-shadow .15s ease; }
+    .qf.on { box-shadow: 0 0 0 2px rgba(11,73,216,.35); }
+    .qf[data-k=""] { background: #f1f5f9; color: #475569; }
+    .qf[data-k=""].on { background: #2563eb; color: #fff; box-shadow: none; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .d1 { animation-delay: 50ms; } .d2 { animation-delay: 100ms; } .d3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: none; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-14 shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4">
+      <section><p class="nav-label">Menu Utama</p>
+        <a href="#" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard Audit</span></a></section>
+      <section><p class="nav-label">Pemeriksaan & Inventaris</p><div class="space-y-0.5">
+        <a href="data-barang.html" class="nav-link"><i data-lucide="package"></i><span>Data Barang</span></a>
+        <a href="data-gudang-lokasi.html" class="nav-link"><i data-lucide="warehouse"></i><span>Data Gudang & Lokasi</span></a>
+        <a href="barang-masuk.html" class="nav-link"><i data-lucide="arrow-down-left"></i><span>Barang Masuk</span></a>
+        <a href="barang-keluar.html" class="nav-link"><i data-lucide="arrow-up-right"></i><span>Barang Keluar</span></a>
+        <a href="mutasi-barang.html" class="nav-link"><i data-lucide="arrow-left-right"></i><span>Mutasi Barang</span></a>
+        <a href="stok-opname.html" class="nav-link active"><i data-lucide="clipboard-check"></i><span>Stok Opname</span></a></div></section>
+      <section><p class="nav-label">Investigasi & Kepatuhan</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="history"></i><span>Log Aktivitas</span></a>
+        <a href="temuan-audit.html" class="nav-link"><i data-lucide="file-search"></i><span>Temuan Audit</span></a>
+        <a href="#" class="nav-link"><i data-lucide="list-checks"></i><span>Tindak Lanjut Temuan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="file-text"></i><span>Laporan Audit</span></a></div></section>
+      <section><p class="nav-label">Pengaturan & Akun</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="bell"></i><span>Notifikasi</span></a>
+        <a href="#" class="nav-link"><i data-lucide="settings"></i><span>Pengaturan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="user-circle"></i><span>Profil Saya</span></a></div></section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-white text-slate-500 hover:bg-[#f1f5fc]" aria-controls="sidebar" aria-label="Buka sidebar"></button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 lg:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-40 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex xl:w-56"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, resi, transaksi..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="relative">
+          <button id="pf" class="flex items-center gap-2 border-l border-slate-100 pl-3" aria-haspopup="true"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</span><span class="hidden text-left leading-tight md:block"><span class="block text-[10px] font-semibold text-slate-800">Budi Santoso</span><span class="block text-[9px] text-slate-500">Auditor Internal</span></span></button>
+          <div id="pfm" hidden class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border border-line bg-white py-1 text-[11px] text-slate-700 shadow-lg">
+            <div class="border-b border-slate-100 px-3 py-2"><p class="font-semibold text-slate-800">Budi Santoso</p><p class="text-[10px] text-slate-500">Auditor Internal · AU001</p></div>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="user" class="h-3.5 w-3.5"></i>Profil Saya</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="settings" class="h-3.5 w-3.5"></i>Pengaturan</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Hak Akses: Read-Only</a>
+            <a href="#" class="flex items-center gap-2 border-t border-slate-100 px-3 py-2 text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="h-3.5 w-3.5"></i>Keluar</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-56px)] p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 max-w-[760px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan & Audit <span class="text-slate-400">&gt;</span> Pemeriksaan & Inventaris <span class="text-blue-700">&gt; Stok Opname</span></p>
+          <h1 class="text-[20px] font-bold leading-tight tracking-tight text-slate-800 sm:text-[24px]">Stok Opname (Stock Count & Audit Fisik)</h1>
+          <p class="mt-1.5 text-[12px] leading-relaxed text-slate-500">Pencocokan kuantitas stok fisik gudang terhadap sistem ledger secara berkala (cycle count & wall-to-wall), identifikasi selisih (discrepancy), serta penyesuaian inventaris resmi Hub Cakung DC-01.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-50 px-2.5 text-[10.5px] font-semibold text-blue-700"><i data-lucide="calendar-check" class="h-3.5 w-3.5"></i>Jadwal Audit Siklus Q1 2025</span>
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 text-[10.5px] font-semibold text-emerald-700"><i data-lucide="trending-up" class="h-3.5 w-3.5"></i>Progress Audit 68,4%</span>
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-slate-100 px-2.5 text-[10.5px] font-semibold text-slate-700"><i data-lucide="sliders-horizontal" class="h-3.5 w-3.5"></i>Toleransi Selisih &lt; 0,2%</span>
+          <button onclick="toast('Menyiapkan ekspor Hasil Audit Stok Opname (Excel/PDF)...','success')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="download" class="h-4 w-4"></i>Ekspor Hasil Audit</button>
+          <button onclick="toast('Menampilkan jadwal tim auditor genggam (read-only)...','success')" class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="users" class="h-4 w-4 text-blue-600"></i>Jadwal Tim Auditor Genggam</button>
+        </div>
+      </section>
+
+      <section id="stats" aria-label="Ringkasan stok opname" class="reveal d1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"></section>
+
+      <section class="reveal d1 card mb-4 p-4">
+        <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <i data-lucide="map" class="h-4 w-4 text-blue-600"></i>
+          <h2 class="min-w-0 text-[13px] font-bold text-slate-800">Status Pelaksanaan Audit per Zona Gudang Hub Cakung DC-01</h2>
+          <button onclick="toast('Membuka denah layout gudang & heatmap discrepancy (read-only)...','success')" class="text-[11px] font-semibold text-blue-700 hover:underline sm:ml-auto">Lihat Denah Layout Gudang & Heatmap Discrepancy &gt;</button>
+        </div>
+        <div id="zones" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+      </section>
+
+      <section class="reveal d2 card mb-4 p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 lg:max-w-[430px]"><i data-lucide="search" class="h-4 w-4 shrink-0"></i><input id="searchOp" type="search" placeholder="Cari No. Berkas Opname, SKU, Nama Barang, Rak / Bin" class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+          <select id="fTipeOp" class="ctl max-w-full"><option value="">Tipe Opname: Semua (Cycle / Blind / Annual)</option><option value="cycle">Cycle Count</option><option value="blind">Blind Count</option><option value="wall-to-wall">Wall-to-Wall</option><option value="random">Audit Acak (Random Sampling)</option></select>
+          <select id="fStatusOp" class="ctl max-w-full"><option value="">Status Audit: Semua (Cocok / Selisih / Draft)</option><option value="match">Disetujui Match</option><option value="selisih">Perlu Rekonsiliasi / Investigasi</option><option value="draft">Dalam Proses Hitung</option></select>
+          <select id="fZonaOp" class="ctl max-w-full"><option value="">Zona Gudang: Semua Zona</option><option value="wh01-za">WH01-ZA (Zona A)</option><option value="wh01-zb">WH01-ZB (Zona B)</option><option value="wh02-zc">WH02-ZC (Zona C)</option><option value="wh02-zd">WH02-ZD (Zona D)</option></select>
+          <button id="reset" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
+          <span class="mr-1 font-semibold uppercase text-slate-600">Filter Cepat:</span>
+          <button class="qf on" data-k="">Semua Sesi (28)</button>
+          <button class="qf bg-emerald-50 text-emerald-700" data-k="match">Selesai & Match (19)</button>
+          <button class="qf bg-red-50 text-red-600" data-k="selisih">● Ada Selisih / Discrepancy (5)</button>
+          <button class="qf bg-amber-50 text-amber-700" data-k="draft">Dalam Proses Hitung (3)</button>
+          <button class="qf bg-indigo-50 text-indigo-700" data-k="approval">Menunggu Approval Kepala Hub (1)</button>
+        </div>
+      </section>
+
+      <section class="reveal d3 card mb-4 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table id="tblOp" class="w-full min-w-[1280px] table-fixed border-collapse text-left">
+            <thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="w-[140px] whitespace-nowrap px-3">No. Berkas & Opname</th><th class="w-[240px] whitespace-nowrap px-3">SKU & Nama Barang</th><th class="w-[210px] whitespace-nowrap px-3">Kategori & Lokasi Rak</th><th class="w-[95px] whitespace-nowrap px-3">Stok Sistem</th><th class="w-[110px] whitespace-nowrap px-3">Hasil Hitung Fisik</th><th class="w-[120px] whitespace-nowrap px-3">Selisih & Nilai</th><th class="w-[170px] whitespace-nowrap px-3">Tim Auditor & Checker</th><th class="w-[150px] whitespace-nowrap px-3">Status</th><th class="w-[90px] whitespace-nowrap px-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
+          </table>
+        </div>
+        <p id="noRow" hidden class="border-t border-slate-100 px-4 py-6 text-center text-[12px] text-slate-500">Tidak ada sesi yang sesuai. Ubah kata kunci atau reset filter.</p>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <span id="cnt"></span>
+          <div class="flex flex-wrap items-center gap-1">
+            <button onclick="toast('Halaman sebelumnya (read-only preview).','warn')" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400">‹ Sebelumnya</button>
+            <button class="h-8 min-w-8 rounded bg-blue-600 px-2 text-[12px] font-semibold text-white">1</button>
+            <button onclick="toast('Memuat sesi halaman 2 (read-only preview)...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">2</button>
+            <button onclick="toast('Memuat sesi halaman 3 (read-only preview)...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">3</button>
+            <button onclick="toast('Memuat sesi halaman 4 (read-only preview)...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">4</button>
+            <button onclick="toast('Memuat sesi halaman 2 (read-only preview)...','success')" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Berikutnya ›</button>
+          </div>
+        </footer>
+      </section>
+
+      <section id="feat" class="grid grid-cols-1 gap-3 lg:grid-cols-3"></section>
+    </main>
+  </div>
+
+  <div id="modal" hidden class="fixed inset-0 z-[70] items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true">
+    <div class="max-h-[90vh] w-full max-w-[780px] overflow-y-auto rounded-xl bg-white shadow-xl">
+      <div class="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+        <h2 class="flex items-center gap-2 text-[13px] font-bold text-slate-800"><i data-lucide="clipboard-check" class="h-4 w-4 text-blue-600"></i>Detail Berkas Stok Opname</h2>
+        <button onclick="closeModal()" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div id="detailBody" class="p-4"></div>
+    </div>
+  </div>
+  <div id="toasts" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const T = { gray:'bg-slate-100 text-slate-700', red:'bg-red-100 text-red-700', amber:'bg-amber-100 text-amber-700', blue:'bg-blue-50 text-blue-700', green:'bg-emerald-100 text-emerald-800', indigo:'bg-indigo-100 text-indigo-800' };
+    const ic = (n, c = 'h-3.5 w-3.5') => `<i data-lucide="${n}" class="${c} shrink-0"></i>`;
+    const pill = (txt, t, sm) => `<span class="inline-flex items-center rounded-full font-semibold ${sm ? 'px-2 py-0.5 text-[9.5px]' : 'px-2.5 py-1 text-[10.5px]'} ${T[t]}">${txt}</span>`;
+
+    /* ===== DATA (isi dari stok-opname.html asli) ===== */
+    const STATS = [
+      {l:'Total SKU Di-Audit Hari Ini', v:'1.845', u:'SKU', b:['94,5% Target Harian','green'], s:'1.742 SKU Cocok 100%', i:'package-check', c:'bg-blue-50 text-blue-600'},
+      {l:'Sesi Audit Berjalan', v:'6', u:'Sesi', b:['Sedang Dihitung','amber'], s:'4 Cycle Count · 2 Wall-to-Wall', i:'clipboard-list', c:'bg-amber-50 text-amber-600'},
+      {l:'Akurasi Stok Fisik vs Sistem', v:'99,2%', u:'', b:['Optimal (AQL 0,5)','green'], s:'Melampaui toleransi &lt; 0,2%', i:'check-check', c:'bg-emerald-50 text-emerald-700'},
+      {l:'Discrepancy / Selisih Rekonsiliasi', v:'5', u:'Temuan', b:['Perlu Investigasi','red'], s:'Selisih Nilai Rp 1,45 Juta (0,08%) · 3 Kurang (-), 2 Lebih (+)', i:'triangle-alert', c:'bg-red-50 text-red-600', red:1}
+    ];
+    const ZONES = [
+      ['WH01-ZA','Sedang Dihitung','amber','Zona A (Elektronik & Laptop)','Blind Count Tahap 2',85,'Kemajuan Audit 85% (425 / 500 SKU)','Auditor Regu 1 (Handheld Zebra)','border-amber-500','bg-amber-500'],
+      ['WH01-ZB','Verifikasi Selisih','indigo','Zona B (Audio & Periferal)','Cycle Count Bulanan',96,'Kemajuan Audit 96% (380 / 395 SKU)','Auditor Regu 3 (Checker QC)','border-amber-500','bg-blue-500'],
+      ['WH02-ZC','Selesai & Match','green','Zona C (Storage & SSD)','Wall-to-Wall Audit',100,'Kemajuan Audit 100% (280 / 280 SKU)','Tim Internal Audit (Verified)','border-emerald-500','bg-emerald-500'],
+      ['WH02-ZD','Berlangsung','blue','Zona D (Kabel & Aksesoris)','Audit Acak (Random Sampling)',40,'Kemajuan Audit 40% (120 / 300 SKU)','Operator Scanner Regu B','border-blue-500','bg-blue-500']
+    ];
+    const OK = ['Disetujui Match','green'], BAD = ['Perlu Rekonsiliasi','red'];
+    const R = [
+      {no:'SO-2025-0081', tgl:'12 Mar 2025, 10:00 WIB', nama:'Apple MacBook Pro 14" M1 Pro', sku:'SKU-LAP-0821', kat:'Laptop (Apple Inc.)', rak:'WH01-ZA-RA01 (Rak Tier 2)', sis:'120 Unit', fis:'118 Unit', sel:['-2 Unit','(-Rp 42,0 Jt)'], tim:['Hendra Wijaya','Checker: Rina'], st:BAD, k:['blind','selisih','wh01-za'], tipe:'Blind Count Tahap 2', note:'Defisit 2 unit high-value, investigasi rekaman CCTV rak Tier 2 malam sebelumnya.'},
+      {no:'SO-2025-0082', tgl:'12 Mar 2025, 09:15 WIB', nama:'SanDisk Extreme Portable SSD 1TB NVMe', sku:'SKU-SSD-0790', kat:'Storage (SanDisk)', rak:'WH02-ZC-RC04 (Bin 12)', sis:'250 Unit', fis:'250 Unit', sel:['+0 (Cocok 100%)'], tim:['Teguh Arianto','Checker: Dimas'], st:OK, k:['cycle','match','wh02-zc'], tipe:'Cycle Count Bulanan', note:'Rekonsiliasi sempurna, tidak ada penyesuaian ledger.'},
+      {no:'SO-2025-0083', tgl:'12 Mar 2025, 08:30 WIB', nama:'Sony WH-1000XM4 Wireless Headphone', sku:'SKU-AUD-8302', kat:'Audio (Sony Corp)', rak:'WH01-ZB-RB02 (Tier 3)', sis:'64 Unit', fis:'61 Unit', sel:['-3 Unit','(-Rp 13,5 Jt)'], tim:['FANG','Checker: Siti'], st:['Sedang Investigasi','amber'], k:['blind','selisih','wh01-zb'], tipe:'Blind Count Tahap 2', note:'Defisit 3 unit, verifikasi ulang picker & cek log outbound zona B.'},
+      {no:'SO-2025-0084', tgl:'12 Mar 2025, 08:45 WIB', nama:'Keychron Q1 Pro Wireless Custom Mechanical', sku:'SKU-KEY-1092', kat:'Periferal (Keychron)', rak:'WH01-ZB-RB03 (Bin 03)', sis:'85 Unit', fis:'85 Unit', sel:['+0 (Cocok 100%)'], tim:['Rina Maryani','Checker: Hendra W.','Auditor: Dimas Setiawan'], st:OK, k:['cycle','match','wh01-zb'], tipe:'Cycle Count Bulanan', note:'Auditor: Dimas Setiawan. Cocok penuh.'},
+      {no:'SO-2025-0085', tgl:'12 Mar 2025, 11:00 WIB', nama:'Canon EOS 60D Digital SLR Body Only', sku:'SKU-CAM-3104', kat:'Kamera (Canon ID)', rak:'WH01-ZA-RA04 (Locker VIP)', sis:'5 Unit', fis:'4 Unit', sel:['-1 Unit','(-Rp 7,5 Jt)'], tim:['DS','Checker: Kepala Hub'], st:BAD, k:['blind','selisih','wh01-za'], tipe:'Blind Count Tahap 2', note:'Defisit 1 unit kamera dari Locker VIP, akses dual-key sedang diperiksa.'},
+      {no:'SO-2025-0086', tgl:'12 Mar 2025, 10:15 WIB', nama:'Zebra TC21 Industrial Handheld Scanner', sku:'SKU-SCN-0055', kat:'Equipment (Zebra Tech)', rak:'WH02-ZD-RD01 (Rak D)', sis:'40 Unit', fis:'40 Unit', sel:['+0 (Cocok 100%)'], tim:['Ilham Rawan','Checker: Teguh A.'], st:OK, k:['random','match','wh02-zd'], tipe:'Audit Acak (Random Sampling)', note:'Sampling acak lolos, cocok penuh.'},
+      {no:'SO-2025-0087', tgl:'12 Mar 2025, 10:45 WIB', nama:'Corsair Vengeance DDR5 32GB (2x16GB) 6000MHz', sku:'SKU-RAM-7721', kat:'Komponen (Corsair)', rak:'WH02-ZC-RC02 (Bin 08)', sis:'180 Unit', fis:'180 Unit', sel:['+0 (Cocok 100%)'], tim:['Siti Lastari','Checker: Tim Internal Audit'], st:OK, k:['cycle','match','wh02-zc'], tipe:'Cycle Count Bulanan', note:'Wall-to-wall zona C tervalidasi tim internal audit.'}
+    ];
+    const FEAT = [
+      ['eye-off','bg-blue-50 text-blue-600','Fitur Blind Count & Two-Way Verification','Pencacahan fisik tanpa menampilkan kuantitas stok buku sistem di layar terminal scanner genggam petugas lapangan untuk menjamin objektivitas hitungan fisik 100% independen.','book-open','Buka Panduan Blind Count >','Membuka panduan Blind Count (read-only)...'],
+      ['scale','bg-amber-50 text-amber-600','SOP Rekonsiliasi & Adjustment Persediaan','Aturan persetujuan bertingkat (Kepala Gudang, Supervisor Logistik, Finance) untuk penyesuaian saldo ledger pembukuan, selisih, dan investigasi rekaman CCTV jika terjadi susut.','download','Unduh Form SOP Adjustment (PDF)','Mengunduh Form SOP Adjustment (PDF)...'],
+      ['file-signature','bg-emerald-50 text-emerald-700','Penerbitan Berita Acara Stok Opname (BASO Digital)','Penerbitan dokumen legal BASO terenkripsi otomatis dilengkapi digital signature Kepala Hub & Tim Internal Audit guna validasi kepatuhan audit PSAK & ISO 9001:2015.','history','Log Riwayat BASO >','Membuka log riwayat BASO (read-only)...']
+    ];
+
+    /* ===== RENDER ===== */
+    $('#stats').innerHTML = STATS.map(s => `
+      <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <div class="min-w-0">
+          <p class="text-[9.5px] font-semibold uppercase tracking-wide ${s.red ? 'text-red-600' : 'text-slate-500'}">${s.l}</p>
+          <p class="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[24px] font-bold leading-tight tracking-tight ${s.red ? 'text-red-600' : ''}">${s.v}${s.u ? ` <span class="text-[10.5px] font-normal text-slate-600">${s.u}</span>` : ''}${pill(s.b[0], s.b[1], 1)}</p>
+          <p class="mt-2.5 text-[10.5px] ${s.red ? 'text-red-600' : 'text-slate-500'}">${s.s}</p>
+        </div>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${s.c}">${ic(s.i, 'h-4 w-4')}</span>
+      </article>`).join('');
+
+    $('#zones').innerHTML = ZONES.map(z => `
+      <div class="rounded-lg border-l-4 ${z[8]} bg-[#eff4ff] p-3.5">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-1.5"><span class="rounded-full bg-blue-600 px-2.5 py-1 text-[10.5px] font-semibold text-white">${z[0]}</span>${pill('● ' + z[1], z[2])}</div>
+        <p class="text-[12px] font-semibold text-slate-800">${z[3]}</p>
+        <p class="mb-2 text-[10.5px] text-slate-500">${z[4]}</p>
+        <div class="mb-1 h-1.5 rounded bg-blue-100"><div class="h-full rounded ${z[9]}" style="width:${z[5]}%"></div></div>
+        <p class="mb-2 text-[10.5px] text-slate-500">${z[6]}</p>
+        <p class="flex items-center gap-1.5 text-[10.5px] text-slate-600">${ic('user-round', 'h-3.5 w-3.5 text-slate-400')}${z[7]}</p>
+      </div>`).join('');
+
+    $('#rows').innerHTML = R.map(r => {
+      const bad = r.sel.length > 1;
+      return `<tr data-no="${r.no}" class="align-top hover:bg-slate-50/70">
+        <td class="px-3 py-3"><a href="#" onclick="openDetail('${r.no}');return false" class="font-bold text-blue-700">${r.no}</a><p class="mt-0.5 text-[10.5px] text-slate-500">${r.tgl}</p></td>
+        <td class="px-3 py-3"><b class="block break-words font-semibold text-slate-800">${r.nama}</b><span class="text-[10.5px] text-slate-500">${r.sku}</span></td>
+        <td class="px-3 py-3"><p class="text-slate-700">${r.kat}</p><span class="mt-1 inline-flex items-start gap-1.5 rounded bg-blue-50 px-2 py-1 text-[10.5px] text-slate-700">${ic('map-pin', 'mt-px h-3.5 w-3.5 text-blue-600')}${r.rak}</span></td>
+        <td class="whitespace-nowrap px-3 py-3 font-semibold text-slate-800">${r.sis}</td>
+        <td class="whitespace-nowrap px-3 py-3 font-semibold text-slate-800">${r.fis}</td>
+        <td class="px-3 py-3"><p class="font-semibold ${bad ? 'text-red-600' : 'text-emerald-700'}">${r.sel[0]}</p>${bad ? `<p class="text-[10.5px] text-slate-500">${r.sel[1]}</p>` : ''}</td>
+        <td class="px-3 py-3"><p class="text-slate-800">${r.tim[0]}</p>${r.tim.slice(1).map(t => `<p class="mt-0.5 text-[10.5px] text-slate-500">${t}</p>`).join('')}</td>
+        <td class="px-3 py-3">${pill('● ' + r.st[0], r.st[1])}</td>
+        <td class="px-3 py-3 text-center"><button onclick="openDetail('${r.no}')" class="inline-flex items-center gap-1 rounded px-2 py-1.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-50">${ic('eye', 'h-4 w-4')}Detail</button></td>
+      </tr>`;
+    }).join('');
+
+    $('#feat').innerHTML = FEAT.map(f => `
+      <article class="card flex flex-col p-4">
+        <div class="mb-2 flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${f[1]}">${ic(f[0], 'h-4 w-4')}</span><h3 class="text-[13px] font-bold leading-snug text-slate-800">${f[2]}</h3></div>
+        <p class="mb-3 text-[11px] leading-relaxed text-slate-600">${f[3]}</p>
+        <button onclick="toast('${f[7]}','success')" class="mt-auto inline-flex items-center gap-1.5 self-start text-left text-[11px] font-semibold text-blue-700 hover:underline">${ic(f[4])}${f[5].replace('>', '&gt;')}</button>
+      </article>`).join('');
+
+    /* ===== MODAL & TOAST ===== */
+    window.openDetail = (no) => {
+      const r = R.find(x => x.no === no);
+      const f = (l, v) => `<div class="min-w-0"><dt class="text-[10.5px] text-slate-500">${l}</dt><dd class="text-[12px] text-slate-800">${v}</dd></div>`;
+      const sub = (t) => `<span class="text-[10.5px] text-slate-500">${t}</span>`;
+      $('#detailBody').innerHTML = `
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          ${f('No. Berkas Opname', `<b class="text-slate-900">${r.no}</b>`)}${f('Tanggal & Waktu', r.tgl)}
+          ${f('SKU & Nama Barang', `${r.nama}<br>${sub(r.sku)}`)}${f('Kategori & Lokasi Rak', `${r.kat}<br>${sub(r.rak)}`)}
+          ${f('Tipe Opname', r.tipe)}${f('Stok Sistem', r.sis)}${f('Hasil Hitung Fisik', r.fis)}${f('Selisih & Nilai', r.sel.join(' '))}
+          ${f('Tim Auditor', `${r.tim[0]}<br>${sub(r.tim[1])}`)}${f('Status', pill('● ' + r.st[0], r.st[1]))}
+        </dl>
+        <div class="mt-3 flex items-start gap-2 rounded-md bg-slate-50 p-3 text-[11px] text-slate-600">${ic('info', 'mt-px h-3.5 w-3.5')}<span>${r.note}</span></div>
+        <div class="mt-4 flex justify-end gap-2"><button onclick="closeModal()" class="btn btn-s h-9 px-4">Tutup</button><button onclick="closeModal();toast('Ekspor detail ${r.no} (PDF)...','success')" class="btn btn-p h-9 px-4">${ic('file-down')}Ekspor PDF</button></div>`;
+      $('#modal').hidden = false; $('#modal').style.display = 'flex';
+      lucide.createIcons();
+    };
+    window.closeModal = () => { $('#modal').hidden = true; $('#modal').style.display = ''; };
+    $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('#pfm').hidden = true; } });
+    window.toast = (msg, type = 'success') => {
+      const el = document.createElement('div');
+      el.className = `max-w-[320px] rounded-md px-3 py-2 text-[11px] font-medium text-white shadow-lg ${type === 'warn' ? 'bg-amber-600' : 'bg-emerald-600'}`;
+      el.textContent = msg; $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3200);
+    };
+
+    /* ===== FILTER ===== */
+    const ft = $('#fTipeOp'), fs = $('#fStatusOp'), fz = $('#fZonaOp'), q = $('#searchOp'), g = $('#global-search');
+    let st = '';
+    function setSt(v) { st = v; fs.value = [...fs.options].some(o => o.value === v) ? v : ''; apply(); }
+    function apply() {
+      const s = `${q.value} ${g.value}`.trim().toLowerCase(); let n = 0;
+      R.forEach(r => {
+        const el = $(`tr[data-no="${r.no}"]`);
+        const ok = (!s || el.textContent.toLowerCase().includes(s)) && (!ft.value || r.k[0] === ft.value) && (!st || r.k[1] === st) && (!fz.value || r.k[2] === fz.value);
+        el.hidden = !ok; n += ok ? 1 : 0;
+      });
+      const any = s || ft.value || st || fz.value;
+      $('#cnt').textContent = any ? `${n} sesi sesuai filter` : 'Menampilkan 1-7 dari 28 sesi stok opname';
+      $('#noRow').hidden = n > 0;
+      document.querySelectorAll('.qf').forEach(b => b.classList.toggle('on', b.dataset.k === st));
+    }
+    [q, g].forEach(i => i.addEventListener('input', apply));
+    [ft, fz].forEach(i => i.addEventListener('change', apply));
+    fs.addEventListener('change', () => setSt(fs.value));
+    document.querySelectorAll('.qf').forEach(b => b.addEventListener('click', () => setSt(b.dataset.k)));
+    $('#reset').addEventListener('click', () => { q.value = g.value = ft.value = fz.value = ''; setSt(''); });
+
+    /* ===== SIDEBAR & PROFIL ===== */
+    const sb = $('#sidebar'), bd = $('#sidebar-backdrop'), tg = $('#sidebar-toggle');
+    const mob = () => matchMedia('(max-width:767px)').matches;
+    function sync() {
+      const open = mob() ? sb.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      tg.setAttribute('aria-expanded', open); tg.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+      tg.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="h-5 w-5"></i>`;
+      bd.classList.toggle('show', mob() && open); lucide.createIcons();
+    }
+    window.toggleSidebar = () => { mob() ? sb.classList.toggle('open') : document.body.classList.toggle('sidebar-collapsed'); sync(); };
+    if (!mob() && innerWidth < 1024) document.body.classList.add('sidebar-collapsed'); /* tablet: sidebar tertutup agar konten lega */
+    window.addEventListener('resize', sync);
+    $('#pf').addEventListener('click', e => { e.stopPropagation(); $('#pfm').hidden = !$('#pfm').hidden; });
+    document.addEventListener('click', e => { if (!$('#pfm').contains(e.target)) $('#pfm').hidden = true; });
+
+    apply(); sync(); lucide.createIcons();
+  </script>
+</body>
+</html>

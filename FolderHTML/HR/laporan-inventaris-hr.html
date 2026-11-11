@@ -1,832 +1,334 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan & Analitik Inventaris HR - Astro Inventory</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' } } } };
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow-x: hidden;
-        }
-        .sidebar-item {
-            transition: all 0.2s ease;
-        }
-        .sidebar-item:hover {
-            background-color: #EFF6FF;
-        }
-        .sidebar-item.active {
-            background-color: #DBEAFE;
-            border-left: 3px solid #2563EB;
-            font-weight: 600;
-            color: #2563EB;
-        }
-        .metric-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
-        }
-        .filter-tag {
-            transition: all 0.2s ease;
-        }
-        .filter-tag:hover {
-            background-color: #DBEAFE;
-        }
-        .table-row {
-            transition: background-color 0.15s ease;
-        }
-        .table-row:hover {
-            background-color: #F9FAFB;
-        }
-        .progress-bar {
-            transition: width 0.5s ease;
-        }
-        .main-layout {
-            display: grid;
-            grid-template-columns: 256px 1fr 320px;
-            min-height: calc(100vh - 64px);
-        }
-        @media (max-width: 1536px) {
-            .main-layout {
-                grid-template-columns: 240px 1fr 280px;
-            }
-        }
-        @media (max-width: 1280px) {
-            .main-layout {
-                grid-template-columns: 220px 1fr;
-            }
-            .sidebar-right {
-                display: none;
-            }
-        }
-        @media (max-width: 768px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-            .sidebar-left {
-                display: none;
-            }
-        }
-        .content-wrapper {
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        .header-responsive {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        @media (max-width: 1024px) {
-            .header-center {
-                display: none;
-            }
-        }
-        @media (max-width: 640px) {
-            .header-search {
-                width: 100%;
-            }
-        }
-            body { font-family: Inter, sans-serif; }
-        .nav-link { transition: background .15s ease, color .15s ease; }
-        .nav-link.active { background: #0b49d8; color: white; }
-        .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
-        #sidebar { width: 220px; transition: transform .22s ease; }
-        #main-area > header { height: 56px; padding-inline: 16px; }
-        #main-area > header > div:first-child,
-        #main-area > header > div:last-child { gap: 12px; }
-        #main-area > header > div:first-child > div { gap: 8px; padding: 6px 10px; font-size: 10px; }
-        #main-area > header > div:first-child i { width: 14px; height: 14px; }
-        #main-area > header > div:last-child label { width: 224px; height: 32px; gap: 8px; padding-inline: 10px; }
-        #main-area > header > div:last-child label i { width: 14px; height: 14px; }
-        #main-area > header > div:last-child label input { font-size: 10px; }
-        #main-area > header > div:last-child > button { width: 32px; height: 32px; }
-        #main-area > header > div:last-child > button i { width: 16px; height: 16px; }
-        #main-area > header > div:last-child > div:last-child { gap: 8px; padding-left: 12px; }
-        #main-area > header > div:last-child > div:last-child > div:first-child { width: 32px; height: 32px; font-size: 10px; }
-        #main-area > header > div:last-child > div:last-child p:first-child { font-size: 10px; }
-        #main-area > header > div:last-child > div:last-child p:last-child { font-size: 9px; }
-        #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
-        #sidebar-toggle:hover { background: #f1f5fc; }
-        @media (min-width: 768px) {
-            body { zoom: 1.15; }
-            #sidebar { transform: translateX(0) !important; }
-            #main-area { margin-left: 220px !important; }
-            body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
-            body.sidebar-collapsed #main-area { margin-left: 0 !important; }
-            #main-area > header { z-index: 60 !important; }
-            #sidebar-toggle { display: flex !important; }
-        }
-        @media (max-width: 767px) {
-            #sidebar { transform: translateX(-100%) !important; }
-            #sidebar.open { transform: translateX(0) !important; }
-            #sidebar-backdrop.show { display: block; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-        }
-
-        .hr-content-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
-        .hr-content-layout > .sidebar-right { top: 56px; height: calc(100vh - 56px); }
-        @media (max-width: 1280px) {
-            .hr-content-layout { grid-template-columns: minmax(0, 1fr); }
-        }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan & Analitik Inventaris HR — Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+    } } };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    /* Sidebar (220px, sama dengan Data Barang) */
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .nav-label { margin-bottom: 6px; padding: 0 8px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+    .nav-link { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #475569; transition: background .15s ease, color .15s ease; }
+    .nav-link svg, .nav-link i { width: 16px; height: 16px; flex: none; }
+    .nav-link.active { background: #0b49d8; color: #fff; font-weight: 500; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    /* Komponen bersama */
+    .card { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+    .ctl { height: 40px; border-radius: 6px; background: #eff6ff; padding: 0 12px; font-size: 12px; color: #334155; outline: none; border: 0; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; line-height: 1.25; text-align: center; transition: background .15s ease; }
+    .btn svg { width: 14px; height: 14px; flex: none; }
+    .btn-p { background: #2563eb; color: #fff; } .btn-p:hover { background: #1d4ed8; }
+    .btn-s { background: #fff; color: #334155; border: 1px solid #e2e8f0; } .btn-s:hover { background: #f8fafc; }
+    .qf { border-radius: 9999px; padding: 4px 12px; font-weight: 600; transition: box-shadow .15s ease; }
+    .qf.on { box-shadow: 0 0 0 2px rgba(11,73,216,.35); }
+    .qf[data-k=""] { background: #f1f5f9; color: #475569; }
+    .qf[data-k=""].on { background: #2563eb; color: #fff; box-shadow: none; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .d1 { animation-delay: 50ms; } .d2 { animation-delay: 100ms; } .d3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: none; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 </head>
+
 <body class="min-h-screen bg-canvas text-ink antialiased">
-  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar(true)"></div>
-  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
-    <a href="#" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
-      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"> <i class="fas fa-cube text-white text-lg"></i></span>
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-14 shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
       <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
     </a>
-    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
-      <section>
-        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">MENU UTAMA</p>
-        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4 shrink-0"></i><span>Dashboard HR</span></a>
-      </section>
-      <section>
-        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">OPERASIONAL & PERSETUJUAN</p>
-        <div class="space-y-0.5">
-          <a href="#" class="nav-link flex h-8 items-center justify-between gap-2 rounded-md px-2 text-slate-600"><span class="flex min-w-0 items-center gap-2"><i data-lucide="arrow-left-right" class="h-4 w-4 shrink-0"></i><span>Antrean Persetujuan</span></span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-text" class="h-4 w-4 shrink-0"></i><span>Detail Permintaan</span></a>
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4 shrink-0"></i><span>Riwayat Persetujuan</span></a>
-        </div>
-      </section>
-      <section>
-        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">MANAJEMEN & LAPORAN</p>
-        <div class="space-y-0.5">
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 active font-medium" aria-current="page"><i data-lucide="chart-no-axes-combined" class="h-4 w-4 shrink-0"></i><span>Laporan Inventaris</span></a>
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="shield-check" class="h-4 w-4 shrink-0"></i><span>Log Audit & Otorisasi</span></a>
-        </div>
-      </section>
-      <section>
-        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">PENGATURAN & AKUN</p>
-        <div class="space-y-0.5">
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4 shrink-0"></i><span>Notifikasi</span></a>
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4 shrink-0"></i><span>Pengaturan</span></a>
-          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-round" class="h-4 w-4 shrink-0"></i><span>Profil Saya</span></a>
-        </div>
-      </section>
+    <nav class="flex-1 space-y-4 px-2 py-4">
+      <section><p class="nav-label">Menu Utama</p>
+        <a href="#" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard HR</span></a></section>
+      <section><p class="nav-label">Operasional & Persetujuan</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="arrow-left-right"></i><span>Antrean Persetujuan</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        <a href="#" class="nav-link"><i data-lucide="file-text"></i><span>Detail Permintaan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="history"></i><span>Riwayat Persetujuan</span></a></div></section>
+      <section><p class="nav-label">Manajemen & Laporan</p><div class="space-y-0.5">
+        <a href="laporan-inventaris-hr.html" class="nav-link active" aria-current="page"><i data-lucide="chart-no-axes-combined"></i><span>Laporan Inventaris</span></a>
+        <a href="#" class="nav-link"><i data-lucide="shield-check"></i><span>Log Audit & Otorisasi</span></a></div></section>
+      <section><p class="nav-label">Pengaturan & Akun</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="bell"></i><span>Notifikasi</span></a>
+        <a href="#" class="nav-link"><i data-lucide="settings"></i><span>Pengaturan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="user-round"></i><span>Profil Saya</span></a></div></section>
     </nav>
   </aside>
-  <div id="main-area" class="min-h-screen md:ml-[220px]">
-    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+
+  <div id="main-area" class="min-h-screen">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
       <div class="flex min-w-0 items-center gap-3">
-        <button onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
-        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
-        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+        <button id="sidebar-toggle" onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-white text-slate-500 hover:bg-[#f1f5fc]" aria-controls="sidebar" aria-label="Buka sidebar"></button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 lg:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
       </div>
-      <div class="flex items-center gap-3">
-        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-40 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex xl:w-56"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
         <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
-        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight sm:block"><p class="text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+        <div class="relative">
+          <button id="pf" class="flex items-center gap-2 border-l border-slate-100 pl-3" aria-haspopup="true"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</span><span class="hidden text-left leading-tight md:block"><span class="block text-[10px] font-semibold text-slate-800">Budi Santoso</span><span class="block text-[9px] text-slate-500">Admin Utama / Super Admin</span></span></button>
+          <div id="pfm" hidden class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border border-line bg-white py-1 text-[11px] text-slate-700 shadow-lg">
+            <div class="border-b border-slate-100 px-3 py-2"><p class="font-semibold text-slate-800">Budi Santoso</p><p class="text-[10px] text-slate-500">Admin Utama / Super Admin · BK-88219-JKT</p></div>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="user" class="h-3.5 w-3.5"></i>Profil Saya</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="settings" class="h-3.5 w-3.5"></i>Pengaturan</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Hak Akses: Super Admin</a>
+            <a href="#" class="flex items-center gap-2 border-t border-slate-100 px-3 py-2 text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="h-3.5 w-3.5"></i>Keluar</a>
+          </div>
+        </div>
       </div>
     </header>
-    <div class="hr-content-layout">
-<main class="content-wrapper p-4 lg:p-6 overflow-x-hidden">
 
-            <!-- Breadcrumb -->
-            <div class="flex items-center space-x-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
-                <a href="#" class="hover:text-blue-600">Beranda</a>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <a href="#" class="hover:text-blue-600">Manajemen & Laporan</a>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <span class="text-gray-900 font-medium">Laporan Inventaris</span>
+    <main class="min-h-[calc(100vh-56px)] p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 max-w-[760px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Beranda <span class="text-slate-400">&gt;</span> Manajemen & Laporan <span class="text-blue-700">&gt; Laporan Inventaris</span></p>
+          <h1 class="text-[20px] font-bold leading-tight tracking-tight text-slate-800 sm:text-[24px]">Laporan & Analitik Inventaris HR</h1>
+          <p class="mt-1.5 text-[12px] leading-relaxed text-slate-500">Pantau mutasi stok barang, status buffer per Hub regional, dan kebutuhan alokasi barang operasional.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="toast('Membuka filter lanjutan...','success')" class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="list-filter" class="h-4 w-4 text-blue-600"></i>Filter Lanjutan</button>
+          <button onclick="toast('Menyiapkan Unduh Rekap Laporan Inventaris...','success')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="download" class="h-4 w-4"></i>Unduh Rekap<i data-lucide="chevron-down" class="h-3.5 w-3.5"></i></button>
+        </div>
+      </section>
+
+      <section class="reveal d1 card mb-4 p-3">
+        <div id="chips" class="flex flex-wrap items-center gap-2 text-[10.5px]"></div>
+        <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[10.5px] text-slate-500">
+          <span class="inline-flex items-center gap-1.5"><i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>Sinkronisasi Buku Besar: 4 Menit Lalu</span>
+          <button id="resetChips" class="font-semibold text-blue-700 hover:underline">Reset Semua</button>
+        </div>
+      </section>
+
+      <section id="stats" aria-label="Ringkasan inventaris" class="reveal d1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"></section>
+
+      <section class="reveal d2 mb-4 grid grid-cols-1 gap-3 xl:grid-cols-3">
+        <article class="card p-4 xl:col-span-2">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 class="text-[13px] font-bold text-slate-800">Tren Volume Mutasi & Sensitivitas Mingguan</h2>
+            <div id="range" class="flex flex-wrap gap-1.5 text-[10.5px] font-semibold">
+              <button class="rounded-md bg-blue-600 px-3 py-1.5 text-white">7 Hari Terakhir</button>
+              <button class="rounded-md bg-slate-100 px-3 py-1.5 text-slate-600 hover:bg-slate-200">30 Hari</button>
+              <button class="rounded-md bg-slate-100 px-3 py-1.5 text-slate-600 hover:bg-slate-200">Bulan Ini</button>
             </div>
+          </div>
+          <div class="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[10.5px]">
+            <span class="inline-flex items-center gap-2 text-slate-700"><i class="h-2.5 w-2.5 rounded-full bg-blue-600"></i><b>Inbound (Masuk)</b>: 8.420 Unit</span>
+            <span class="inline-flex items-center gap-2 text-slate-700"><i class="h-2.5 w-2.5 rounded-full bg-slate-400"></i><b>Outbound (Keluar)</b>: 6.850 Unit</span>
+            <span class="inline-flex items-center gap-2 text-red-600"><i class="h-2.5 w-2.5 rounded-full bg-red-500"></i><b>Penyesuaian Selisih</b>: 14 Unit</span>
+          </div>
+          <div class="relative h-56"><canvas id="mutasiChart"></canvas></div>
+          <div class="mt-4 grid grid-cols-1 gap-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
+            <div class="sm:text-center"><p class="mb-1 text-[10.5px] text-slate-500">Throughput Rata-rata</p><p class="text-[16px] font-bold text-slate-800">1.202 <span class="text-[10.5px] font-normal text-slate-500">Unit/Hari</span></p></div>
+            <div class="sm:border-x sm:border-slate-100 sm:text-center"><p class="mb-1 text-[10.5px] text-slate-500">Akurasi Stok Opname</p><p class="text-[16px] font-bold text-slate-800">99,8% <span class="text-[10.5px] font-normal text-slate-500">(Fiskal)</span></p></div>
+            <div class="sm:text-center"><p class="mb-1 text-[10.5px] text-slate-500">Puncak Throughput</p><p class="text-[16px] font-bold text-slate-800">Sabtu <span class="text-[10.5px] font-normal text-slate-500">(1.480 Unit)</span></p></div>
+          </div>
+        </article>
 
-            <!-- Page Header -->
-            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-                <div class="flex-1">
-                    <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Laporan & Analitik Inventaris HR</h1>
-                    <p class="text-sm lg:text-base text-gray-600">Pantau barang terkasih mutasi stok, status buffer per Hub regional, dan kebutuhan alokasi barang operasional.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2 text-sm">
-                        <i class="fas fa-filter"></i>
-                        <span>Filter Lanjutan</span>
-                    </button>
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 text-sm">
-                        <i class="fas fa-download"></i>
-                        <span>Unduh Rekap</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                </div>
-            </div>
+        <article class="card flex flex-col p-4">
+          <div class="mb-1 flex items-center justify-between gap-2"><h2 class="text-[13px] font-bold text-slate-800">Distribusi per Hub Regional</h2><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">AMIP</span></div>
+          <p class="mb-3 text-[11px] text-slate-500">Porsi penyaluran dan mutasi barang logistik terverifikasi.</p>
+          <div id="hubs" class="space-y-3.5"></div>
+          <div class="mt-auto flex items-start gap-2 rounded-md bg-blue-50 p-3 pt-3 text-[11px] leading-relaxed text-blue-800"><i data-lucide="info" class="mt-px h-3.5 w-3.5 shrink-0"></i><span>Semua transaksi tercatat pada Ledger ASTRO-SKU256 dan terlindungi otorisasi ganda HR.</span></div>
+        </article>
+      </section>
 
-            <!-- Active Filters -->
-            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="filter-tag bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
-                        <span><strong>Periode:</strong> Maret 2025</span>
-                        <button class="hover:text-blue-900 ml-1"><i class="fas fa-times"></i></button>
-                    </span>
-                    <span class="filter-tag bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
-                        <span><strong>Semua Hub:</strong> 4 Hub Regional</span>
-                        <button class="hover:text-blue-900 ml-1"><i class="fas fa-times"></i></button>
-                    </span>
-                    <span class="filter-tag bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs lg:text-sm flex items-center space-x-2">
-                        <span><strong>SLA:</strong> > 95% Sesuai Standar</span>
-                        <button class="hover:text-blue-900 ml-1"><i class="fas fa-times"></i></button>
-                    </span>
-                </div>
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs lg:text-sm text-gray-500">
-                    <span><i class="fas fa-sync-alt mr-1"></i> Sinkronisasi Buku Besar: 4 Menit Lalu</span>
-                    <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">Reset Semua</a>
-                </div>
-            </div>
+      <section class="reveal d3 card mb-4 overflow-hidden">
+        <div class="flex flex-wrap items-start justify-between gap-3 p-4 pb-3">
+          <div class="min-w-0 flex-1"><h2 class="text-[13px] font-bold text-slate-800">Ringkasan Laporan per Kategori SKU & Lokasi</h2><p class="mt-0.5 text-[11px] text-slate-500">Rincian batch buffer besar mutasi inventaris, valuasi, dan tingkat kepatuhan SPO.</p></div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="fKat" class="ctl max-w-full"><option value="">Semua Kategori</option></select>
+            <select id="fHub" class="ctl max-w-full"><option value="">Semua DC / Hub</option></select>
+            <button onclick="toast('Menyiapkan Cetak PDF laporan...','success')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="file-text" class="h-4 w-4"></i>Cetak PDF</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1110px] table-fixed border-collapse text-left">
+            <thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr><th class="w-[150px] whitespace-nowrap px-3">Kode Laporan</th><th class="w-[330px] whitespace-nowrap px-3">Kategori & SKU Induk</th><th class="w-[170px] whitespace-nowrap px-3">Volume Mutasi</th><th class="w-[170px] whitespace-nowrap px-3">Nilai Valuasi</th><th class="w-[130px] whitespace-nowrap px-3">Rasio Persetujuan</th><th class="w-[160px] whitespace-nowrap px-3">Status Kepatuhan</th></tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
+          </table>
+        </div>
+        <p id="noRow" hidden class="border-t border-slate-100 px-4 py-6 text-center text-[12px] text-slate-500">Tidak ada laporan yang sesuai filter.</p>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <span id="cnt"></span>
+          <div class="flex flex-wrap items-center gap-1">
+            <button class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400" disabled>‹ Sebelumnya</button>
+            <button class="h-8 min-w-8 rounded bg-blue-600 px-2 text-[12px] font-semibold text-white">1</button>
+            <button onclick="toast('Memuat halaman 2...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">2</button>
+            <button onclick="toast('Memuat halaman 3...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">3</button>
+            <span class="px-1">…</span>
+            <button onclick="toast('Memuat halaman 7...','success')" class="h-8 min-w-8 rounded px-2 text-[12px] hover:bg-slate-50">7</button>
+            <button onclick="toast('Memuat halaman 2...','success')" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Berikutnya ›</button>
+          </div>
+        </footer>
+      </section>
 
-            <!-- Metric Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-                <!-- Card 1 -->
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-4 lg:p-5 shadow-sm">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-sync-alt text-blue-600"></i>
-                        </div>
-                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">+14.3%</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">1.240</h3>
-                    <p class="text-sm text-gray-600 mb-2">Total Mutasi Selesai</p>
-                    <p class="text-xs text-gray-500 flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-1"></i>
-                        Sudah 2 Pengiriman Siap Dispatch
-                    </p>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-4 lg:p-5 shadow-sm">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-coins text-yellow-600"></i>
-                        </div>
-                        <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-semibold">Maret 2025</span>
-                    </div>
-                    <h3 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Rp 4,85 M</h3>
-                    <p class="text-sm text-gray-600 mb-2">Valuasi Distribusi</p>
-                    <p class="text-xs text-gray-500">+8.9% dari 100% kap SPO & HR Finance</p>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-4 lg:p-5 shadow-sm">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-check-double text-green-600"></i>
-                        </div>
-                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Target 95%+</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">98.4%</h3>
-                    <p class="text-sm text-gray-600 mb-2">Kepatuhan SLA HR</p>
-                    <p class="text-xs text-gray-500">848+743 stl terpenuhi 42 menit</p>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-4 lg:p-5 shadow-sm">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-semibold">Urgent!</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-red-600 mb-1">2</h3>
-                    <p class="text-sm text-gray-600 mb-2">Stok Kritis Terlaporkan</p>
-                    <p class="text-xs text-red-600 font-medium">Butuh restock PO darurat (< 20% ROP)</p>
-                </div>
-            </div>
-
-            <!-- Graph Section -->
-            <div class="bg-white border border-gray-200 rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                    <h2 class="text-base lg:text-lg font-bold text-gray-900">Tren Volume Mutasi & Sensitivitas Mingguan</h2>
-                    <div class="flex flex-wrap gap-2">
-                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-xs lg:text-sm">7 Hari Terakhir</button>
-                        <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs lg:text-sm hover:bg-gray-200">30 Hari</button>
-                        <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs lg:text-sm hover:bg-gray-200">Bulan Ini</button>
-                    </div>
-                </div>
-
-                <!-- Legend -->
-                <div class="flex flex-wrap items-center gap-4 lg:gap-6 mb-4 text-xs lg:text-sm">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
-                        <span class="text-gray-700"><strong>Inbound (Masuk)</strong>: 8.420 Unit</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
-                        <span class="text-gray-700"><strong>Outbound (Keluar)</strong>: 6.850 Unit</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span class="text-red-600"><strong>Penyesuaian Selisih</strong>: 14 Unit</span>
-                    </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="relative h-56 lg:h-64">
-                    <canvas id="mutasiChart"></canvas>
-                </div>
-
-                <!-- Bottom Metrics -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
-                    <div class="text-center">
-                        <p class="text-xs lg:text-sm text-gray-500 mb-1">Throughput Rata-rata</p>
-                        <p class="text-lg lg:text-xl font-bold text-gray-900">1.202 <span class="text-xs lg:text-sm font-normal text-gray-500">Unit/Hari</span></p>
-                    </div>
-                    <div class="text-center sm:border-x border-gray-200">
-                        <p class="text-xs lg:text-sm text-gray-500 mb-1">Akurasi Stok Opname</p>
-                        <p class="text-lg lg:text-xl font-bold text-gray-900">99.8% <span class="text-xs lg:text-sm font-normal text-gray-500">(Fiskal)</span></p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs lg:text-sm text-gray-500 mb-1">Puncak Throughput</p>
-                        <p class="text-lg lg:text-xl font-bold text-gray-900">Sabtu <span class="text-xs lg:text-sm font-normal text-gray-500">(1.480 Unit)</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Table Section -->
-            <div class="bg-white border border-gray-200 rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
-                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
-                    <div class="flex-1">
-                        <h2 class="text-base lg:text-lg font-bold text-gray-900 mb-1">Ringkasan Laporan per Kategori SKU & Lokasi</h2>
-                        <p class="text-xs lg:text-sm text-gray-600">Rincian batch buffer besar mutasi inventaris, valuasi, dan tingkat kepatuhan SPO.</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-xs lg:text-sm">
-                            <option>Semua Kategori</option>
-                        </select>
-                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-xs lg:text-sm">
-                            <option>Semua DC / Hub</option>
-                        </select>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 text-xs lg:text-sm">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Cetak PDF</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="table-container overflow-x-auto -mx-4 lg:mx-0">
-                    <table class="w-full min-w-[1000px]">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Kode Laporan</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kategori & SKU Induk</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Volume Mutasi</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Nilai Valuasi</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Rasio Persetujuan</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status Kepatuhan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            <!-- Row 1 -->
-                            <tr class="table-row border-b border-gray-100">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-blue-600 font-semibold hover:underline text-sm">REP-2025-Q3-A1</a>
-                                    <p class="text-xs text-gray-500 mt-1">Cakung DC-01</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="w-10 h-10 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-camera text-purple-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Kamera & Optik</p>
-                                            <p class="text-xs text-gray-600">[DSLR Pro] - SONY / Cam 6000 / Canon EG / Mark II</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">320 Unit</p>
-                                    <p class="text-xs text-green-600">100% Terverifikasi</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">Rp 1,44 M</p>
-                                    <p class="text-xs text-gray-500">Rp 4,5M/Unit Avg</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">99.4% SPO</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="flex items-center text-green-700 text-sm">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        <span class="font-medium">Sesuai Standar</span>
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <!-- Row 2 -->
-                            <tr class="table-row border-b border-gray-100">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-blue-600 font-semibold hover:underline text-sm">REP-2025-Q3-B4</a>
-                                    <p class="text-xs text-gray-500 mt-1">Rungkut DC-02</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="w-10 h-10 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-watch text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Gadget & Wearables</p>
-                                            <p class="text-xs text-gray-600">[XL] - WTC-AR40 / Watch 4th Gen Series</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">410 Unit</p>
-                                    <p class="text-xs text-red-600">Selisih Opname -3 Unit</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">Rp 1,23 M</p>
-                                    <p class="text-xs text-gray-500">Kilau Akurasi Terkoreksi</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">97.1% SPO</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">Audit Selisih</span>
-                                </td>
-                            </tr>
-
-                            <!-- Row 3 -->
-                            <tr class="table-row border-b border-gray-100">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-blue-600 font-semibold hover:underline text-sm">REP-2025-Q3-C2</a>
-                                    <p class="text-xs text-gray-500 mt-1">Cakung DC-01</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="w-10 h-10 bg-green-100 rounded flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-barcode text-green-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Perangkat Kesar & Scanner QR</p>
-                                            <p class="text-xs text-gray-600">[SKU HOS-ZR8] / Wireless Bluetooth Scanner</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">245 Unit</p>
-                                    <p class="text-xs text-green-600">Buffer Optimal</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">Rp 612,5 Jt</p>
-                                    <p class="text-xs text-gray-500">Logistik Operasional</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">99.8% SPO</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="flex items-center text-green-700 text-sm">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        <span class="font-medium">Sesuai Standar</span>
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <!-- Row 4 -->
-                            <tr class="table-row border-b border-gray-100">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-blue-600 font-semibold hover:underline text-sm">REP-2025-Q3-D8</a>
-                                    <p class="text-xs text-gray-500 mt-1">Gedebage DC-03</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="w-10 h-10 bg-orange-100 rounded flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-network-wired text-orange-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Jaringan & Terminal Transit</p>
-                                            <p class="text-xs text-gray-600">[SWI HET-CB2] / Cisco Switch PoE+ 24 Port</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">95 Unit</p>
-                                    <p class="text-xs text-green-600">Alokasi Infrastruktur</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">Rp 855 Jt</p>
-                                    <p class="text-xs text-gray-500">Capex Terdeklarasi</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">100% SPO</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="flex items-center text-green-700 text-sm">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        <span class="font-medium">Sesuai Standar</span>
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <!-- Row 5 -->
-                            <tr class="table-row">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-blue-600 font-semibold hover:underline text-sm">REP-2025-Q3-E5</a>
-                                    <p class="text-xs text-gray-500 mt-1">Belawan DC-04</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="w-10 h-10 bg-pink-100 rounded flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-print text-pink-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Printer Thermal Struk & Barcode</p>
-                                            <p class="text-xs text-gray-600">[SEU PRN-TM TM-T82X SerIV]</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">170 Unit</p>
-                                    <p class="text-xs text-green-600">Permintaan Direct</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <p class="font-semibold text-gray-900 text-sm">Rp 712,5 Jt</p>
-                                    <p class="text-xs text-gray-500">Pengeluaran Semester 1</p>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">96.5% SPO</span>
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="flex items-center text-green-700 text-sm">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        <span class="font-medium">Sesuai Standar</span>
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-xs lg:text-sm text-gray-600">Menampilkan 1 - 5 dari 32 Kategori Mutasi Laporan</p>
-                    <div class="flex items-center space-x-2">
-                        <button class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm text-gray-400 cursor-not-allowed" disabled>Sebelumnya</button>
-                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-xs lg:text-sm">1</button>
-                        <button class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm hover:bg-gray-50">2</button>
-                        <button class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm hover:bg-gray-50">3</button>
-                        <span class="px-2 text-gray-400">...</span>
-                        <button class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm hover:bg-gray-50">7</button>
-                        <button class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm bg-gray-100 hover:bg-gray-200">Berikutnya</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
-                <div class="flex items-start space-x-3">
-                    <i class="fas fa-lock text-gray-500 mt-1 flex-shrink-0"></i>
-                    <div class="flex-1">
-                        <p class="text-xs lg:text-sm text-gray-700">
-                            Dokumen laporan ini tereterenkripsi secara digital oleh <strong>Budi Santoso (Admin Otorisasi HR)</strong> dengan NIP: <strong>BK-88219-JKT</strong>
-                        </p>
-                        <div class="flex flex-wrap items-center gap-2 lg:gap-4 mt-2">
-                            <p class="text-xs text-gray-500">SHA-256 : 7F1b...3dd3</p>
-                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">
-                                <i class="fas fa-shield-alt mr-1"></i>Tervalidasi ISO-27001
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Sidebar Kanan -->
-        <aside class="sidebar-right bg-white border-l border-gray-200 p-4 lg:p-6 overflow-y-auto sticky top-[64px] h-[calc(100vh-64px)]">
-
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-gray-900 text-sm lg:text-base">Distribusi per Hub Regional</h3>
-                <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">AMIP</span>
-            </div>
-
-            <p class="text-xs lg:text-sm text-gray-600 mb-6">Porsi penyaluran dan mutasi barang logistik terverifikasi.</p>
-
-            <!-- Hub 1 -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-gray-900 text-sm">Cakung DC-01</h4>
-                    <span class="text-blue-600 font-bold text-sm">45%</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2">(Utama Jakarta)</p>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                    <div class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 45%"></div>
-                </div>
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-600">558 Unit Mutasi</span>
-                    <span class="text-green-600 font-semibold">SLA: 99.2%</span>
-                </div>
-            </div>
-
-            <!-- Hub 2 -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-gray-900 text-sm">Rungkut DC-02</h4>
-                    <span class="text-blue-600 font-bold text-sm">25%</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2">(Surabaya)</p>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                    <div class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
-                </div>
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-600">310 Unit Mutasi</span>
-                    <span class="text-green-600 font-semibold">SLA: 98.0%</span>
-                </div>
-            </div>
-
-            <!-- Hub 3 -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-gray-900 text-sm">Gedebage DC-03</h4>
-                    <span class="text-blue-600 font-bold text-sm">18%</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2">(Bandung)</p>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                    <div class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 18%"></div>
-                </div>
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-600">223 Unit Mutasi</span>
-                    <span class="text-green-600 font-semibold">SLA: 97.8%</span>
-                </div>
-            </div>
-
-            <!-- Hub 4 -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-gray-900 text-sm">Belawan DC-04</h4>
-                    <span class="text-gray-600 font-bold text-sm">12%</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2">(Medan)</p>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                    <div class="progress-bar bg-gray-400 h-2 rounded-full" style="width: 12%"></div>
-                </div>
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-600">149 Unit Mutasi</span>
-                    <span class="text-red-600 font-semibold">SLA: 95.1%</span>
-                </div>
-            </div>
-
-            <!-- Info Box -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p class="text-xs text-blue-800">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Semua sidekah tercatat setiap Ledger Hasil ASTRO-SKU256 terterindung otorisasi ganda HR.
-                </p>
-            </div>
-
-        </aside>
-
-
-</div>
+      <section class="card flex items-start gap-3 bg-slate-50 p-4">
+        <i data-lucide="lock" class="mt-0.5 h-4 w-4 shrink-0 text-slate-500"></i>
+        <div class="min-w-0 flex-1">
+          <p class="text-[12px] leading-relaxed text-slate-700">Dokumen laporan ini terenkripsi secara digital oleh <b>Budi Santoso (Admin Otorisasi HR)</b> dengan NIP: <b>BK-88219-JKT</b></p>
+          <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            <span class="text-[10.5px] text-slate-500">SHA-256 : 7F1b...3dd3</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Tervalidasi ISO-27001</span>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
-
-    <!-- Chart.js Script -->
-    <script>
-        const ctx = document.getElementById('mutasiChart').getContext('2d');
-        const mutasiChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                datasets: [
-                    {
-                        label: 'Inbound (Masuk)',
-                        data: [920, 1150, 980, 1220, 1100, 1448, 1200],
-                        borderColor: '#2563EB',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#2563EB',
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Outbound (Keluar)',
-                        data: [800, 950, 880, 1020, 980, 1180, 1040],
-                        borderColor: '#9CA3AF',
-                        backgroundColor: 'rgba(156, 163, 175, 0.05)',
-                        borderDash: [5, 5],
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#9CA3AF',
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        titleFont: {
-                            size: 13
-                        },
-                        bodyFont: {
-                            size: 12
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 300,
-                        max: 1800,
-                        ticks: {
-                            callback: function(value) {
-                                return value >= 1000 ? (value/1000) + 'k' : value;
-                            },
-                            font: {
-                                size: 11
-                            }
-                        },
-                        grid: {
-                            color: '#F3F4F6',
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 11
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                }
-            }
-        });
-    </script>
-
+  <div id="toasts" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2"></div>
 
   <script>
-    lucide.createIcons();
-    (() => {
-      const sidebar = document.getElementById('sidebar');
-      const backdrop = document.getElementById('sidebar-backdrop');
-      const toggleButton = document.querySelector('#main-area header button[aria-label="Buka menu"]');
-      if (!sidebar || !toggleButton) return;
-      toggleButton.id = 'sidebar-toggle';
-      toggleButton.setAttribute('aria-controls', 'sidebar');
-      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
-      const sync = () => {
-        const open = isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
-        toggleButton.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
-        toggleButton.setAttribute('title', open ? 'Tutup menu' : 'Buka menu');
-        toggleButton.setAttribute('aria-expanded', String(open));
-        const icon = toggleButton.querySelector('[data-lucide], svg');
-        const iconName = open ? 'x' : 'menu';
-        if (icon && !icon.classList.contains(`lucide-${iconName}`)) {
-          toggleButton.innerHTML = `<i data-lucide="${iconName}" class="h-5 w-5"></i>`;
-          lucide.createIcons();
-        }
-        backdrop.classList.toggle('show', isMobile() && open);
-      };
-      window.toggleSidebar = (close = false) => {
-        if (isMobile()) sidebar.classList.toggle('open', close ? false : !sidebar.classList.contains('open'));
-        else document.body.classList.toggle('sidebar-collapsed', close ? true : !document.body.classList.contains('sidebar-collapsed'));
-        sync();
-      };
-      window.addEventListener('resize', sync);
-      sync();
-    })();
+    const $ = (s) => document.querySelector(s);
+    const T = { gray:'bg-slate-100 text-slate-700', red:'bg-red-100 text-red-700', green:'bg-emerald-100 text-emerald-800', amber:'bg-amber-50 text-amber-600', purple:'bg-purple-100 text-purple-700', blue:'bg-blue-50 text-blue-600', orange:'bg-orange-100 text-orange-700', pink:'bg-pink-100 text-pink-700' };
+    const ic = (n, c = 'h-3.5 w-3.5') => `<i data-lucide="${n}" class="${c} shrink-0"></i>`;
+    const pill = (txt, t, sm) => `<span class="inline-flex items-center rounded-full font-semibold ${sm ? 'px-2 py-0.5 text-[9.5px]' : 'px-2.5 py-1 text-[10.5px]'} ${T[t]}">${txt}</span>`;
+
+    /* ===== DATA (isi dari laporan-inventaris-hr.html asli) ===== */
+    const CHIPS = [['Periode:', 'Maret 2025'], ['Semua Hub:', '4 Hub Regional'], ['SLA:', '&gt; 95% Sesuai Standar']];
+    const STATS = [
+      {l:'Total Mutasi Selesai', v:'1.240', b:['+14,3%','green'], s:'Sudah 2 Pengiriman Siap Dispatch', si:'circle-check', i:'refresh-cw', c:'bg-blue-50 text-blue-600'},
+      {l:'Valuasi Distribusi', v:'Rp 4,85 M', b:['Maret 2025','gray'], s:'+8,9% dari 100% kap SPO & HR Finance', i:'coins', c:'bg-amber-50 text-amber-600'},
+      {l:'Kepatuhan SLA HR', v:'98,4%', b:['Target 95%+','green'], s:'848+743 stl terpenuhi 42 menit', i:'check-check', c:'bg-emerald-50 text-emerald-700'},
+      {l:'Stok Kritis Terlaporkan', v:'2', b:['Urgent!','red'], s:'Butuh restock PO darurat (&lt; 20% ROP)', i:'triangle-alert', c:'bg-red-50 text-red-600', red:1}
+    ];
+    const HUBS = [
+      ['Cakung DC-01','Utama Jakarta',45,'558 Unit Mutasi','99,2%','bg-blue-600','text-blue-700','text-emerald-700'],
+      ['Rungkut DC-02','Surabaya',25,'310 Unit Mutasi','98,0%','bg-blue-600','text-blue-700','text-emerald-700'],
+      ['Gedebage DC-03','Bandung',18,'223 Unit Mutasi','97,8%','bg-blue-600','text-blue-700','text-emerald-700'],
+      ['Belawan DC-04','Medan',12,'149 Unit Mutasi','95,1%','bg-slate-400','text-slate-600','text-red-600']
+    ];
+    const R = [
+      {kode:'REP-2025-Q3-A1', hub:'Cakung DC-01', kat:['Kamera & Optik','purple','camera'], sku:'[DSLR Pro] - SONY / Cam 6000 / Canon EG / Mark II', vol:'320 Unit', vn:['100% Terverifikasi','text-emerald-700'], val:'Rp 1,44 M', vl:'Rp 4,5 M/Unit Avg', rs:'99,4% SPO', st:['Sesuai Standar','green']},
+      {kode:'REP-2025-Q3-B4', hub:'Rungkut DC-02', kat:['Gadget & Wearables','blue','watch'], sku:'[XL] - WTC-AR40 / Watch 4th Gen Series', vol:'410 Unit', vn:['Selisih Opname -3 Unit','text-red-600'], val:'Rp 1,23 M', vl:'Akurasi Terkoreksi', rs:'97,1% SPO', st:['Audit Selisih','red']},
+      {kode:'REP-2025-Q3-C2', hub:'Cakung DC-01', kat:['Perangkat Kasir & Scanner QR','green','scan-barcode'], sku:'[SKU HOS-ZR8] / Wireless Bluetooth Scanner', vol:'245 Unit', vn:['Buffer Optimal','text-emerald-700'], val:'Rp 612,5 Jt', vl:'Logistik Operasional', rs:'99,8% SPO', st:['Sesuai Standar','green']},
+      {kode:'REP-2025-Q3-D8', hub:'Gedebage DC-03', kat:['Jaringan & Terminal Transit','orange','network'], sku:'[SWI HET-CB2] / Cisco Switch PoE+ 24 Port', vol:'95 Unit', vn:['Alokasi Infrastruktur','text-emerald-700'], val:'Rp 855 Jt', vl:'Capex Terdeklarasi', rs:'100% SPO', st:['Sesuai Standar','green']},
+      {kode:'REP-2025-Q3-E5', hub:'Belawan DC-04', kat:['Printer Thermal Struk & Barcode','pink','printer'], sku:'[SEU PRN-TM TM-T82X SerIV]', vol:'170 Unit', vn:['Permintaan Direct','text-emerald-700'], val:'Rp 712,5 Jt', vl:'Pengeluaran Semester 1', rs:'96,5% SPO', st:['Sesuai Standar','green']}
+    ];
+
+    /* ===== RENDER ===== */
+    function drawChips(list) {
+      $('#chips').innerHTML = list.map((c, i) => `<span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-blue-700"><span><b>${c[0]}</b> ${c[1]}</span><button data-i="${i}" class="rounded-full hover:text-blue-900" aria-label="Hapus filter ${c[0]}">${ic('x', 'h-3 w-3')}</button></span>`).join('') || '<span class="text-slate-500">Tidak ada filter aktif.</span>';
+      document.querySelectorAll('#chips button').forEach(b => b.addEventListener('click', () => { chips.splice(+b.dataset.i, 1); drawChips(chips); lucide.createIcons(); }));
+    }
+    let chips = CHIPS.slice();
+    drawChips(chips);
+    $('#resetChips').addEventListener('click', () => { chips = CHIPS.slice(); drawChips(chips); lucide.createIcons(); });
+
+    $('#stats').innerHTML = STATS.map(s => `
+      <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <div class="min-w-0">
+          <p class="text-[9.5px] font-semibold uppercase tracking-wide ${s.red ? 'text-red-600' : 'text-slate-500'}">${s.l}</p>
+          <p class="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[24px] font-bold leading-tight tracking-tight ${s.red ? 'text-red-600' : ''}">${s.v}${pill(s.b[0], s.b[1], 1)}</p>
+          <p class="mt-2.5 flex items-start gap-1.5 text-[10.5px] ${s.red ? 'font-semibold text-red-600' : 'text-slate-500'}">${s.si ? ic(s.si, 'mt-px h-3.5 w-3.5 text-emerald-600') : ''}<span>${s.s}</span></p>
+        </div>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${s.c}">${ic(s.i, 'h-4 w-4')}</span>
+      </article>`).join('');
+
+    $('#hubs').innerHTML = HUBS.map(h => `
+      <div>
+        <div class="flex items-baseline justify-between gap-2"><p class="text-[12px] font-semibold text-slate-800">${h[0]} <span class="text-[10.5px] font-normal text-slate-500">(${h[1]})</span></p><b class="text-[12px] ${h[6]}">${h[2]}%</b></div>
+        <div class="my-1.5 h-1.5 rounded bg-blue-100"><div class="h-full rounded ${h[5]}" style="width:${h[2]}%"></div></div>
+        <div class="flex items-center justify-between text-[10.5px]"><span class="text-slate-600">${h[3]}</span><span class="font-semibold ${h[7]}">SLA: ${h[4]}</span></div>
+      </div>`).join('');
+
+    $('#rows').innerHTML = R.map(r => `
+      <tr data-kat="${r.kat[0]}" data-hub="${r.hub}" class="align-top hover:bg-slate-50/70">
+        <td class="px-3 py-3"><a href="#" class="font-bold text-blue-700">${r.kode}</a><p class="mt-0.5 text-[10.5px] text-slate-500">${r.hub}</p></td>
+        <td class="px-3 py-3"><div class="flex items-start gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${T[r.kat[1]]}">${ic(r.kat[2], 'h-4 w-4')}</span><div class="min-w-0"><p class="font-semibold text-slate-800">${r.kat[0]}</p><p class="mt-0.5 break-words text-[10.5px] text-slate-500">${r.sku}</p></div></div></td>
+        <td class="px-3 py-3"><p class="font-semibold text-slate-800">${r.vol}</p><p class="mt-0.5 text-[10.5px] ${r.vn[1]}">${r.vn[0]}</p></td>
+        <td class="px-3 py-3"><p class="font-semibold text-slate-800">${r.val}</p><p class="mt-0.5 text-[10.5px] text-slate-500">${r.vl}</p></td>
+        <td class="px-3 py-3">${pill(r.rs, 'green')}</td>
+        <td class="px-3 py-3">${pill('● ' + r.st[0], r.st[1])}</td>
+      </tr>`).join('');
+
+    const fk = $('#fKat'), fh = $('#fHub');
+    [...new Set(R.map(r => r.kat[0]))].forEach(v => fk.add(new Option(v, v)));
+    [...new Set(R.map(r => r.hub))].forEach(v => fh.add(new Option(v, v)));
+
+    window.toast = (msg, type = 'success') => {
+      const el = document.createElement('div');
+      el.className = `max-w-[320px] rounded-md px-3 py-2 text-[11px] font-medium text-white shadow-lg ${type === 'warn' ? 'bg-amber-600' : 'bg-emerald-600'}`;
+      el.textContent = msg; $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3200);
+    };
+
+
+    /* ===== FILTER TABEL ===== */
+    function apply() {
+      let n = 0;
+      document.querySelectorAll('#rows tr').forEach(tr => {
+        const ok = (!fk.value || tr.dataset.kat === fk.value) && (!fh.value || tr.dataset.hub === fh.value);
+        tr.hidden = !ok; n += ok ? 1 : 0;
+      });
+      $('#cnt').textContent = (fk.value || fh.value) ? `${n} laporan sesuai filter` : 'Menampilkan 1 - 5 dari 32 Kategori Mutasi Laporan';
+      $('#noRow').hidden = n > 0;
+    }
+    [fk, fh].forEach(s => s.addEventListener('change', apply));
+    document.querySelectorAll('#range button').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('#range button').forEach(x => x.className = 'rounded-md bg-slate-100 px-3 py-1.5 text-slate-600 hover:bg-slate-200');
+      b.className = 'rounded-md bg-blue-600 px-3 py-1.5 text-white';
+    }));
+
+    /* ===== GRAFIK ===== */
+    if (window.Chart) {
+      Chart.defaults.font.family = 'Inter, sans-serif'; Chart.defaults.font.size = 11; Chart.defaults.color = '#64748b';
+      new Chart($('#mutasiChart'), {
+        type: 'line',
+        data: { labels: ['Sen','Sel','Rab','Kam','Jum','Sab','Min'], datasets: [
+          {label:'Inbound (Masuk)', data:[920,1150,980,1220,1100,1448,1200], borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,.1)', fill:true, tension:.4, pointRadius:3, pointBackgroundColor:'#2563EB', borderWidth:2},
+          {label:'Outbound (Keluar)', data:[800,950,880,1020,980,1180,1040], borderColor:'#9CA3AF', backgroundColor:'rgba(156,163,175,.05)', borderDash:[5,5], fill:true, tension:.4, pointRadius:3, pointBackgroundColor:'#9CA3AF', borderWidth:2}
+        ] },
+        options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
+          plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(15,23,42,.9)', padding:10} },
+          scales:{ y:{min:300, max:1800, ticks:{callback:v => v >= 1000 ? (v/1000) + 'k' : v}, grid:{color:'#f1f5f9'}, border:{display:false}}, x:{grid:{display:false}, border:{display:false}} } }
+      });
+    } else { $('#mutasiChart').parentElement.innerHTML = '<p class="flex h-full items-center justify-center text-[11px] text-slate-400">Grafik tidak dapat dimuat (Chart.js diblokir jaringan).</p>'; }
+
+    /* ===== SIDEBAR & PROFIL ===== */
+    const sb = $('#sidebar'), bd = $('#sidebar-backdrop'), tg = $('#sidebar-toggle');
+    const mob = () => matchMedia('(max-width:767px)').matches;
+    function sync() {
+      const open = mob() ? sb.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      tg.setAttribute('aria-expanded', open); tg.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+      tg.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="h-5 w-5"></i>`;
+      bd.classList.toggle('show', mob() && open); lucide.createIcons();
+    }
+    window.toggleSidebar = () => { mob() ? sb.classList.toggle('open') : document.body.classList.toggle('sidebar-collapsed'); sync(); };
+    if (!mob() && innerWidth < 1024) document.body.classList.add('sidebar-collapsed'); /* tablet: sidebar tertutup agar konten lega */
+    window.addEventListener('resize', sync);
+    $('#pf').addEventListener('click', e => { e.stopPropagation(); $('#pfm').hidden = !$('#pfm').hidden; });
+    document.addEventListener('click', e => { if (!$('#pfm').contains(e.target)) $('#pfm').hidden = true; });
+
+    const g = $('#global-search'); apply(); sync(); lucide.createIcons();
   </script>
 </body>
 </html>

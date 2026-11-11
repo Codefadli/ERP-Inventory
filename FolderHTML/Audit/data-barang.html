@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pemeriksaan Data Barang — Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+    } } };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    /* Sidebar (220px, sama dengan Data Barang) */
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .nav-label { margin-bottom: 6px; padding: 0 8px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+    .nav-link { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #475569; transition: background .15s ease, color .15s ease; }
+    .nav-link svg, .nav-link i { width: 16px; height: 16px; flex: none; }
+    .nav-link.active { background: #0b49d8; color: #fff; font-weight: 500; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    /* Komponen bersama */
+    .card { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+    .ctl { height: 40px; border-radius: 6px; background: #eff6ff; padding: 0 12px; font-size: 12px; color: #334155; outline: none; border: 0; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; line-height: 1.25; text-align: center; transition: background .15s ease; }
+    .btn svg { width: 14px; height: 14px; flex: none; }
+    .btn-p { background: #2563eb; color: #fff; } .btn-p:hover { background: #1d4ed8; }
+    .btn-s { background: #fff; color: #334155; border: 1px solid #e2e8f0; } .btn-s:hover { background: #f8fafc; }
+    .qf { border-radius: 9999px; padding: 4px 12px; font-weight: 600; transition: box-shadow .15s ease; }
+    .qf.on { box-shadow: 0 0 0 2px rgba(11,73,216,.35); }
+    .qf[data-k=""] { background: #f1f5f9; color: #475569; }
+    .qf[data-k=""].on { background: #2563eb; color: #fff; box-shadow: none; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .d1 { animation-delay: 50ms; } .d2 { animation-delay: 100ms; } .d3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: none; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-14 shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4">
+      <section><p class="nav-label">Menu Utama</p>
+        <a href="#" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard Audit</span></a></section>
+      <section><p class="nav-label">Pemeriksaan & Inventaris</p><div class="space-y-0.5">
+        <a href="data-barang.html" class="nav-link active"><i data-lucide="package"></i><span>Data Barang</span></a>
+        <a href="data-gudang-lokasi.html" class="nav-link"><i data-lucide="warehouse"></i><span>Data Gudang & Lokasi</span></a>
+        <a href="barang-masuk.html" class="nav-link"><i data-lucide="arrow-down-left"></i><span>Barang Masuk</span></a>
+        <a href="barang-keluar.html" class="nav-link"><i data-lucide="arrow-up-right"></i><span>Barang Keluar</span></a>
+        <a href="mutasi-barang.html" class="nav-link"><i data-lucide="arrow-left-right"></i><span>Mutasi Barang</span></a>
+        <a href="stok-opname.html" class="nav-link"><i data-lucide="clipboard-check"></i><span>Stok Opname</span></a></div></section>
+      <section><p class="nav-label">Investigasi & Kepatuhan</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="history"></i><span>Log Aktivitas</span></a>
+        <a href="temuan-audit.html" class="nav-link"><i data-lucide="file-search"></i><span>Temuan Audit</span></a>
+        <a href="#" class="nav-link"><i data-lucide="list-checks"></i><span>Tindak Lanjut Temuan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="file-text"></i><span>Laporan Audit</span></a></div></section>
+      <section><p class="nav-label">Pengaturan & Akun</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="bell"></i><span>Notifikasi</span></a>
+        <a href="#" class="nav-link"><i data-lucide="settings"></i><span>Pengaturan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="user-circle"></i><span>Profil Saya</span></a></div></section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-white text-slate-500 hover:bg-[#f1f5fc]" aria-controls="sidebar" aria-label="Buka sidebar"></button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 lg:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-40 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex xl:w-56"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, resi, transaksi..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="relative">
+          <button id="pf" class="flex items-center gap-2 border-l border-slate-100 pl-3" aria-haspopup="true"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</span><span class="hidden text-left leading-tight md:block"><span class="block text-[10px] font-semibold text-slate-800">Budi Santoso</span><span class="block text-[9px] text-slate-500">Auditor Internal</span></span></button>
+          <div id="pfm" hidden class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border border-line bg-white py-1 text-[11px] text-slate-700 shadow-lg">
+            <div class="border-b border-slate-100 px-3 py-2"><p class="font-semibold text-slate-800">Budi Santoso</p><p class="text-[10px] text-slate-500">Auditor Internal · AU001</p></div>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="user" class="h-3.5 w-3.5"></i>Profil Saya</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="settings" class="h-3.5 w-3.5"></i>Pengaturan</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Hak Akses: Read-Only</a>
+            <a href="#" class="flex items-center gap-2 border-t border-slate-100 px-3 py-2 text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="h-3.5 w-3.5"></i>Keluar</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-56px)] p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 max-w-[760px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan & Audit <span class="text-slate-400">&gt;</span> Pemeriksaan & Inventaris <span class="text-blue-700">&gt; Pemeriksaan Data Barang</span></p>
+          <h1 class="text-[20px] font-bold leading-tight tracking-tight text-slate-800 sm:text-[24px]">Pemeriksaan Master Data Barang & Logika Ledger</h1>
+          <p class="mt-1.5 text-[12px] leading-relaxed text-slate-500">Pemeriksaan validitas katalog SKU, audit harga perolehan vs valuasi sistem, kepatuhan batas Reorder Point (ROP), dan riwayat perubahan master atribut barang.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-indigo-50 px-2.5 text-[10.5px] font-semibold text-indigo-700"><i data-lucide="cpu" class="h-3.5 w-3.5"></i>Audit Engine v3.4</span>
+          <button onclick="toast('Menyiapkan ekspor Audit Catalog (CSV)...','success')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="download" class="h-4 w-4"></i>Ekspor Audit Catalog (CSV)</button>
+        </div>
+      </section>
+
+      <section id="stats" aria-label="Ringkasan pemeriksaan barang" class="reveal d1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"></section>
+
+      <section class="reveal d2 card mb-4 p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 lg:max-w-[430px]"><i data-lucide="search" class="h-4 w-4 shrink-0"></i><input id="searchSku" type="search" placeholder="Cari SKU, nama barang, kode barcode EAN-13, atau ID perubahan" class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+          <select id="fKategori" class="ctl max-w-full"><option value="">Semua Kategori</option><option value="kamera & optik">Kamera & Optik</option><option value="storage ssd">Storage SSD</option><option value="networking core">Networking Core</option><option value="perangkat barcode">Perangkat Barcode</option><option value="aksesoris komputer">Aksesoris Komputer</option></select>
+          <select id="fStatus" class="ctl max-w-full"><option value="">Semua Status Audit</option><option value="anomali">Anomali</option><option value="normal">Normal</option></select>
+          <select id="fZona" class="ctl max-w-full"><option value="">Semua Zona</option><option value="a-04">Zone A-04</option><option value="b-12">Zone B-12</option><option value="c-01">Zone C-01</option><option value="a-01">Zone A-01</option><option value="b-03">Zone B-03</option></select>
+          <select id="fFlag" class="ctl max-w-full"><option value="">Semua Flag Harga</option><option value="wajar">Wajar</option><option value="normal">Normal</option><option value="presisi">Presisi</option><option value="deviasi ekstrem">Deviasi Ekstrem</option></select>
+          <button id="reset" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[11px]">
+          <label class="flex cursor-pointer items-center gap-2 font-medium text-slate-700"><input id="cbAnomali" type="checkbox" class="h-4 w-4 accent-blue-600">Hanya tampilkan SKU bermasalah / Anomali (<span>3</span>)</label>
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="cnt" class="text-slate-500"></span>
+            <button onclick="openM('modalCols')" class="btn btn-s h-8"><i data-lucide="columns-3"></i>Kustomisasi Kolom</button>
+            <button onclick="toast('Sinkronisasi Ledger: status read-only Audit. Terakhir sync 14:32 WIB.','warn')" class="btn btn-s h-8"><i data-lucide="refresh-cw"></i>Sinkronisasi Ledger</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal d3 card mb-4 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table id="tbl" class="w-full min-w-[1150px] table-fixed border-collapse text-left">
+            <thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr><th class="w-[260px] px-3">Kode SKU & Identifikasi</th><th class="w-[190px] px-3">Parameter Sistem</th><th class="w-[220px] px-3">Harga & Valuasi Buku</th><th class="w-[230px] px-3">Status Audit & Kepatuhan</th><th class="w-[250px] px-3">Petugas Terakhir & Log Aksi</th></tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
+          </table>
+        </div>
+        <p id="noRow" hidden class="border-t border-slate-100 px-4 py-6 text-center text-[12px] text-slate-500">Tidak ada SKU yang sesuai. Ubah kata kunci atau reset filter.</p>
+      </section>
+
+      <section class="card p-4">
+        <div class="mb-2 flex flex-wrap items-center gap-2">
+          <i data-lucide="scale" class="h-4 w-4 text-blue-600"></i>
+          <h3 class="min-w-0 text-[13px] font-bold text-slate-800">Pedoman Audit Master Data Sesuai Regulasi SOX & ISO 27001:2022</h3>
+          <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[10.5px] font-semibold text-blue-700 sm:ml-auto">Klausa 4.8.24 — Otorisasi Data</span>
+        </div>
+        <p class="mb-3 text-[12px] leading-relaxed text-slate-600">Berdasarkan standar kontrol internal operasional gudang, modifikasi atribut harga pokok perolehan (HPP), metode depresiasi inventaris, serta parameter ambang batas Safety Stock dan Reorder Point (ROP) yang melampaui toleransi ±10% wajib menyertakan otorisasi digital tertulis dari Finance Manager dan Head of Internal Audit. Modifikasi sepihak oleh staf operasional pergudangan tanpa approval ID akan otomatis dialinkan ke status temuan audit level 2.</p>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Audit Trail Tamper-proof Aktif</span>
+          <span class="inline-flex items-center gap-1.5 text-[10.5px] text-slate-500"><i data-lucide="clock" class="h-3.5 w-3.5"></i>Pemeriksaan Terjadwal Otomatis: H+1 Tiap Penutupan Buku</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalCols" hidden class="mdl fixed inset-0 z-[70] items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true">
+    <div class="w-full max-w-[420px] overflow-hidden rounded-xl bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3"><h2 class="flex items-center gap-2 text-[13px] font-bold text-slate-800"><i data-lucide="columns-3" class="h-4 w-4 text-blue-600"></i>Kustomisasi Kolom Tabel</h2><button onclick="closeModal()" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button></div>
+      <div id="colList" class="space-y-2.5 p-4 text-[12px] text-slate-700"></div>
+      <div class="flex justify-end gap-2 border-t border-slate-100 p-4"><button onclick="closeModal()" class="btn btn-s h-9 px-4">Batal</button><button onclick="saveCols()" class="btn btn-p h-9 px-4">Simpan</button></div>
+    </div>
+  </div>
+  <div id="modal" hidden class="mdl fixed inset-0 z-[70] items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true">
+    <div class="max-h-[90vh] w-full max-w-[760px] overflow-y-auto rounded-xl bg-white shadow-xl">
+      <div class="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3"><h2 class="flex items-center gap-2 text-[13px] font-bold text-slate-800"><i data-lucide="package-open" class="h-4 w-4 text-blue-600"></i>Detail Audit SKU</h2><button onclick="closeModal()" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button></div>
+      <div id="detailBody" class="p-4"></div>
+    </div>
+  </div>
+  <div id="toasts" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const T = { gray:'bg-slate-100 text-slate-700', red:'bg-red-100 text-red-700', green:'bg-emerald-100 text-emerald-800', indigo:'bg-indigo-100 text-indigo-800', purple:'bg-purple-100 text-purple-700', blue:'bg-blue-100 text-blue-700', orange:'bg-orange-100 text-orange-700', pink:'bg-pink-100 text-pink-700' };
+    const TX = { green:'text-emerald-700', gray:'text-slate-600', red:'text-red-600' };
+    const ic = (n, c = 'h-3.5 w-3.5') => `<i data-lucide="${n}" class="${c} shrink-0"></i>`;
+    const badge = (txt, t, i) => `<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-semibold ${T[t]}">${i ? ic(i) : ''}${txt}</span>`;
+
+    /* ===== DATA (isi dari data-barang.html asli) ===== */
+    const STATS = [
+      {l:'Total Master SKU Aktif', v:'8.650', u:'SKU', b:['100%','green','shield-check'], s:'Terverifikasi Kriptografis', i:'barcode', c:'bg-blue-50 text-blue-600'},
+      {l:'Deviasi Data Atribut', v:'3', u:'SKU', b:['Anomali','red'], s:'ROP Tak Terdefinisi & Barcode Ganda', i:'triangle-alert', c:'bg-red-50 text-red-600', red:1},
+      {l:'Valuasi Inventaris Buku', v:'Rp 48,24', u:'M', b:['FiFo','green'], s:'Rp 48.240.150.000 · Tervalidasi', i:'coins', c:'bg-emerald-50 text-emerald-700'},
+      {l:'Sampel Audit Diperiksa', v:'1.250', u:'SKU', b:['14,4%','gray'], s:'Sampling Acak Bulan Berjalan', i:'shuffle', c:'bg-indigo-50 text-indigo-600'}
+    ];
+    const R = [
+      {sku:'CAN-GOOD-PRO', nama:'Canon EOS 600D Kit 18-55mm IS II', kat:['Kamera & Optik','purple','camera'], ean:'8991200348123', zona:'A-04', mn:'10 / 25 Unit', rop:'550 Unit', rb:['Over','red'], hpp:'Rp 5.250.000', pasar:'Rp 5.300.000', dev:'+0,95% (Wajar)', dt:'green', tot:'Rp 315 Jt', st:['Anomali ROP Ketinggian','red','circle-alert'], note:'Parameter 5x lipat dari kuota rak buffer.', pet:'Budi Santoso', role:'Ka. Gudang', tgl:'18 Okt 2024 · 14:32:10 WIB', tx:'TX-HoDrBs2100', k:['kamera & optik','anomali','a-04','wajar']},
+      {sku:'SSD-SDITB-EVO', nama:'Samsung 980 Pro 1TB M.2 PCIe 4.0', kat:['Storage SSD','blue','hard-drive'], ean:'8806091238910', dup:1, zona:'B-12', mn:'50 / 100 Unit', rop:'150 Unit', rb:['Normal','gray'], hpp:'Rp 1.450.000', pasar:'Rp 1.420.000', dev:'-2,07% (Normal)', dt:'gray', tot:'Rp 290 Jt', st:['EAN Duplikat','red','circle-alert'], note:'Barcode ganda terdeteksi pada master.', pet:'Rian Hidayat', role:'Staf Input Master', tgl:'19 Okt 2024 · 09:12:44 WIB', tx:'TX-HoOvBE30L', k:['storage ssd','anomali','b-12','normal']},
+      {sku:'NET-SWAB-POE', nama:'Cisco Catalyst 48-Port PoE+ Managed', kat:['Networking Core','orange','network'], ean:'0883421554301', zona:'C-01', mn:'5 / 15 Unit', rop:'20 Unit', rb:['Normal','gray'], hpp:'Rp 2.800.000', pasar:'Rp 2.150.000', dev:'-23,2% (Deviasi Ekstrem)', dt:'red', tot:'Rp 86 Jt', st:['Deviasi Ekstrem','red','circle-alert'], note:'Penurunan nilai pasar memerlukan provisi NRV.', pet:'Siti Rahma', role:'Procurement Lead', tgl:'17 Okt 2024 · 17:05:19 WIB', tx:'TX-uodsse1020', k:['networking core','anomali','c-01','deviasi ekstrem']},
+      {sku:'SCN-ZBR-2208', nama:'Zebra DS2208 2D Corded Scanner', kat:['Perangkat Barcode','green','scan-barcode'], ean:'8997230491022', zona:'A-01', mn:'20 / 40 Unit', rop:'60 Unit', rb:['Normal','gray'], hpp:'Rp 1.359.000', pasar:'Rp 1.376.900', dev:'+1,30% (Presisi)', dt:'green', tot:'Rp 81,5 Jt', st:['Presisi','green','circle-check'], note:'Parameter ledger sinkron 100%.', pet:'Dewi Anggraini', role:'Auditor', tgl:'19 Okt 2024 · 11:20:00 WIB', tx:'TX-AUD#T72911', k:['perangkat barcode','normal','a-01','presisi']},
+      {sku:'KBD-LOG-MX01', nama:'Logitech MX Mechanical Wireless Mini', kat:['Aksesoris Komputer','pink','keyboard'], ean:'0978551743120', zona:'B-03', mn:'15 / 30 Unit', rop:'45 Unit', rb:['Normal','gray'], hpp:'Rp 2.100.000', pasar:'Rp 2.150.000', dev:'+2,38% (Normal)', dt:'green', tot:'Rp 94,5 Jt', st:['Normal','green','circle-check'], note:'Sample verification batch 104 aktif.', pet:'Agus Permana', role:'Staf Gudang', tgl:'16 Okt 2024 · 08:45:12 WIB', tx:'TX-Ho04873810', k:['aksesoris komputer','normal','b-03','normal']}
+    ];
+    const COLS = ['Kode SKU & Identifikasi','Parameter Sistem','Harga & Valuasi Buku','Status Audit & Kepatuhan','Petugas Terakhir & Log Aksi'];
+
+    /* ===== RENDER ===== */
+    $('#stats').innerHTML = STATS.map(s => `
+      <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <div class="min-w-0">
+          <p class="text-[9.5px] font-semibold uppercase tracking-wide ${s.red ? 'text-red-600' : 'text-slate-500'}">${s.l}</p>
+          <p class="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[24px] font-bold leading-tight tracking-tight ${s.red ? 'text-red-600' : ''}">${s.v} <span class="text-[10.5px] font-normal text-slate-600">${s.u}</span>${badge(s.b[0], s.b[1], s.b[2]).replace('px-2.5 py-1 text-[10.5px]', 'px-2 py-0.5 text-[9.5px]')}</p>
+          <p class="mt-2.5 text-[10.5px] ${s.red ? 'font-semibold text-red-600' : 'text-slate-500'}">${s.s}</p>
+        </div>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${s.c}">${ic(s.i, 'h-4 w-4')}</span>
+      </article>`).join('');
+
+    $('#rows').innerHTML = R.map(r => `
+      <tr data-sku="${r.sku}" class="align-top hover:bg-slate-50/70">
+        <td class="px-3 py-3">
+          <a href="#" onclick="openDetail('${r.sku}');return false" class="font-bold text-blue-700">${r.sku}</a>
+          <p class="mt-1 break-words font-semibold text-slate-800">${r.nama}</p>
+          <span class="mt-1.5 inline-flex items-center gap-1.5 rounded px-2 py-1 text-[10.5px] font-medium ${T[r.kat[1]]}">${ic(r.kat[2])}${r.kat[0]}</span>
+          <p class="mt-1.5 text-[10.5px] text-slate-500">${r.dup ? 'EAN Duplikat' : 'EAN'}: ${r.ean}</p>
+        </td>
+        <td class="px-3 py-3">
+          <span class="inline-flex items-center gap-1.5 rounded bg-blue-50 px-2 py-1 text-[10.5px] text-slate-700">${ic('map-pin', 'h-3.5 w-3.5 text-blue-600')}Zone ${r.zona}</span>
+          <p class="mt-1.5 text-[10.5px] text-slate-500">Min / Safety: ${r.mn}</p>
+          <p class="mt-1 text-slate-800">Nilai ROP: <b>${r.rop}</b></p>
+          <span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[10.5px] font-semibold ${T[r.rb[1]]}">${r.rb[0]}</span>
+        </td>
+        <td class="px-3 py-3">
+          <p class="text-slate-700">HPP Tercatat: <b class="text-slate-900">${r.hpp}</b></p>
+          <p class="mt-1 text-[10.5px] text-slate-500">Pasar Terakhir: ${r.pasar}</p>
+          <p class="mt-1 font-semibold ${TX[r.dt]}">${r.dev}</p>
+          <p class="mt-1 text-[10.5px] text-slate-500">Total: ${r.tot}</p>
+        </td>
+        <td class="px-3 py-3">
+          ${badge(r.st[0], r.st[1], r.st[2])}
+          <p class="mt-2 text-[11px] leading-relaxed text-slate-600">${r.note}</p>
+        </td>
+        <td class="px-3 py-3">
+          <p class="font-medium text-slate-900">${r.pet} <span class="font-normal text-slate-500">(${r.role})</span></p>
+          <p class="mt-1 text-[10.5px] text-slate-500">${r.tgl}</p>
+          <p class="mt-1 text-[10.5px] text-slate-400">${r.tx}</p>
+          <div class="mt-2 flex items-center gap-1">
+            <button onclick="openDetail('${r.sku}')" class="inline-flex items-center gap-1 rounded px-2 py-1.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-50">${ic('eye', 'h-4 w-4')}Detail</button>
+            <button onclick="toast('Ekspor baris ${r.sku}...','success')" class="rounded p-1.5 text-slate-600 hover:bg-slate-100" aria-label="Ekspor baris ${r.sku}">${ic('file-down', 'h-4 w-4')}</button>
+          </div>
+        </td>
+      </tr>`).join('');
+
+    /* ===== MODAL & TOAST ===== */
+    window.openM = (id) => { const m = $('#' + id); m.hidden = false; m.style.display = 'flex'; };
+    window.closeModal = () => { document.querySelectorAll('.mdl').forEach(m => { m.hidden = true; m.style.display = ''; }); drawCols(); };
+    document.querySelectorAll('.mdl').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(); }));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('#pfm').hidden = true; } });
+    window.openDetail = (sku) => {
+      const r = R.find(x => x.sku === sku);
+      const f = (l, v) => `<div class="min-w-0"><dt class="text-[10.5px] text-slate-500">${l}</dt><dd class="text-[12px] text-slate-800">${v}</dd></div>`;
+      $('#detailBody').innerHTML = `
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          ${f('Kode SKU', `<b class="text-slate-900">${r.sku}</b>`)}${f('Nama Barang', r.nama)}${f('Kategori', r.kat[0])}${f('EAN / Barcode', r.ean + (r.dup ? ' (Duplikat)' : ''))}
+          ${f('Zona Rak', r.zona)}${f('Nilai ROP', r.rop + (r.rb[0] === 'Over' ? ' (Over)' : ''))}${f('HPP Tercatat', r.hpp)}${f('Pasar Terakhir', r.pasar)}
+          ${f('Deviasi Harga', r.dev)}${f('Status Audit', r.st[0])}${f('Petugas Terakhir', `${r.pet} (${r.role})`)}${f('Waktu & TX', `${r.tgl}<br><span class="text-[10.5px] text-slate-400">${r.tx}</span>`)}
+        </dl>
+        <div class="mt-3 flex items-start gap-2 rounded-md bg-slate-50 p-3 text-[11px] text-slate-600">${ic('info', 'mt-px h-3.5 w-3.5')}<span>${r.note}</span></div>
+        <div class="mt-4 flex justify-end gap-2"><button onclick="closeModal()" class="btn btn-s h-9 px-4">Tutup</button><button onclick="closeModal();toast('Ekspor detail ${r.sku} (PDF)...','success')" class="btn btn-p h-9 px-4">${ic('file-down')}Ekspor PDF</button></div>`;
+      openM('modal'); lucide.createIcons();
+    };
+    window.toast = (msg, type = 'success') => {
+      const el = document.createElement('div');
+      el.className = `max-w-[320px] rounded-md px-3 py-2 text-[11px] font-medium text-white shadow-lg ${type === 'warn' ? 'bg-amber-600' : 'bg-emerald-600'}`;
+      el.textContent = msg; $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3200);
+    };
+
+    
+    /* ===== KUSTOMISASI KOLOM ===== */
+    let shown = COLS.map(() => true);
+    function drawCols() {
+      $('#colList').innerHTML = COLS.map((c, i) => `<label class="flex cursor-pointer items-center gap-2"><input type="checkbox" data-c="${i}" ${shown[i] ? 'checked' : ''} class="h-4 w-4 accent-blue-600">${c.replace('&', '&amp;')}</label>`).join('');
+    }
+    window.saveCols = () => {
+      const boxes = [...document.querySelectorAll('#colList input')];
+      if (!boxes.some(b => b.checked)) { toast('Pilih minimal satu kolom.', 'warn'); return; }
+      shown = boxes.map(b => b.checked);
+      document.querySelectorAll('#tbl tr').forEach(tr => [...tr.children].forEach((c, i) => c.style.display = shown[i] ? '' : 'none'));
+      closeModal(); toast('Konfigurasi kolom disimpan.', 'success');
+    };
+    drawCols();
+
+    /* ===== FILTER ===== */
+    const fk = $('#fKategori'), fs = $('#fStatus'), fz = $('#fZona'), ff = $('#fFlag'), cb = $('#cbAnomali'), q = $('#searchSku'), g = $('#global-search');
+    function apply() {
+      const s = `${q.value} ${g.value}`.trim().toLowerCase(); let n = 0;
+      R.forEach(r => {
+        const el = $(`tr[data-sku="${r.sku}"]`);
+        const ok = (!s || el.textContent.toLowerCase().includes(s)) && (!fk.value || r.k[0] === fk.value) && (!fs.value || r.k[1] === fs.value) && (!fz.value || r.k[2] === fz.value) && (!ff.value || r.k[3] === ff.value) && (!cb.checked || r.k[1] === 'anomali');
+        el.hidden = !ok; n += ok ? 1 : 0;
+      });
+      $('#cnt').textContent = `Menampilkan ${n} dari 1.250 sampel data audit`;
+      $('#noRow').hidden = n > 0;
+    }
+    [q, g].forEach(i => i.addEventListener('input', apply));
+    [fk, fs, fz, ff, cb].forEach(i => i.addEventListener('change', apply));
+    $('#reset').addEventListener('click', () => { q.value = g.value = fk.value = fs.value = fz.value = ff.value = ''; cb.checked = false; apply(); });
+
+    /* ===== SIDEBAR & PROFIL ===== */
+    const sb = $('#sidebar'), bd = $('#sidebar-backdrop'), tg = $('#sidebar-toggle');
+    const mob = () => matchMedia('(max-width:767px)').matches;
+    function sync() {
+      const open = mob() ? sb.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      tg.setAttribute('aria-expanded', open); tg.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+      tg.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="h-5 w-5"></i>`;
+      bd.classList.toggle('show', mob() && open); lucide.createIcons();
+    }
+    window.toggleSidebar = () => { mob() ? sb.classList.toggle('open') : document.body.classList.toggle('sidebar-collapsed'); sync(); };
+    if (!mob() && innerWidth < 1024) document.body.classList.add('sidebar-collapsed'); /* tablet: sidebar tertutup agar konten lega */
+    window.addEventListener('resize', sync);
+    $('#pf').addEventListener('click', e => { e.stopPropagation(); $('#pfm').hidden = !$('#pfm').hidden; });
+    document.addEventListener('click', e => { if (!$('#pfm').contains(e.target)) $('#pfm').hidden = true; });
+
+    apply(); sync(); lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manajemen Data Gudang & Lokasi Rak — Astro Inventory</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: '#0b49d8',
+            ink: '#17243b',
+            canvas: '#f5f7fc',
+            line: '#e8edf5'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: Inter, sans-serif; overflow-x: hidden; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+
+    /* ---------- Sidebar ---------- */
+    .nav-link { transition: background .15s ease, color .15s ease; }
+    .nav-link.active { background: #0b49d8; color: #fff; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    #sidebar-backdrop.show { display: block !important; }
+    #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #sidebar-toggle:hover { background: #f1f5fc; }
+    #sidebar-toggle[aria-expanded="true"] .i-menu,
+    #sidebar-toggle[aria-expanded="false"] .i-close { display: none; }
+
+    /* Mobile & tablet: sidebar menjadi drawer */
+    @media (max-width: 1023px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      body.drawer-open { overflow: hidden; }
+    }
+    /* Desktop: sidebar tetap tampil, bisa di-collapse */
+    @media (min-width: 1024px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; min-height: calc(100vh / 1.15); transition: margin-left .22s ease; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 1023px) { #main-area { min-height: 100vh; } }
+
+    /* ---------- Animasi ---------- */
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .reveal-delay-1 { animation-delay: 50ms; }
+    .reveal-delay-2 { animation-delay: 100ms; }
+    .reveal-delay-3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
+    /* ---------- Skala tipografi tetap (stabil di semua ukuran layar) ----------
+       24 judul/angka KPI · 13 judul panel · 12 isi · 10.5 teks sekunder · 9.5 label */
+    .pri  { font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.35; }
+    .txt  { font-size: 12px; color: #334155; line-height: 1.35; }
+    .sub  { margin-top: 4px; font-size: 10.5px; line-height: 1.4; color: #64748b; }
+    .sub-red { color: #dc2626; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 9999px; padding: 4px 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+    .tag  { display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600; line-height: 1.35; }
+    .c-green  { background: #d1fae5; color: #065f46; }
+    .c-red    { background: #fee2e2; color: #b91c1c; }
+    .c-amber  { background: #fef3c7; color: #92400e; }
+    .c-indigo { background: #e0e7ff; color: #3730a3; }
+    .c-slate  { background: #f1f5f9; color: #334155; }
+    .c-blue   { background: #0b49d8; color: #fff; }
+    .c-gray   { background: #94a3b8; color: #fff; }
+    .panel-title { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+
+    /* ---------- Tabel: kartu bertumpuk di layar kecil ---------- */
+    @media (max-width: 767px) {
+      .rtable { min-width: 0 !important; table-layout: auto !important; }
+      .rtable thead { display: none; }
+      .rtable, .rtable tbody, .rtable tr { display: block; width: 100%; }
+      .rtable tbody tr { padding: 12px 14px; }
+      .rtable td { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; width: auto !important; padding: 6px 0 !important; text-align: left !important; }
+      .rtable td::before { content: attr(data-label); padding-top: 2px; font-size: 9.5px; font-weight: 600; letter-spacing: .025em; text-transform: uppercase; color: #64748b; }
+    }
+
+    .c-purple { background: #f3e8ff; color: #6b21a8; }
+    .c-pink   { background: #fce7f3; color: #9d174d; }
+    .c-orange { background: #ffedd5; color: #9a3412; }
+    .c-sky    { background: #dbeafe; color: #1d4ed8; }
+    .chip { border-radius: 9999px; padding: 4px 12px; font-size: 10.5px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s ease, color .15s ease; }
+    .chip-slate { background: #f1f5f9; color: #475569; }
+    .chip-red   { background: #fef2f2; color: #dc2626; }
+    .chip-green { background: #ecfdf5; color: #047857; }
+    .chip.active { background: #2563eb; color: #fff; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 lg:hidden"></div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p>
+        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard Admin</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Master Data & Inventaris</p>
+        <div class="space-y-0.5">
+          <a href="data_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="package" class="h-4 w-4"></i><span>Data Barang</span></a>
+          <a href="kategori_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="tags" class="h-4 w-4"></i><span>Kategori Barang</span></a>
+          <a href="data_gudang_lokasi.html" aria-current="page" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="warehouse" class="h-4 w-4"></i><span>Data Gudang & Lokasi</span></a>
+          <a href="data_supplier.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="truck" class="h-4 w-4"></i><span>Data Supplier</span></a>
+          <a href="data_departemen.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="building-2" class="h-4 w-4"></i><span>Departemen</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional & Transaksi</p>
+        <div class="space-y-0.5">
+          <a href="barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a>
+          <a href="barang_keluar.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a>
+          <a href="mutasi_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-left-right" class="h-4 w-4"></i><span>Mutasi Barang</span></a>
+          <a href="stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-list" class="h-4 w-4"></i><span>Persetujuan Barang</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Manajemen Sistem</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="users" class="h-4 w-4"></i><span>Manajemen Pengguna</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Laporan & Analitik</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-clock" class="h-4 w-4"></i><span>Laporan & Riwayat</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4"></i><span>Log Aktivitas</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-circle" class="h-4 w-4"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+
+  <div id="main-area">
+    <!-- ============ TOPBAR ============ -->
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Tutup sidebar" class="flex h-8 w-8 shrink-0 items-center justify-center text-slate-500">
+          <i data-lucide="menu" class="i-menu h-5 w-5"></i><i data-lucide="x" class="i-close h-5 w-5"></i>
+        </button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 md:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 min-[1360px]:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button type="button" class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight md:block"><p class="whitespace-nowrap text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="whitespace-nowrap text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
+    </header>
+
+    <!-- ============ KONTEN ============ -->
+    <main class="bg-canvas p-4 lg:p-5">
+      <!-- Judul halaman -->
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 flex-1 basis-[300px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Data Gudang & Lokasi Rak</span></p>
+          <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Manajemen Data Gudang & Lokasi Rak</h1>
+          <p class="mt-1.5 max-w-[720px] text-[12px] leading-relaxed text-slate-500">Pemetaan fasilitas penyimpanan fisik Hub Cakung DC-01, konfigurasi zona gudang, kapasitas rak/bin, pengawasan okupansi ruang, dan status utilitas lorong pallet.</p>
+          <div class="mt-2.5 flex flex-wrap items-center gap-2">
+            <span class="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700"><i data-lucide="radio-tower" class="h-3.5 w-3.5 shrink-0"></i>Pemetaan Denah Real-time: Aktif</span>
+          </div>
+        </div>
+        <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+          <button type="button" data-toast="Membuka visual denah interaktif..." class="flex h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:flex-none"><i data-lucide="map" class="h-4 w-4 text-blue-600"></i>Buka Visual Denah Interaktif</button>
+          <button type="button" data-toast="Menyiapkan ekspor Layout Denah (PDF)..." class="flex h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700 sm:flex-none"><i data-lucide="file-down" class="h-4 w-4"></i>Ekspor Layout Denah</button>
+        </div>
+      </section>
+
+      <!-- Ringkasan -->
+      <section aria-label="Ringkasan gudang dan lokasi" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Gudang Aktif</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">7 <span class="text-[10.5px] font-normal text-slate-600">Gedung / DC</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-emerald-700">↗ +1 Fasilitas</span> &nbsp;Hub Cakung DC-01 · Terbagi Zona A s/d F</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="warehouse" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Zona & Lorong</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">24 <span class="text-[10.5px] font-normal text-slate-600">Zona</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-blue-600">● &nbsp;Multi-tier (3)</span> &nbsp;Cluster Elektronik, Komputer, Tools & Staging</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600"><i data-lucide="layers" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kapasitas Rak & Bin</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">1.840 <span class="text-[10.5px] font-normal text-slate-600">Slot</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-emerald-700">● &nbsp;78% Avg</span> &nbsp;1.435 Terisi · 8 Rak Aktif</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="grid-3x3" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-red-600">Slot Kritis / Hampir Penuh</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">8 <span class="text-[10.5px] font-normal text-slate-600">Rak</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-red-600"><span class="font-semibold">! &nbsp;&gt; 90%</span> &nbsp;Perlu Relokasi / Penataan Ulang</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-600"><i data-lucide="triangle-alert" class="h-4 w-4"></i></span>
+        </article>
+      </section>
+
+      <!-- Peta okupansi zona -->
+      <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-2"><i data-lucide="chart-area" class="h-4 w-4 shrink-0 text-blue-600"></i><h2 class="panel-title">Peta Okupansi Zona Hub Cakung DC-01</h2></div>
+        <p class="mb-3 mt-1 text-[10.5px] leading-relaxed text-slate-500">Monitoring real-time utilisasi fisik rak & staging area per cluster operasional.</p>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 min-[1400px]:grid-cols-5">
+          <div class="rounded-lg border border-slate-100 bg-blue-50/80 p-3">
+            <div class="mb-2 flex items-center justify-between gap-2"><span class="rounded bg-white px-2 py-0.5 text-[10px] font-bold text-blue-700">WH01-ZA</span><span class="text-[10.5px] font-bold text-red-600">92% Penuh</span></div>
+            <p class="pri">Elektronik & High-Value</p>
+            <div class="mb-1.5 mt-2 h-1.5 rounded bg-blue-100"><div class="h-full rounded" style="width:92%;background:#dc2626"></div></div>
+            <p class="sub" style="margin-top:0">280 / 300 Slot</p>
+          </div>
+          <div class="rounded-lg border border-slate-100 bg-blue-50/80 p-3">
+            <div class="mb-2 flex items-center justify-between gap-2"><span class="rounded bg-white px-2 py-0.5 text-[10px] font-bold text-blue-700">WH01-ZB</span><span class="text-[10.5px] font-bold text-amber-600">64% Penuh</span></div>
+            <p class="pri">Akses & Periferal</p>
+            <div class="mb-1.5 mt-2 h-1.5 rounded bg-blue-100"><div class="h-full rounded" style="width:64%;background:#f59e0b"></div></div>
+            <p class="sub" style="margin-top:0">320 / 500 Slot</p>
+          </div>
+          <div class="rounded-lg border border-slate-100 bg-blue-50/80 p-3">
+            <div class="mb-2 flex items-center justify-between gap-2"><span class="rounded bg-white px-2 py-0.5 text-[10px] font-bold text-blue-700">WH02-ZC</span><span class="text-[10.5px] font-bold text-red-600">85% Penuh</span></div>
+            <p class="pri">Komponen Komputer</p>
+            <div class="mb-1.5 mt-2 h-1.5 rounded bg-blue-100"><div class="h-full rounded" style="width:85%;background:#dc2626"></div></div>
+            <p class="sub" style="margin-top:0">340 / 400 Slot</p>
+          </div>
+          <div class="rounded-lg border border-slate-100 bg-blue-50/80 p-3">
+            <div class="mb-2 flex items-center justify-between gap-2"><span class="rounded bg-white px-2 py-0.5 text-[10px] font-bold text-blue-700">WH02-ZD</span><span class="text-[10.5px] font-bold text-emerald-700">45% Penuh</span></div>
+            <p class="pri">Tools & Heavy</p>
+            <div class="mb-1.5 mt-2 h-1.5 rounded bg-blue-100"><div class="h-full rounded" style="width:45%;background:#047857"></div></div>
+            <p class="sub" style="margin-top:0">180 / 400 Slot</p>
+          </div>
+          <div class="rounded-lg border border-slate-100 bg-blue-50/80 p-3">
+            <div class="mb-2 flex items-center justify-between gap-2"><span class="rounded bg-white px-2 py-0.5 text-[10px] font-bold text-blue-700">WH02-ZE</span><span class="text-[10.5px] font-bold text-amber-600">70% Penuh</span></div>
+            <p class="pri">Staging Inbound Buffer</p>
+            <div class="mb-1.5 mt-2 h-1.5 rounded bg-blue-100"><div class="h-full rounded" style="width:70%;background:#f59e0b"></div></div>
+            <p class="sub" style="margin-top:0">175 / 250 Slot</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter -->
+      <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-0 basis-full items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 sm:flex-1 sm:basis-[260px] lg:max-w-[430px]">
+            <i data-lucide="search" class="h-4 w-4 shrink-0"></i>
+            <input id="searchLoc" type="search" placeholder="Cari kode gudang, zona, lorong, nomor rak (contoh: WH01-ZA-RA01)" class="w-full min-w-0 bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400" />
+          </label>
+          <select id="fGedung" aria-label="Filter gedung" class="h-10 min-w-0 basis-[calc(50%-4px)] rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:basis-auto">
+            <option value="">Semua Gedung (Hub DC-01)</option>
+            <option value="wh01">WH01 - Gedung A</option>
+            <option value="wh02">WH02 - Gedung B</option>
+          </select>
+          <select id="fTipe" aria-label="Filter tipe penyimpanan" class="h-10 min-w-0 basis-[calc(50%-4px)] rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:basis-auto">
+            <option value="">Semua Tipe Penyimpanan</option>
+            <option value="heavy-duty shelf">Heavy-Duty Shelf</option>
+            <option value="high-security cage">High-Security Cage</option>
+            <option value="multi-tier bin">Multi-Tier Bin</option>
+            <option value="pallet racking">Pallet Racking Drive-in</option>
+            <option value="cantilever">Cantilever & Floor Bay</option>
+            <option value="flow rack">Temporary Flow Rack</option>
+          </select>
+          <select id="fOkup" aria-label="Filter status okupansi" class="h-10 min-w-0 flex-1 basis-0 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:flex-none sm:basis-auto">
+            <option value="">Status Okupansi (Semua)</option>
+            <option value="hampir penuh">Hampir Penuh</option>
+            <option value="normal">Normal</option>
+            <option value="luang">Luang / Tersedia</option>
+          </select>
+          <button id="reset-filters" type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
+          <span class="mr-1 font-semibold uppercase text-slate-600">Filter Cepat:</span>
+          <button type="button" data-quick="" data-qtype="" class="chip chip-slate active">Semua Lokasi (1.840)</button>
+          <button type="button" data-qtype="zona" data-quick="za" class="chip chip-slate">Zona A - Elektronik (300)</button>
+          <button type="button" data-qtype="zona" data-quick="zb" class="chip chip-slate">Zona B - Aksesoris (500)</button>
+          <button type="button" data-qtype="zona" data-quick="zc" class="chip chip-slate">Zona C - Komputer (400)</button>
+          <button type="button" data-qtype="okup" data-quick="hampir penuh" class="chip chip-red">● Slot Hampir Penuh (42)</button>
+          <button type="button" data-qtype="okup" data-quick="luang" class="chip chip-green">Slot Kosong / Tersedia (405)</button>
+          <button type="button" id="btnCols" class="ml-auto flex h-8 items-center gap-1.5 rounded-md border border-slate-100 bg-white px-3 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="columns-3" class="h-4 w-4 text-blue-600"></i>Kustomisasi Kolom</button>
+        </div>
+      </section>
+
+      <!-- Tabel -->
+      <section class="reveal reveal-delay-3 mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table id="tblLokasi" class="rtable w-full min-w-[1100px] table-fixed border-collapse text-left">
+            <thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="w-[230px] whitespace-nowrap px-2">Kode & Nama Lokasi</th>
+                <th class="w-[190px] whitespace-nowrap px-2">Tipe Rak / Storage</th>
+                <th class="w-[140px] whitespace-nowrap px-2">Kapasitas Maksimal</th>
+                <th class="w-[170px] whitespace-nowrap px-2">Keterisian & Okupansi</th>
+                <th class="w-[130px] whitespace-nowrap px-2">SKU Tersimpan</th>
+                <th class="w-[150px] whitespace-nowrap px-2">Status</th>
+                <th class="w-[90px] whitespace-nowrap px-2 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="loc-rows" class="divide-y divide-slate-100">
+              <tr data-tipe="heavy-duty shelf" data-okup="hampir penuh" data-gedung="wh01" data-zona="za" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH01-ZA-RA01" class="text-[12px] font-bold text-blue-700 hover:underline">WH01-ZA-RA01</a><p class="pri mt-1">Rak Lorong A-01 (Lantai 1)</p><p class="sub">Zona A · Steel Tier (Level 1-4)</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Heavy-Duty Shelf</p><p class="sub">Beban maks: 2.000 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">400 Unit</p><p class="sub">Kamera &amp; Optik</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-red-600">370 Unit</b> · 92%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:92%;background:#dc2626"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">18 SKU</p><span class="tag c-purple mt-1">High-Value</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-red">● Hampir Penuh</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH01-ZA-RA01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH01-ZA-RA01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH01-ZA-RA01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH01-ZA-RA01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="high-security cage" data-okup="hampir penuh" data-gedung="wh01" data-zona="za" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH01-ZA-RA02" class="text-[12px] font-bold text-blue-700 hover:underline">WH01-ZA-RA02</a><p class="pri mt-1">Rak Lorong A-02 (Lantai 1)</p><p class="sub">Zona A · VIP Secure</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">High-Security Cage</p><p class="sub">Kunci RFID &amp; Kamera CCTV</p><p class="sub">Beban maks: 1.500 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">250 Unit</p><p class="sub">Laptop Bisnis</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-red-600">220 Unit</b> · 88%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:88%;background:#dc2626"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">12 SKU</p><span class="tag c-sky mt-1">Bisnis</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-red">● Hampir Penuh</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH01-ZA-RA02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH01-ZA-RA02"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH01-ZA-RA02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH01-ZA-RA02"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="multi-tier bin" data-okup="normal" data-gedung="wh01" data-zona="zb" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH01-ZB-RB01" class="text-[12px] font-bold text-blue-700 hover:underline">WH01-ZB-RB01</a><p class="pri mt-1">Rak Lorong B-01 (Lantai 1)</p><p class="sub">Zona B · Small Parts Bins (A1-H8)</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Multi-Tier Bin</p><p class="sub">Beban maks: 1.200 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">600 Unit</p><p class="sub">Aksesoris &amp; Kabel</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-amber-600">360 Unit</b> · 60%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:60%;background:#f59e0b"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">45 SKU</p><span class="tag c-pink mt-1">Aksesoris</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-amber">● Normal</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH01-ZB-RB01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH01-ZB-RB01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH01-ZB-RB01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH01-ZB-RB01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="multi-tier bin" data-okup="luang" data-gedung="wh01" data-zona="zb" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH01-ZB-RB02" class="text-[12px] font-bold text-blue-700 hover:underline">WH01-ZB-RB02</a><p class="pri mt-1">Rak Lorong B-02 (Lantai 1)</p><p class="sub">Zona B · Small Parts Bins (I1-P8)</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Multi-Tier Bin</p><p class="sub">Beban maks: 1.200 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">600 Unit</p><p class="sub">Smartwatch &amp; Audio</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-emerald-700">260 Unit</b> · 43%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:43%;background:#047857"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">32 SKU</p><span class="tag c-pink mt-1">Audio</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-green">● Luang</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH01-ZB-RB02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH01-ZB-RB02"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH01-ZB-RB02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH01-ZB-RB02"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="pallet racking" data-okup="normal" data-gedung="wh02" data-zona="zc" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH02-ZC-RC01" class="text-[12px] font-bold text-blue-700 hover:underline">WH02-ZC-RC01</a><p class="pri mt-1">Rak Lorong C-01 (Lantai 2)</p><p class="sub">Zona C · Forklift Dedicated Bay</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Pallet Racking Drive-in</p><p class="sub">Beban maks: 10.000 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">50 Pallet</p><p class="sub">Bulk Storage SSD/HDD</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-red-600">44 Pallet</b> · 88%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:88%;background:#dc2626"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">8 SKU</p><span class="tag c-sky mt-1">Bulk</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-amber">● Optimal</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH02-ZC-RC01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH02-ZC-RC01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH02-ZC-RC01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH02-ZC-RC01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="cantilever" data-okup="luang" data-gedung="wh02" data-zona="zd" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH02-ZD-RD01" class="text-[12px] font-bold text-blue-700 hover:underline">WH02-ZD-RD01</a><p class="pri mt-1">Rak Lorong D-01 (Lantai 1)</p><p class="sub">Zona D · Oversized Cargo &amp; Rigs</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Cantilever &amp; Floor Bay</p><p class="sub">Beban maks: 8.000 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">30 Pallet</p><p class="sub">Peralatan &amp; Scanner</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-emerald-700">9 Pallet</b> · 30%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:30%;background:#047857"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">4 SKU</p><span class="tag c-orange mt-1">Heavy</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-green">● Luang</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH02-ZD-RD01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH02-ZD-RD01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH02-ZD-RD01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH02-ZD-RD01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-tipe="flow rack" data-okup="normal" data-gedung="wh02" data-zona="ze" class="hover:bg-slate-50/70">
+                <td data-label="Lokasi" class="px-2 py-3 align-top"><div><a href="#" data-detail="WH02-ZE-RE01" class="text-[12px] font-bold text-blue-700 hover:underline">WH02-ZE-RE01</a><p class="pri mt-1">Dock Staging Rak E-01 (Inbound)</p><p class="sub">Zona E · Gravity Roller Staging</p></div></td>
+                <td data-label="Tipe Rak" class="px-2 py-3 align-top"><div><p class="txt">Temporary Flow Rack</p><p class="sub">Beban maks: 1.000 kg</p></div></td>
+                <td data-label="Kapasitas" class="px-2 py-3 align-top"><div><p class="pri">200 Unit</p><p class="sub">Antrean QC Inbound</p></div></td>
+                <td data-label="Okupansi" class="px-2 py-3 align-top"><div><p class="txt"><b class="text-amber-600">150 Unit</b> · 75%</p><div class="mt-1.5 h-1.5 w-32 max-w-full rounded bg-blue-100"><div class="h-full rounded" style="width:75%;background:#f59e0b"></div></div></div></td>
+                <td data-label="SKU" class="px-2 py-3 align-top"><div><p class="txt">9 SKU</p><span class="tag c-slate mt-1">Transit</span></div></td>
+                <td data-label="Status" class="px-2 py-3 align-top"><div><span class="pill c-indigo">● Area Transit</span></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="WH02-ZE-RE01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail WH02-ZE-RE01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="WH02-ZE-RE01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor WH02-ZE-RE01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="empty-state" hidden class="px-4 py-8 text-center text-[12px] text-slate-500">Tidak ada lokasi rak yang sesuai dengan filter. Ubah atau reset filter untuk melihat data.</p>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <div class="flex flex-wrap items-center gap-2"><span id="rowCount">Menampilkan 1 - 7 dari 1.840 lokasi rak terdaftar</span><span>Baris:</span><select aria-label="Jumlah baris" class="h-8 rounded bg-blue-50 px-2 text-[12px]"><option>10</option><option>25</option><option>50</option></select></div>
+          <div class="flex flex-wrap items-center gap-1">
+            <button type="button" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">‹ Sebelumnya</button>
+            <button type="button" class="h-8 min-w-8 rounded bg-blue-600 px-2 text-[12px] font-semibold text-white">1</button><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">2</button><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">3</button><span class="px-1">…</span><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">184</button>
+            <button type="button" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Selanjutnya ›</button>
+          </div>
+        </footer>
+      </section>
+
+      <!-- Kartu fitur -->
+      <section class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <article class="flex flex-col rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="mb-2 flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="printer" class="h-4 w-4"></i></span><h3 class="panel-title">Cetak Batch Label Barcode Rak</h3></div>
+          <p class="sub mb-3" style="margin-top:0">Generate QR code standar ISO/IEC 18004 dan label barcode Code-128 untuk navigasi barcode scanner armada gudang. Format: QR & EAN-128</p>
+          <button type="button" data-toast="Menyiapkan ekspor label barcode rak..." class="mt-auto flex h-9 w-fit items-center gap-2 rounded-md bg-blue-600 px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="file-down" class="h-4 w-4"></i>Ekspor Label Batch</button>
+        </article>
+        <article class="flex flex-col rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="mb-2 flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-600"><i data-lucide="bell-ring" class="h-4 w-4"></i></span><h3 class="panel-title">Atur Ambang Batas Okupansi (Warning ROP)</h3></div>
+          <p class="sub mb-3" style="margin-top:0">Alert otomatis via email & push notification ke Kepala Regu jika okupansi rak lorong melampaui &gt; 85%. Konfigurasi Ambang: 85% - 90%</p>
+          <button type="button" data-toast="Menampilkan konfigurasi ambang okupansi..." class="mt-auto flex h-9 w-fit items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="eye" class="h-4 w-4 text-blue-600"></i>Lihat Konfigurasi Ambang</button>
+        </article>
+        <article class="flex flex-col rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="mb-2 flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="bot" class="h-4 w-4"></i></span><h3 class="panel-title">Optimasi Slotting Otomatis (AI Suggestion)</h3></div>
+          <p class="sub mb-3" style="margin-top:0">Rekomendasi penempatan barang fast-moving lebih dekat ke loading dock untuk memangkas waktu travel picking hingga 24%.</p>
+          <button type="button" data-toast="Memuat 14 rekomendasi slotting AI..." class="mt-auto flex h-9 w-fit items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="lightbulb" class="h-4 w-4 text-blue-600"></i>Kelola 14 Rekomendasi Siap</button>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ MODAL KUSTOMISASI KOLOM ============ -->
+  <div id="modalCols" hidden class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="colsTitle">
+    <div class="flex max-h-[calc(100vh-32px)] w-full max-w-[420px] flex-col overflow-hidden rounded-xl bg-white shadow-xl">
+      <div class="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <h3 id="colsTitle" class="panel-title flex items-center gap-2"><i data-lucide="columns-3" class="h-4 w-4 shrink-0 text-blue-600"></i>Kustomisasi Kolom Tabel</h3>
+        <button type="button" data-close-modal class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div class="space-y-2.5 overflow-y-auto p-4 text-[12px] text-slate-700">
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="0" checked class="h-4 w-4 accent-blue-600"> Kode & Nama Lokasi</label>
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="1" checked class="h-4 w-4 accent-blue-600"> Tipe Rak / Storage</label>
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="2" checked class="h-4 w-4 accent-blue-600"> Kapasitas Maksimal</label>
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="3" checked class="h-4 w-4 accent-blue-600"> Keterisian & Okupansi</label>
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="4" checked class="h-4 w-4 accent-blue-600"> SKU Tersimpan</label>
+        <label class="flex items-center gap-2"><input type="checkbox" data-col="5" checked class="h-4 w-4 accent-blue-600"> Status</label>
+      </div>
+      <div class="flex shrink-0 justify-end gap-2 border-t border-line px-4 py-3">
+        <button type="button" data-close-modal class="h-10 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
+        <button type="button" id="saveCols" class="h-10 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL DETAIL LOKASI ============ -->
+  <div id="modalDetail" hidden class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="flex max-h-[calc(100vh-32px)] w-full max-w-[760px] flex-col overflow-hidden rounded-xl bg-white shadow-xl">
+      <div class="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <h3 id="modalTitle" class="panel-title flex items-center gap-2"><i data-lucide="map-pin" class="h-4 w-4 shrink-0 text-blue-600"></i>Detail Lokasi Rak</h3>
+        <button type="button" data-close-modal class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div id="detailBody" class="overflow-y-auto p-4"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite" hidden class="fixed bottom-4 right-4 z-[90] flex max-w-[calc(100vw-32px)] items-center gap-2 rounded-lg bg-slate-800 px-3.5 py-2.5 text-[12px] font-medium text-white shadow-lg"><i data-lucide="circle-check" class="h-4 w-4 shrink-0 text-emerald-400"></i><span id="toast-text"></span></div>
+
+  <script>
+    /* ---------- Sidebar: drawer (<1024px) / collapse (>=1024px) ---------- */
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggle = document.getElementById('sidebar-toggle');
+      const isMobile = () => window.matchMedia('(max-width: 1023px)').matches;
+      const isOpen = () => isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      const sync = () => {
+        const open = isOpen();
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggle.setAttribute('title', open ? 'Tutup sidebar' : 'Buka sidebar');
+        backdrop.classList.toggle('show', isMobile() && open);
+        document.body.classList.toggle('drawer-open', isMobile() && open);
+      };
+      const setOpen = (open) => {
+        if (isMobile()) sidebar.classList.toggle('open', open);
+        else document.body.classList.toggle('sidebar-collapsed', !open);
+        sync();
+      };
+      toggle.addEventListener('click', () => setOpen(!isOpen()));
+      backdrop.addEventListener('click', () => setOpen(false));
+      sidebar.addEventListener('click', (e) => { if (isMobile() && e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMobile() && isOpen()) setOpen(false); });
+      window.addEventListener('resize', () => { if (!isMobile()) sidebar.classList.remove('open'); sync(); });
+      // di layar kecil drawer tertutup saat awal; di desktop terbuka
+      sync();
+    })();
+
+    /* ---------- Toast ---------- */
+    let toastTimer;
+    function toast(message) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = message;
+      el.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+    }
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-toast]');
+      if (t) toast(t.dataset.toast);
+      const x = e.target.closest('[data-export]');
+      if (x) toast('Ekspor baris ' + x.dataset.export + '...');
+    });
+    
+    /* ---------- Filter tabel ---------- */
+    const rows = [...document.querySelectorAll('#loc-rows tr')];
+    const searchLoc = document.getElementById('searchLoc');
+    const globalSearch = document.getElementById('global-search');
+    const fGedung = document.getElementById('fGedung');
+    const fTipe = document.getElementById('fTipe');
+    const fOkup = document.getElementById('fOkup');
+    const chips = [...document.querySelectorAll('.chip')];
+    const rowCount = document.getElementById('rowCount');
+    const emptyState = document.getElementById('empty-state');
+    const defaultCount = rowCount.textContent;
+    let quick = { type: '', value: '' };
+
+    function applyFilters() {
+      const query = `${searchLoc.value} ${globalSearch ? globalSearch.value : ''}`.trim().toLowerCase();
+      let visible = 0;
+      rows.forEach((row) => {
+        const d = row.dataset;
+        const ok =
+          (!query || row.textContent.toLowerCase().includes(query)) &&
+          (!fGedung.value || d.gedung === fGedung.value) &&
+          (!fTipe.value || d.tipe === fTipe.value) &&
+          (!fOkup.value || d.okup === fOkup.value) &&
+          (!quick.type || d[quick.type] === quick.value);
+        row.hidden = !ok;
+        if (ok) visible++;
+      });
+      const filtered = query || fGedung.value || fTipe.value || fOkup.value || quick.type;
+      rowCount.textContent = filtered ? `${visible} lokasi sesuai filter` : defaultCount;
+      emptyState.hidden = visible > 0;
+    }
+    function setQuick(chip) {
+      chips.forEach((c) => c.classList.toggle('active', c === chip));
+      quick = { type: chip.dataset.qtype, value: chip.dataset.quick };
+      applyFilters();
+    }
+    chips.forEach((chip) => chip.addEventListener('click', () => setQuick(chip)));
+    [searchLoc, globalSearch].forEach((el) => el && el.addEventListener('input', applyFilters));
+    [fGedung, fTipe, fOkup].forEach((el) => el.addEventListener('change', applyFilters));
+    document.getElementById('reset-filters').addEventListener('click', () => {
+      searchLoc.value = '';
+      if (globalSearch) globalSearch.value = '';
+      fGedung.value = fTipe.value = fOkup.value = '';
+      setQuick(chips[0]);
+    });
+
+    /* ---------- Modal (detail + kolom) ---------- */
+    let lastFocus = null;
+    function openModal(id) {
+      lastFocus = document.activeElement;
+      const m = document.getElementById(id);
+      m.hidden = false;
+      document.body.style.overflow = 'hidden';
+      const first = m.querySelector('[data-close-modal]');
+      if (first) first.focus();
+    }
+    function closeModal() {
+      document.querySelectorAll('[role="dialog"]').forEach((m) => { m.hidden = true; });
+      document.body.style.overflow = '';
+      if (lastFocus) lastFocus.focus();
+    }
+
+    const LOC = {
+      'WH01-ZA-RA01': { nama: 'Rak Lorong A-01 (Lantai 1)', zona: 'Zona A - Elektronik & High-Value', tipe: 'Heavy-Duty Shelf (Steel Tier Level 1-4)', beban: '2.000 kg', kap: '400 Unit', isi: '370 Unit (92%)', sku: '18 SKU', kat: 'Kamera & Optik', status: 'Hampir Penuh', tone: 'red', note: 'Okupansi kritis >90%, rekomendasi relokasi sebagian SKU ke WH02-ZD.' },
+      'WH01-ZA-RA02': { nama: 'Rak Lorong A-02 (Lantai 1)', zona: 'Zona A - VIP Secure', tipe: 'High-Security Cage (RFID + CCTV)', beban: '1.500 kg', kap: '250 Unit', isi: '220 Unit (88%)', sku: '12 SKU', kat: 'Laptop Bisnis', status: 'Hampir Penuh', tone: 'red', note: 'Akses dual-key, CCTV DVR aktif 24/7.' },
+      'WH01-ZB-RB01': { nama: 'Rak Lorong B-01 (Lantai 1)', zona: 'Zona B - Audio & Periferal', tipe: 'Multi-Tier Bin (Small Parts A1-H8)', beban: '1.200 kg', kap: '600 Unit', isi: '360 Unit (60%)', sku: '45 SKU', kat: 'Aksesoris & Kabel', status: 'Normal', tone: 'amber', note: 'Okupansi sehat, slot tersedia untuk inbound reguler.' },
+      'WH01-ZB-RB02': { nama: 'Rak Lorong B-02 (Lantai 1)', zona: 'Zona B - Audio & Periferal', tipe: 'Multi-Tier Bin (Small Parts I1-P8)', beban: '1.200 kg', kap: '600 Unit', isi: '260 Unit (43%)', sku: '32 SKU', kat: 'Smartwatch & Audio', status: 'Luang', tone: 'green', note: 'Banyak slot kosong, cocok untuk konsolidasi SKU fast-moving.' },
+      'WH02-ZC-RC01': { nama: 'Rak Lorong C-01 (Lantai 2)', zona: 'Zona C - Komponen Komputer', tipe: 'Pallet Racking Drive-in (Forklift Bay)', beban: '10.000 kg', kap: '50 Pallet', isi: '44 Pallet (88%)', sku: '8 SKU', kat: 'Bulk Storage SSD/HDD', status: 'Optimal', tone: 'amber', note: 'Utilisasi forklift bay mendekati ambang, jadwalkan restocking terstruktur.' },
+      'WH02-ZD-RD01': { nama: 'Rak Lorong D-01 (Lantai 1)', zona: 'Zona D - Tools & Heavy', tipe: 'Cantilever & Floor Bay (Oversized)', beban: '8.000 kg', kap: '30 Pallet', isi: '9 Pallet (30%)', sku: '4 SKU', kat: 'Peralatan & Scanner', status: 'Luang', tone: 'green', note: 'Kapasitas berlebih untuk kargo oversized musiman.' },
+      'WH02-ZE-RE01': { nama: 'Dock Staging Rak E-01 (Inbound)', zona: 'Zona E - Staging Inbound Buffer', tipe: 'Temporary Flow Rack (Gravity Roller)', beban: '1.000 kg', kap: '200 Unit', isi: '150 Unit (75%)', sku: '9 SKU', kat: 'Antrean QC Inbound', status: 'Area Transit', tone: 'indigo', note: 'Area transit, rotasi cepat antrean QC inbound.' }
+    };
+
+    function field(label, value) {
+      return `<div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">${label}</p><p class="mt-1 text-[12px] leading-snug text-slate-800">${value}</p></div>`;
+    }
+    function openDetail(code) {
+      const d = LOC[code];
+      if (!d) return;
+      document.getElementById('detailBody').innerHTML =
+        '<div class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">' +
+          field('Kode Lokasi', `<b>${code}</b>`) +
+          field('Nama Lokasi', d.nama) +
+          field('Zona', d.zona) +
+          field('Tipe Rak / Storage', d.tipe) +
+          field('Beban Maksimal', d.beban) +
+          field('Kapasitas Maksimal', d.kap) +
+          field('Keterisian & Okupansi', d.isi) +
+          field('SKU Tersimpan', d.sku) +
+          field('Kategori Komoditas', d.kat) +
+          field('Status Okupansi', `<span class="pill c-${d.tone}">● ${d.status}</span>`) +
+        '</div>' +
+        `<div class="mt-4 flex items-start gap-2 rounded-md bg-blue-50/80 p-3 text-[10.5px] leading-relaxed text-slate-600"><i data-lucide="info" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600"></i><span>${d.note}</span></div>` +
+        '<div class="mt-4 flex flex-col-reverse justify-end gap-2 sm:flex-row">' +
+          '<button type="button" data-close-modal class="h-10 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 hover:bg-slate-50">Tutup</button>' +
+          `<button type="button" data-close-modal data-toast="Ekspor detail ${code} (PDF)..." class="flex h-10 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700"><i data-lucide="file-down" class="h-4 w-4"></i>Ekspor PDF</button>` +
+        '</div>';
+      lucide.createIcons();
+      openModal('modalDetail');
+    }
+
+    /* ---------- Kustomisasi kolom ---------- */
+    const colBoxes = [...document.querySelectorAll('#modalCols [data-col]')];
+    const colState = colBoxes.map(() => true);
+    function applyCols() {
+      const cells = document.querySelectorAll('#tblLokasi tr');
+      cells.forEach((tr) => {
+        [...tr.children].forEach((cell, i) => { if (i < colState.length) cell.hidden = !colState[i]; });
+      });
+    }
+    document.getElementById('btnCols').addEventListener('click', () => {
+      colBoxes.forEach((b, i) => { b.checked = colState[i]; });
+      openModal('modalCols');
+    });
+    document.getElementById('saveCols').addEventListener('click', () => {
+      colBoxes.forEach((b, i) => { colState[i] = b.checked; });
+      applyCols();
+      closeModal();
+      toast('Konfigurasi kolom disimpan.');
+    });
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-detail]');
+      if (trigger) { e.preventDefault(); openDetail(trigger.dataset.detail); return; }
+      if (e.target.matches('[role="dialog"]') || e.target.closest('[data-close-modal]')) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.querySelector('[role="dialog"]:not([hidden])')) closeModal();
+    });
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
