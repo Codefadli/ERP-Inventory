@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Departemen — Astro Inventory</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    .nav-link { transition: background .15s ease, color .15s ease; }
+    .nav-link.active { background: #0b49d8; color: white; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .delay-1 { animation-delay: 50ms; }
+    .delay-2 { animation-delay: 100ms; }
+    .delay-3 { animation-delay: 150ms; }
+    .department-row { animation: row-in .25s ease both; }
+    #department-rows > tr.department-row { height: 60px; }
+    .soft-button { transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+    .soft-button:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15, 23, 42, .08); }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes row-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+    #sidebar { width: 220px; }
+    #sidebar > a { height: 56px; gap: 8px; padding-inline: 12px; }
+    #sidebar > a > span:first-child { width: 32px; height: 32px; }
+    #sidebar > a > span:first-child i { width: 20px; height: 20px; }
+    #sidebar > a > span:last-child > span:first-child { font-size: 12px; }
+    #sidebar > a > span:last-child > span:last-child { font-size: 9px; }
+    #sidebar nav { gap: 16px; padding: 16px 8px; font-size: 11px; }
+    #sidebar nav section > p { margin-bottom: 6px; padding-inline: 8px; font-size: 9px; }
+    #sidebar nav a { height: 32px; gap: 8px; padding-inline: 8px; border-radius: 6px; font-size: 11px; }
+    #sidebar nav a > i { width: 16px; height: 16px; }
+    #sidebar nav a > span.ml-auto { height: 16px; min-width: 16px; font-size: 9px; }
+    #main-area > header { height: 56px; padding-inline: 16px; }
+    #main-area > header > div:first-child,
+    #main-area > header > div:last-child { gap: 12px; }
+    #main-area > header > div:first-child > div { gap: 8px; padding: 6px 10px; font-size: 10px; }
+    #main-area > header > div:first-child i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label { width: 224px; height: 32px; gap: 8px; padding-inline: 10px; }
+    #main-area > header > div:last-child label i { width: 14px; height: 14px; }
+    #main-area > header > div:last-child label input { font-size: 10px; }
+    #main-area > header > div:last-child > button { width: 32px; height: 32px; }
+    #main-area > header > div:last-child > button i { width: 16px; height: 16px; }
+    #main-area > header > div:last-child > div:last-child { gap: 8px; padding-left: 12px; }
+    #main-area > header > div:last-child > div:last-child > div:first-child { width: 32px; height: 32px; font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:first-child { font-size: 10px; }
+    #main-area > header > div:last-child > div:last-child p:last-child { font-size: 9px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px !important; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%) !important; transition: transform .2s ease; }
+      #sidebar.open { transform: translateX(0) !important; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+  <style>
+    #sidebar { transition: transform .22s ease; }
+    @media (min-width: 768px) {
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
+      body.sidebar-collapsed #main-area { margin-left: 0 !important; }
+      #main-area > header { z-index: 60 !important; }
+      #main-area header #sidebar-toggle { display: flex !important; }
+    }
+    #main-area header #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #main-area header #sidebar-toggle:hover { background: #f1f5fc; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
+    <a href="data_barang.html" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i class="fas fa-cube text-white text-lg"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p>
+        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard Admin</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Master Data & Inventaris</p>
+        <div class="space-y-0.5">
+          <a href="data_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="package" class="h-4 w-4"></i><span>Data Barang</span></a>
+          <a href="kategori_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="tags" class="h-4 w-4"></i><span>Kategori Barang</span></a>
+          <a href="data_gudang_lokasi.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="warehouse" class="h-4 w-4"></i><span>Data Gudang & Lokasi</span></a>
+          <a href="data_supplier.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="truck" class="h-4 w-4"></i><span>Data Supplier</span></a>
+          <a href="data_departemen.html" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="building-2" class="h-4 w-4"></i><span>Departemen</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional & Transaksi</p>
+        <div class="space-y-0.5">
+          <a href="barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a>
+          <a href="barang_keluar.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a>
+          <a href="mutasi_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-left-right" class="h-4 w-4"></i><span>Mutasi Barang</span></a>
+          <a href="stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-list" class="h-4 w-4"></i><span>Persetujuan Barang</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Manajemen Sistem</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="users" class="h-4 w-4"></i><span>Manajemen Pengguna</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Laporan & Analitik</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-clock" class="h-4 w-4"></i><span>Laporan & Riwayat</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4"></i><span>Log Aktivitas</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-circle" class="h-4 w-4"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen md:ml-[220px]">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-5 w-5"></i></button>
+        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight sm:block"><p class="text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-56px)] bg-canvas p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Manajemen Departemen & Divisi</span></p>
+          <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Manajemen Data Departemen & Unit Pemohon</h1>
+          <p class="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-500">Direktori master divisi internal penerima dan pemohon alokasi barang keluar (outbound), batas pagu kuota bulanan, penanggung jawab (PIC), dan riwayat utilisasi inventaris Hub Cabang DC-01.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="export-structure" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Struktur Divisi</button>
+          <button id="quota-button" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="sliders-horizontal" class="h-4 w-4 text-blue-600"></i>Alokasi Kuota</button>
+          <button id="add-department" class="soft-button flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="plus" class="h-4 w-4"></i>Tambah Departemen Baru</button>
+        </div>
+      </section>
+
+      <section aria-label="Ringkasan departemen" class="reveal delay-1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Unit</p><p id="unit-count" class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">12 Unit</p><p class="mt-2.5 text-[10.5px] text-slate-500">Semua unit terdaftar aktif</p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="building-2" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Staf</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">485 <span class="text-[10.5px] font-medium text-slate-500">Staf</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">Total Karyawan / Pemohon</p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-600"><i data-lucide="users" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Rata-rata Kuota Barang</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">74.2%</p><p class="mt-2.5 text-[10.5px] text-slate-500">Rp 428.5 Juta diserap bulan ini</p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="chart-no-axes-column-increasing" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-red-100 bg-red-50/40 px-4 py-3 shadow-sm">
+          <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Perlu Tinjauan</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">8 <span class="text-[10.5px] font-medium text-slate-500">Berkas</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">Permintaan Pending (Outbound)</p></div>
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-red-100 text-red-600"><i data-lucide="clock-3" class="h-4 w-4"></i></span>
+        </article>
+      </section>
+
+      <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 class="flex items-center gap-2 text-[12px] font-semibold text-slate-800"><i data-lucide="chart-no-axes-column-increasing" class="h-4 w-4 text-blue-600"></i>Distribusi Beban Kuota Pengambilan Barang Bulanan (Per Maret 2025)</h2>
+          <button id="efficiency-button" class="text-[10.5px] font-semibold text-blue-600 hover:text-blue-800">Lihat Analisis Efisiensi Penggunaan per Divisi <i data-lucide="arrow-up-right" class="inline h-3.5 w-3.5"></i></button>
+        </div>
+        <div id="quota-distribution" class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4"></div>
+      </section>
+
+      <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 xl:max-w-[430px]">
+            <i data-lucide="search" class="h-4 w-4"></i><input id="department-search" type="search" placeholder="Cari nama departemen, kode divisi, nama PIC..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"><i data-lucide="scan-search" class="h-4 w-4 text-blue-500"></i>
+          </label>
+          <select id="category-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Semua Kategori Divisi</option></select>
+          <select id="status-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Status Kuota (Semua)</option><option value="active">Aktif</option><option value="critical">Kuota Kritis</option></select>
+          <select id="frequency-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Frekuensi Permintaan</option><option value="high">Tinggi</option><option value="normal">Normal</option></select>
+          <button id="advanced-filter" class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] text-slate-700"><i data-lucide="list-filter" class="h-4 w-4"></i>Filter Lanjutan</button>
+          <button id="reset-filters" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
+          <span class="mr-1 font-semibold uppercase text-slate-600">FILTER CEPAT:</span>
+          <button data-quick-filter="all" class="rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white">Semua Departemen (12)</button>
+          <button data-quick-filter="Operasional & Gudang" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Operasional & Gudang (4)</button>
+          <button data-quick-filter="Teknologi & Hardware" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Teknologi & Hardware (3)</button>
+          <button data-quick-filter="General Affairs & Fasilitas" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">General Affairs & Fasilitas (3)</button>
+          <button data-quick-filter="quota" class="rounded-full bg-red-50 px-3 py-1 text-[10.5px] font-semibold text-red-600">Kuota &gt; 80% (2)</button>
+        </div>
+      </section>
+
+      <section class="reveal delay-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1200px] table-fixed border-collapse text-left">
+            <thead class="h-11 whitespace-nowrap bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="w-[48px] px-2"><input id="select-all" type="checkbox" aria-label="Pilih semua departemen" class="h-4 w-4 accent-blue-600"></th>
+                <th class="w-[250px] px-2">Kode & Nama Departemen</th>
+                <th class="w-[240px] px-2">Kepala Divisi & PIC</th>
+                <th class="w-[120px] px-2">Jumlah Anggota</th>
+                <th class="w-[180px] px-2">Alokasi Kuota Bulanan</th>
+                <th class="w-[140px] px-2">Total Outbound</th>
+                <th class="w-[130px] px-2">Status Divisi</th>
+                <th class="w-[100px] px-2 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="department-rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
+          </table>
+        </div>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <div class="flex items-center gap-2"><span id="row-count" aria-live="polite"></span><span>Baris per halaman:</span><select id="page-size" class="h-8 rounded bg-blue-50 px-2 text-[12px]"><option value="7">7</option><option value="10">10</option><option value="25">25</option></select></div>
+          <div class="flex items-center gap-1.5"><button id="previous-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600 disabled:opacity-40">‹</button><div id="pagination" class="flex items-center gap-1"></div><button id="next-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600 disabled:opacity-40">›</button></div>
+        </footer>
+      </section>
+
+      <section class="reveal delay-3 mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="shield-check" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Aturan Persetujuan Berjenjang (Approval Matrix)</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Konfigurasi batas nilai nominal atau kategori barang khusus yang mewajibkan tanda tangan digital Kepala Hub DC-01.</p></div></div>
+          <button data-action="approval" class="mt-3 h-8 self-start rounded-md bg-blue-50 px-3 text-[10.5px] font-semibold text-blue-700 hover:bg-blue-100">Konfigurasi Matrix →</button>
+        </article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="refresh-cw" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Reset Kuota Otomatis Setiap Awal Bulan</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Pagu aktual berjalan inventaris barang akan diperbarui otomatis setiap tanggal 1 pukul 00:00 WIB sesuai plafon tahunan.</p></div></div>
+          <button data-action="schedule" class="mt-3 h-8 self-start rounded-md bg-blue-50 px-3 text-[10.5px] font-semibold text-blue-700 hover:bg-blue-100">Jadwal Pembaruan Bulanan →</button>
+        </article>
+        <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-700"><i data-lucide="chart-no-axes-column-increasing" class="h-4 w-4"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Laporan Konsumsi Inventaris per Unit</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Evaluasi tren konsumsi SKU fast-moving, perlengkapan ATK, dan tools operasional yang diserap oleh masing-masing unit kerja.</p></div></div>
+          <button data-action="report" class="mt-3 h-8 self-start rounded-md bg-blue-50 px-3 text-[10.5px] font-semibold text-blue-700 hover:bg-blue-100">Unduh Laporan Konsumsi →</button>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="department-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 p-4">
+    <form id="department-form" class="max-h-[90vh] w-full max-w-[500px] overflow-y-auto rounded-xl bg-white p-4 shadow-xl">
+      <div class="mb-4 flex items-start justify-between"><div><h2 class="text-[12px] font-bold text-slate-800">Tambah Departemen Baru</h2><p class="mt-1 text-[10.5px] text-slate-500">Daftarkan unit dan penanggung jawab alokasi inventaris.</p></div><button type="button" id="close-modal" class="rounded p-1 text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button></div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label class="text-[12px] font-medium text-slate-700 sm:col-span-2">Nama departemen<input name="name" required maxlength="70" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Divisi / Departemen Baru"></label>
+        <label class="text-[12px] font-medium text-slate-700">Kategori divisi<select name="category" required class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"><option value="">Pilih kategori</option><option>Operasional & Gudang</option><option>Teknologi & Hardware</option><option>General Affairs & Fasilitas</option><option>Quality Control & Lab</option><option>Keuangan & Audit</option></select></label>
+        <label class="text-[12px] font-medium text-slate-700">Kepala divisi<input name="head" required maxlength="60" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Nama kepala divisi"></label>
+        <label class="text-[12px] font-medium text-slate-700">Jumlah anggota<input name="members" type="number" min="1" max="9999" required class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="25"></label>
+        <label class="text-[12px] font-medium text-slate-700">Kuota bulanan (Rp juta)<input name="quota" type="number" min="1" max="1000000" required class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="50"></label>
+      </div>
+      <div class="mt-5 flex justify-end gap-2"><button type="button" id="cancel-modal" class="h-10 rounded-md border border-slate-200 px-4 text-[12px] font-medium text-slate-600 hover:bg-slate-50">Batal</button><button type="submit" class="h-10 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700">Simpan Departemen</button></div>
+    </form>
+  </div>
+  <div id="toast" role="status" class="fixed bottom-4 right-4 z-[80] hidden rounded-lg bg-slate-900 px-4 py-3 text-[12px] text-white shadow-lg"></div>
+
+  <script>
+    lucide.createIcons();
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-backdrop').classList.toggle('show');
+    }
+
+    const departments = [
+      { code: 'DEP-OPS-01', name: 'Divisi Operasional & Hub Gudang', category: 'Operasional & Gudang', floor: 'Lantai 1 - Gedung DC Utama (Logistik)', head: 'Ir. Bambang Sugiarto', email: 'bambang.s@astroinventory.id', initials: 'BS', color: 'bg-blue-100 text-blue-800', members: 64, spend: 85, quota: 100, usage: 85, outbound: 142, status: 'Aktif', frequency: 'high' },
+      { code: 'DEP-ITE-02', name: 'Divisi Teknologi Informasi & Infrastruktur', category: 'Teknologi & Hardware', floor: 'Lantai 3 - Server Room & Digital Hub', head: 'Adrian Pratama, S.Kom', email: 'adrian.p@astroinventory.id', initials: 'AP', color: 'bg-blue-50 text-blue-700', members: 28, spend: 45, quota: 75, usage: 62, outbound: 68, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-QCL-03', name: 'Divisi Quality Control & Kalibrasi', category: 'Quality Control & Lab', floor: 'Lantai 1 - Laboratorium Pengujian Mutu', head: 'Rina Marlina, S.T.', email: 'rina.m@astroinventory.id', initials: 'RM', color: 'bg-emerald-100 text-emerald-800', members: 18, spend: 22, quota: 50, usage: 45, outbound: 41, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-MFC-04', name: 'Divisi Maintenance & Fasilitas Gedung', category: 'General Affairs & Fasilitas', floor: 'Workshop Mekanik & Gedung Operasional', head: 'Dedi Kurniawan', email: 'dedi.k@astroinventory.id', initials: 'DK', color: 'bg-red-100 text-red-700', members: 32, spend: 56, quota: 60, usage: 91, outbound: 98, status: 'Kuota Kritis', frequency: 'high' },
+      { code: 'DEP-GAF-05', name: 'General Affairs & Keperluan Kantor', category: 'General Affairs & Fasilitas', floor: 'Lantai 2 - Ruang Layanan Umum', head: 'Siti Nurhaliza, S.AB', email: 'siti.gaf@astroinventory.id', initials: 'SN', color: 'bg-indigo-100 text-indigo-800', members: 45, spend: 35, quota: 40, usage: 88, outbound: 74, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-SAF-06', name: 'Health, Safety & Environment (HSE)', category: 'General Affairs & Fasilitas', floor: 'Gedung Pos Jaga & K3 Reserve', head: 'Hendra Kusuma, S.KM', email: 'hendra.hse@astroinventory.id', initials: 'HK', color: 'bg-emerald-50 text-emerald-700', members: 14, spend: 15, quota: 40, usage: 38, outbound: 29, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-FIN-07', name: 'Finance, Audit & Purchasing', category: 'Keuangan & Audit', floor: 'Lantai 2 - Keuangan & Akuntansi', head: 'Maya Anggraini, S.E.', email: 'maya.fin@astroinventory.id', initials: 'MA', color: 'bg-blue-50 text-blue-700', members: 22, spend: 10, quota: 40, usage: 25, outbound: 18, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-MKT-08', name: 'Marketing & Komunikasi', category: 'Umum & Administrasi', floor: 'Lantai 2 - Kantor Pusat', head: 'Nadia Permata, S.I.Kom', email: 'nadia.m@astroinventory.id', initials: 'NP', color: 'bg-pink-100 text-pink-700', members: 36, spend: 32, quota: 55, usage: 58, outbound: 52, status: 'Aktif', frequency: 'normal' },
+      { code: 'DEP-RND-09', name: 'Riset & Pengembangan Produk', category: 'Teknologi & Hardware', floor: 'Lantai 3 - Lab Inovasi', head: 'Fajar Prakoso, M.T.', email: 'fajar.rnd@astroinventory.id', initials: 'FP', color: 'bg-violet-100 text-violet-700', members: 24, spend: 48, quota: 65, usage: 74, outbound: 55, status: 'Aktif', frequency: 'high' },
+      { code: 'DEP-CS-10', name: 'Layanan Pelanggan & Retur', category: 'Operasional & Gudang', floor: 'Lantai 1 - Customer Care', head: 'Dewi Lestari', email: 'dewi.cs@astroinventory.id', initials: 'DL', color: 'bg-amber-100 text-amber-700', members: 42, spend: 20, quota: 35, usage: 57, outbound: 85, status: 'Aktif', frequency: 'high' },
+      { code: 'DEP-LOG-11', name: 'Logistik Inbound & Distribusi', category: 'Operasional & Gudang', floor: 'Lantai 1 - Loading Dock', head: 'Yusuf Maulana', email: 'yusuf.log@astroinventory.id', initials: 'YM', color: 'bg-cyan-100 text-cyan-700', members: 58, spend: 60, quota: 80, usage: 75, outbound: 126, status: 'Aktif', frequency: 'high' },
+      { code: 'DEP-PRC-12', name: 'Procurement & Vendor Management', category: 'Keuangan & Audit', floor: 'Lantai 2 - Pengadaan', head: 'Laras Wibowo, S.E.', email: 'laras.prc@astroinventory.id', initials: 'LW', color: 'bg-slate-100 text-slate-700', members: 20, spend: 28, quota: 50, usage: 56, outbound: 63, status: 'Aktif', frequency: 'normal' }
+    ];
+
+    const distribution = [
+      { name: 'Divisi Logistik & Gudang', usage: 88, spend: 'Rp 88M', quota: 'Rp 100M', tone: 'bg-red-500', label: 'Tinggi (>80% Volume)', labelTone: 'text-red-600' },
+      { name: 'IT & Digital Infrastructure', usage: 62, spend: 'Rp 45M', quota: 'Rp 75M', tone: 'bg-blue-600', label: 'Optimal', labelTone: 'text-blue-700' },
+      { name: 'Quality Control & Lab', usage: 45, spend: 'Rp 22M', quota: 'Rp 50M', tone: 'bg-emerald-700', label: 'Aman & Rendah', labelTone: 'text-emerald-700' },
+      { name: 'Maintenance & Fasilitas', usage: 91, spend: 'Rp 55M', quota: 'Rp 60M', tone: 'bg-red-500', label: 'Mendekati Pagu', labelTone: 'text-red-600' }
+    ];
+    const distributionHost = document.getElementById('quota-distribution');
+    distributionHost.innerHTML = distribution.map((item) => `<article class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+      <div class="flex items-center justify-between gap-2"><h3 class="truncate text-[12px] font-semibold text-slate-700">${item.name}</h3><span class="text-[10.5px] font-bold ${item.labelTone}">${item.usage}%</span></div>
+      <div class="mt-2 h-1 rounded-full bg-slate-200"><div class="h-full rounded-full ${item.tone}" style="width:${item.usage}%"></div></div>
+      <div class="mt-1.5 flex items-center justify-between gap-2 text-[10.5px]"><span class="text-slate-500">${item.spend} / ${item.quota}</span><b class="${item.labelTone}">${item.label}</b></div>
+    </article>`).join('');
+
+    const rowsHost = document.getElementById('department-rows');
+    const searchInput = document.getElementById('department-search');
+    const globalSearch = document.getElementById('global-search');
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const frequencyFilter = document.getElementById('frequency-filter');
+    const pageSizeInput = document.getElementById('page-size');
+    let activeQuickFilter = 'all';
+    let filteredDepartments = [...departments];
+    let currentPage = 1;
+
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+
+    function renderPagination() {
+      const host = document.getElementById('pagination');
+      const totalPages = Math.max(1, Math.ceil(filteredDepartments.length / Number(pageSizeInput.value)));
+      host.innerHTML = '';
+      for (let page = 1; page <= totalPages; page++) {
+        if (totalPages > 5 && page > 2 && page < totalPages - 1 && Math.abs(page - currentPage) > 1) {
+          if (page === 3 || page === totalPages - 2) {
+            const dots = document.createElement('span');
+            dots.className = 'px-1 text-slate-400';
+            dots.textContent = '…';
+            host.append(dots);
+          }
+          continue;
+        }
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = String(page);
+        button.setAttribute('aria-label', `Halaman ${page}`);
+        button.className = `h-8 min-w-8 rounded px-2 text-[12px] ${page === currentPage ? 'bg-blue-600 font-semibold text-white' : 'text-slate-600 hover:bg-blue-50'}`;
+        button.addEventListener('click', () => { currentPage = page; renderRows(); });
+        host.append(button);
+      }
+      document.getElementById('previous-page').disabled = currentPage <= 1;
+      document.getElementById('next-page').disabled = currentPage >= totalPages;
+    }
+
+    function renderRows() {
+      const size = Number(pageSizeInput.value);
+      const start = (currentPage - 1) * size;
+      const visible = filteredDepartments.slice(start, start + size);
+      rowsHost.innerHTML = visible.map((item, index) => {
+        const safe = Object.fromEntries(Object.entries(item).map(([key, value]) => [key, typeof value === 'string' ? escapeHtml(value) : value]));
+        const quotaTone = safe.usage >= 80 ? 'bg-red-500 text-red-600' : safe.usage >= 60 ? 'bg-blue-600 text-blue-700' : 'bg-emerald-700 text-emerald-700';
+        const statusTone = safe.status === 'Kuota Kritis' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700';
+        const quotaValue = safe.spend > 0 ? safe.spend : 0;
+        return `<tr class="department-row hover:bg-slate-50/70" style="animation-delay:${Math.min(index * 20, 140)}ms" data-code="${safe.code}">
+          <td class="px-2"><input type="checkbox" class="department-checkbox h-4 w-4 accent-blue-600" aria-label="Pilih ${safe.name}"></td>
+          <td class="px-2"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${safe.color} text-[9.5px] font-bold">${safe.initials}</span><span class="min-w-0"><b class="block text-[12px] font-semibold leading-tight text-slate-800">${safe.name}</b><span class="mt-1 inline-block rounded bg-slate-100 px-2 py-1 text-[10.5px] text-slate-600">${safe.code}</span><span class="block truncate text-[10.5px] text-slate-500">${safe.floor}</span></span></div></td>
+          <td class="px-2"><b class="block truncate text-[12px] font-medium text-slate-700">${safe.head}</b><span class="mt-1 flex items-center gap-1 text-[10.5px] text-slate-500"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[9.5px] font-bold text-blue-700">${safe.initials}</span>${safe.email}</span></td>
+          <td class="px-2"><span class="rounded bg-slate-100 px-2.5 py-1 text-[10.5px] font-semibold text-slate-700">${safe.members} Staf</span></td>
+          <td class="px-2"><div class="flex items-center justify-between gap-1 text-[10.5px]"><b class="whitespace-nowrap text-slate-700">Rp ${quotaValue} Jt / ${safe.quota} Jt</b><span class="font-semibold ${safe.usage >= 80 ? 'text-red-600' : safe.usage >= 60 ? 'text-blue-700' : 'text-emerald-700'}">${safe.usage}%</span></div><div class="mt-1 h-1 rounded-full bg-blue-100"><div class="h-full rounded-full ${quotaTone.split(' ')[0]}" style="width:${Math.min(safe.usage, 100)}%"></div></div></td>
+          <td class="px-2 text-center"><b class="block text-[12px] text-slate-700">${safe.outbound}</b><span class="text-[10.5px] text-slate-500">Pengambilan</span></td>
+          <td class="px-2"><span class="rounded-full ${statusTone} px-2.5 py-1 text-[10.5px] font-semibold">${safe.status}</span></td>
+          <td class="px-2"><div class="flex items-center justify-center gap-1 text-slate-500"><button data-row-action="view" aria-label="Lihat ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="eye" class="h-4 w-4"></i></button><button data-row-action="edit" aria-label="Edit ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="square-pen" class="h-4 w-4"></i></button><button data-row-action="more" aria-label="Opsi ${safe.name}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i data-lucide="ellipsis-vertical" class="h-4 w-4"></i></button></div></td>
+        </tr>`;
+      }).join('');
+      lucide.createIcons();
+      const end = Math.min(start + size, filteredDepartments.length);
+      document.getElementById('row-count').textContent = filteredDepartments.length
+        ? `Menampilkan ${start + 1} - ${end} dari ${filteredDepartments.length} departemen`
+        : 'Tidak ada departemen yang sesuai dengan filter';
+      renderPagination();
+    }
+
+    function applyFilters() {
+      const query = `${searchInput.value} ${globalSearch.value}`.trim().toLowerCase();
+      filteredDepartments = departments.filter((item) => {
+        const matchesSearch = !query || Object.values(item).join(' ').toLowerCase().includes(query);
+        const matchesCategory = !categoryFilter.value || item.category === categoryFilter.value;
+        const matchesStatus = !statusFilter.value || (statusFilter.value === 'critical' ? item.status === 'Kuota Kritis' : item.status === 'Aktif');
+        const matchesFrequency = !frequencyFilter.value || item.frequency === frequencyFilter.value;
+        const matchesQuick = activeQuickFilter === 'all'
+          || (activeQuickFilter === 'quota'
+            ? item.usage >= 80
+            : item.category === activeQuickFilter);
+        return matchesSearch && matchesCategory && matchesStatus && matchesFrequency && matchesQuick;
+      });
+      currentPage = 1;
+      renderRows();
+    }
+
+    [...new Set(departments.map((item) => item.category))].sort().forEach((category) => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categoryFilter.append(option);
+    });
+
+    [searchInput, globalSearch].forEach((input) => input.addEventListener('input', applyFilters));
+    [categoryFilter, statusFilter, frequencyFilter].forEach((select) => select.addEventListener('change', applyFilters));
+    pageSizeInput.addEventListener('change', () => { currentPage = 1; renderRows(); });
+    document.getElementById('previous-page').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderRows(); } });
+    document.getElementById('next-page').addEventListener('click', () => {
+      if (currentPage < Math.ceil(filteredDepartments.length / Number(pageSizeInput.value))) { currentPage++; renderRows(); }
+    });
+    document.querySelectorAll('[data-quick-filter]').forEach((button) => button.addEventListener('click', () => {
+      activeQuickFilter = button.dataset.quickFilter;
+      categoryFilter.value = '';
+      statusFilter.value = '';
+      frequencyFilter.value = '';
+      searchInput.value = '';
+      globalSearch.value = '';
+      document.querySelectorAll('[data-quick-filter]').forEach((item) => item.className = item === button
+        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
+        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
+      applyFilters();
+    }));
+    document.getElementById('reset-filters').addEventListener('click', () => {
+      searchInput.value = '';
+      globalSearch.value = '';
+      categoryFilter.value = '';
+      statusFilter.value = '';
+      frequencyFilter.value = '';
+      activeQuickFilter = 'all';
+      document.querySelectorAll('[data-quick-filter]').forEach((item, index) => item.className = index === 0
+        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
+        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
+      applyFilters();
+    });
+    document.getElementById('select-all').addEventListener('change', (event) => {
+      document.querySelectorAll('.department-checkbox').forEach((checkbox) => { checkbox.checked = event.target.checked; });
+    });
+    rowsHost.addEventListener('change', (event) => {
+      if (event.target.matches('.department-checkbox') && !event.target.checked) document.getElementById('select-all').checked = false;
+    });
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    const modal = document.getElementById('department-modal');
+    const form = document.getElementById('department-form');
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+    }
+    document.getElementById('add-department').addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      form.elements.name.focus();
+    });
+    ['close-modal', 'cancel-modal'].forEach((id) => document.getElementById(id).addEventListener('click', closeModal));
+    modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const values = new FormData(form);
+      const name = String(values.get('name')).trim();
+      const newDepartment = {
+        code: `DEP-NEW-${String(Date.now()).slice(-3)}`,
+        name,
+        category: String(values.get('category')),
+        floor: 'Lokasi belum ditentukan',
+        head: String(values.get('head')).trim(),
+        email: 'Belum ada email PIC',
+        initials: name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+        color: 'bg-blue-100 text-blue-800',
+        members: Number(values.get('members')),
+        spend: 0,
+        quota: Number(values.get('quota')),
+        usage: 0,
+        outbound: 0,
+        status: 'Aktif',
+        frequency: 'normal'
+      };
+      departments.unshift(newDepartment);
+      document.getElementById('unit-count').textContent = `${departments.length} Unit`;
+      if (![...categoryFilter.options].some((option) => option.value === newDepartment.category)) {
+        const option = document.createElement('option');
+        option.value = newDepartment.category;
+        option.textContent = newDepartment.category;
+        categoryFilter.append(option);
+      }
+      activeQuickFilter = 'all';
+      document.querySelectorAll('[data-quick-filter]').forEach((item, index) => item.className = index === 0
+        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
+        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
+      form.reset();
+      closeModal();
+      applyFilters();
+      showToast('Departemen berhasil ditambahkan.');
+    });
+
+    document.getElementById('export-structure').addEventListener('click', () => {
+      const headers = ['Kode Departemen', 'Nama Departemen', 'Kategori', 'Kepala Divisi', 'Email PIC', 'Anggota', 'Kuota Bulanan (Rp Juta)', 'Penggunaan (%)', 'Total Outbound', 'Status'];
+      const csvCell = (value) => `"${String(value).replace(/"/g, '""')}"`;
+      const csv = [headers, ...filteredDepartments.map((item) => [
+        item.code, item.name, item.category, item.head, item.email, item.members, item.quota, item.usage, item.outbound, item.status
+      ])].map((row) => row.map(csvCell).join(',')).join('\r\n');
+      const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'data-departemen.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('quota-button').addEventListener('click', () => showToast('Pengaturan alokasi kuota bulanan per departemen.'));
+    document.getElementById('efficiency-button').addEventListener('click', () => showToast('Analisis penggunaan kuota ditampilkan berdasarkan realisasi outbound.'));
+    document.getElementById('advanced-filter').addEventListener('click', () => {
+      frequencyFilter.focus();
+      showToast('Gunakan pilihan frekuensi permintaan untuk penyaringan lanjutan.');
+    });
+    rowsHost.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-row-action]');
+      if (!button) return;
+      const row = button.closest('tr');
+      const item = departments.find((department) => department.code === row.dataset.code);
+      if (!item) return;
+      const action = button.dataset.rowAction;
+      showToast(action === 'view' ? `Detail departemen ${item.name}` : action === 'edit' ? `Mode edit untuk ${item.name}` : `Opsi departemen ${item.name}`);
+    });
+    document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
+      const messages = {
+        approval: 'Pengaturan approval matrix departemen.',
+        schedule: 'Jadwal reset kuota bulanan.',
+        report: 'Laporan konsumsi inventaris per unit.'
+      };
+      showToast(messages[button.dataset.action]);
+    }));
+
+    renderRows();
+  </script>
+  <script>
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggleButton = document.querySelector('#main-area header button[aria-label="Buka menu"]');
+      if (!sidebar || !toggleButton) return;
+      toggleButton.id = 'sidebar-toggle';
+      toggleButton.setAttribute('aria-controls', 'sidebar');
+      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+      const sync = () => {
+        const open = isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+        toggleButton.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('title', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggleButton.setAttribute('aria-expanded', String(open));
+        const icon = toggleButton.querySelector('[data-lucide], svg');
+        const iconName = open ? 'x' : 'menu';
+        if (icon && icon.getAttribute('data-lucide') !== iconName) {
+          icon.setAttribute('data-lucide', iconName);
+          if (window.lucide) window.lucide.createIcons();
+        }
+        backdrop?.classList.toggle('show', isMobile() && open);
+      };
+      window.toggleSidebar = (close = false) => {
+        if (isMobile()) sidebar.classList.toggle('open', close ? false : !sidebar.classList.contains('open'));
+        else document.body.classList.toggle('sidebar-collapsed', close ? true : !document.body.classList.contains('sidebar-collapsed'));
+        sync();
+      };
+      window.addEventListener('resize', sync);
+      sync();
+    })();
+  </script>
+</body>
+</html>
