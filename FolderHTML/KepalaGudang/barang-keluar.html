@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barang Keluar — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ============================================================
+   ASTRO Inventory — Shared Design System
+   Tailwind CDN + Font Awesome. Component-level styles only.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+}
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar-left {
+  width: 256px; flex-shrink: 0;
+  background: #ffffff; border-right: 1px solid #e5eeff;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.main-area { flex: 1; min-width: 0; }
+@media (max-width: 1024px) { .sidebar-left { display: none; } }
+
+/* ---------- Sidebar items ---------- */
+.sidebar-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem;
+  font-size: .875rem; color: #334155; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background-color: #eff6ff; }
+.sidebar-item.active {
+  background-color: #0044ce; border-left: 3px solid #0033b8;
+  font-weight: 600; color: #ffffff;
+}
+.sidebar-item.active:hover { background-color: #0040d8; }
+/* non-referenced items: visually normal (reference fidelity), behaviorally inactive */
+.sidebar-item.disabled { opacity: 1; cursor: not-allowed; }
+.sidebar-item.disabled:hover { background-color: transparent; }
+.sidebar-section-label {
+  font-size: .6875rem; font-weight: 700; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 0 .75rem; margin: 0.625rem 0 0.375rem;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+
+/* ---------- Cards ---------- */
+.metric-card { transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,.15); }
+.panel { background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+
+/* ---------- Tables ---------- */
+.table-row { transition: background-color .15s ease; }
+.table-row:hover { background-color: #f9fafb; }
+
+/* ---------- Filter chips ---------- */
+.filter-tag { transition: background-color .15s ease; }
+.filter-tag:hover { background-color: #dbeafe; }
+
+/* ---------- Progress ---------- */
+.progress-bar { transition: width .5s ease; }
+
+/* ---------- Tabs ---------- */
+.tab-btn { transition: all .15s ease; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+
+/* ---------- Badges ---------- */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* ---------- Modal ---------- */
+.modal-overlay { position:fixed; inset:0; background:rgba(11,28,48,.55); display:none; align-items:flex-start; justify-content:center; z-index:80; padding: 5vh 1rem 1rem; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:.75rem; width:100%; max-width:640px; box-shadow:0 20px 50px -10px rgba(0,0,0,.35); animation: modalIn .18s ease; }
+@keyframes modalIn { from{opacity:0; transform:translateY(12px) scale(.98);} to{opacity:1; transform:none;} }
+
+/* ---------- Dropdown ---------- */
+.dropdown { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 10px 25px -5px rgba(0,0,0,.18); min-width:260px; z-index:70; display:none; }
+.dropdown.open { display:block; }
+
+/* ---------- Toast ---------- */
+#toast-container { position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.5rem; }
+.toast { background:#fff; border:1px solid #e5eeff; border-left:4px solid #2563eb; border-radius:.5rem; padding:.75rem 1rem; box-shadow:0 8px 20px -6px rgba(0,0,0,.2); font-size:.875rem; color:#0b1c30; animation: toastIn .2s ease; max-width:340px; }
+.toast.success { border-left-color:#16a34a; }
+.toast.warn { border-left-color:#f59e0b; }
+.toast.error { border-left-color:#dc2626; }
+@keyframes toastIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;} }
+
+/* ---------- Mobile sidebar drawer ---------- */
+.drawer-backdrop { position:fixed; inset:0; background:rgba(11,28,48,.45); z-index:60; display:none; }
+.drawer-backdrop.open { display:block; }
+@media (max-width:1024px){
+  .sidebar-left.drawer { display:block; position:fixed; top:0; left:0; height:100vh; z-index:61; transform:translateX(-100%); transition:transform .25s ease; }
+  .sidebar-left.drawer.open { transform:translateX(0); }
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar-left::-webkit-scrollbar { width:6px; }
+.sidebar-left::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ---------- Misc helpers ---------- */
+.anim-fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+</style>
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+      <div class="hidden sm:block">
+        <h1 class="text-base lg:text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+      </div>
+      <div class="hidden xl:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
+        <i class="fas fa-building"></i><span>Jakarta (Pusat DC) &rsaquo;</span>
+        <b>Hub Cakung DC-01 (Utama)</b>
+      </div>
+      <span class="hidden lg:inline-flex badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Operasional Normal</span>
+    </div>
+    <div class="flex items-center gap-2 lg:gap-3">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        <input type="text" data-header-search placeholder="Cari SKU, resi, transaksi..." class="hidden md:block w-64 xl:w-80 pl-9 pr-10 py-2 text-sm bg-gray-100 border border-transparent rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        <kbd class="hidden md:flex absolute right-2.5 top-2 text-[10px] text-gray-400 border border-gray-300 bg-white rounded px-1.5 py-0.5">&#8984;K</kbd>
+      </div>
+      <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition" data-dropdown="notif">
+        <i class="fas fa-bell text-lg"></i><span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+      </button>
+      <div class="dropdown" data-dropdown-menu="notif" style="min-width:320px">
+        <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="text-sm font-bold text-gray-900">Notifikasi</p>
+          <span class="badge bg-blue-100 text-blue-700">3 Baru</span>
+        </div>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exchange-alt text-blue-600 mr-2 w-3"></i>Mutasi Antar-Hub Menunggu Otorisasi</p>
+          <p class="text-xs text-gray-500">Permintaan alokasi darurat 150 unit ke Halim DC-02</p>
+          <p class="text-[11px] text-gray-400 mt-1">10 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exclamation-triangle text-amber-500 mr-2 w-3"></i>Stok di Bawah Batas ROP</p>
+          <p class="text-xs text-gray-500">SKU-CAM-600D tersisa 4 unit dari ambang ROP 25</p>
+          <p class="text-[11px] text-gray-400 mt-1">35 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-check-circle text-green-600 mr-2 w-3"></i>Otorisasi Mutasi Disetujui</p>
+          <p class="text-xs text-gray-500">Surat Jalan SPO-WMS-019 siap cetak</p>
+          <p class="text-[11px] text-gray-400 mt-1">1 jam lalu</p>
+        </a>
+      </div>
+      <div class="relative">
+        <button class="flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-gray-200" data-dropdown="profile">
+          <div class="text-right hidden md:block">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin</p>
+          </div>
+          <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">BS</div>
+        </button>
+        <div class="dropdown" data-dropdown-menu="profile">
+          <div class="p-3 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin &middot; DC-01</p>
+          </div>
+          <a href="#" data-disabled class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+          <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+          <a href="notifikasi.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-bell w-4 mr-2"></i>Notifikasi</a>
+          <div class="border-t border-gray-100"><a href="#" data-disabled class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+<p class="sidebar-section-label">Menu Utama</p>
+<a href="kepalagudang(dashboard).html" class="sidebar-item"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+<p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+<a href="data-barang.html" class="sidebar-item"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+<a href="data-gudang.html" class="sidebar-item"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+<p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+<a href="barang-masuk.html" class="sidebar-item"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+<a href="barang-keluar.html" class="sidebar-item active"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+<a href="mutasi-barang.html" class="sidebar-item"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+<a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+<a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+<a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+<p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+<a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+<a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+<a href="#" class="sidebar-item disabled" data-disabled><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+
+    </nav>
+    <div class="mx-3 my-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+      <p class="text-[11px] font-bold text-blue-700 mb-1"><i class="fas fa-headset mr-1"></i>Bantuan DC-01</p>
+      <p class="text-[10px] text-blue-700/70 mb-2">Hotline Logistik &amp; Tim WMS aktif 24/7.</p>
+      <button class="w-full text-[11px] py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" data-toast="Menghubungi hotline pusat...">Hubungi</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+<!-- Breadcrumb + status -->
+<div class="flex flex-wrap items-center gap-2 text-xs mb-3">
+  <span class="font-semibold tracking-wide text-gray-500">OPERASIONAL &amp; TRANSAKSI</span><i class="fas fa-chevron-right text-[9px] text-gray-400"></i>
+  <span class="text-blue-600 font-semibold">TRANSAKSI BARANG KELUAR (OUTBOUND DC)</span>
+</div>
+<div class="flex flex-wrap justify-end items-center gap-2 mb-3 text-xs">
+  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-circle" style="font-size:5px"></i><b>5 Armada Antre Dispatch</b></span>
+  <span class="badge bg-slate-100 text-slate-600">Outbound Shift Pagi (08:00 - 16:00 WIB)</span>
+  <span class="badge bg-emerald-50 text-emerald-700">SLA Picking &amp; Packing <b>99.2%</b></span>
+</div>
+
+<!-- Page header -->
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
+  <div class="flex-1">
+    <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Transaksi Barang Keluar (Outbound DC)</h1>
+    <p class="text-sm text-gray-600 max-w-2xl">Monitoring pengeluaran inventaris untuk distribusi antar-cabang, pemenuhan permintaan divisi internal, validasi Surat Jalan Keluar (DO/SJ), dan verifikasi serah terima armada logistik Hub Cakung DC-01.</p>
+  </div>
+  <div class="flex flex-wrap items-start gap-2">
+    <button data-toast="Data Outbound diekspor ke XLSX..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-download text-blue-600"></i><b>Ekspor Data Outbound</b></button>
+    <button data-toast="Jadwal dispatch armada &amp; alokasi gate dibuka..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-truck-fast text-blue-600"></i><b>Jadwal Dispatch Armada</b></button>
+    <button data-open-modal="modalBuat" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2 transition shadow-sm"><i class="fas fa-plus"></i><b>Buat Pengeluaran Barang Baru</b></button>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-arrow-up-right-from-square text-blue-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-trend-up"></i>+8,4% vs Kemarin</span>
+    </div>
+    <p class="text-3xl font-extrabold text-gray-900 mt-2"><span data-count="1180" data-num="dot"></span> <span class="text-base font-semibold text-gray-500">Unit</span></p>
+    <p class="text-sm font-semibold text-gray-600 mt-1">Total Keluar Hari Ini</p>
+    <p class="text-xs text-emerald-700 mt-1"><i class="fas fa-circle-check mr-1"></i>22 Order Selesai Dikirim</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-lines text-blue-600"></i></div>
+      <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>96,5% Sesuai Jadwal</span>
+    </div>
+    <p class="text-3xl font-extrabold text-gray-900 mt-2"><span data-count="11"></span> <span class="text-base font-semibold text-gray-500">Berkas DO</span></p>
+    <p class="text-sm font-semibold text-gray-600 mt-1">Permintaan / DO Dalam Proses</p>
+    <p class="text-xs text-gray-500 mt-1"><span class="text-blue-600 font-semibold">&#9679; 7 Selesai Packing</span> &bull; <span class="text-amber-600 font-semibold">4 Sedang Picking</span></p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"><i class="fas fa-shield-halved text-emerald-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700">Zero Defect Outbound</span>
+    </div>
+    <p class="text-3xl font-extrabold text-gray-900 mt-2"><span data-count="99.8" data-dec="1"></span><span class="text-lg font-bold">%</span></p>
+    <p class="text-sm font-semibold text-gray-600 mt-1">Akurasi Picking &amp; QC Outbound</p>
+    <p class="text-xs text-gray-500 mt-1"><span class="text-emerald-700 font-semibold"><i class="fas fa-rotate mr-1"></i>1.178 Unit Lolos</span> &bull; 2 Unit Ganti SKU</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-box-open text-amber-500"></i></div>
+      <span class="badge bg-amber-100 text-amber-700">Perlu Loading Dock</span>
+    </div>
+    <p class="text-3xl font-extrabold text-gray-900 mt-2"><span data-count="240" data-num="dot"></span> <span class="text-base font-semibold text-gray-500">Unit</span></p>
+    <p class="text-sm font-semibold text-gray-600 mt-1">Menunggu Muat / Dispatch</p>
+    <p class="text-xs text-amber-600 mt-1"><i class="fas fa-triangle-exclamation mr-1"></i>Area Staging Outbound Gate 03-05</p>
+  </div>
+</div>
+
+<!-- Dock status -->
+<div class="panel p-4 lg:p-6 mb-6 anim-fade-up">
+  <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 bg-blue-600 rounded-full inline-block"></span>
+      <div>
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base">Status Slot Loading Dock &amp; Antrean Armada Outbound</h3>
+        <p class="text-xs text-gray-500">Hub Cakung DC-01 &bull; 4 Loading Bays Terpadu dengan Sistem Sensor Pallet &amp; Timbangan Otomatis</p>
+      </div>
+    </div>
+    <button data-toast="Jadwal dispatch &amp; live CCTV gate dibuka..." class="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition">Lihat Jadwal Dispatch &amp; Live CCTV Gate <i class="fas fa-arrow-right-long"></i></button>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+    <div class="border border-blue-100 bg-blue-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-blue-700 bg-white border border-blue-200 rounded px-1.5 py-1">DOCK 01</span><span class="badge bg-blue-600 text-white text-[10px]"><i class="fas fa-circle" style="font-size:4px"></i>Proses Muat</span></div>
+      <p class="font-bold text-gray-900 text-sm">Hub Surabaya DC-02</p>
+      <p class="text-[11px] text-gray-500">Armada JNE Trucking B 9821 UXT</p>
+      <p class="text-[11px] text-gray-500">380 Karton (Elektronik &amp; Periferal)</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">Progress Muat</span><span class="font-bold text-blue-600">85%</span></div>
+      <div class="progress-bar bg-blue-100 rounded-full h-2" style="width:100%" data-w="85"><div class="h-2 bg-blue-600 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-purple-100 bg-purple-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-purple-700 bg-white border border-purple-200 rounded px-1.5 py-1">DOCK 02</span><span class="badge bg-purple-100 text-purple-700 text-[10px]"><i class="fas fa-id-card mr-1"></i>Verifikasi DO</span></div>
+      <p class="font-bold text-gray-900 text-sm">Divisi Operasional &amp; IT Pusat</p>
+      <p class="text-[11px] text-gray-500">Kurir Internal Van B 1204 KLA</p>
+      <p class="text-[11px] text-gray-500">150 Unit High-Value (Laptop &amp; Kamera)</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">Selesai Scan Barcode</span><span class="font-bold text-purple-600">95%</span></div>
+      <div class="progress-bar bg-purple-100 rounded-full h-2" style="width:100%" data-w="95"><div class="h-2 bg-purple-600 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-orange-100 bg-orange-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-orange-700 bg-white border border-orange-200 rounded px-1.5 py-1">DOCK 03</span><span class="badge bg-orange-100 text-orange-700 text-[10px]"><i class="fas fa-pallet mr-1"></i>Staging Pallet</span></div>
+      <p class="font-bold text-gray-900 text-sm">Hub Bandung DC-03</p>
+      <p class="text-[11px] text-gray-500">Armada SICEpat Cargo B 9331 XJ</p>
+      <p class="text-[11px] text-gray-500">420 Master Box</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">Picking Gudang</span><span class="font-bold text-orange-600">45%</span></div>
+      <div class="progress-bar bg-orange-100 rounded-full h-2" style="width:100%" data-w="45"><div class="h-2 bg-orange-500 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-slate-100 bg-slate-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-slate-600 bg-white border border-slate-200 rounded px-1.5 py-1">DOCK 04</span><span class="badge bg-slate-200 text-slate-700 text-[10px]"><i class="fas fa-truck mr-1"></i>Menunggu Truk</span></div>
+      <p class="font-bold text-gray-900 text-sm">Divisi Maintenance &amp; GA</p>
+      <p class="text-[11px] text-gray-500">Pick-up Internal DC</p>
+      <p class="text-[11px] text-gray-500">90 Unit Alat &amp; Perlengkapan</p>
+      <div class="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-2 mt-3 text-[11px]"><span class="text-gray-500">Estimasi Tiba:</span><b class="text-slate-700">10:45 WIB</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search & filter -->
+<div class="panel p-4 lg:p-5 mb-4 anim-fade-up">
+  <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+    <div class="flex-1 relative">
+      <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-400"></i>
+      <input id="searchReq" type="text" placeholder="Cari nomor DO, no. surat jalan, divisi / cabang tujuan..." class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-transparent rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <select id="fTujuan" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Semua Tujuan (Divisi &amp; Cabang Hub)</option><option value="sby">Hub Surabaya DC-02</option><option value="it">Divisi IT &amp; Infrastruktur</option><option value="bdg">Hub Bandung DC-03</option><option value="ops">Divisi Operasional &amp; Hub</option><option value="smg">Hub Semarang DC-04</option><option value="qc">Divisi Quality Control &amp; Lab</option><option value="rma">CV Digital Mandiri (RMA)</option>
+      </select>
+      <select id="fStatus" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Status Pengeluaran (Semua)</option><option value="selesai">Selesai Dispatch</option><option value="serah">Selesai Diserahkan</option><option value="muat">Proses Muat</option><option value="picking">Sedang Picking</option><option value="verif">Verifikasi DO &amp; Segel</option><option value="tunggu">Menunggu Pengambilan</option>
+      </select>
+      <select id="fJenis" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Jenis Pengiriman: Semua (Internal/Ekspedisi)</option><option value="ekspedisi">Ekspedisi</option><option value="internal">Internal</option>
+      </select>
+      <button data-toast="Panel filter lanjutan outbound dibuka..." class="px-3.5 py-2.5 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm font-semibold text-blue-700 transition"><i class="fas fa-sliders mr-1"></i><b>Filter Lanjutan</b></button>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-2 mt-4" id="chipGroup">
+    <button data-chip="all" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Semua Outbound (16)</button>
+    <button data-chip="selesai" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Selesai &amp; Dikirim (9)</button>
+    <button data-chip="muat" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Sedang Proses Muat (4)</button>
+    <button data-chip="picking" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Tahap Picking &amp; Packing (3)</button>
+    <button data-chip="tertunda" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Tertunda / Butuh Persetujuan (0)</button>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="panel mb-6 anim-fade-up" style="background:linear-gradient(180deg,#f8faff 0%,#ffffff 90px)">
+  <div class="px-4 lg:px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <h3 class="font-bold text-gray-900 text-sm lg:text-base">Daftar Transaksi Outbound Terjadwal Hari Ini</h3>
+      <span class="badge bg-blue-100 text-blue-700 text-[10px]">16 TRANSAKSI</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button data-refresh data-toast="Daftar outbound terjadwal disegarkan." class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Segarkan"><i class="fas fa-rotate"></i></button>
+      <button data-toast="Susunan kolom tabel tersimpan ke preferensi." class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Kustom kolom"><i class="fas fa-table-columns"></i></button>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[1200px]" id="tblReq">
+      <thead>
+        <tr class="border-b border-gray-200 text-[11px] uppercase tracking-wide text-gray-500">
+          <th class="px-4 py-3 w-10"><input type="checkbox" id="cbPilihSemua" class="rounded border-gray-300"></th>
+          <th class="px-4 py-3 text-left font-bold">No. DO &amp; Surat Jalan</th>
+          <th class="px-4 py-3 text-left font-bold">Tujuan &amp; PIC Penerima</th>
+          <th class="px-4 py-3 text-left font-bold">Detail Komoditas / Barang</th>
+          <th class="px-4 py-3 text-left font-bold">Total Qty &amp; Kemasan</th>
+          <th class="px-4 py-3 text-left font-bold">Gate / Staging Rak Asal</th>
+          <th class="px-4 py-3 text-left font-bold">Status Dispatch &amp; QC</th>
+          <th class="px-4 py-3 text-right font-bold">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <!-- DO-0641 -->
+        <tr data-status="selesai" data-tujuan="sby" data-jenis="ekspedisi" data-kode="DO-2025-0641" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0641</p><p class="text-xs text-gray-500">SJ-4412/OUT-JKT</p><p class="text-xs text-gray-400">08:30 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Hub Surabaya DC-02</p><p class="text-xs text-gray-500">PIC: Slamet Riyadi</p><p class="text-xs text-gray-500">JNE Cargo Express</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">MacBook Pro M1 &amp; Workstation</p><p class="text-xs text-blue-500">Komputer &amp; Laptop</p><p class="text-[11px] text-emerald-600 font-semibold">12 SN Terdata Valid</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">60 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">5 Box High-Security</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH01-ZA-RA02</b></p><p class="text-xs text-gray-500 mt-1">Cage Segel Biru</p></td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Dispatch</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0641" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0642 -->
+        <tr data-status="serah" data-tujuan="it" data-jenis="internal" data-kode="DO-2025-0642" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0642</p><p class="text-xs text-gray-500">SJ-4413/OUT-JKT</p><p class="text-xs text-gray-400">09:10 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Divisi IT &amp; Infrastruktur</p><p class="text-xs text-gray-500">PIC: Adrian Pratama, S.Kom</p><p class="text-xs text-gray-500">Gedung Pusat Lantai 3</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">Mechanical Keyboard RGB &amp; Mouse</p><p class="text-xs text-blue-500">Periferal Komputer</p><p class="text-[11px] text-gray-500">4 Varian Aksesoris</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">45 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">3 Dus Karton Master</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH01-ZB-RB01</b></p><p class="text-xs text-gray-500 mt-1">Tier 02 - Bin 04</p></td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-check-double"></i>Selesai Diserahkan</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0642" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0643 -->
+        <tr data-status="muat" data-tujuan="bdg" data-jenis="ekspedisi" data-kode="DO-2025-0643" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0643</p><p class="text-xs text-gray-500">SJ-4414/OUT-JKT</p><p class="text-xs text-gray-400">09:45 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Hub Bandung DC-03</p><p class="text-xs text-gray-500">PIC: Hendra K.</p><p class="text-xs text-gray-500">SICepat Cargo B 9331 XJ</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">Sony WH-1000XM4 &amp; Audio System</p><p class="text-xs text-blue-500">Audio &amp; Sound</p><p class="text-[11px] text-emerald-600 font-semibold">Segel Pabrik Utuh</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">120 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">8 Dus Karton (Pallet 2)</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH01-ZB-RB02</b></p><p class="text-xs text-gray-500 mt-1">Staging Bay 01</p></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-100 text-blue-700"><i class="fas fa-circle" style="font-size:5px"></i>Proses Muat Dock 01 (85%)</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0643" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0644 -->
+        <tr data-status="picking" data-tujuan="ops" data-jenis="internal" data-kode="DO-2025-0644" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0644</p><p class="text-xs text-gray-500">SJ-4415/OUT-JKT</p><p class="text-xs text-gray-400">10:15 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Divisi Operasional &amp; Hub</p><p class="text-xs text-gray-500">PIC: Ir. Bambang Sugiarto</p><p class="text-xs text-gray-500">Gudang Satelit Lantai 1</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">Barcode Scanner Zebra &amp; Label Roll</p><p class="text-xs text-blue-500">Tools Gudang</p><p class="text-[11px] text-gray-500">Non-SKU Internal DC</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">35 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">2 Master Box Heavy</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH02-RD01</b></p><p class="text-xs text-gray-500 mt-1">Staging Area B</p></td>
+          <td class="px-4 py-3"><span class="badge bg-amber-100 text-amber-700"><i class="fas fa-barcode"></i>Sedang Picking</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0644" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0645 -->
+        <tr data-status="verif" data-tujuan="smg" data-jenis="ekspedisi" data-kode="DO-2025-0645" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0645</p><p class="text-xs text-gray-500">SJ-4416/OUT-JKT</p><p class="text-xs text-gray-400">10:30 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Hub Semarang DC-04</p><p class="text-xs text-gray-500">PIC: Dedi Sutisna</p><p class="text-xs text-gray-500">Lalamove Truck CDD</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">Sandisk SSD NVMe 1TB &amp; HDD</p><p class="text-xs text-blue-500">Storage &amp; Drive</p><p class="text-[11px] text-purple-600 font-semibold">Batch #SNV-992</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">200 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">10 Box Anti-Static</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH02-ZC-RC01</b></p><p class="text-xs text-gray-500 mt-1">Dock Gate 02</p></td>
+          <td class="px-4 py-3"><span class="badge bg-purple-100 text-purple-700"><i class="fas fa-id-card"></i>Verifikasi DO &amp; Segel</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0645" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0646 -->
+        <tr data-status="tunggu" data-tujuan="qc" data-jenis="internal" data-kode="DO-2025-0646" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0646</p><p class="text-xs text-gray-500">SJ-4417/OUT-JKT</p><p class="text-xs text-gray-400">11:00 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">Divisi Quality Control &amp; Lab</p><p class="text-xs text-gray-500">PIC: Rina Marlina, S.T.</p><p class="text-xs text-gray-500">Lab Kalibrasi Lantai 1</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">Canon 60D Body &amp; Optical Lens</p><p class="text-xs text-blue-500">Kamera &amp; Optik</p><p class="text-[11px] text-red-600 font-semibold">Fragile / Handle With Care</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">15 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">2 Hardcase Transit</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-warehouse"></i></span><b class="text-gray-800">WH01-ZA-RA01</b></p><p class="text-xs text-gray-500 mt-1">Meja Transit QC</p></td>
+          <td class="px-4 py-3"><span class="badge bg-blue-100 text-blue-700"><i class="fas fa-hourglass-half"></i>Menunggu Pengambilan</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0646" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+        <!-- DO-0647 -->
+        <tr data-status="selesai" data-tujuan="rma" data-jenis="ekspedisi" data-kode="DO-2025-0647" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">DO-2025-0647</p><p class="text-xs text-gray-500">SJ-4418/OUT-JKT</p><p class="text-xs text-gray-400">11:20 WIB</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">CV Digital Mandiri (RMA)</p><p class="text-xs text-gray-500">PIC: Maya Agustina</p><p class="text-xs text-gray-500">Retur Garansi Vendor</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[180px]">RAM DDR5 32GB Kit Defect QC</p><p class="text-xs text-blue-500">Komponen Memori</p><p class="text-[11px] text-red-600 font-semibold">Klaim RMA Pabrikan</p></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">8 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">1 Small Box Segel RMA</p></td>
+          <td class="px-4 py-3"><p class="inline-flex items-center gap-1 text-[11px]"><span class="w-5 h-5 bg-amber-100 text-amber-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-triangle-exclamation"></i></span><b class="text-gray-800">QC-KARANTINA-02</b></p><p class="text-xs text-gray-500 mt-1">Zona RMA Vendor</p></td>
+          <td class="px-4 py-3"><span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Dispatch</span></td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="DO-2025-0647" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye text-blue-500"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 lg:px-5 py-3 border-t border-gray-100 text-xs text-gray-500 bg-white">
+    <p>Menampilkan <b class="text-gray-800">1 - 7</b> dari <b class="text-gray-800">16</b> transaksi outbound hari ini</p>
+    <div class="flex items-center gap-1">
+      <button data-toast="Anda sudah berada di halaman pertama." data-toast-type="warn" class="px-2.5 py-1 border border-gray-300 rounded text-gray-400">Sebelumnya</button>
+      <button class="px-3 py-1 bg-blue-600 text-white rounded font-semibold">1</button>
+      <button data-toast="Menampilkan halaman 2 daftar outbound..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
+      <button data-toast="Menampilkan halaman 3 daftar outbound..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">3</button>
+      <button data-toast="Menampilkan halaman berikutnya daftar outbound..." class="px-2.5 py-1 border border-gray-300 rounded hover:bg-gray-50 text-blue-600">Berikutnya</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3 kartu utilitas bawah -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-2 anim-fade-up">
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-barcode text-blue-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Pindai Barcode Surat Jalan <span class="text-blue-600">(e-DO)</span></h4>
+    <p class="text-xs text-gray-500 mb-3">Pemindaian barcode lembar kerja picking &amp; validasi nomor segel kontainer dengan scanner nirkabel Zebra DC.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <p class="text-xs text-emerald-700 font-bold"><i class="fas fa-circle" style="font-size:5px"></i>Scanner Handheld Terhubung</p>
+      <button data-toast="Aplikasi scanner e-DO dibuka (mode kamera aktif)..." class="text-xs font-bold text-blue-600 hover:text-blue-800">Buka Scanner <i class="fas fa-arrow-right-long"></i></button>
+    </div>
+  </div>
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-clipboard-check text-emerald-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Standar Prosedur Double-Check</h4>
+    <p class="text-xs text-gray-500 mb-3">Protokol verifikasi kesesuaian fisik SKU, validasi berat timbangan otomatis vs toleransi sistem, dan segel anti-rusak.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <span class="badge bg-slate-100 text-slate-600 font-mono">SOP Rev v3.8 (2025)</span>
+      <button data-toast="Checklist Double-Check (PDF) diunduh..." class="text-xs font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-download"></i> Unduh Checklist</button>
+    </div>
+  </div>
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-signature text-blue-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Integrasi Berita Acara Digital <span class="text-blue-600">(e-BAP)</span></h4>
+    <p class="text-xs text-gray-500 mb-3">Tanda tangan digital penerima (dinas/driver) langsung via tablet gate dan notifikasi otomatis real-time ke email pemohon.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <p class="text-xs text-emerald-700 font-bold"><i class="fas fa-circle" style="font-size:5px"></i>Gateway e-Signature Aktif</p>
+      <button data-toast="Log berita acara digital dibuka..." class="text-xs font-bold text-blue-600 hover:text-blue-800">Log Berita Acara <i class="fas fa-arrow-right-long"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: buat pengeluaran ============ -->
+<div class="modal-overlay" id="modalBuat">
+  <div class="modal-box" style="max-width:560px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-plus mr-2 text-blue-600"></i>Buat Pengeluaran Barang Baru</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="col-span-2"><label class="text-xs font-semibold text-gray-600">Tujuan (Divisi / Cabang Hub)</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Hub Surabaya DC-02</option><option>Hub Bandung DC-03</option><option>Hub Semarang DC-04</option><option>Divisi IT &amp; Infrastruktur</option><option>Divisi Quality Control &amp; Lab</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Jenis Pengiriman</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Ekspedisi</option><option>Internal (Kurir Van)</option><option>Pick-up langsung</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Gate / Dock</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Dock 01</option><option>Dock 02</option><option>Dock 03</option><option>Dock 04</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Staging Rak Asal</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="WH01-ZB-RB01"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Total Qty (Unit)</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0"></div>
+        <div class="col-span-2"><label class="text-xs font-semibold text-gray-600">Keterangan / Referensi Permintaan</label><textarea rows="2" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="cth: Permintaan DO divisi IT No. REQ-2025-0381"></textarea></div>
+      </div>
+      <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700"><i class="fas fa-lock mr-1"></i>Seluruh pengeluaran wajib memiliki otorisasi Kepala Gudang yang sudah memenuhi syarat.</div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Batal</button>
+      <button data-close-modal data-saved-toast="Pengeluaran baru dibuat & lanjut ke tahap picking." class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-check mr-1"></i>Buat &amp; Dispatch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: detail DO ============ -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-box" style="max-width:680px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-truck mr-2 text-blue-600"></i>Detail Transaksi Outbound</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5" id="detailBody"><p class="text-sm text-gray-500">Memuat detail...</p></div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   ASTRO Inventory — Shared interaction layer
+   Vanilla JS, no deps. Tailwind handles layout/visuals.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Toast ---------- */
+  function toast(msg, type) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+  }
+  window.toast = toast;
+
+  /* ---------- Mobile sidebar drawer ---------- */
+  function initDrawer() {
+    const trig = document.querySelector('[data-drawer-trigger]');
+    const sb = document.querySelector('.sidebar-left');
+    const back = document.querySelector('.drawer-backdrop');
+    if (!trig || !sb) return;
+    function open() { sb.classList.add('drawer','open'); if(back) back.classList.add('open'); }
+    function close() { sb.classList.remove('open'); if(back) back.classList.remove('open'); }
+    trig.addEventListener('click', function(){ sb.classList.contains('open') ? close() : open(); });
+    if (back) back.addEventListener('click', close);
+  }
+
+  /* ---------- Dropdowns (notification / profile) ---------- */
+  function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach(function (btn) {
+      const target = btn.getAttribute('data-dropdown');
+      const menu = document.querySelector('[data-dropdown-menu="' + target + '"]');
+      if (!menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown.open').forEach(function (m){ if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.dropdown.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+    document.querySelectorAll('.dropdown').forEach(function (m){ m.addEventListener('click', function(e){ e.stopPropagation(); }); });
+  }
+
+  /* ---------- Disabled sidebar items ---------- */
+  function initDisabledNav() {
+    document.querySelectorAll('.sidebar-item.disabled').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        toast('Halaman belum tersedia (tidak memiliki referensi PNG).', 'warn');
+      });
+    });
+  }
+
+  /* ---------- Modals ---------- */
+  window.openModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('open');
+  };
+  window.closeModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  };
+  function initModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) {
+      m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const m = b.closest('.modal-overlay'); if (m) m.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+  }
+
+  /* ---------- Tabs ---------- */
+  window.initTabs = function (container) {
+    const root = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!root) return;
+    const btns = root.querySelectorAll('[data-tab]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const name = b.getAttribute('data-tab');
+        btns.forEach(function (x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        panels.forEach(function (p){
+          p.style.display = (p.getAttribute('data-tab-panel') === name) ? '' : 'none';
+        });
+      });
+    });
+  };
+
+  /* ---------- Table filtering / search ---------- */
+  /* Rows carry data attributes; selects/search filter them. */
+  window.initTableFilter = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    const search = opts.searchId ? document.getElementById(opts.searchId) : null;
+    const selects = (opts.selects || []).map(function (s) {
+      return { el: document.getElementById(s.id), attr: s.attr };
+    });
+
+    function visible(r) {
+      if (search) {
+        const q = (search.value || '').toLowerCase().trim();
+        if (q && r.textContent.toLowerCase().indexOf(q) === -1) return false;
+      }
+      for (let i = 0; i < selects.length; i++) {
+        const v = selects[i].el ? selects[i].el.value : '';
+        if (v && (r.getAttribute('data-' + selects[i].attr) || '').toLowerCase() !== String(v).toLowerCase()) return false;
+      }
+      if (opts.checkboxId) {
+        const cb = document.getElementById(opts.checkboxId);
+        if (cb && cb.checked) {
+          const flag = r.getAttribute('data-flag') || '';
+          if (flag.indexOf('anomali') === -1) return false;
+        }
+      }
+      return true;
+    }
+    function apply() {
+      let count = 0;
+      rows.forEach(function (r) {
+        const ok = visible(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      const info = document.getElementById(opts.countId);
+      if (info) info.textContent = count;
+    }
+    if (search) search.addEventListener('input', apply);
+    selects.forEach(function (s){ if (s.el) s.el.addEventListener('change', apply); });
+    if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.addEventListener('change', apply); }
+    const reset = opts.resetId ? document.getElementById(opts.resetId) : null;
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      selects.forEach(function (s){ if (s.el) s.el.value = ''; });
+      if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.checked = false; }
+      apply();
+    });
+    apply();
+    return { reapply: apply };
+  };
+
+  /* ---------- Client-side pagination (simple) ---------- */
+  window.initPagination = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    let perPage = opts.perPage || 10;
+    let page = 1;
+    const wrap = document.getElementById(opts.controlsId);
+    function filteredRows() {
+      return allRows.filter(function (r){ return r.style.display !== 'none'; });
+    }
+    function render() {
+      const fr = filteredRows();
+      const pages = Math.max(1, Math.ceil(fr.length / perPage));
+      if (page > pages) page = pages;
+      fr.forEach(function (r, idx) {
+        const start = (page - 1) * perPage;
+        r.style.display = (idx >= start && idx < start + perPage) ? '' : 'none';
+      });
+      if (wrap) {
+        const info = opts.infoId ? document.getElementById(opts.infoId) : null;
+        if (info) {
+          const from = fr.length ? (page - 1) * perPage + 1 : 0;
+          const to = Math.min(page * perPage, fr.length);
+          info.textContent = 'Menampilkan ' + from + ' - ' + to + ' dari ' + fr.length + ' ' + (opts.unit || 'data');
+        }
+        let html = '';
+        const prev = page <= 1;
+        html += '<button ' + (prev ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (prev ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50') + ' data-pg="' + (page - 1) + '">Sebelumnya</button>';
+        for (let p = 1; p <= pages; p++) {
+          html += '<button class="px-3 py-1 rounded text-xs lg:text-sm ' + (p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '" data-pg="' + p + '">' + p + '</button>';
+        }
+        const next = page >= pages;
+        html += '<button ' + (next ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (next ? 'text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200') + ' data-pg="' + (page + 1) + '">Berikutnya</button>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('[data-pg]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = parseInt(b.getAttribute('data-pg'), 10); if (!isNaN(v)) { page = v; render(); }
+          });
+        });
+      }
+    }
+    return { render: render, setPage: function (p) { page = p; render(); } };
+  };
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    initDrawer();
+    initDropdowns();
+    initDisabledNav();
+    initModals();
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Shared page interactions (inline ke semua halaman baru)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Animated counters ---------- */
+  function fmtNum(v, style) {
+    if (style === 'dot') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return String(Math.round(v));
+  }
+  window.animCount = function (el) {
+    var raw = el.getAttribute('data-count');
+    var target = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+    var styleDot = el.getAttribute('data-num') === 'dot';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var dec = parseFloat(el.getAttribute('data-dec') || '0');
+    var dur = 1100, t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var v = (dec ? target * eased : target * eased);
+      el.innerHTML = (dec ? v.toFixed(dec).replace('.', ',') : fmtNum(v, styleDot)) + (p > .55 ? suffix : '');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  };
+  function startCounters() {
+    document.querySelectorAll('[data-count]').forEach(function (el) { animCount(el); });
+  }
+
+  /* ---------- Animated progress bars ---------- */
+  function startBars() {
+    document.querySelectorAll('.progress-bar[data-w]').forEach(function (b, i) {
+      setTimeout(function () { b.style.width = b.getAttribute('data-w') + '%'; }, 120 + i * 45);
+    });
+  }
+
+  /* ---------- Modal helper buttons ---------- */
+  function initModalButtons() {
+    document.querySelectorAll('[data-open-modal]').forEach(function (b) {
+      b.addEventListener('click', function () { openModal(b.getAttribute('data-open-modal')); });
+    });
+    document.querySelectorAll('[data-saved-toast]').forEach(function (b) {
+      b.addEventListener('click', function () { toast(b.getAttribute('data-saved-toast'), 'success'); });
+    });
+  }
+
+  /* ---------- Toast-bound buttons ---------- */
+  function initToastButtons() {
+    document.querySelectorAll('[data-toast]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var msg = b.getAttribute('data-toast');
+        var type = b.getAttribute('data-toast-type') || 'success';
+        toast(msg, type);
+      });
+    });
+  }
+
+  /* ---------- Refresh spin ---------- */
+  function initRefresh() {
+    document.querySelectorAll('[data-refresh]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var icon = b.querySelector('i');
+        if (icon) { icon.style.transition = 'transform .6s'; icon.style.transform = 'rotate(360deg)'; }
+        b.classList.add('pointer-events-none');
+        setTimeout(function () {
+          if (icon) { icon.style.transition = 'none'; icon.style.transform = 'none'; }
+          b.classList.remove('pointer-events-none');
+        }, 620);
+        toast(b.getAttribute('data-toast') || 'Data berhasil disegarkan.', 'success');
+        if (window.__applyFilters) setTimeout(function () { window.__applyFilters(); }, 300);
+      });
+    });
+  }
+
+  /* ---------- Chip active toggling ---------- */
+  window.setChip = function (groupEl, btn) {
+    groupEl.querySelectorAll('[data-chip]').forEach(function (x) {
+      x.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+    });
+    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+  };
+
+  window.initChipGroup = function (groupId, onStart) {
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('[data-chip]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setChip(group, b);
+        window.__activeChip = b.getAttribute('data-chip');
+        if (window.__applyFilters) window.__applyFilters();
+        if (b.getAttribute('data-toast')) toast(b.getAttribute('data-toast'), 'info');
+      });
+    });
+    var first = group.querySelector('[data-chip]');
+    if (first) { setChip(group, first); window.__activeChip = first.getAttribute('data-chip'); }
+    if (onStart) onStart();
+  };
+
+  /* ---------- Kbd focus helper ---------- */
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      var s = document.querySelector('[data-header-search]');
+      if (s) { e.preventDefault(); s.focus(); }
+    }
+  });
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    startCounters();
+    startBars();
+    initToastButtons();
+    initModalButtons();
+    initRefresh();
+    var hs = document.querySelector('[data-header-search]');
+    if (hs) hs.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') toast('Pencarian "' + hs.value.trim() + '" — menampilkan hasil di halaman terkait.', 'info');
+    });
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Interaksi khusus: Transaksi Barang Keluar (Outbound DC)
+   ============================================================ */
+(function () {
+  'use strict';
+  var search = document.getElementById('searchReq');
+  var fTujuan = document.getElementById('fTujuan');
+  var fStatus = document.getElementById('fStatus');
+  var fJenis = document.getElementById('fJenis');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#tblReq tbody tr'));
+
+  function apply() {
+    var q = (search.value || '').toLowerCase().trim();
+    var tuj = fTujuan.value.toLowerCase();
+    var stat = fStatus.value.toLowerCase();
+    var jns = fJenis.value.toLowerCase();
+    var chip = window.__activeChip || 'all';
+    rows.forEach(function (r) {
+      var st = r.getAttribute('data-status');
+      var ok = true;
+      if (chip === 'selesai') ok = st === 'selesai' || st === 'serah';
+      else if (chip === 'muat') ok = st === 'muat' || st === 'verif';
+      else if (chip === 'picking') ok = st === 'picking' || st === 'tunggu';
+      else if (chip === 'tertunda') ok = false;
+      if (ok && tuj && r.getAttribute('data-tujuan') !== tuj) ok = false;
+      if (ok && stat && st !== stat) ok = false;
+      if (ok && jns && r.getAttribute('data-jenis') !== jns) ok = false;
+      if (ok && q && r.textContent.toLowerCase().indexOf(q) === -1) ok = false;
+      r.style.display = ok ? '' : 'none';
+    });
+  }
+  window.__applyFilters = apply;
+
+  [search, fTujuan, fStatus, fJenis].forEach(function (el) {
+    el.addEventListener('input', apply);
+    el.addEventListener('change', apply);
+  });
+
+  window.initChipGroup('chipGroup', apply);
+
+  var cbAll = document.getElementById('cbPilihSemua');
+  cbAll.addEventListener('change', function () {
+    document.querySelectorAll('.row-cb').forEach(function (cb) {
+      cb.checked = cbAll.checked;
+      cb.closest('tr').classList.toggle('bg-blue-50/60', cbAll.checked);
+    });
+    if (cbAll.checked) toast('Semua DO terpilih — dapat dipicu ulang tahap picking massal.', 'info');
+  });
+  document.querySelectorAll('.row-cb').forEach(function (cb) {
+    cb.addEventListener('change', function () { cb.closest('tr').classList.toggle('bg-blue-50/60', cb.checked); });
+  });
+
+  /* ============ Modal detail outbound ============ */
+  var META = {
+    'DO-2025-0641': { t: 'Hub Surabaya DC-02', pic: 'Slamet Riyadi · JNE Cargo Express', b: 'MacBook Pro M1 & Workstation', qty: '60 Unit (5 Box High-Security)', staging: 'WH01-ZA-RA02 · Cage Segel Biru', s: 'Selesai Dispatch', sj: 'SJ-4412/OUT-JKT · 08:30 WIB' },
+    'DO-2025-0642': { t: 'Divisi IT & Infrastruktur', pic: 'Adrian Pratama, S.Kom · Gedung Pusat Lantai 3', b: 'Mechanical Keyboard RGB & Mouse', qty: '45 Unit (3 Dus Karton Master)', staging: 'WH01-ZB-RB01 · Tier 02 - Bin 04', s: 'Selesai Diserahkan', sj: 'SJ-4413/OUT-JKT · 09:10 WIB' },
+    'DO-2025-0643': { t: 'Hub Bandung DC-03', pic: 'Hendra K. · SICepat Cargo B 9331 XJ', b: 'Sony WH-1000XM4 & Audio System', qty: '120 Unit (8 Dus Karton / Pallet 2)', staging: 'WH01-ZB-RB02 · Staging Bay 01', s: 'Proses Muat Dock 01 (85%)', sj: 'SJ-4414/OUT-JKT · 09:45 WIB' },
+    'DO-2025-0644': { t: 'Divisi Operasional & Hub', pic: 'Ir. Bambang Sugiarto · Gudang Satelit Lantai 1', b: 'Barcode Scanner Zebra & Label Roll', qty: '35 Unit (2 Master Box Heavy)', staging: 'WH02-RD01 · Staging Area B', s: 'Sedang Picking', sj: 'SJ-4415/OUT-JKT · 10:15 WIB' },
+    'DO-2025-0645': { t: 'Hub Semarang DC-04', pic: 'Dedi Sutisna · Lalamove Truck CDD', b: 'Sandisk SSD NVMe 1TB & HDD (Batch #SNV-992)', qty: '200 Unit (10 Box Anti-Static)', staging: 'WH02-ZC-RC01 · Dock Gate 02', s: 'Verifikasi DO & Segel', sj: 'SJ-4416/OUT-JKT · 10:30 WIB' },
+    'DO-2025-0646': { t: 'Divisi Quality Control & Lab', pic: 'Rina Marlina, S.T. · Lab Kalibrasi Lantai 1', b: 'Canon 60D Body & Optical Lens (Fragile)', qty: '15 Unit (2 Hardcase Transit)', staging: 'WH01-ZA-RA01 · Meja Transit QC', s: 'Menunggu Pengambilan', sj: 'SJ-4417/OUT-JKT · 11:00 WIB' },
+    'DO-2025-0647': { t: 'CV Digital Mandiri (RMA)', pic: 'Maya Agustina · Retur Garansi Vendor', b: 'RAM DDR5 32GB Kit Defect QC', qty: '8 Unit (1 Small Box Segel RMA)', staging: 'QC-KARANTINA-02 · Zona RMA Vendor', s: 'Selesai Dispatch', sj: 'SJ-4418/OUT-JKT · 11:20 WIB' }
+  };
+  window.openDetail = function (kode) {
+    var m = META[kode];
+    if (!m) return;
+    document.getElementById('detailBody').innerHTML =
+      '<div class="grid grid-cols-2 gap-3 text-sm">' +
+      '<div><p class="text-xs text-gray-500">Nomor DO</p><p class="font-bold text-blue-700">' + kode + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Surat Jalan &amp; Waktu</p><p class="text-gray-900 font-semibold">' + m.sj + '</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Tujuan &amp; PIC Penerima</p><p class="text-gray-900 font-semibold">' + m.t + '</p><p class="text-xs text-gray-500">' + m.pic + '</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Komoditas</p><p class="text-gray-900">' + m.b + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Total Qty &amp; Kemasan</p><p class="text-gray-900 font-semibold">' + m.qty + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Gate / Staging Rak Asal</p><p class="text-gray-900">' + m.staging + '</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Status Dispatch &amp; QC</p><p class="text-gray-900 font-semibold">' + m.s + '</p></div>' +
+      '</div>' +
+      '<div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700"><i class="fas fa-signature mr-1"></i>Konfirmasi serah terima driver dilakukan lewat e-signature di tablet gate.</div>' +
+      '<div class="mt-4 flex justify-end gap-2"><button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Tutup</button><button data-close-modal onclick="toast(\'Surat Jalan \' + \'' + kode + '\' dicetak ke printer dokumen.\',\'success\')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-print mr-1"></i>Cetak Surat Jalan</button></div>';
+    openModal('modalDetail');
+  };
+  document.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () { openDetail(b.getAttribute('data-detail')); });
+  });
+
+  apply();
+})();
+
+</script>
+</body>
+</html>
