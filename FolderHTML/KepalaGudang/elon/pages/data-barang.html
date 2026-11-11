@@ -2,225 +2,1523 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Barang | Astro Inventory</title>
+
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="../layouts/main-layout.js"></script>
     <link rel="stylesheet" href="../styles/global.css" />
+
+    <style>
+      /* =========================================
+         DATA BARANG - ASTRO INVENTORY
+         STANDARD UI & TYPOGRAPHY
+      ========================================= */
+
+      html,
+      body,
+      #app,
+      #app * {
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+
+      #page-content {
+        width: 100%;
+        min-width: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      #page-content h1 {
+        font-size: 22px !important;
+        line-height: 1.35;
+        font-weight: 700;
+        letter-spacing: -0.35px;
+      }
+
+      #page-content section:first-child > div p {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      #page-content section:first-child > p {
+        font-size: 10px;
+        line-height: 1.5;
+        letter-spacing: 0.25px;
+      }
+
+      /* =========================================
+         STATISTICS
+      ========================================= */
+
+      .db-stat {
+        min-width: 0;
+      }
+
+      #page-content .db-stat p.text-3xl {
+        font-size: 30px !important;
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      #page-content .db-stat p.text-\[9px\] {
+        font-size: 10px !important;
+        line-height: 1.5;
+      }
+
+      #page-content .db-stat p.mt-2 {
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .db-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #eef2ff;
+        color: #1d4ed8;
+      }
+
+      /* =========================================
+         BUTTON
+      ========================================= */
+
+      #page-content .btn {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
+        transition: all 0.18s ease;
+      }
+
+      #page-content .btn:hover:not(:disabled) {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+        box-shadow: 0 2px 7px rgba(37, 99, 235, 0.09);
+      }
+
+      #page-content .btn:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+
+      #page-content .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.42;
+        background: #f8fafc;
+        box-shadow: none;
+      }
+
+      #page-content .btn.btn-primary {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        box-shadow: 0 2px 5px rgba(29, 78, 216, 0.18);
+      }
+
+      #page-content .btn.btn-primary:hover:not(:disabled) {
+        color: #fff;
+        border-color: #1e40af;
+        background: #1e40af;
+        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.22);
+      }
+
+      #page-content .btn svg {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+      }
+
+      #page-content .btn:focus-visible,
+      #page-content .db-quick:focus-visible,
+      #page-content .db-action:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.2);
+        outline-offset: 2px;
+      }
+
+      /* =========================================
+         SEARCH & FILTER
+      ========================================= */
+
+      #page-content .db-search {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        font-size: 12px !important;
+        transition: all 0.18s ease;
+      }
+
+      #page-content .db-search::placeholder {
+        font-size: 11px;
+        color: #94a3b8;
+      }
+
+      #page-content .db-search:focus {
+        border-color: #93b4f5;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+      }
+
+      #page-content .db-select,
+      #page-content .db-filters select,
+      #page-content #jumlahBaris {
+        min-width: 0;
+        min-height: 34px;
+        border: 1px solid #dbe4f0;
+        border-radius: 8px;
+        background-color: #fff;
+        color: #183153;
+        padding: 6px 28px 6px 10px;
+        font-size: 12px !important;
+        outline: none;
+      }
+
+      #page-content .db-select:focus,
+      #page-content .db-filters select:focus,
+      #page-content #jumlahBaris:focus {
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      #page-content .db-quick {
+        border: 1px solid transparent;
+        border-radius: 7px;
+        background: transparent;
+        color: #334155;
+        padding: 7px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: all 0.18s ease;
+      }
+
+      #page-content .db-quick:hover {
+        border-color: #dbeafe;
+        background: #f5f8ff;
+        color: #1d4ed8;
+      }
+
+      #page-content .db-quick.active {
+        border-color: #dbeafe;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+
+      /* =========================================
+         TABLE
+      ========================================= */
+
+      #page-content .db-table {
+        width: 100%;
+        min-width: 1220px;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      #page-content .db-table th {
+        padding: 13px 9px;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.4;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1px;
+        color: #0f172a;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      #page-content .db-table td {
+        padding: 12px 9px;
+        vertical-align: middle;
+        font-size: 12px;
+        line-height: 1.5;
+        border-bottom: 1px solid #edf1f6;
+      }
+
+      #page-content .db-table tbody tr {
+        transition: background 0.15s ease;
+      }
+
+      #page-content .db-table tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      #page-content .db-table .sku-code {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+      }
+
+      #page-content .db-table .ean-code {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #64748b;
+        white-space: nowrap;
+      }
+
+      #page-content .db-table .product-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      #page-content .db-table .product-brand {
+        margin-top: 2px;
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      #page-content .db-table input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        accent-color: #1d4ed8;
+        cursor: pointer;
+      }
+
+      /* =========================================
+         STATUS
+      ========================================= */
+
+      #page-content .db-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      #page-content .db-status-dot {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        display: inline-block;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      /* =========================================
+         ACTION BUTTON
+      ========================================= */
+
+      #page-content .db-action {
+        width: 30px;
+        height: 30px;
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        color: #36577f;
+        background: transparent;
+        transition: all 0.18s ease;
+      }
+
+      #page-content .db-action:hover {
+        color: #1d4ed8;
+        border-color: #dbeafe;
+        background: #eff6ff;
+      }
+
+      #page-content .db-action svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* =========================================
+         RESPONSIVE
+      ========================================= */
+
+      @media (max-width: 900px) {
+        #page-content .db-toolbar {
+          align-items: stretch;
+        }
+
+        #page-content .db-filters {
+          width: 100%;
+        }
+
+        #page-content .db-filters select {
+          flex: 1 1 150px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #page-content h1 {
+          font-size: 19px !important;
+        }
+
+        #page-content .db-stat p.text-3xl {
+          font-size: 25px !important;
+        }
+
+        #page-content .db-table th,
+        #page-content .db-table td {
+          font-size: 11px;
+        }
+
+        #page-content .btn {
+          min-height: 34px;
+          padding: 7px 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #page-content .db-stat p.text-3xl {
+          font-size: 23px !important;
+        }
+
+        #page-content .db-filters select {
+          flex: 1 1 100%;
+          width: 100%;
+        }
+
+        #page-content .db-quick {
+          font-size: 10px;
+          padding: 6px 8px;
+        }
+      }
+    </style>
   </head>
+
   <body data-active="data-barang" class="bg-slate-50 text-slate-900">
     <div id="app" class="flex min-h-screen"></div>
+
     <template id="page">
-      <div>
-        <p class="text-[11px] text-slate-500">
-          MASTER DATA &amp; INVENTARIS &gt; KATALOG SKU TERPADU
-        </p>
-        <div class="flex flex-wrap items-start justify-between gap-3 mt-1">
-          <div>
-            <h1 class="text-2xl font-bold">
-              Data Master Barang &amp; Inventaris
-            </h1>
-            <p class="text-sm text-slate-600 max-w-2xl">
-              Katalog terpusat seluruh SKU produk, klasifikasi kategori, status
-              stok multi-gudang, harga acuan, dan unit penyimpanan fisik Hub
-              DC-01.
-            </p>
+      <main id="page-content" class="w-full space-y-4">
+        <!-- HEADER -->
+        <section>
+          <p class="text-[9px] font-medium tracking-wide text-slate-500">
+            MASTER DATA &amp; INVENTARIS
+            <span class="text-blue-600">› KATALOG SKU TERPADU</span>
+          </p>
+
+          <div class="mt-2 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">
+                Data Master Barang &amp; Inventaris
+              </h1>
+
+              <p class="mt-1 max-w-3xl text-[10px] text-slate-500">
+                Katalog terpusat seluruh SKU produk, klasifikasi kategori,
+                status stok multi-gudang, harga acuan, dan unit penyimpanan
+                fisik Hub DC-01.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="exportBarang" type="button" class="btn">
+                <i data-lucide="download"></i>
+                Ekspor Data
+              </button>
+
+              <button id="importBarang" type="button" class="btn">
+                <i data-lucide="upload"></i>
+                Import Batch
+              </button>
+
+              <button id="tambahBarang" type="button" class="btn btn-primary">
+                <i data-lucide="plus-square"></i>
+                Tambah Barang Baru
+              </button>
+
+              <input
+                type="file"
+                id="fileImport"
+                accept=".csv,text/csv"
+                class="hidden"
+              />
+            </div>
           </div>
-          <div class="flex gap-2">
-            <button class="btn">Ekspor Data</button
-            ><button class="btn">Import Batch</button
-            ><button class="btn btn-primary">+ Tambah Barang Baru</button>
+        </section>
+
+        <!-- STATISTIK -->
+        <section class="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          <div class="db-stat flex items-start justify-between py-1">
+            <div>
+              <p class="text-[9px] uppercase tracking-wide text-slate-500">
+                Total SKU Terdaftar
+              </p>
+              <p class="mt-1 text-3xl font-bold text-slate-900">8.650</p>
+              <p class="mt-2 flex items-center gap-1 text-[9px] text-green-700">
+                <i data-lucide="trending-up" class="h-3 w-3"></i>
+                <b>+142 SKU</b> baru bulan ini
+              </p>
+            </div>
+
+            <span class="rounded-lg bg-indigo-50 p-2.5 text-blue-700">
+              <i data-lucide="package" class="h-5 w-5"></i>
+            </span>
           </div>
-        </div>
-      </div>
-      <section class="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="card">
-          <p class="text-xs text-slate-500">Total SKU Terdaftar</p>
-          <p class="text-3xl font-bold mt-1">8.650</p>
-          <p class="text-xs text-green-700 mt-1">+142 SKU baru bulan ini</p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">Total Unit Fisik</p>
-          <p class="text-3xl font-bold mt-1">428.500</p>
-          <p class="text-xs text-green-700 mt-1">98,4% akurasi stok audit</p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">Stok Kritis (ROP)</p>
-          <p class="text-3xl font-bold mt-1">24</p>
-          <p class="text-xs text-red-700 mt-1">Perlu PO &amp; restock segera</p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">Out of Stock</p>
-          <p class="text-3xl font-bold mt-1">3</p>
-          <p class="text-xs text-blue-700 mt-1">Dalam rute inbound supplier</p>
-        </div>
-      </section>
-      <div class="card flex flex-wrap gap-2">
-        <input
-          class="flex-1 min-w-[220px] bg-slate-100 rounded-lg px-3 py-2 text-xs"
-          placeholder="Cari SKU, nama produk, barcode EAN, brand..."
-        /><select class="btn font-normal">
-          <option>Semua Kategori</option></select
-        ><select class="btn font-normal">
-          <option>Semua Status Stok</option></select
-        ><select class="btn font-normal">
-          <option>Semua Lokasi Gudang</option>
-        </select>
-      </div>
-      <section class="card p-0 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[900px]">
-            <thead>
-              <tr>
-                <th class="th">KODE SKU &amp; EAN</th>
-                <th class="th">NAMA BARANG &amp; BRAND</th>
-                <th class="th">KATEGORI</th>
-                <th class="th">LOKASI RAK / BIN</th>
-                <th class="th">STOK FISIK (ROP)</th>
-                <th class="th">NILAI ASET / UNIT</th>
-                <th class="th">STATUS</th>
-                <th class="th">AKSI</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="td">
-                  <b class="sku">SKU-CAM-600D</b><br />899273618290
-                </td>
-                <td class="td">
-                  Canon 60D DSLR Camera Body<br /><span class="text-slate-500"
-                    >Brand: Canon Inc.</span
-                  >
-                </td>
-                <td class="td">
-                  <span class="badge b-slate">Kamera &amp; Optik</span>
-                </td>
-                <td class="td">WH01-RA-02</td>
-                <td class="td">
-                  4 Unit (ROP 25)
-                  <div class="bar red"><i style="width: 16%"></i></div>
-                </td>
-                <td class="td">Rp 8.500.000</td>
-                <td class="td"><span class="badge b-red">Menipis</span></td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">SKU-CAM-NIK8</b><br />899273618412
-                </td>
-                <td class="td">
-                  Nikon Reel Optical Pro X<br /><span class="text-slate-500"
-                    >Brand: Nikon Corp.</span
-                  >
-                </td>
-                <td class="td">
-                  <span class="badge b-slate">Kamera &amp; Optik</span>
-                </td>
-                <td class="td">WH01-RA-03</td>
-                <td class="td">
-                  7 Unit (ROP 20)
-                  <div class="bar red"><i style="width: 35%"></i></div>
-                </td>
-                <td class="td">Rp 12.450.000</td>
-                <td class="td"><span class="badge b-red">Menipis</span></td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">SKU-WTC-AP40</b><br />899120491023
-                </td>
-                <td class="td">
-                  Titan Smart Watch Classic Silver<br /><span
-                    class="text-slate-500"
-                    >Brand: Titan Gear</span
-                  >
-                </td>
-                <td class="td">
-                  <span class="badge b-slate">Wearable Gadget</span>
-                </td>
-                <td class="td">WH01-RA-02-T3</td>
-                <td class="td">
-                  180 Pcs (ROP 40)
-                  <div class="bar green"><i style="width: 90%"></i></div>
-                </td>
-                <td class="td">Rp 1.850.000</td>
-                <td class="td"><span class="badge b-green">Stok Aman</span></td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">SKU-LAP-M102</b><br />899553102450
-                </td>
-                <td class="td">
-                  Macbook Pro M1 2020 Space Gray<br /><span
-                    class="text-slate-500"
-                    >Brand: Apple</span
-                  >
-                </td>
-                <td class="td">
-                  <span class="badge b-slate">Laptop &amp; Komputer</span>
-                </td>
-                <td class="td">WH01-RA-01</td>
-                <td class="td">
-                  100 Unit (ROP 15)
-                  <div class="bar green"><i style="width: 75%"></i></div>
-                </td>
-                <td class="td">Rp 16.200.000</td>
-                <td class="td"><span class="badge b-green">Stok Aman</span></td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">SKU-STR-SD01</b><br />899881920381
-                </td>
-                <td class="td">
-                  Sandisk Extreme Portable SSD 1TB<br /><span
-                    class="text-slate-500"
-                    >Brand: SanDisk</span
-                  >
-                </td>
-                <td class="td">
-                  <span class="badge b-slate">Storage Drive</span>
-                </td>
-                <td class="td">WH01-RA-01-T2</td>
-                <td class="td">
-                  0 Unit (ROP 30)
-                  <div class="bar"><i style="width: 0%"></i></div>
-                </td>
-                <td class="td">Rp 2.100.000</td>
-                <td class="td"><span class="badge b-blue">Habis</span></td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="p-3 text-xs text-slate-500 border-t border-slate-100">
-          Menampilkan 1 - 5 dari 8.650 total barang
-        </p>
-      </section>
+
+          <div class="db-stat flex items-start justify-between py-1">
+            <div>
+              <p class="text-[9px] uppercase tracking-wide text-slate-500">
+                Total Unit Fisik
+              </p>
+              <p class="mt-1 text-3xl font-bold text-slate-900">428.500</p>
+              <p class="mt-2 flex items-center gap-1 text-[9px] text-green-700">
+                <i data-lucide="check-circle" class="h-3 w-3"></i>
+                <b>98,4%</b> Akurasi stok audit
+              </p>
+            </div>
+
+            <span class="rounded-lg bg-emerald-50 p-2.5 text-emerald-700">
+              <i data-lucide="badge-check" class="h-5 w-5"></i>
+            </span>
+          </div>
+
+          <div class="db-stat flex items-start justify-between py-1">
+            <div>
+              <p class="text-[9px] uppercase tracking-wide text-red-600">
+                Stok Kritis (ROP)
+              </p>
+              <p class="mt-1 text-3xl font-bold text-red-600">
+                24 <span class="text-xs font-normal text-slate-500">SKU</span>
+              </p>
+              <p class="mt-2 flex items-center gap-1 text-[9px] text-red-600">
+                <i data-lucide="alert-circle" class="h-3 w-3"></i>
+                Perlu PO &amp; Restock Segera
+              </p>
+            </div>
+
+            <span class="rounded-lg bg-red-50 p-2.5 text-red-600">
+              <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+            </span>
+          </div>
+
+          <div class="db-stat flex items-start justify-between py-1">
+            <div>
+              <p class="text-[9px] uppercase tracking-wide text-slate-500">
+                Out of Stock
+              </p>
+              <p class="mt-1 text-3xl font-bold text-slate-900">
+                3 <span class="text-xs font-normal">SKU</span>
+              </p>
+              <p class="mt-2 flex items-center gap-1 text-[9px] text-blue-700">
+                <i data-lucide="truck" class="h-3 w-3"></i>
+                Dalam rute inbound supplier
+              </p>
+            </div>
+
+            <span class="rounded-lg bg-indigo-100 p-2.5 text-blue-700">
+              <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+            </span>
+          </div>
+        </section>
+
+        <!-- SEARCH & FILTER -->
+        <section class="space-y-3">
+          <div
+            class="db-toolbar flex flex-wrap items-center justify-between gap-3"
+          >
+            <div class="relative min-w-[220px] max-w-[410px] flex-1">
+              <i
+                data-lucide="search"
+                class="absolute left-3 top-3 h-3.5 w-3.5 text-slate-500"
+              ></i>
+
+              <input
+                id="searchBarang"
+                type="search"
+                class="db-search w-full py-2 pl-9 pr-3 text-[10px] outline-none"
+                placeholder="Cari SKU, nama produk, barcode EAN, brand..."
+              />
+            </div>
+
+            <div class="db-filters flex flex-wrap items-center gap-1.5">
+              <select id="filterKategori" class="db-select">
+                <option value="">Semua Kategori</option>
+                <option>Kamera &amp; Optik</option>
+                <option>Wearable Gadget</option>
+                <option>Laptop &amp; Komputer</option>
+                <option>Aksesoris Komputer</option>
+                <option>Audio &amp; Sound</option>
+                <option>Storage Drive</option>
+              </select>
+
+              <select id="filterStatus" class="db-select">
+                <option value="">Semua Status Stok</option>
+                <option value="Menipis">Menipis</option>
+                <option value="Stok Aman">Stok Aman</option>
+                <option value="Habis">Habis</option>
+              </select>
+
+              <select id="filterLokasi" class="db-select">
+                <option value="">Semua Lokasi Gudang</option>
+                <option value="WH01-RA-01">WH01-RA-01</option>
+                <option value="WH01-RA-02">WH01-RA-02</option>
+                <option value="WH01-RA-03">WH01-RA-03</option>
+                <option value="WH01-RA-04">WH01-RA-04</option>
+              </select>
+
+              <button id="resetFilter" type="button" class="btn">
+                <i data-lucide="sliders-horizontal"></i>
+                Reset Filter
+              </button>
+
+              <button
+                id="refreshBarang"
+                type="button"
+                class="btn"
+                title="Refresh data"
+                aria-label="Refresh data"
+              >
+                <i data-lucide="refresh-cw"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- FILTER CEPAT -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="mr-1 text-[9px] font-semibold text-slate-700">
+              Filter Cepat:
+            </span>
+
+            <button
+              type="button"
+              class="db-quick quick-filter active"
+              data-status=""
+            >
+              Semua Barang (8.650)
+            </button>
+
+            <button
+              type="button"
+              class="db-quick quick-filter"
+              data-status="Stok Aman"
+            >
+              Stok Aman (8.412)
+            </button>
+
+            <button
+              type="button"
+              class="db-quick quick-filter"
+              data-status="Menipis"
+            >
+              ⊙ Stok Menipis (24)
+            </button>
+
+            <button
+              type="button"
+              class="db-quick quick-filter"
+              data-status="Habis"
+            >
+              Stok Habis (3)
+            </button>
+
+            <button
+              type="button"
+              class="db-quick quick-filter"
+              data-status="fast"
+            >
+              Fast Moving (1.240)
+            </button>
+          </div>
+        </section>
+
+        <!-- TABEL BARANG -->
+        <section
+          class="overflow-hidden rounded-xl border border-slate-200 bg-white"
+        >
+          <div class="overflow-x-auto">
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th class="w-9">
+                    <input
+                      type="checkbox"
+                      id="selectAll"
+                      aria-label="Pilih semua barang"
+                    />
+                  </th>
+                  <th>KODE SKU &amp; EAN</th>
+                  <th>NAMA BARANG &amp; BRAND</th>
+                  <th>KATEGORI</th>
+                  <th>LOKASI RAK / BIN</th>
+                  <th>STOK FISIK (ROP)</th>
+                  <th>SATUAN</th>
+                  <th>NILAI ASET / UNIT</th>
+                  <th>STATUS</th>
+                  <th>AKSI</th>
+                </tr>
+              </thead>
+
+              <tbody id="barangTable"></tbody>
+            </table>
+          </div>
+
+          <!-- FOOTER TABEL -->
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-4 py-3"
+          >
+            <div
+              class="flex flex-wrap items-center gap-2 text-[9px] text-slate-500"
+            >
+              <span id="totalBarang">Memuat data barang...</span>
+              <span>|</span>
+              <label for="jumlahBaris">Baris:</label>
+
+              <select
+                id="jumlahBaris"
+                class="rounded bg-indigo-50 px-2 py-1 text-[9px]"
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="prevPage" type="button" class="btn" disabled>
+                <i data-lucide="chevron-left"></i>
+                Sebelumnya
+              </button>
+
+              <span id="pageInfo" class="px-2 text-[9px] text-slate-500">
+                Halaman 1
+              </span>
+
+              <button id="nextPage" type="button" class="btn" disabled>
+                Selanjutnya
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
     </template>
+
+    <!-- =========================================
+         DATA & JAVASCRIPT
+    ========================================= -->
+
     <script>
-      // Memuat layout bersama (butuh server lokal, mis. Live Server)
-      fetch("../layouts/MainLayout.html")
-        .then((r) => r.text())
-        .then((h) => {
-          document.getElementById("app").innerHTML = h;
-          document
-            .getElementById("content")
-            .append(document.getElementById("page").content);
-          document
-            .querySelector('[data-nav="' + document.body.dataset.active + '"]')
-            ?.classList.add("nav-active");
+      "use strict";
+
+      /* =========================================
+         DATA BARANG
+      ========================================= */
+
+      const dataBarang = [
+        {
+          sku: "SKU-CAM-600D",
+          ean: "899273618290",
+          nama: "Canon 60D DSLR Camera Body",
+          brand: "Canon Inc.",
+          kategori: "Kamera & Optik",
+          lokasi: "WH01-RA-02",
+          stok: 4,
+          rop: 25,
+          satuan: "Unit",
+          harga: 8500000,
+          status: "Menipis",
+          icon: "camera",
+          fast: true,
+        },
+        {
+          sku: "SKU-CAM-NIK8",
+          ean: "899273618412",
+          nama: "Nikon Reel Optical Pro X",
+          brand: "Nikon Corp.",
+          kategori: "Kamera & Optik",
+          lokasi: "WH01-RA-03",
+          stok: 7,
+          rop: 20,
+          satuan: "Unit",
+          harga: 12450000,
+          status: "Menipis",
+          icon: "aperture",
+          fast: false,
+        },
+        {
+          sku: "SKU-WTC-AP40",
+          ean: "899120491023",
+          nama: "Titan Smart Watch Classic Silver",
+          brand: "Titan Gear",
+          kategori: "Wearable Gadget",
+          lokasi: "WH01-RA-02-T3",
+          stok: 180,
+          rop: 40,
+          satuan: "Pcs",
+          harga: 1850000,
+          status: "Stok Aman",
+          icon: "watch",
+          fast: true,
+        },
+        {
+          sku: "SKU-LAP-M102",
+          ean: "899553102450",
+          nama: "Macbook Pro M1 2020 Space Gray",
+          brand: "Apple",
+          kategori: "Laptop & Komputer",
+          lokasi: "WH01-RA-01",
+          stok: 100,
+          rop: 15,
+          satuan: "Unit",
+          harga: 16200000,
+          status: "Stok Aman",
+          icon: "laptop",
+          fast: true,
+        },
+        {
+          sku: "SKU-ACC-KB05",
+          ean: "899610023415",
+          nama: "Mechanical Keyboard RGB Wireless",
+          brand: "Keychron",
+          kategori: "Aksesoris Komputer",
+          lokasi: "WH01-RA-02-T1",
+          stok: 210,
+          rop: 50,
+          satuan: "Unit",
+          harga: 1450000,
+          status: "Stok Aman",
+          icon: "keyboard",
+          fast: false,
+        },
+        {
+          sku: "SKU-AUD-SN09",
+          ean: "899778219011",
+          nama: "Sony Wireless Headphone WH-1000XM4",
+          brand: "Sony",
+          kategori: "Audio & Sound",
+          lokasi: "WH01-RA-04",
+          stok: 120,
+          rop: 25,
+          satuan: "Unit",
+          harga: 3899000,
+          status: "Stok Aman",
+          icon: "headphones",
+          fast: true,
+        },
+        {
+          sku: "SKU-STR-SD01",
+          ean: "899881920381",
+          nama: "Sandisk Extreme Portable SSD 1TB",
+          brand: "SanDisk",
+          kategori: "Storage Drive",
+          lokasi: "WH01-RA-01-T2",
+          stok: 0,
+          rop: 30,
+          satuan: "Box",
+          harga: 2100000,
+          status: "Habis",
+          icon: "hard-drive",
+          fast: false,
+        },
+      ];
+
+      /* =========================================
+         HELPER
+      ========================================= */
+
+      const esc = (value) =>
+        String(value ?? "").replace(
+          /[&<>"']/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            })[char],
+        );
+
+      const rupiah = (value) =>
+        "Rp " + Number(value || 0).toLocaleString("id-ID");
+
+      const renderIcons = () => {
+        if (window.lucide?.createIcons) {
+          window.lucide.createIcons({
+            attrs: {
+              "stroke-width": 1.8,
+            },
+          });
+        }
+      };
+
+      /* =========================================
+         STATUS BADGE
+      ========================================= */
+
+      function statusMarkup(status) {
+        const color =
+          status === "Menipis"
+            ? "text-red-600"
+            : status === "Habis"
+              ? "text-slate-500"
+              : "text-green-700";
+
+        return `
+          <span class="db-status ${color}">
+            <i class="db-status-dot"></i>
+            ${esc(status)}
+          </span>
+        `;
+      }
+
+      /* =========================================
+         RENDER TABEL
+      ========================================= */
+
+      function renderRows(rows) {
+        const tbody = document.getElementById("barangTable");
+
+        if (!tbody) return;
+
+        if (!rows.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" class="py-12 text-center text-sm text-slate-400">
+                <i
+                  data-lucide="package-search"
+                  class="mx-auto mb-2 h-8 w-8"
+                ></i>
+                Tidak ada barang yang ditemukan.
+              </td>
+            </tr>
+          `;
+
+          renderIcons();
+          return;
+        }
+
+        tbody.innerHTML = rows
+          .map(
+            (item) => `
+          <tr data-sku="${esc(item.sku)}">
+
+            <td class="text-center">
+              <input
+                type="checkbox"
+                class="row-check"
+                aria-label="Pilih ${esc(item.sku)}"
+              />
+            </td>
+
+            <td>
+              <span class="sku-code">${esc(item.sku)}</span>
+              <span class="ean-code">${esc(item.ean)}</span>
+            </td>
+
+            <td>
+              <div class="flex items-center gap-2">
+                <span class="db-icon">
+                  <i data-lucide="${esc(item.icon)}" class="h-4 w-4"></i>
+                </span>
+
+                <div class="min-w-0">
+                  <div class="product-name">
+                    ${esc(item.nama)}
+                  </div>
+                  <div class="product-brand">
+                    Brand: ${esc(item.brand)}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <td>${esc(item.kategori)}</td>
+
+            <td>
+              <span class="inline-flex items-center gap-1">
+                <i
+                  data-lucide="map-pin"
+                  class="h-3 w-3 shrink-0 text-blue-600"
+                ></i>
+                ${esc(item.lokasi)}
+              </span>
+            </td>
+
+            <td class="whitespace-nowrap">
+              <b class="${
+                item.status === "Menipis"
+                  ? "text-red-600"
+                  : item.status === "Habis"
+                    ? "text-slate-500"
+                    : "text-green-700"
+              }">
+                ${Number(item.stok).toLocaleString("id-ID")}
+                ${esc(item.satuan)}
+              </b>
+
+              <span class="ml-2 text-[8px] text-slate-400">
+                ROP: ${esc(item.rop)}
+              </span>
+            </td>
+
+            <td>${esc(item.satuan)}</td>
+
+            <td class="whitespace-nowrap font-semibold">
+              ${rupiah(item.harga)}
+            </td>
+
+            <td>${statusMarkup(item.status)}</td>
+
+            <td>
+              <div class="flex items-center justify-center gap-1">
+
+                <button
+                  class="db-action"
+                  type="button"
+                  title="Detail"
+                  aria-label="Detail ${esc(item.sku)}"
+                  data-action="detail"
+                  data-sku="${esc(item.sku)}"
+                >
+                  <i data-lucide="eye"></i>
+                </button>
+
+                <button
+                  class="db-action"
+                  type="button"
+                  title="Edit"
+                  aria-label="Edit ${esc(item.sku)}"
+                  data-action="edit"
+                  data-sku="${esc(item.sku)}"
+                >
+                  <i data-lucide="pencil"></i>
+                </button>
+
+                <button
+                  class="db-action"
+                  type="button"
+                  title="Kelola Stok"
+                  aria-label="Kelola stok ${esc(item.sku)}"
+                  data-action="stock"
+                  data-sku="${esc(item.sku)}"
+                >
+                  <i data-lucide="qr-code"></i>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        `,
+          )
+          .join("");
+
+        renderIcons();
+      }
+
+      /* =========================================
+         LOAD MAIN LAYOUT
+      ========================================= */
+
+      async function loadMainLayout() {
+        const app = document.getElementById("app");
+
+        try {
+          const response = await fetch("../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html tidak ditemukan. Periksa lokasi file dan jalankan project melalui Live Server.",
+            );
+          }
+
+          app.innerHTML = await response.text();
+
+          const content = document.getElementById("content");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html.",
+            );
+          }
+
+          const pageTemplate = document.getElementById("page");
+
+          if (!pageTemplate) {
+            throw new Error("Template halaman #page tidak ditemukan.");
+          }
+
+          content.appendChild(pageTemplate.content.cloneNode(true));
+
+          /* INISIALISASI LAYOUT */
+          if (typeof window.initMainLayout === "function") {
+            window.initMainLayout();
+          }
+
+          /* NAVIGASI AKTIF */
+          document.querySelectorAll("[data-nav]").forEach((link) => {
+            const isActive = link.dataset.nav === document.body.dataset.active;
+
+            link.classList.toggle("nav-active", isActive);
+
+            if (isActive) {
+              link.setAttribute("aria-current", "page");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          });
+
+          /* INISIALISASI DATA BARANG */
+          initDataBarang();
+
+          renderIcons();
+        } catch (error) {
+          console.error("Gagal memuat halaman:", error);
+
+          app.innerHTML = `
+            <div class="m-auto rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">
+              <i
+                data-lucide="alert-circle"
+                class="mx-auto mb-3 h-9 w-9 text-red-600"
+              ></i>
+
+              <h2 class="mb-2 font-bold text-slate-900">
+                Layout Gagal Dimuat
+              </h2>
+
+              <p class="text-sm text-slate-500">
+                ${esc(error.message)}
+              </p>
+
+              <button
+                onclick="location.reload()"
+                type="button"
+                class="btn btn-primary mt-4"
+              >
+                Muat Ulang
+              </button>
+            </div>
+          `;
+
+          renderIcons();
+        }
+      }
+
+      /* =========================================
+         FILTER DAN INTERAKSI DATA BARANG
+      ========================================= */
+
+      function initDataBarang() {
+        const $ = (id) => document.getElementById(id);
+
+        const search = $("searchBarang");
+        const kategori = $("filterKategori");
+        const status = $("filterStatus");
+        const lokasi = $("filterLokasi");
+        const quickButtons = [...document.querySelectorAll(".quick-filter")];
+
+        let quickStatus = "";
+        let currentPage = 1;
+        let filtered = [...dataBarang];
+
+        /* FILTER BARANG */
+        function filterBarang() {
+          const keyword = search.value.trim().toLocaleLowerCase("id");
+
+          filtered = dataBarang.filter((item) => {
+            const text = [
+              item.sku,
+              item.ean,
+              item.nama,
+              item.brand,
+              item.kategori,
+              item.lokasi,
+            ]
+              .join(" ")
+              .toLocaleLowerCase("id");
+
+            return (
+              text.includes(keyword) &&
+              (!kategori.value || item.kategori === kategori.value) &&
+              (!status.value || item.status === status.value) &&
+              (!lokasi.value || item.lokasi.startsWith(lokasi.value)) &&
+              (!quickStatus ||
+                (quickStatus === "fast"
+                  ? item.fast
+                  : item.status === quickStatus))
+            );
+          });
+
+          currentPage = 1;
+          renderTable();
+        }
+
+        /* PAGINATION */
+        function renderTable() {
+          const limit = Number($("jumlahBaris").value);
+          const total = filtered.length;
+          const pages = Math.max(1, Math.ceil(total / limit));
+
+          currentPage = Math.min(currentPage, pages);
+
+          const start = (currentPage - 1) * limit;
+          const end = Math.min(start + limit, total);
+
+          renderRows(filtered.slice(start, end));
+
+          $("totalBarang").textContent = total
+            ? `Menampilkan ${start + 1} - ${end} dari ${total} data contoh`
+            : "Tidak ada barang ditemukan";
+
+          $("pageInfo").textContent = `Halaman ${currentPage} dari ${pages}`;
+
+          $("prevPage").disabled = currentPage <= 1;
+          $("nextPage").disabled = currentPage >= pages;
+
+          $("selectAll").checked = false;
+          $("selectAll").indeterminate = false;
+        }
+
+        /* RESET FILTER */
+        function resetFilters() {
+          search.value = "";
+          kategori.value = "";
+          status.value = "";
+          lokasi.value = "";
+          quickStatus = "";
+
+          quickButtons.forEach((button, index) => {
+            button.classList.toggle("active", index === 0);
+          });
+
+          filterBarang();
+        }
+
+        /* SEARCH */
+        search.addEventListener("input", filterBarang);
+
+        /* DROPDOWN FILTER */
+        kategori.addEventListener("change", filterBarang);
+        lokasi.addEventListener("change", filterBarang);
+
+        status.addEventListener("change", () => {
+          quickStatus = "";
+
+          quickButtons.forEach((button) => {
+            button.classList.remove("active");
+          });
+
+          filterBarang();
         });
+
+        /* QUICK FILTER */
+        quickButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            quickButtons.forEach((item) => {
+              item.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            quickStatus = button.dataset.status;
+            status.value = "";
+
+            filterBarang();
+          });
+        });
+
+        /* RESET DAN REFRESH */
+        $("resetFilter").addEventListener("click", resetFilters);
+        $("refreshBarang").addEventListener("click", resetFilters);
+
+        /* JUMLAH BARIS */
+        $("jumlahBaris").addEventListener("change", () => {
+          currentPage = 1;
+          renderTable();
+        });
+
+        /* HALAMAN SEBELUMNYA */
+        $("prevPage").addEventListener("click", () => {
+          if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+          }
+        });
+
+        /* HALAMAN SELANJUTNYA */
+        $("nextPage").addEventListener("click", () => {
+          const pages = Math.ceil(
+            filtered.length / Number($("jumlahBaris").value),
+          );
+
+          if (currentPage < pages) {
+            currentPage++;
+            renderTable();
+          }
+        });
+
+        /* PILIH SEMUA */
+        $("selectAll").addEventListener("change", (event) => {
+          document
+            .querySelectorAll("#barangTable .row-check")
+            .forEach((checkbox) => {
+              checkbox.checked = event.target.checked;
+            });
+        });
+
+        /* UPDATE CHECKBOX */
+        $("barangTable").addEventListener("change", (event) => {
+          if (!event.target.matches(".row-check")) return;
+
+          const checks = [
+            ...document.querySelectorAll("#barangTable .row-check"),
+          ];
+
+          const count = checks.filter((checkbox) => checkbox.checked).length;
+
+          $("selectAll").checked = checks.length > 0 && count === checks.length;
+
+          $("selectAll").indeterminate = count > 0 && count < checks.length;
+        });
+
+        /* AKSI TABEL */
+        $("barangTable").addEventListener("click", (event) => {
+          const button = event.target.closest("[data-action]");
+
+          if (!button) return;
+
+          const item = dataBarang.find((row) => row.sku === button.dataset.sku);
+
+          if (!item) return;
+
+          /* DETAIL */
+          if (button.dataset.action === "detail") {
+            alert(
+              `DETAIL BARANG
+
+SKU: ${item.sku}
+EAN: ${item.ean}
+Nama: ${item.nama}
+Brand: ${item.brand}
+Kategori: ${item.kategori}
+Lokasi: ${item.lokasi}
+Stok: ${item.stok} ${item.satuan}
+ROP: ${item.rop}
+Nilai aset/unit: ${rupiah(item.harga)}
+Status: ${item.status}`,
+            );
+          }
+
+          /* EDIT */
+          if (button.dataset.action === "edit") {
+            const nextName = prompt("Ubah nama barang:", item.nama);
+
+            if (nextName === null) return;
+
+            const clean = nextName.trim();
+
+            if (!clean) {
+              alert("Nama barang tidak boleh kosong.");
+              return;
+            }
+
+            item.nama = clean;
+            renderTable();
+          }
+
+          /* KELOLA STOK */
+          if (button.dataset.action === "stock") {
+            alert(
+              `INFORMASI STOK
+
+SKU: ${item.sku}
+Stok saat ini: ${item.stok} ${item.satuan}
+ROP: ${item.rop}
+
+Pengelolaan stok terhubung setelah database tersedia.`,
+            );
+          }
+        });
+
+        /* =========================================
+           EXPORT CSV
+        ========================================= */
+
+        $("exportBarang").addEventListener("click", () => {
+          const headers = [
+            "SKU",
+            "EAN",
+            "Nama Barang",
+            "Brand",
+            "Kategori",
+            "Lokasi",
+            "Stok",
+            "ROP",
+            "Satuan",
+            "Harga",
+            "Status",
+          ];
+
+          const rows = filtered.map((item) => [
+            item.sku,
+            item.ean,
+            item.nama,
+            item.brand,
+            item.kategori,
+            item.lokasi,
+            item.stok,
+            item.rop,
+            item.satuan,
+            item.harga,
+            item.status,
+          ]);
+
+          const csv = [headers, ...rows]
+            .map((row) =>
+              row
+                .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+                .join(","),
+            )
+            .join("\r\n");
+
+          const blob = new Blob(["\uFEFF" + csv], {
+            type: "text/csv;charset=utf-8;",
+          });
+
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = "data-barang-astro-inventory.csv";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(url);
+        });
+
+        /* =========================================
+           IMPORT CSV
+        ========================================= */
+
+        $("importBarang").addEventListener("click", () => {
+          $("fileImport").click();
+        });
+
+        $("fileImport").addEventListener("change", async (event) => {
+          const file = event.target.files[0];
+
+          if (!file) return;
+
+          try {
+            const text = await file.text();
+
+            const lines = text
+              .replace(/^\uFEFF/, "")
+              .split(/\r?\n/)
+              .filter((line) => line.trim());
+
+            if (lines.length < 2) {
+              throw new Error("CSV tidak memiliki baris data.");
+            }
+
+            alert(
+              `File "${file.name}" berhasil dibaca (${lines.length - 1} baris).
+
+Pemetaan kolom dan penyimpanan database perlu disesuaikan dengan format CSV.`,
+            );
+          } catch (error) {
+            alert("Import gagal: " + error.message);
+          }
+
+          event.target.value = "";
+        });
+
+        /* =========================================
+           TAMBAH BARANG
+        ========================================= */
+
+        $("tambahBarang").addEventListener("click", () => {
+          const sku = prompt("Masukkan kode SKU baru:");
+
+          if (!sku) return;
+
+          const cleanSku = sku.trim();
+
+          if (!cleanSku) {
+            alert("Kode SKU tidak boleh kosong.");
+            return;
+          }
+
+          if (
+            dataBarang.some(
+              (item) => item.sku.toLowerCase() === cleanSku.toLowerCase(),
+            )
+          ) {
+            alert("Kode SKU sudah terdaftar.");
+            return;
+          }
+
+          const nama = prompt("Masukkan nama barang:");
+
+          if (!nama || !nama.trim()) {
+            alert("Nama barang tidak boleh kosong.");
+            return;
+          }
+
+          const brand = prompt("Masukkan brand:") || "-";
+          const ean = prompt("Masukkan barcode EAN:") || "-";
+
+          const item = {
+            sku: cleanSku,
+            ean: ean.trim() || "-",
+            nama: nama.trim(),
+            brand: brand.trim() || "-",
+            kategori: "Aksesoris Komputer",
+            lokasi: "WH01-RA-01",
+            stok: 0,
+            rop: 0,
+            satuan: "Unit",
+            harga: 0,
+            status: "Habis",
+            icon: "package",
+            fast: false,
+          };
+
+          dataBarang.unshift(item);
+
+          resetFilters();
+        });
+
+        /* =========================================
+           INISIALISASI AWAL
+        ========================================= */
+
+        filterBarang();
+      }
+
+      /* =========================================
+         JALANKAN APLIKASI
+      ========================================= */
+
+      document.addEventListener("DOMContentLoaded", loadMainLayout);
     </script>
   </body>
 </html>

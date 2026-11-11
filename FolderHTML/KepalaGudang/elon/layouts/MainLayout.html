@@ -1,67 +1,182 @@
-<!-- Fragment layout: sidebar + topbar. Dimuat oleh tiap halaman lewat fetch(), konten halaman masuk ke #content -->
-<aside
-  class="w-60 shrink-0 bg-white border-r border-slate-200 p-4 hidden md:block"
->
-  <div class="mb-5">
-    <p class="font-bold">Astro Inventory</p>
-    <p class="text-xs text-slate-500">Sistem Inventaris Terpadu</p>
+<!-- MAIN LAYOUT ASTRO INVENTORY -->
+
+<!-- SIDEBAR BACKDROP MOBILE -->
+<div
+  id="sidebar-backdrop"
+  class="sidebar-backdrop"
+  onclick="toggleSidebar()"
+></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="astro-sidebar">
+  <!-- LOGO BRAND -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <i data-lucide="package-check"></i>
+    </div>
+
+    <div>
+      <h1>Astro Inventory</h1>
+      <p>Sistem Inventaris Terpadu</p>
+    </div>
   </div>
-  <p class="text-[11px] font-semibold text-slate-400 mt-4 mb-1">MENU UTAMA</p>
-  <a class="nav" data-nav="dashboard" href="dashboard.html"
-    >Dashboard Kepala Gudang</a
-  >
-  <p class="text-[11px] font-semibold text-slate-400 mt-4 mb-1">
-    MASTER DATA &amp; INVENTARIS
-  </p>
-  <a class="nav" data-nav="data-barang" href="data-barang.html">Data Barang</a>
-  <a class="nav" data-nav="data-gudang" href="data-gudang.html"
-    >Data Gudang &amp; Lokasi</a
-  >
-  <p class="text-[11px] font-semibold text-slate-400 mt-4 mb-1">
-    OPERASIONAL &amp; TRANSAKSI
-  </p>
-  <a class="nav" data-nav="barang-masuk" href="barang-masuk.html"
-    >Barang Masuk</a
-  >
-  <a class="nav" data-nav="barang-keluar" href="barang-keluar.html"
-    >Barang Keluar</a
-  >
-  <a class="nav" data-nav="mutasi-barang" href="mutasi-barang.html"
-    >Mutasi Barang</a
-  >
-  <a class="nav" data-nav="stok-opname" href="stok-opname.html">Stok Opname</a>
-  <a
-    class="nav flex justify-between"
-    data-nav="persetujuan"
-    href="persetujuan.html"
-    >Persetujuan Barang <span class="badge b-red">5</span></a
-  >
-  <a class="nav" data-nav="laporan" href="laporan.html"
-    >Laporan &amp; Analitik</a
-  >
-  <p class="text-[11px] font-semibold text-slate-400 mt-4 mb-1">
-    PENGATURAN &amp; AKUN
-  </p>
-  <a class="nav" data-nav="notifikasi" href="notifikasi.html">Notifikasi</a>
-  <a class="nav" data-nav="pengaturan" href="pengaturan.html">Pengaturan</a>
-  <a class="nav" data-nav="profil" href="profil.html">Profil Saya</a>
+
+  <!-- NAVIGATION -->
+  <nav class="sidebar-navigation">
+    <!-- MENU UTAMA -->
+    <div class="nav-section">
+      <p class="nav-heading">MENU UTAMA</p>
+
+      <a href="./dashboard.html" class="nav-link" data-nav="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard Audit</span>
+      </a>
+    </div>
+
+    <!-- PEMERIKSAAN & INVENTARIS -->
+    <div class="nav-section">
+      <p class="nav-heading">PEMERIKSAAN &amp; INVENTARIS</p>
+
+      <a href="./data-barang.html" class="nav-link" data-nav="data-barang">
+        <i data-lucide="package"></i>
+        <span>Data Barang</span>
+      </a>
+
+      <a href="./data-gudang.html" class="nav-link" data-nav="data-gudang">
+        <i data-lucide="warehouse"></i>
+        <span>Data Gudang &amp; Lokasi</span>
+      </a>
+
+      <a href="./barang-masuk.html" class="nav-link" data-nav="barang-masuk">
+        <i data-lucide="arrow-down-left"></i>
+        <span>Barang Masuk</span>
+      </a>
+
+      <a href="./barang-keluar.html" class="nav-link" data-nav="barang-keluar">
+        <i data-lucide="arrow-up-right"></i>
+        <span>Barang Keluar</span>
+      </a>
+
+      <a href="./mutasi-barang.html" class="nav-link" data-nav="mutasi-barang">
+        <i data-lucide="arrow-left-right"></i>
+        <span>Mutasi Barang</span>
+      </a>
+
+      <a href="./stok-opname.html" class="nav-link" data-nav="stok-opname">
+        <i data-lucide="clipboard-check"></i>
+        <span>Stok Opname</span>
+      </a>
+    </div>
+
+    <!-- INVESTIGASI & KEPATUHAN -->
+    <div class="nav-section">
+      <p class="nav-heading">INVESTIGASI &amp; KEPATUHAN</p>
+
+      <a href="./log-aktivitas.html" class="nav-link" data-nav="log-aktivitas">
+        <i data-lucide="history"></i>
+        <span>Log Aktivitas</span>
+      </a>
+
+      <a href="./temuan-audit.html" class="nav-link" data-nav="temuan-audit">
+        <i data-lucide="scan-search"></i>
+        <span>Temuan Audit</span>
+      </a>
+
+      <a href="./tindak-lanjut.html" class="nav-link" data-nav="tindak-lanjut">
+        <i data-lucide="list-checks"></i>
+        <span>Tindak Lanjut Temuan</span>
+      </a>
+
+      <a href="./laporan-audit.html" class="nav-link" data-nav="laporan-audit">
+        <i data-lucide="file-text"></i>
+        <span>Laporan Audit</span>
+      </a>
+    </div>
+
+    <!-- PENGATURAN & AKUN -->
+    <div class="nav-section">
+      <p class="nav-heading">PENGATURAN &amp; AKUN</p>
+
+      <a href="./notifikasi.html" class="nav-link" data-nav="notifikasi">
+        <i data-lucide="bell"></i>
+        <span>Notifikasi</span>
+      </a>
+
+      <a href="./pengaturan.html" class="nav-link" data-nav="pengaturan">
+        <i data-lucide="settings"></i>
+        <span>Pengaturan</span>
+      </a>
+
+      <a href="./profil.html" class="nav-link" data-nav="profil">
+        <i data-lucide="user-round"></i>
+        <span>Profil Saya</span>
+      </a>
+    </div>
+  </nav>
 </aside>
-<div class="flex-1 min-w-0">
-  <header
-    class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-3"
-  >
-    <span class="text-xs font-semibold bg-slate-100 rounded-lg px-3 py-1.5"
-      >Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span
-    >
-    <span class="badge b-green">Operasional Normal</span>
-    <input
-      class="ml-auto w-72 bg-slate-100 rounded-lg px-3 py-1.5 text-xs"
-      placeholder="Cari SKU, resi, transaksi..."
-    />
-    <div class="text-right">
-      <p class="text-xs font-bold">Budi Santoso</p>
-      <p class="text-[10px] text-slate-500">Admin Utama / Super Admin</p>
+
+<!-- MAIN AREA -->
+<div id="main-area" class="astro-main">
+  <!-- TOPBAR -->
+  <header class="astro-topbar">
+    <!-- TOPBAR LEFT -->
+    <div class="topbar-left">
+      <button
+        type="button"
+        class="sidebar-toggle"
+        onclick="toggleSidebar()"
+        aria-label="Buka atau tutup sidebar"
+      >
+        <i data-lucide="menu"></i>
+      </button>
+
+      <!-- LOKASI -->
+      <div class="location-badge">
+        <i data-lucide="network"></i>
+        <span>Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
+      </div>
+
+      <!-- STATUS OPERASIONAL -->
+      <div class="operation-badge">
+        <span class="status-dot"></span>
+        <span>Operasional Normal</span>
+      </div>
+    </div>
+
+    <!-- TOPBAR RIGHT -->
+    <div class="topbar-right">
+      <!-- GLOBAL SEARCH -->
+      <div class="global-search">
+        <i data-lucide="search"></i>
+
+        <input
+          type="text"
+          placeholder="Cari SKU, resi, transaksi..."
+          aria-label="Pencarian global"
+        />
+      </div>
+
+      <!-- NOTIFICATION -->
+      <button type="button" class="notification-button" aria-label="Notifikasi">
+        <i data-lucide="bell"></i>
+        <span class="notification-dot"></span>
+      </button>
+
+      <!-- DIVIDER -->
+      <div class="topbar-divider"></div>
+
+      <!-- USER PROFILE -->
+      <div class="user-profile">
+        <div class="user-information">
+          <p class="user-name">Budi Santoso</p>
+          <p class="user-role">Auditor Internal</p>
+        </div>
+
+        <div class="user-avatar">BS</div>
+      </div>
     </div>
   </header>
-  <main id="content" class="p-6 space-y-5"></main>
+
+  <!-- PAGE CONTENT -->
+  <main id="content" class="astro-content"></main>
 </div>

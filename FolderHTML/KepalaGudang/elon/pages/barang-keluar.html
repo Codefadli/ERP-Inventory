@@ -2,237 +2,1598 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Barang Keluar | Astro Inventory</title>
+
+    <!-- TAILWIND CSS -->
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- FONT AWESOME -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <!-- LUCIDE ICON -->
+    <script src="https://unpkg.com/lucide@0.468.0"></script>
+
+    <!-- GLOBAL CSS -->
     <link rel="stylesheet" href="../styles/global.css" />
+
+    <style>
+      /* =========================================
+         BASE
+      ========================================= */
+
+      #content {
+        width: 100%;
+        min-width: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+        line-height: 1.5;
+        color: #172033;
+      }
+
+      #content *,
+      #content *::before,
+      #content *::after {
+        box-sizing: border-box;
+      }
+
+      #content h1 {
+        margin: 0;
+        font-size: 22px !important;
+        line-height: 1.35 !important;
+        font-weight: 700;
+        letter-spacing: -0.35px;
+      }
+
+      #content h2 {
+        font-size: 14px !important;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
+      #content p {
+        line-height: 1.5;
+      }
+
+      /* =========================================
+         CARD
+      ========================================= */
+
+      #content .card {
+        min-width: 0;
+        padding: 14px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .card.p-0 {
+        padding: 0 !important;
+      }
+
+      /* =========================================
+         FONT SIZE
+      ========================================= */
+
+      #content .text-3xl {
+        font-size: 30px !important;
+        line-height: 1.3 !important;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      #content .text-xl {
+        font-size: 22px !important;
+      }
+
+      #content .text-lg {
+        font-size: 17px !important;
+      }
+
+      #content .text-sm {
+        font-size: 12px !important;
+      }
+
+      #content .text-xs {
+        font-size: 11px !important;
+      }
+
+      #content .text-\[9px\] {
+        font-size: 9px !important;
+      }
+
+      #content .text-\[10px\] {
+        font-size: 10px !important;
+      }
+
+      #content .text-\[11px\] {
+        font-size: 11px !important;
+      }
+
+      /* =========================================
+         BUTTON
+      ========================================= */
+
+      #content button,
+      #content .btn {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+        font-weight: 600;
+        line-height: 1.4;
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      #content .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
+      }
+
+      #content .btn:hover {
+        background: #f5f8ff;
+        border-color: #93b4f5;
+        color: #1d4ed8;
+      }
+
+      #content .btn-primary {
+        background: #1d4ed8;
+        color: #fff;
+        border-color: #1d4ed8;
+        box-shadow: 0 2px 5px rgba(29, 78, 216, 0.18);
+      }
+
+      #content .btn-primary:hover {
+        background: #1e40af;
+        border-color: #1e40af;
+        color: #fff;
+      }
+
+      #content button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      #content .btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* INPUT & SELECT */
+
+      #content input,
+      #content select {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+      }
+
+      #content #searchInbound {
+        width: 100%;
+        height: 38px;
+        min-height: 38px;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid #dbe4f0;
+        padding: 8px 12px 8px 36px;
+      }
+
+      #content #searchInbound::placeholder {
+        font-size: 11px;
+        color: #94a3b8;
+      }
+
+      #content select.btn {
+        height: 34px;
+        min-height: 34px;
+        padding: 6px 28px 6px 10px;
+        border-radius: 8px;
+        font-size: 12px !important;
+        font-weight: 500;
+      }
+
+      #content input:focus,
+      #content select:focus {
+        outline: none;
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      /* =========================================
+         INPUT
+      ========================================= */
+
+      #content input[type="text"] {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 38px;
+        padding: 8px 12px 8px 36px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #334155;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+        line-height: 1.4;
+        outline: none;
+      }
+
+      #content input[type="text"]::placeholder {
+        color: #94a3b8;
+      }
+
+      #content input[type="text"]:focus {
+        border-color: #93b4f5;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      }
+
+      /* =========================================
+         SELECT
+      ========================================= */
+
+      #content select {
+        display: inline-flex;
+        align-items: center;
+        width: auto;
+        max-width: 100%;
+        min-height: 36px;
+        height: 36px;
+        padding: 6px 28px 6px 10px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background-color: #ffffff;
+        color: #334155;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+        font-weight: 500;
+        line-height: 1.3;
+        outline: none;
+      }
+
+      #content select:focus {
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      }
+
+      /* =========================================
+         GRID
+      ========================================= */
+
+      #content .grid {
+        min-width: 0;
+      }
+
+      #content .grid > .card {
+        min-width: 0;
+      }
+
+      /* =========================================
+         LOADING DOCK
+      ========================================= */
+
+      #content .bar {
+        width: 100%;
+        height: 7px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e8eef6;
+      }
+
+      #content .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 20px;
+        background: #2563eb;
+      }
+
+      /* =========================================
+         BADGE
+      ========================================= */
+
+      #content .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        padding: 5px 9px;
+        border-radius: 6px;
+        font-size: 10px !important;
+        font-weight: 600;
+        line-height: 1.35;
+        white-space: nowrap;
+      }
+
+      #content .b-blue {
+        color: #1d4ed8;
+        background: #eff6ff;
+      }
+
+      #content .b-green {
+        color: #15803d;
+        background: #f0fdf4;
+      }
+
+      #content .b-amber {
+        color: #b45309;
+        background: #fffbeb;
+      }
+
+      #content .b-slate {
+        color: #475569;
+        background: #f1f5f9;
+      }
+
+      /* =========================================
+         TABLE
+      ========================================= */
+
+      #content .overflow-x-auto {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+      }
+
+      #content .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      #content .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      #content .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+      }
+
+      #content table {
+        width: 100%;
+        min-width: 1220px;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: auto;
+      }
+
+      #content thead {
+        background: #f8fafc;
+      }
+
+      #content th.th {
+        padding: 13px 9px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 11px !important;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+
+      #content td.td {
+        padding: 12px 9px;
+        border-bottom: 1px solid #edf1f6;
+        color: #334155;
+        font-size: 12px !important;
+        line-height: 1.5;
+        vertical-align: middle;
+      }
+
+      #content tbody tr {
+        transition: background 0.15s ease;
+      }
+
+      #content tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      #content tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      #content .sku {
+        color: #1d4ed8;
+        font-size: 12px !important;
+        font-weight: 700;
+      }
+
+      #content td.td:last-child {
+        min-width: 75px;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      #content td.td button {
+        padding: 5px 8px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #1d4ed8;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px !important;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      #content td.td button:hover {
+        background: #eff6ff;
+      }
+
+      /* =========================================
+         FOOTER
+      ========================================= */
+
+      #content .border-t,
+      #content .border-b {
+        border-color: #e2e8f0;
+      }
+
+      #content .border-slate-100 {
+        border-color: #edf1f6;
+      }
+
+      #content .p-3 {
+        padding: 12px;
+      }
+
+      #content .p-4 {
+        padding: 14px;
+      }
+
+      /* =========================================
+         MODAL
+      ========================================= */
+
+      #content .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, 0.48);
+      }
+
+      #content .modal-overlay.show {
+        display: flex;
+      }
+
+      #content .modal-box {
+        width: 100%;
+        max-width: 480px;
+        padding: 22px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+      }
+
+      #content .modal-box input {
+        width: 100%;
+        height: 38px;
+        padding: 8px 10px;
+        border: 1px solid #dbe4f0;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+
+      /* =========================================
+         RESPONSIVE
+      ========================================= */
+
+      @media (max-width: 1024px) {
+        #content .text-3xl {
+          font-size: 26px !important;
+        }
+
+        #content .card {
+          padding: 12px;
+        }
+
+        #content .card.p-0 {
+          padding: 0 !important;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #content h1 {
+          font-size: 19px !important;
+        }
+
+        #content h2 {
+          font-size: 13px !important;
+        }
+
+        #content .text-3xl {
+          font-size: 25px !important;
+        }
+
+        #content .btn {
+          min-height: 34px;
+          padding: 7px 10px;
+          font-size: 11px !important;
+        }
+
+        #content select {
+          height: 34px;
+          min-height: 34px;
+          font-size: 11px !important;
+        }
+
+        #content input[type="text"] {
+          height: 36px;
+          font-size: 11px !important;
+        }
+
+        #content th.th {
+          padding: 11px 8px;
+          font-size: 10px !important;
+        }
+
+        #content td.td {
+          padding: 10px 8px;
+          font-size: 11px !important;
+        }
+
+        #content .card {
+          border-radius: 10px;
+        }
+
+        #content .card.p-0 {
+          padding: 0 !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #content .text-3xl {
+          font-size: 22px !important;
+        }
+
+        #content .card {
+          padding: 11px;
+        }
+
+        #content .card.p-0 {
+          padding: 0 !important;
+        }
+      }
+    </style>
   </head>
+
   <body data-active="barang-keluar" class="bg-slate-50 text-slate-900">
     <div id="app" class="flex min-h-screen"></div>
+
     <template id="page">
-      <div>
-        <p class="text-[11px] text-slate-500">
-          OPERASIONAL &amp; TRANSAKSI &gt; TRANSAKSI BARANG KELUAR (OUTBOUND DC)
-        </p>
-        <div class="flex flex-wrap items-start justify-between gap-3 mt-1">
-          <div>
-            <h1 class="text-2xl font-bold">
-              Transaksi Barang Keluar (Outbound DC)
-            </h1>
-            <p class="text-sm text-slate-600 max-w-2xl">
-              Monitoring pengeluaran inventaris untuk distribusi antar-cabang,
-              permintaan divisi internal, validasi Surat Jalan Keluar (DO/SJ),
-              dan verifikasi serah terima armada.
+      <div class="space-y-6">
+        <!-- HEADER -->
+        <div>
+          <p class="text-[9px] font-medium tracking-wide text-slate-500">
+            OPERASIONAL &gt;
+            <span class="text-blue-700">
+              TRANSAKSI BARANG KELUAR (OUTBOUND DC)
+            </span>
+          </p>
+
+          <div class="flex flex-wrap items-start justify-between gap-3 mt-2">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">
+                Transaksi Barang Keluar (Outbound DC)
+              </h1>
+
+              <p class="text-[10px] text-slate-500 max-w-2xl mt-1">
+                Monitoring pengeluaran inventaris untuk distribusi antar-cabang,
+                permintaan divisi internal, validasi Surat Jalan Keluar (DO/SJ),
+                dan verifikasi serah terima armada.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn" id="exportBtn">
+                <i class="fa-solid fa-file-export"></i>
+                Ekspor Data Outbound
+              </button>
+
+              <button type="button" class="btn" id="dispatchBtn">
+                <i class="fa-solid fa-truck-fast"></i>
+                Jadwal Dispatch Armada
+              </button>
+
+              <button type="button" class="btn btn-primary" id="newOutboundBtn">
+                <i class="fa-solid fa-plus"></i>
+                Buat Pengeluaran Barang Baru
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATISTIK -->
+        <section class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="card">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-slate-500">Total Keluar Hari Ini</p>
+              <i class="fa-solid fa-box-open text-blue-500 text-lg"></i>
+            </div>
+            <p class="text-3xl font-bold mt-1">1.180 Unit</p>
+            <p class="text-xs text-green-700 mt-1">
+              <i class="fa-solid fa-arrow-up mr-1"></i>
+              22 order selesai dikirim
             </p>
           </div>
-          <div class="flex gap-2">
-            <button class="btn">Ekspor Data Outbound</button
-            ><button class="btn">Jadwal Dispatch Armada</button
-            ><button class="btn btn-primary">
-              + Buat Pengeluaran Barang Baru
+
+          <div class="card">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-slate-500">Permintaan / DO Dalam Proses</p>
+              <i
+                class="fa-solid fa-file-circle-check text-amber-500 text-lg"
+              ></i>
+            </div>
+            <p class="text-3xl font-bold mt-1">11 Berkas</p>
+            <p class="text-xs text-slate-500 mt-1">
+              7 selesai packing · 4 sedang picking
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-slate-500">
+                Akurasi Picking &amp; QC Outbound
+              </p>
+              <i class="fa-solid fa-clipboard-check text-green-500 text-lg"></i>
+            </div>
+            <p class="text-3xl font-bold mt-1">99,8%</p>
+            <p class="text-xs text-green-700 mt-1">
+              1.178 unit lolos · 2 ganti SKU
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-slate-500">Menunggu Muat / Dispatch</p>
+              <i class="fa-solid fa-truck-loading text-orange-500 text-lg"></i>
+            </div>
+            <p class="text-3xl font-bold mt-1">240 Unit</p>
+            <p class="text-xs text-amber-700 mt-1">
+              Area staging outbound gate 03-05
+            </p>
+          </div>
+        </section>
+
+        <!-- STATUS LOADING DOCK -->
+        <section>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-bold text-sm">
+              Status Slot Loading Dock &amp; Antrean Armada Outbound
+            </h2>
+
+            <span class="text-xs text-slate-500">
+              <i class="fa-solid fa-clock mr-1"></i>
+              Monitoring Dispatch
+            </span>
+          </div>
+
+          <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="card">
+              <div class="flex justify-between items-center text-xs">
+                <b>DOCK 01</b>
+                <span class="badge b-blue">Proses Muat</span>
+              </div>
+              <p class="font-semibold text-sm mt-3">Hub Surabaya DC-02</p>
+              <p class="text-xs text-slate-500 mb-3">
+                <i class="fa-solid fa-truck mr-1"></i>
+                JNE Trucking B 9821 UXT · 380 Karton
+              </p>
+              <div class="bar"><i style="width: 85%"></i></div>
+              <p class="text-[11px] text-slate-500 mt-1">Progress muat 85%</p>
+            </div>
+
+            <div class="card">
+              <div class="flex justify-between items-center text-xs">
+                <b>DOCK 02</b>
+                <span class="badge b-slate">Verifikasi DO</span>
+              </div>
+              <p class="font-semibold text-sm mt-3">
+                Divisi Operasional &amp; IT Pusat
+              </p>
+              <p class="text-xs text-slate-500 mb-3">
+                <i class="fa-solid fa-van-shuttle mr-1"></i>
+                Kurir Internal Van B 1204 KLA
+              </p>
+              <div class="bar"><i style="width: 95%"></i></div>
+              <p class="text-[11px] text-slate-500 mt-1">Scan barcode 95%</p>
+            </div>
+
+            <div class="card">
+              <div class="flex justify-between items-center text-xs">
+                <b>DOCK 03</b>
+                <span class="badge b-amber">Staging Pallet</span>
+              </div>
+              <p class="font-semibold text-sm mt-3">Hub Bandung DC-03</p>
+              <p class="text-xs text-slate-500 mb-3">
+                <i class="fa-solid fa-truck-fast mr-1"></i>
+                SiCepat Cargo B 9331 XJ · 420 Master Box
+              </p>
+              <div class="bar"><i style="width: 45%"></i></div>
+              <p class="text-[11px] text-slate-500 mt-1">Picking gudang 45%</p>
+            </div>
+
+            <div class="card">
+              <div class="flex justify-between items-center text-xs">
+                <b>DOCK 04</b>
+                <span class="badge b-slate">Menunggu Truk</span>
+              </div>
+              <p class="font-semibold text-sm mt-3">
+                Divisi Maintenance &amp; GA
+              </p>
+              <p class="text-xs text-slate-500 mb-3">
+                <i class="fa-solid fa-truck-pickup mr-1"></i>
+                Pick-up internal DC · 80 unit
+              </p>
+              <div class="bar"><i style="width: 0%"></i></div>
+              <p class="text-[11px] text-slate-500 mt-1">
+                Estimasi tiba 10:45 WIB
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FILTER -->
+        <div class="card flex flex-wrap gap-2">
+          <div class="flex-1 min-w-[220px] relative">
+            <i
+              class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+            ></i>
+            <input
+              type="text"
+              id="searchOutbound"
+              placeholder="Cari nomor DO, surat jalan, divisi / cabang tujuan..."
+              aria-label="Cari transaksi barang keluar"
+            />
+          </div>
+
+          <select id="filterTujuan" aria-label="Filter tujuan">
+            <option value="">Semua Tujuan</option>
+            <option value="Hub Surabaya DC-02">Hub Surabaya DC-02</option>
+            <option value="Hub Bandung DC-03">Hub Bandung DC-03</option>
+            <option value="Divisi Internal">Divisi Internal</option>
+          </select>
+
+          <select id="filterStatus" aria-label="Filter status pengeluaran">
+            <option value="">Status Pengeluaran (Semua)</option>
+            <option value="Selesai Dispatch">Selesai Dispatch</option>
+            <option value="Selesai Diserahkan">Selesai Diserahkan</option>
+            <option value="Proses Muat">Proses Muat</option>
+            <option value="Sedang Picking">Sedang Picking</option>
+          </select>
+
+          <select id="filterJenis" aria-label="Filter jenis pengiriman">
+            <option value="">Jenis Pengiriman: Semua</option>
+            <option value="Ekspedisi">Ekspedisi</option>
+            <option value="Kurir Internal">Kurir Internal</option>
+            <option value="Pick-up Internal">Pick-up Internal</option>
+          </select>
+        </div>
+
+        <!-- TABEL TRANSAKSI -->
+        <section class="card p-0 overflow-hidden">
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 p-4 border-b border-slate-100"
+          >
+            <div>
+              <h2 class="font-bold text-sm">Daftar Transaksi Barang Keluar</h2>
+              <p class="text-xs text-slate-500 mt-1">
+                Riwayat pengeluaran dan status pengiriman barang
+              </p>
+            </div>
+
+            <button type="button" class="btn" id="resetFilterBtn">
+              <i class="fa-solid fa-rotate-left"></i>
+              Reset Filter
             </button>
           </div>
+
+          <div class="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th class="th">NO. DO &amp; SURAT JALAN</th>
+                  <th class="th">TUJUAN &amp; PIC PENERIMA</th>
+                  <th class="th">DETAIL KOMODITAS</th>
+                  <th class="th">TOTAL QTY</th>
+                  <th class="th">GATE / STAGING RAK</th>
+                  <th class="th">STATUS DISPATCH &amp; QC</th>
+                  <th class="th">AKSI</th>
+                </tr>
+              </thead>
+
+              <tbody id="outboundTableBody">
+                <tr
+                  data-do="DO-2025-0641"
+                  data-surat="SJ-4412/OUT-JKT"
+                  data-tujuan="Hub Surabaya DC-02"
+                  data-pic="Slamet Riyadi"
+                  data-komoditas="MacBook Pro M1 & Workstation"
+                  data-qty="60 Unit"
+                  data-rak="WH01-ZA-RA02"
+                  data-status="Selesai Dispatch"
+                  data-jenis="Ekspedisi"
+                  data-armada="JNE Trucking B 9821 UXT"
+                >
+                  <td class="td">
+                    <b class="sku">DO-2025-0641</b><br />
+                    <span class="text-xs text-slate-500">SJ-4412/OUT-JKT</span>
+                  </td>
+                  <td class="td">
+                    Hub Surabaya DC-02<br />
+                    <span class="text-xs text-slate-500"
+                      >PIC: Slamet Riyadi</span
+                    >
+                  </td>
+                  <td class="td">MacBook Pro M1 &amp; Workstation</td>
+                  <td class="td">60 Unit</td>
+                  <td class="td">WH01-ZA-RA02</td>
+                  <td class="td">
+                    <span class="badge b-green">Selesai Dispatch</span>
+                  </td>
+                  <td class="td">
+                    <button type="button" class="detail-btn">Detail</button>
+                  </td>
+                </tr>
+
+                <tr
+                  data-do="DO-2025-0642"
+                  data-surat="SJ-4413/OUT-JKT"
+                  data-tujuan="Divisi IT & Infrastruktur"
+                  data-pic="Adrian Pratama"
+                  data-komoditas="Mechanical Keyboard RGB & Mouse"
+                  data-qty="45 Unit"
+                  data-rak="WH01-ZB-RB01"
+                  data-status="Selesai Diserahkan"
+                  data-jenis="Kurir Internal"
+                  data-armada="Kurir Internal Van B 1204 KLA"
+                >
+                  <td class="td">
+                    <b class="sku">DO-2025-0642</b><br />
+                    <span class="text-xs text-slate-500">SJ-4413/OUT-JKT</span>
+                  </td>
+                  <td class="td">
+                    Divisi IT &amp; Infrastruktur<br />
+                    <span class="text-xs text-slate-500"
+                      >PIC: Adrian Pratama</span
+                    >
+                  </td>
+                  <td class="td">Mechanical Keyboard RGB &amp; Mouse</td>
+                  <td class="td">45 Unit</td>
+                  <td class="td">WH01-ZB-RB01</td>
+                  <td class="td">
+                    <span class="badge b-green">Selesai Diserahkan</span>
+                  </td>
+                  <td class="td">
+                    <button type="button" class="detail-btn">Detail</button>
+                  </td>
+                </tr>
+
+                <tr
+                  data-do="DO-2025-0643"
+                  data-surat="SJ-4414/OUT-JKT"
+                  data-tujuan="Hub Bandung DC-03"
+                  data-pic="Hendra K."
+                  data-komoditas="Sony WH-1000XM4 & Audio System"
+                  data-qty="120 Unit"
+                  data-rak="WH01-ZB-RB02"
+                  data-status="Proses Muat"
+                  data-jenis="Ekspedisi"
+                  data-armada="SiCepat Cargo B 9331 XJ"
+                >
+                  <td class="td">
+                    <b class="sku">DO-2025-0643</b><br />
+                    <span class="text-xs text-slate-500">SJ-4414/OUT-JKT</span>
+                  </td>
+                  <td class="td">
+                    Hub Bandung DC-03<br />
+                    <span class="text-xs text-slate-500">PIC: Hendra K.</span>
+                  </td>
+                  <td class="td">Sony WH-1000XM4 &amp; Audio System</td>
+                  <td class="td">120 Unit</td>
+                  <td class="td">WH01-ZB-RB02</td>
+                  <td class="td">
+                    <span class="badge b-blue">Proses Muat Dock 01 (85%)</span>
+                  </td>
+                  <td class="td">
+                    <button type="button" class="detail-btn">Detail</button>
+                  </td>
+                </tr>
+
+                <tr
+                  data-do="DO-2025-0644"
+                  data-surat="SJ-4415/OUT-JKT"
+                  data-tujuan="Divisi Operasional & Hub"
+                  data-pic="Bambang Sugiarto"
+                  data-komoditas="Barcode Scanner Zebra & Label Roll"
+                  data-qty="35 Unit"
+                  data-rak="WH02-RD01"
+                  data-status="Sedang Picking"
+                  data-jenis="Pick-up Internal"
+                  data-armada="Pick-up internal DC"
+                >
+                  <td class="td">
+                    <b class="sku">DO-2025-0644</b><br />
+                    <span class="text-xs text-slate-500">SJ-4415/OUT-JKT</span>
+                  </td>
+                  <td class="td">
+                    Divisi Operasional &amp; Hub<br />
+                    <span class="text-xs text-slate-500"
+                      >PIC: Bambang Sugiarto</span
+                    >
+                  </td>
+                  <td class="td">Barcode Scanner Zebra &amp; Label Roll</td>
+                  <td class="td">35 Unit</td>
+                  <td class="td">WH02-RD01</td>
+                  <td class="td">
+                    <span class="badge b-amber">Sedang Picking</span>
+                  </td>
+                  <td class="td">
+                    <button type="button" class="detail-btn">Detail</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- FOOTER -->
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 p-3 border-t border-slate-100"
+          >
+            <p class="text-xs text-slate-500" id="tableInfo">
+              Menampilkan 1 - 4 dari 4 transaksi outbound
+            </p>
+
+            <div class="flex items-center gap-1" id="pagination">
+              <button type="button" class="btn text-xs" id="prevPage" disabled>
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary text-xs"
+                aria-current="page"
+              >
+                1
+              </button>
+              <button type="button" class="btn text-xs" id="nextPage" disabled>
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- DETAIL MODAL -->
+        <div class="modal-overlay" id="detailModal">
+          <div class="modal-box">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold text-base">Detail Transaksi Outbound</h2>
+              <button type="button" class="text-slate-500" data-close-modal>
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <div id="detailContent" class="space-y-3 text-sm"></div>
+
+            <div class="flex justify-end mt-5">
+              <button type="button" class="btn btn-primary" data-close-modal>
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW OUTBOUND MODAL -->
+        <div class="modal-overlay" id="newOutboundModal">
+          <div class="modal-box">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold text-base">Buat Pengeluaran Barang Baru</h2>
+              <button type="button" class="text-slate-500" data-close-modal>
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <form id="newOutboundForm" class="space-y-3">
+              <div>
+                <label class="block mb-1 font-semibold">Nomor DO</label>
+                <input
+                  type="text"
+                  name="nomorDO"
+                  placeholder="Contoh: DO-2025-0645"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold">Tujuan</label>
+                <input
+                  type="text"
+                  name="tujuan"
+                  placeholder="Nama cabang / divisi tujuan"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold">PIC Penerima</label>
+                <input
+                  type="text"
+                  name="pic"
+                  placeholder="Nama PIC penerima"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold">Detail Komoditas</label>
+                <input
+                  type="text"
+                  name="komoditas"
+                  placeholder="Nama barang"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold">Jumlah</label>
+                <input
+                  type="text"
+                  name="qty"
+                  placeholder="Contoh: 10 Unit"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold"
+                  >Gate / Staging Rak</label
+                >
+                <input
+                  type="text"
+                  name="rak"
+                  placeholder="Contoh: WH01-ZA-RA02"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block mb-1 font-semibold">Jenis Pengiriman</label>
+                <select name="jenis" class="w-full" required>
+                  <option value="Ekspedisi">Ekspedisi</option>
+                  <option value="Kurir Internal">Kurir Internal</option>
+                  <option value="Pick-up Internal">Pick-up Internal</option>
+                </select>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="btn" data-close-modal>
+                  Batal
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-check"></i>
+                  Simpan Transaksi
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-      <section class="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="card">
-          <p class="text-xs text-slate-500">Total Keluar Hari Ini</p>
-          <p class="text-3xl font-bold mt-1">1.180 Unit</p>
-          <p class="text-xs text-green-700 mt-1">22 order selesai dikirim</p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">Permintaan / DO Dalam Proses</p>
-          <p class="text-3xl font-bold mt-1">11 Berkas</p>
-          <p class="text-xs text-slate-500 mt-1">
-            7 selesai packing · 4 sedang picking
-          </p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">
-            Akurasi Picking &amp; QC Outbound
-          </p>
-          <p class="text-3xl font-bold mt-1">99,8%</p>
-          <p class="text-xs text-green-700 mt-1">
-            1.178 unit lolos · 2 ganti SKU
-          </p>
-        </div>
-        <div class="card">
-          <p class="text-xs text-slate-500">Menunggu Muat / Dispatch</p>
-          <p class="text-3xl font-bold mt-1">240 Unit</p>
-          <p class="text-xs text-amber-700 mt-1">
-            Area staging outbound gate 03-05
-          </p>
-        </div>
-      </section>
-      <section>
-        <h2 class="font-bold mb-2">
-          Status Slot Loading Dock &amp; Antrean Armada Outbound
-        </h2>
-        <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div class="card">
-            <div class="flex justify-between text-xs">
-              <b>DOCK 01</b><span class="badge b-blue">Proses Muat</span>
-            </div>
-            <p class="font-semibold text-sm mt-2">Hub Surabaya DC-02</p>
-            <p class="text-xs text-slate-500 mb-3">
-              JNE Trucking B 9821 UXT · 380 Karton
-            </p>
-            <div class="bar"><i style="width: 85%"></i></div>
-            <p class="text-[11px] text-slate-500 mt-1">Progress muat 85%</p>
-          </div>
-          <div class="card">
-            <div class="flex justify-between text-xs">
-              <b>DOCK 02</b><span class="badge b-slate">Verifikasi DO</span>
-            </div>
-            <p class="font-semibold text-sm mt-2">
-              Divisi Operasional &amp; IT Pusat
-            </p>
-            <p class="text-xs text-slate-500 mb-3">
-              Kurir Internal Van B 1204 KLA
-            </p>
-            <div class="bar"><i style="width: 95%"></i></div>
-            <p class="text-[11px] text-slate-500 mt-1">Scan barcode 95%</p>
-          </div>
-          <div class="card">
-            <div class="flex justify-between text-xs">
-              <b>DOCK 03</b><span class="badge b-amber">Staging Pallet</span>
-            </div>
-            <p class="font-semibold text-sm mt-2">Hub Bandung DC-03</p>
-            <p class="text-xs text-slate-500 mb-3">
-              SiCepat Cargo B 9331 XJ · 420 Master Box
-            </p>
-            <div class="bar"><i style="width: 45%"></i></div>
-            <p class="text-[11px] text-slate-500 mt-1">Picking gudang 45%</p>
-          </div>
-          <div class="card">
-            <div class="flex justify-between text-xs">
-              <b>DOCK 04</b><span class="badge b-slate">Menunggu Truk</span>
-            </div>
-            <p class="font-semibold text-sm mt-2">
-              Divisi Maintenance &amp; GA
-            </p>
-            <p class="text-xs text-slate-500 mb-3">
-              Pick-up internal DC · 80 unit
-            </p>
-            <div class="bar"><i style="width: 0%"></i></div>
-            <p class="text-[11px] text-slate-500 mt-1">
-              Estimasi tiba 10:45 WIB
-            </p>
-          </div>
-        </div>
-      </section>
-      <div class="card flex flex-wrap gap-2">
-        <input
-          class="flex-1 min-w-[220px] bg-slate-100 rounded-lg px-3 py-2 text-xs"
-          placeholder="Cari nomor DO, surat jalan, divisi / cabang tujuan..."
-        /><select class="btn font-normal">
-          <option>Semua Tujuan</option></select
-        ><select class="btn font-normal">
-          <option>Status Pengeluaran (Semua)</option></select
-        ><select class="btn font-normal">
-          <option>Jenis Pengiriman: Semua</option>
-        </select>
-      </div>
-      <section class="card p-0 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[900px]">
-            <thead>
-              <tr>
-                <th class="th">NO. DO &amp; SURAT JALAN</th>
-                <th class="th">TUJUAN &amp; PIC PENERIMA</th>
-                <th class="th">DETAIL KOMODITAS</th>
-                <th class="th">TOTAL QTY</th>
-                <th class="th">GATE / STAGING RAK</th>
-                <th class="th">STATUS DISPATCH &amp; QC</th>
-                <th class="th">AKSI</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="td">
-                  <b class="sku">DO-2025-0641</b><br />SJ-4412/OUT-JKT
-                </td>
-                <td class="td">Hub Surabaya DC-02<br />PIC: Slamet Riyadi</td>
-                <td class="td">MacBook Pro M1 &amp; Workstation</td>
-                <td class="td">60 Unit</td>
-                <td class="td">WH01-ZA-RA02</td>
-                <td class="td">
-                  <span class="badge b-green">Selesai Dispatch</span>
-                </td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">DO-2025-0642</b><br />SJ-4413/OUT-JKT
-                </td>
-                <td class="td">
-                  Divisi IT &amp; Infrastruktur<br />PIC: Adrian Pratama
-                </td>
-                <td class="td">Mechanical Keyboard RGB &amp; Mouse</td>
-                <td class="td">45 Unit</td>
-                <td class="td">WH01-ZB-RB01</td>
-                <td class="td">
-                  <span class="badge b-green">Selesai Diserahkan</span>
-                </td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">DO-2025-0643</b><br />SJ-4414/OUT-JKT
-                </td>
-                <td class="td">Hub Bandung DC-03<br />PIC: Hendra K.</td>
-                <td class="td">Sony WH-1000XM4 &amp; Audio System</td>
-                <td class="td">120 Unit</td>
-                <td class="td">WH01-ZB-RB02</td>
-                <td class="td">
-                  <span class="badge b-blue">Proses Muat Dock 01 (85%)</span>
-                </td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="td">
-                  <b class="sku">DO-2025-0644</b><br />SJ-4415/OUT-JKT
-                </td>
-                <td class="td">
-                  Divisi Operasional &amp; Hub<br />PIC: Bambang Sugiarto
-                </td>
-                <td class="td">Barcode Scanner Zebra &amp; Label Roll</td>
-                <td class="td">35 Unit</td>
-                <td class="td">WH02-RD01</td>
-                <td class="td">
-                  <span class="badge b-amber">Sedang Picking</span>
-                </td>
-                <td class="td">
-                  <span class="text-blue-700 font-semibold">Detail</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="p-3 text-xs text-slate-500 border-t border-slate-100">
-          Menampilkan 1 - 4 dari 16 transaksi outbound
-        </p>
-      </section>
     </template>
+
+    <!-- MAIN LAYOUT SCRIPT -->
+    <script src="../layouts/main-layout.js"></script>
+
     <script>
-      // Memuat layout bersama (butuh server lokal, mis. Live Server)
+      /* =========================================
+         LOAD MAIN LAYOUT
+      ========================================= */
+
       fetch("../layouts/MainLayout.html")
-        .then((r) => r.text())
-        .then((h) => {
-          document.getElementById("app").innerHTML = h;
-          document
-            .getElementById("content")
-            .append(document.getElementById("page").content);
-          document
-            .querySelector('[data-nav="' + document.body.dataset.active + '"]')
-            ?.classList.add("nav-active");
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html tidak ditemukan: " + response.status,
+            );
+          }
+
+          return response.text();
+        })
+        .then((html) => {
+          const app = document.getElementById("app");
+
+          if (!app) {
+            throw new Error("Elemen #app tidak ditemukan.");
+          }
+
+          app.innerHTML = html;
+
+          const content = document.getElementById("content");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html",
+            );
+          }
+
+          const pageTemplate = document.getElementById("page");
+
+          if (!pageTemplate) {
+            throw new Error("Template halaman #page tidak ditemukan.");
+          }
+
+          content.append(pageTemplate.content.cloneNode(true));
+
+          /* INISIALISASI SIDEBAR DAN MAIN LAYOUT */
+          if (typeof window.initMainLayout === "function") {
+            window.initMainLayout();
+          }
+
+          /* RENDER ICON LUCIDE UNTUK MAIN LAYOUT */
+          if (
+            window.lucide &&
+            typeof window.lucide.createIcons === "function"
+          ) {
+            window.lucide.createIcons();
+          }
+
+          /* INISIALISASI FITUR HALAMAN */
+          initOutboundPage();
+        })
+        .catch((error) => {
+          console.error("Gagal memuat halaman:", error);
+
+          const app = document.getElementById("app");
+
+          if (app) {
+            app.innerHTML = `
+              <div style="padding:24px;color:#dc2626;font-family:Arial,sans-serif">
+                <h2>Gagal memuat halaman.</h2>
+                <p>Periksa lokasi MainLayout.html, main-layout.js, dan koneksi internet.</p>
+                <p>${error.message}</p>
+              </div>
+            `;
+          }
         });
+
+      /* =========================================
+         OUTBOUND PAGE INTERACTION
+      ========================================= */
+
+      function initOutboundPage() {
+        const content = document.getElementById("content");
+
+        if (!content) return;
+
+        const searchInput = content.querySelector("#searchOutbound");
+        const filterTujuan = content.querySelector("#filterTujuan");
+        const filterStatus = content.querySelector("#filterStatus");
+        const filterJenis = content.querySelector("#filterJenis");
+        const tableBody = content.querySelector("#outboundTableBody");
+        const tableInfo = content.querySelector("#tableInfo");
+
+        const detailModal = content.querySelector("#detailModal");
+        const detailContent = content.querySelector("#detailContent");
+        const newOutboundModal = content.querySelector("#newOutboundModal");
+
+        let currentPage = 1;
+        const rowsPerPage = 4;
+
+        function getRows() {
+          return Array.from(tableBody.querySelectorAll("tr"));
+        }
+
+        function getFilteredRows() {
+          const keyword = searchInput.value.trim().toLowerCase();
+          const tujuan = filterTujuan.value.toLowerCase();
+          const status = filterStatus.value.toLowerCase();
+          const jenis = filterJenis.value.toLowerCase();
+
+          return getRows().filter((row) => {
+            const rowText = row.innerText.toLowerCase();
+
+            const rowTujuan = row.dataset.tujuan.toLowerCase();
+            const rowStatus = row.dataset.status.toLowerCase();
+            const rowJenis = row.dataset.jenis.toLowerCase();
+
+            const matchSearch =
+              !keyword ||
+              rowText.includes(keyword) ||
+              Object.values(row.dataset).some((value) =>
+                String(value).toLowerCase().includes(keyword),
+              );
+
+            const matchTujuan =
+              !tujuan ||
+              rowTujuan.includes(tujuan) ||
+              (tujuan === "divisi internal" && rowTujuan.includes("divisi"));
+
+            const matchStatus = !status || rowStatus === status;
+
+            const matchJenis = !jenis || rowJenis === jenis;
+
+            return matchSearch && matchTujuan && matchStatus && matchJenis;
+          });
+        }
+
+        function renderTable() {
+          const allRows = getRows();
+          const filteredRows = getFilteredRows();
+
+          const totalPages = Math.max(
+            1,
+            Math.ceil(filteredRows.length / rowsPerPage),
+          );
+
+          if (currentPage > totalPages) {
+            currentPage = totalPages;
+          }
+
+          const start = (currentPage - 1) * rowsPerPage;
+          const end = start + rowsPerPage;
+
+          allRows.forEach((row) => {
+            row.style.display = "none";
+          });
+
+          filteredRows.slice(start, end).forEach((row) => {
+            row.style.display = "";
+          });
+
+          if (filteredRows.length === 0) {
+            tableBody.innerHTML = `
+              <tr id="emptyOutboundRow">
+                <td colspan="7" class="td text-center text-slate-500" style="padding:28px">
+                  <i class="fa-solid fa-folder-open text-2xl mb-2"></i>
+                  <br />
+                  Tidak ada transaksi yang sesuai dengan pencarian.
+                </td>
+              </tr>
+            `;
+          } else {
+            const emptyRow = content.querySelector("#emptyOutboundRow");
+            if (emptyRow) emptyRow.remove();
+          }
+
+          const displayedStart = filteredRows.length ? start + 1 : 0;
+          const displayedEnd = Math.min(end, filteredRows.length);
+
+          tableInfo.textContent = `Menampilkan ${displayedStart} - ${displayedEnd} dari ${filteredRows.length} transaksi outbound`;
+
+          renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+          const pagination = content.querySelector("#pagination");
+
+          pagination.innerHTML = `
+            <button type="button" class="btn text-xs" id="prevPage"
+              ${currentPage === 1 ? "disabled" : ""}
+              aria-label="Halaman sebelumnya">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <button type="button" class="btn btn-primary text-xs"
+              aria-current="page">
+              ${currentPage}
+            </button>
+
+            <button type="button" class="btn text-xs" id="nextPage"
+              ${currentPage >= totalPages ? "disabled" : ""}
+              aria-label="Halaman berikutnya">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          `;
+
+          pagination
+            .querySelector("#prevPage")
+            .addEventListener("click", () => {
+              if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+              }
+            });
+
+          pagination
+            .querySelector("#nextPage")
+            .addEventListener("click", () => {
+              if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+              }
+            });
+        }
+
+        /* PENCARIAN DAN FILTER */
+
+        searchInput.addEventListener("input", () => {
+          currentPage = 1;
+          renderTable();
+        });
+
+        [filterTujuan, filterStatus, filterJenis].forEach((filter) => {
+          filter.addEventListener("change", () => {
+            currentPage = 1;
+            renderTable();
+          });
+        });
+
+        /* RESET FILTER */
+
+        content
+          .querySelector("#resetFilterBtn")
+          .addEventListener("click", () => {
+            searchInput.value = "";
+            filterTujuan.value = "";
+            filterStatus.value = "";
+            filterJenis.value = "";
+            currentPage = 1;
+            renderTable();
+          });
+
+        /* DETAIL TRANSAKSI */
+
+        tableBody.addEventListener("click", (event) => {
+          const button = event.target.closest(".detail-btn");
+
+          if (!button) return;
+
+          const row = button.closest("tr");
+
+          if (!row || !row.dataset.do) return;
+
+          const fields = [
+            ["Nomor DO", row.dataset.do],
+            ["Surat Jalan", row.dataset.surat],
+            ["Tujuan", row.dataset.tujuan],
+            ["PIC Penerima", row.dataset.pic],
+            ["Detail Komoditas", row.dataset.komoditas],
+            ["Total Quantity", row.dataset.qty],
+            ["Gate / Staging Rak", row.dataset.rak],
+            ["Status", row.dataset.status],
+            ["Jenis Pengiriman", row.dataset.jenis],
+            ["Armada", row.dataset.armada],
+          ];
+
+          detailContent.innerHTML = fields
+            .map(
+              ([label, value]) => `
+            <div class="flex flex-col gap-1 border-b border-slate-100 pb-2">
+              <span class="text-xs text-slate-500">${label}</span>
+              <strong class="text-slate-800">${escapeHTML(value)}</strong>
+            </div>
+          `,
+            )
+            .join("");
+
+          detailModal.classList.add("show");
+        });
+
+        /* TUTUP MODAL */
+
+        content.querySelectorAll("[data-close-modal]").forEach((button) => {
+          button.addEventListener("click", () => {
+            button.closest(".modal-overlay").classList.remove("show");
+          });
+        });
+
+        [detailModal, newOutboundModal].forEach((modal) => {
+          modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+              modal.classList.remove("show");
+            }
+          });
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            detailModal.classList.remove("show");
+            newOutboundModal.classList.remove("show");
+          }
+        });
+
+        /* BUAT TRANSAKSI BARU */
+
+        content
+          .querySelector("#newOutboundBtn")
+          .addEventListener("click", () => {
+            newOutboundModal.classList.add("show");
+          });
+
+        content
+          .querySelector("#newOutboundForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const form = event.currentTarget;
+            const formData = new FormData(form);
+
+            const nomorDO = String(formData.get("nomorDO")).trim();
+            const tujuan = String(formData.get("tujuan")).trim();
+            const pic = String(formData.get("pic")).trim();
+            const komoditas = String(formData.get("komoditas")).trim();
+            const qty = String(formData.get("qty")).trim();
+            const rak = String(formData.get("rak")).trim();
+            const jenis = String(formData.get("jenis")).trim();
+
+            if (!nomorDO || !tujuan || !pic || !komoditas || !qty || !rak) {
+              alert("Lengkapi semua data transaksi terlebih dahulu.");
+              return;
+            }
+
+            const duplicate = getRows().some(
+              (row) => row.dataset.do.toLowerCase() === nomorDO.toLowerCase(),
+            );
+
+            if (duplicate) {
+              alert("Nomor DO sudah terdaftar.");
+              return;
+            }
+
+            const row = document.createElement("tr");
+
+            row.dataset.do = nomorDO;
+            row.dataset.surat = "-";
+            row.dataset.tujuan = tujuan;
+            row.dataset.pic = pic;
+            row.dataset.komoditas = komoditas;
+            row.dataset.qty = qty;
+            row.dataset.rak = rak;
+            row.dataset.status = "Sedang Picking";
+            row.dataset.jenis = jenis;
+            row.dataset.armada = "-";
+
+            row.innerHTML = `
+              <td class="td">
+                <b class="sku">${escapeHTML(nomorDO)}</b><br />
+                <span class="text-xs text-slate-500">Belum diterbitkan</span>
+              </td>
+              <td class="td">
+                ${escapeHTML(tujuan)}<br />
+                <span class="text-xs text-slate-500">PIC: ${escapeHTML(pic)}</span>
+              </td>
+              <td class="td">${escapeHTML(komoditas)}</td>
+              <td class="td">${escapeHTML(qty)}</td>
+              <td class="td">${escapeHTML(rak)}</td>
+              <td class="td">
+                <span class="badge b-amber">Sedang Picking</span>
+              </td>
+              <td class="td">
+                <button type="button" class="detail-btn">Detail</button>
+              </td>
+            `;
+
+            tableBody.appendChild(row);
+
+            form.reset();
+            newOutboundModal.classList.remove("show");
+
+            searchInput.value = "";
+            filterTujuan.value = "";
+            filterStatus.value = "";
+            filterJenis.value = "";
+
+            currentPage = 1;
+            renderTable();
+
+            alert("Transaksi berhasil ditambahkan ke daftar.");
+          });
+
+        /* EKSPOR CSV */
+
+        content.querySelector("#exportBtn").addEventListener("click", () => {
+          const rows = getFilteredRows();
+
+          if (rows.length === 0) {
+            alert("Tidak ada data untuk diekspor.");
+            return;
+          }
+
+          const headers = [
+            "Nomor DO",
+            "Surat Jalan",
+            "Tujuan",
+            "PIC Penerima",
+            "Detail Komoditas",
+            "Total Quantity",
+            "Gate / Staging Rak",
+            "Status",
+            "Jenis Pengiriman",
+            "Armada",
+          ];
+
+          const csvRows = rows.map((row) => [
+            row.dataset.do,
+            row.dataset.surat,
+            row.dataset.tujuan,
+            row.dataset.pic,
+            row.dataset.komoditas,
+            row.dataset.qty,
+            row.dataset.rak,
+            row.dataset.status,
+            row.dataset.jenis,
+            row.dataset.armada,
+          ]);
+
+          const escapeCSV = (value) =>
+            `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+          const csvContent = [
+            headers.map(escapeCSV).join(","),
+            ...csvRows.map((row) => row.map(escapeCSV).join(",")),
+          ].join("\r\n");
+
+          const blob = new Blob(["\uFEFF" + csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = "data-barang-keluar.csv";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(url);
+        });
+
+        /* JADWAL DISPATCH */
+
+        content.querySelector("#dispatchBtn").addEventListener("click", () => {
+          alert(
+            "Monitoring Jadwal Dispatch Armada\n\n" +
+              "DOCK 01: Proses Muat - 85%\n" +
+              "DOCK 02: Verifikasi DO - 95%\n" +
+              "DOCK 03: Staging Pallet - 45%\n" +
+              "DOCK 04: Menunggu Truk",
+          );
+        });
+
+        renderTable();
+      }
+
+      /* =========================================
+         HTML ESCAPE
+      ========================================= */
+
+      function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => {
+          const entities = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;",
+          };
+
+          return entities[character];
+        });
+      }
     </script>
   </body>
 </html>
