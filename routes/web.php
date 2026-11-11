@@ -40,6 +40,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/hubs-by-city', [App\Http\Controllers\HubSelectionController::class, 'getHubsByCity'])->name('hubs-by-city');
     });
     
+    // ========================================================================
+    // PROFILE ROUTES (All authenticated users)
+    // ========================================================================
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show'])->name('show');
+        Route::get('/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        Route::put('/email', [App\Http\Controllers\ProfileController::class, 'updateEmail'])->name('email');
+        Route::put('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password');
+        Route::post('/photo', [App\Http\Controllers\ProfileController::class, 'uploadPhoto'])->name('photo.upload');
+        Route::delete('/photo', [App\Http\Controllers\ProfileController::class, 'deletePhoto'])->name('photo.delete');
+    });
+    
     // Default Dashboard (redirect based on role) - untuk authenticated user
     Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
@@ -68,7 +81,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('homepage.admin', ['user' => auth()->user()]);
+            return view('dashboard.index');
         })->name('dashboard');
         
         // User Management (permission: user.manage)
@@ -98,7 +111,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:kepala_gudang')->prefix('gudang')->name('gudang.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('homepage.admin', ['user' => auth()->user()]);
+            return view('dashboard.index');
         })->name('dashboard');
         
         // Master Data (permission: master.manage)
@@ -125,7 +138,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:hr')->prefix('hr')->name('hr.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('hr_dashboard', ['user' => auth()->user()]);
+            return view('dashboard.index');
         })->name('dashboard');
         
         // Approval Queue (permission: issue.approve)
@@ -141,7 +154,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:pegawai')->prefix('pegawai')->name('pegawai.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('homepage.admin', ['user' => auth()->user()]);
+            return view('dashboard.index');
         })->name('dashboard');
         
         // Barang Masuk (permission: receipt.create)
@@ -164,7 +177,7 @@ Route::middleware('auth')->group(function () {
     // ========================================================================
     Route::middleware('role:audit')->prefix('audit')->name('audit.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('homepage.admin', ['user' => auth()->user()]);
+            return view('dashboard.index');
         })->name('dashboard');
         
         // Audit Logs (permission: audit.view)
@@ -202,7 +215,7 @@ Route::middleware('auth')->group(function () {
     
     // Default Dashboard (fallback)
     Route::get('/dashboard', function () {
-        return view('homepage.dashboard', ['user' => auth()->user()]);
+        return view('dashboard.index');
     })->name('dashboard');
 });
 
