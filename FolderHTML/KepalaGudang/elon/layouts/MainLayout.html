@@ -1,13 +1,21 @@
-<!-- MAIN LAYOUT ASTRO INVENTORY -->
+<!-- =========================================
+     ASTRO INVENTORY - MAIN LAYOUT
+========================================= -->
 
-<!-- SIDEBAR BACKDROP MOBILE -->
+<!-- =========================================
+     SIDEBAR BACKDROP MOBILE
+========================================= -->
+
 <div
   id="sidebar-backdrop"
   class="sidebar-backdrop"
-  onclick="toggleSidebar()"
+  onclick="closeSidebar()"
 ></div>
 
-<!-- SIDEBAR -->
+<!-- =========================================
+     SIDEBAR
+========================================= -->
+
 <aside id="sidebar" class="astro-sidebar">
   <!-- LOGO BRAND -->
   <div class="sidebar-brand">
@@ -27,7 +35,12 @@
     <div class="nav-section">
       <p class="nav-heading">MENU UTAMA</p>
 
-      <a href="./dashboard.html" class="nav-link" data-nav="dashboard">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="dashboard"
+        data-page-path="dashboard.html"
+      >
         <i data-lucide="layout-dashboard"></i>
         <span>Dashboard Audit</span>
       </a>
@@ -37,32 +50,62 @@
     <div class="nav-section">
       <p class="nav-heading">PEMERIKSAAN &amp; INVENTARIS</p>
 
-      <a href="./data-barang.html" class="nav-link" data-nav="data-barang">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="data-barang"
+        data-page-path="data-barang.html"
+      >
         <i data-lucide="package"></i>
         <span>Data Barang</span>
       </a>
 
-      <a href="./data-gudang.html" class="nav-link" data-nav="data-gudang">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="data-gudang"
+        data-page-path="data-gudang.html"
+      >
         <i data-lucide="warehouse"></i>
         <span>Data Gudang &amp; Lokasi</span>
       </a>
 
-      <a href="./barang-masuk.html" class="nav-link" data-nav="barang-masuk">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="barang-masuk"
+        data-page-path="barang-masuk.html"
+      >
         <i data-lucide="arrow-down-left"></i>
         <span>Barang Masuk</span>
       </a>
 
-      <a href="./barang-keluar.html" class="nav-link" data-nav="barang-keluar">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="barang-keluar"
+        data-page-path="barang-keluar.html"
+      >
         <i data-lucide="arrow-up-right"></i>
         <span>Barang Keluar</span>
       </a>
 
-      <a href="./mutasi-barang.html" class="nav-link" data-nav="mutasi-barang">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="mutasi-barang"
+        data-page-path="mutasi-barang.html"
+      >
         <i data-lucide="arrow-left-right"></i>
         <span>Mutasi Barang</span>
       </a>
 
-      <a href="./stok-opname.html" class="nav-link" data-nav="stok-opname">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="stok-opname"
+        data-page-path="stok-opname.html"
+      >
         <i data-lucide="clipboard-check"></i>
         <span>Stok Opname</span>
       </a>
@@ -72,22 +115,42 @@
     <div class="nav-section">
       <p class="nav-heading">INVESTIGASI &amp; KEPATUHAN</p>
 
-      <a href="./log-aktivitas.html" class="nav-link" data-nav="log-aktivitas">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="log-aktivitas"
+        data-page-path="audit/log-aktivitas.html"
+      >
         <i data-lucide="history"></i>
         <span>Log Aktivitas</span>
       </a>
 
-      <a href="./temuan-audit.html" class="nav-link" data-nav="temuan-audit">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="temuan-audit"
+        data-page-path="audit/temuan-audit.html"
+      >
         <i data-lucide="scan-search"></i>
         <span>Temuan Audit</span>
       </a>
 
-      <a href="./tindak-lanjut.html" class="nav-link" data-nav="tindak-lanjut">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="tindak-lanjut"
+        data-page-path="audit/tindak-lanjut.html"
+      >
         <i data-lucide="list-checks"></i>
         <span>Tindak Lanjut Temuan</span>
       </a>
 
-      <a href="./laporan-audit.html" class="nav-link" data-nav="laporan-audit">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="laporan"
+        data-page-path="audit/laporan.html"
+      >
         <i data-lucide="file-text"></i>
         <span>Laporan Audit</span>
       </a>
@@ -97,17 +160,32 @@
     <div class="nav-section">
       <p class="nav-heading">PENGATURAN &amp; AKUN</p>
 
-      <a href="./notifikasi.html" class="nav-link" data-nav="notifikasi">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="notifikasi"
+        data-page-path="audit/notifikasi.html"
+      >
         <i data-lucide="bell"></i>
         <span>Notifikasi</span>
       </a>
 
-      <a href="./pengaturan.html" class="nav-link" data-nav="pengaturan">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="pengaturan"
+        data-page-path="audit/pengaturan.html"
+      >
         <i data-lucide="settings"></i>
         <span>Pengaturan</span>
       </a>
 
-      <a href="./profil.html" class="nav-link" data-nav="profil">
+      <a
+        href="#"
+        class="nav-link"
+        data-nav="profil"
+        data-page-path="profil.html"
+      >
         <i data-lucide="user-round"></i>
         <span>Profil Saya</span>
       </a>
@@ -115,17 +193,25 @@
   </nav>
 </aside>
 
-<!-- MAIN AREA -->
+<!-- =========================================
+     MAIN AREA
+========================================= -->
+
 <div id="main-area" class="astro-main">
-  <!-- TOPBAR -->
+  <!-- =====================================
+       TOPBAR
+  ====================================== -->
+
   <header class="astro-topbar">
     <!-- TOPBAR LEFT -->
     <div class="topbar-left">
+      <!-- SIDEBAR TOGGLE -->
       <button
         type="button"
         class="sidebar-toggle"
         onclick="toggleSidebar()"
         aria-label="Buka atau tutup sidebar"
+        aria-controls="sidebar"
       >
         <i data-lucide="menu"></i>
       </button>
@@ -133,7 +219,8 @@
       <!-- LOKASI -->
       <div class="location-badge">
         <i data-lucide="network"></i>
-        <span>Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span>
+
+        <span> Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama) </span>
       </div>
 
       <!-- STATUS OPERASIONAL -->
@@ -151,13 +238,21 @@
 
         <input
           type="text"
+          id="globalSearch"
           placeholder="Cari SKU, resi, transaksi..."
           aria-label="Pencarian global"
         />
       </div>
 
       <!-- NOTIFICATION -->
-      <button type="button" class="notification-button" aria-label="Notifikasi">
+      <button
+        type="button"
+        class="notification-button"
+        aria-label="Notifikasi"
+        title="Notifikasi"
+        data-page-path="audit/notifikasi.html"
+        data-topbar-navigation
+      >
         <i data-lucide="bell"></i>
         <span class="notification-dot"></span>
       </button>
@@ -172,11 +267,22 @@
           <p class="user-role">Auditor Internal</p>
         </div>
 
-        <div class="user-avatar">BS</div>
+        <a
+          href="#"
+          class="user-avatar"
+          aria-label="Buka profil pengguna"
+          title="Profil Saya"
+          data-page-path="profil.html"
+        >
+          BS
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- PAGE CONTENT -->
+  <!-- =====================================
+       PAGE CONTENT
+  ====================================== -->
+
   <main id="content" class="astro-content"></main>
 </div>

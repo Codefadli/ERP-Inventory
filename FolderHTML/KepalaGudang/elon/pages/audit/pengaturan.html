@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Pengaturan | Astro Inventory</title>
+
+    <!-- LIBRARY -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <!-- GLOBAL STYLES & JAVASCRIPT -->
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <script src="../../layouts/main-layout.js"></script>
+
+    <style>
+      body {
+        font-family: "Inter", Arial, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        font-size: 12px;
+      }
+
+      #content {
+        min-width: 0;
+      }
+
+      .settings-page {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .settings-page * {
+        box-sizing: border-box;
+      }
+
+      .settings-page button,
+      .settings-page input,
+      .settings-page select {
+        font: inherit;
+      }
+
+      .settings-page button {
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      .settings-page button:focus-visible,
+      .settings-page input:focus-visible,
+      .settings-page select:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      /* HEADER */
+
+      .settings-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+      }
+
+      .settings-header h1 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.35;
+        letter-spacing: -0.35px;
+      }
+
+      .settings-header p {
+        max-width: 700px;
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      /* BUTTONS */
+
+      .settings-btn {
+        display: inline-flex;
+        min-height: 36px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      }
+
+      .settings-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+      }
+
+      .settings-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .settings-btn.primary {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #fff;
+      }
+
+      .settings-btn.primary:hover {
+        background: #1e40af;
+      }
+
+      .settings-btn.danger {
+        color: #dc2626;
+        border-color: #fecaca;
+        background: #fff;
+      }
+
+      .settings-btn.danger:hover {
+        background: #fef2f2;
+      }
+
+      /* MAIN LAYOUT */
+
+      .settings-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.9fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .settings-main,
+      .settings-aside {
+        min-width: 0;
+      }
+
+      .settings-main {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .settings-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      /* TABS */
+
+      .settings-tabs {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-height: 42px;
+      }
+
+      .settings-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .settings-tab:hover {
+        background: #f1f5f9;
+      }
+
+      .settings-tab.active {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #fff;
+      }
+
+      .settings-tab svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* SETTINGS CARD */
+
+      .settings-card {
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #fff;
+      }
+
+      .settings-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .settings-card-header h3 {
+        color: #172033;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .settings-card-header p {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .settings-tag {
+        display: inline-flex;
+        min-height: 21px;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .settings-tag.green {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      .settings-tag.blue {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .settings-tag.slate {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      .settings-tag.red {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      /* SETTING ROW */
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px;
+        border: 1px solid #eef2f7;
+        border-radius: 9px;
+        background: #f8fafc;
+      }
+
+      .settings-row + .settings-row {
+        margin-top: 9px;
+      }
+
+      .settings-row strong {
+        display: block;
+        color: #1e293b;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .settings-row p {
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      /* TOGGLE */
+
+      .settings-toggle {
+        position: relative;
+        display: inline-flex;
+        width: 38px;
+        height: 21px;
+        flex: 0 0 38px;
+        align-items: center;
+        padding: 2px;
+        border: 0;
+        border-radius: 20px;
+        background: #cbd5e1;
+        transition: background 0.2s ease;
+      }
+
+      .settings-toggle::after {
+        content: "";
+        display: block;
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease;
+      }
+
+      .settings-toggle.active {
+        background: #1d4ed8;
+      }
+
+      .settings-toggle.active::after {
+        transform: translateX(17px);
+      }
+
+      .settings-toggle:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 3px;
+      }
+
+      /* AUTHORIZATION */
+
+      .settings-highlight {
+        padding: 14px;
+        border: 1px solid #dbeafe;
+        border-radius: 9px;
+        background: #eff6ff;
+      }
+
+      .settings-highlight-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .settings-highlight strong {
+        color: #1e293b;
+        font-size: 11px;
+      }
+
+      .settings-highlight p {
+        max-width: 470px;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .settings-limit {
+        min-width: 130px;
+        padding: 8px 10px;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        background: #fff;
+        text-align: right;
+      }
+
+      .settings-limit span {
+        display: block;
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .settings-limit strong {
+        display: block;
+        margin-top: 3px;
+        color: #1d4ed8;
+        font-size: 15px;
+      }
+
+      .settings-range {
+        width: 100%;
+        margin-top: 15px;
+        accent-color: #1d4ed8;
+        cursor: pointer;
+      }
+
+      .settings-range-labels {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 9px;
+      }
+
+      /* FORM */
+
+      .settings-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .settings-field label {
+        display: block;
+        margin-bottom: 6px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .settings-field input,
+      .settings-field select {
+        width: 100%;
+        min-height: 36px;
+        padding: 8px 10px;
+        border: 1px solid #dbe4f0;
+        border-radius: 8px;
+        background: #fff;
+        color: #334155;
+        font-size: 11px;
+      }
+
+      .settings-field small {
+        display: block;
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      /* RADIO */
+
+      .settings-radio-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .settings-radio-card {
+        display: block;
+        padding: 11px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+        cursor: pointer;
+      }
+
+      .settings-radio-card:has(input:checked) {
+        border-color: #2563eb;
+        background: #eff6ff;
+      }
+
+      .settings-radio-card label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .settings-radio-card input {
+        accent-color: #1d4ed8;
+      }
+
+      .settings-radio-card p {
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      /* SESSION LIST */
+
+      .settings-session {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 11px;
+        border: 1px solid #eef2f7;
+        border-radius: 8px;
+        background: #f8fafc;
+      }
+
+      .settings-session + .settings-session {
+        margin-top: 8px;
+      }
+
+      .settings-session strong {
+        color: #334155;
+        font-size: 11px;
+      }
+
+      .settings-session p {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .settings-session-time {
+        flex: 0 0 auto;
+        color: #94a3b8;
+        font-size: 10px;
+        text-align: right;
+      }
+
+      /* ASIDE */
+
+      .settings-side-card {
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #fff;
+      }
+
+      .settings-side-card h3 {
+        margin-bottom: 9px;
+        color: #172033;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .settings-side-card > p {
+        margin-bottom: 11px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .settings-detail-list {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .settings-detail {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      .settings-detail strong {
+        color: #334155;
+        font-size: 10px;
+        text-align: right;
+      }
+
+      .settings-progress {
+        height: 6px;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #e2e8f0;
+      }
+
+      .settings-progress div {
+        height: 100%;
+        border-radius: inherit;
+        background: #1d4ed8;
+      }
+
+      .settings-side-icon {
+        display: flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        border-radius: 9px;
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .settings-side-icon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .settings-compliance {
+        padding: 16px;
+        border: 1px solid #bfdbfe;
+        border-radius: 11px;
+        background: #eff6ff;
+      }
+
+      .settings-compliance h3 {
+        color: #1e3a8a;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .settings-compliance p {
+        margin-top: 7px;
+        color: #475569;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      /* TAB PANELS */
+
+      .settings-panel[hidden] {
+        display: none !important;
+      }
+
+      /* TOAST */
+
+      .settings-toast {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        max-width: min(380px, calc(100vw - 32px));
+        padding: 12px 15px;
+        border: 1px solid #dbe4f0;
+        border-radius: 10px;
+        background: #fff;
+        color: #334155;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.13);
+        font-size: 11px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+      }
+
+      .settings-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .settings-toast svg {
+        width: 16px;
+        height: 16px;
+        color: #2563eb;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1050px) {
+        .settings-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .settings-aside {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .settings-compliance {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .settings-header {
+          padding: 16px;
+        }
+
+        .settings-header h1 {
+          font-size: 19px;
+        }
+
+        .settings-aside {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .settings-radio-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .settings-tabs {
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .settings-header .settings-btn {
+          width: 100%;
+        }
+
+        .settings-form-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .settings-session {
+          flex-direction: column;
+        }
+
+        .settings-session-time {
+          text-align: left;
+        }
+
+        .settings-highlight-top {
+          flex-direction: column;
+        }
+
+        .settings-limit {
+          width: 100%;
+          text-align: left;
+        }
+
+        .settings-range-labels {
+          font-size: 8px;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-active="pengaturan">
+    <div id="app"></div>
+
+    <template id="page">
+      <main class="settings-page space-y-5">
+        <!-- HEADER -->
+
+        <section class="settings-header">
+          <div>
+            <div
+              class="flex items-center gap-2 mb-2 text-slate-400 text-[10px] font-semibold"
+            >
+              <span>Dashboard</span>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              <span>Pengaturan &amp; Akun</span>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              <span class="text-blue-700">Pengaturan</span>
+            </div>
+
+            <h1>Pengaturan Akun &amp; Preferensi HR Approver</h1>
+
+            <p>
+              Kelola preferensi alur persetujuan, notifikasi otorisasi, keamanan
+              sesi, dan integrasi perangkat sistem terminal logistik.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="settings-btn" data-action="reset">
+              <i data-lucide="rotate-ccw"></i>
+              Pulihkan Default
+            </button>
+
+            <button
+              type="button"
+              class="settings-btn primary"
+              data-action="save"
+            >
+              <i data-lucide="save"></i>
+              Simpan Perubahan
+            </button>
+          </div>
+        </section>
+
+        <!-- TABS -->
+
+        <nav class="settings-tabs" aria-label="Kategori pengaturan">
+          <button
+            type="button"
+            class="settings-tab active"
+            data-tab="authorization"
+          >
+            <i data-lucide="shield-check"></i>
+            Preferensi Otorisasi
+          </button>
+
+          <button type="button" class="settings-tab" data-tab="notifications">
+            <i data-lucide="bell"></i>
+            Notifikasi
+          </button>
+
+          <button type="button" class="settings-tab" data-tab="security">
+            <i data-lucide="lock"></i>
+            Keamanan &amp; Sesi
+          </button>
+
+          <button type="button" class="settings-tab" data-tab="interface">
+            <i data-lucide="monitor"></i>
+            Tampilan &amp; Bahasa
+          </button>
+        </nav>
+
+        <div class="settings-layout">
+          <!-- MAIN -->
+
+          <section class="settings-main">
+            <!-- AUTHORIZATION PANEL -->
+
+            <div class="settings-panel space-y-3" data-panel="authorization">
+              <section class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3>Ambang Batas &amp; Delegasi Persetujuan</h3>
+                    <p>
+                      Kontrol batas nominal wewenang mandiri dan pendelegasian
+                      eskalasi otomatis.
+                    </p>
+                  </div>
+
+                  <span class="settings-tag green">Aktif Berlaku</span>
+                </div>
+
+                <div class="settings-highlight">
+                  <div class="settings-highlight-top">
+                    <div>
+                      <strong>Batas Otorisasi Mandiri (Single Approver)</strong>
+                      <p>
+                        Nilai mutasi barang di atas ambang ini mewajibkan
+                        persetujuan ganda (Dual-Approval Spv &amp; Head DC).
+                      </p>
+                    </div>
+
+                    <div class="settings-limit">
+                      <span>PLAFON SAAT INI</span>
+                      <strong id="limit-display">Rp 100 Juta</strong>
+                    </div>
+                  </div>
+
+                  <input
+                    type="range"
+                    class="settings-range"
+                    id="authorization-limit"
+                    min="10"
+                    max="500"
+                    step="10"
+                    value="100"
+                  />
+
+                  <div class="settings-range-labels">
+                    <span>Rp 10 Juta</span>
+                    <span>Rp 250 Juta</span>
+                    <span>Rp 500 Juta</span>
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <div class="settings-row">
+                    <div>
+                      <strong>Peringatan Kritis SLA Kadaluwarsa ROP</strong>
+                      <p>
+                        Kirim alert visual darurat dan sinyal suara otomatis
+                        saat antrean mutasi mendekati batas SLA.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="settings-toggle active"
+                      role="switch"
+                      aria-checked="true"
+                      aria-label="Peringatan kritis SLA"
+                    ></button>
+                  </div>
+
+                  <div class="settings-row">
+                    <div>
+                      <strong>Mode Delegasi Otorisasi Sementara</strong>
+                      <p>
+                        Alihkan antrean persetujuan ke kolega pengganti selama
+                        masa nonaktif.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="settings-toggle active"
+                      role="switch"
+                      aria-checked="true"
+                      aria-label="Mode delegasi otorisasi"
+                    ></button>
+                  </div>
+                </div>
+
+                <div class="settings-form-grid mt-3">
+                  <div class="settings-field">
+                    <label for="delegator">Delegator / Pengganti</label>
+                    <select id="delegator">
+                      <option>Dewi Anggraini - HR Supervisor (DC-01)</option>
+                      <option>Rian Hidayat - Admin Logistik</option>
+                      <option>Andi Pratama - Kepala Gudang</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-field">
+                    <label for="delegation-period">Periode Delegasi</label>
+                    <input
+                      type="text"
+                      id="delegation-period"
+                      value="24 Okt 2024 s/d 28 Okt 2024"
+                    />
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- NOTIFICATION PANEL -->
+
+            <div
+              class="settings-panel space-y-3"
+              data-panel="notifications"
+              hidden
+            >
+              <section class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3>Preferensi Notifikasi &amp; Bot</h3>
+                    <p>
+                      Atur kanal pemberitahuan untuk aktivitas inventaris dan
+                      antrean persetujuan.
+                    </p>
+                  </div>
+
+                  <span class="settings-tag green">Konfigurasi Aktif</span>
+                </div>
+
+                <div class="settings-row">
+                  <div>
+                    <strong>Notifikasi dalam Aplikasi</strong>
+                    <p>
+                      Tampilkan pemberitahuan langsung pada dashboard Astro
+                      Inventory.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Notifikasi aplikasi"
+                  ></button>
+                </div>
+
+                <div class="settings-row">
+                  <div>
+                    <strong>Notifikasi Email</strong>
+                    <p>
+                      Kirim pemberitahuan penting ke email kedinasan terdaftar.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Notifikasi email"
+                  ></button>
+                </div>
+
+                <div class="settings-row">
+                  <div>
+                    <strong>Notifikasi Bot Telegram</strong>
+                    <p>
+                      Kirim ringkasan antrean mendesak melalui bot internal.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Notifikasi Telegram"
+                  ></button>
+                </div>
+
+                <div class="settings-row">
+                  <div>
+                    <strong>Notifikasi Suara Tiket Urgent</strong>
+                    <p>
+                      Putar nada peringatan ketika item ROP kritis masuk ke
+                      antrean.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Notifikasi suara"
+                  ></button>
+                </div>
+
+                <div class="settings-form-grid mt-4">
+                  <div class="settings-field">
+                    <label for="digest-frequency">Frekuensi Ringkasan</label>
+                    <select id="digest-frequency">
+                      <option>Real-time</option>
+                      <option>Setiap 30 menit</option>
+                      <option>Per jam</option>
+                      <option>Harian</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-field">
+                    <label for="quiet-hours">Jam Senyap</label>
+                    <select id="quiet-hours">
+                      <option>Nonaktif</option>
+                      <option>22:00 - 06:00 WIB</option>
+                      <option>23:00 - 05:00 WIB</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <section class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3>Integrasi Bot Telegram</h3>
+                    <p>Status koneksi kanal pemberitahuan internal.</p>
+                  </div>
+                  <span class="settings-tag green">Terkoneksi</span>
+                </div>
+
+                <div class="settings-detail-list">
+                  <div class="settings-detail">
+                    <span>Nama Bot</span>
+                    <strong>@AstroApproverBot</strong>
+                  </div>
+                  <div class="settings-detail">
+                    <span>Chat ID Terdaftar</span>
+                    <strong>882949172_DC</strong>
+                  </div>
+                  <div class="settings-detail">
+                    <span>Frekuensi Digest</span>
+                    <strong>Real-time</strong>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="settings-btn mt-4"
+                  data-action="test-bot"
+                >
+                  <i data-lucide="send"></i>
+                  Kirim Tes Pesan Bot
+                </button>
+              </section>
+            </div>
+
+            <!-- SECURITY PANEL -->
+
+            <div class="settings-panel space-y-3" data-panel="security" hidden>
+              <section class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3>Keamanan &amp; Kebijakan Sesi Otentikasi</h3>
+                    <p>
+                      Proteksi kredensial untuk mencegah penyalahgunaan
+                      otorisasi inventaris.
+                    </p>
+                  </div>
+
+                  <span class="settings-tag green">Enkripsi Aktif</span>
+                </div>
+
+                <strong class="block mb-3 text-slate-700">
+                  Waktu Habis Sesi Otomatis
+                </strong>
+
+                <div class="settings-radio-grid">
+                  <div class="settings-radio-card">
+                    <label>
+                      <input type="radio" name="timeout" value="15" />
+                      15 Menit
+                    </label>
+                    <p>Protokol keamanan ketat</p>
+                  </div>
+
+                  <div class="settings-radio-card">
+                    <label>
+                      <input type="radio" name="timeout" value="30" checked />
+                      30 Menit
+                    </label>
+                    <p>Keseimbangan aman &amp; efisien</p>
+                  </div>
+
+                  <div class="settings-radio-card">
+                    <label>
+                      <input type="radio" name="timeout" value="60" />
+                      60 Menit
+                    </label>
+                    <p>Operasional panjang di DC</p>
+                  </div>
+                </div>
+
+                <div class="settings-row mt-3">
+                  <div>
+                    <strong>Verifikasi Dua Langkah (2FA)</strong>
+                    <p>
+                      Membutuhkan token OTP saat menandatangani persetujuan di
+                      atas plafon mandiri.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Verifikasi dua langkah"
+                  ></button>
+                </div>
+              </section>
+
+              <section class="settings-card">
+                <div
+                  class="flex items-center justify-between flex-wrap gap-3 mb-3"
+                >
+                  <div>
+                    <h3 class="font-bold text-slate-800 text-[13px]">
+                      Histori Sesi Login Terminal Aktif
+                    </h3>
+                    <p class="mt-1 text-slate-500 text-[10px]">
+                      Perangkat yang saat ini terhubung ke akun.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="settings-btn danger"
+                    data-action="disconnect-sessions"
+                  >
+                    Putuskan Sesi Lain
+                  </button>
+                </div>
+
+                <div class="settings-session">
+                  <div>
+                    <strong>MacBook Pro 16" • Chrome 129.0</strong>
+                    <span class="settings-tag green ml-1">Sesi Ini</span>
+                    <p>IP: 10.24.110.42 · Terminal Hub Cakung DC-01</p>
+                  </div>
+                  <span class="settings-session-time">Aktif baru saja</span>
+                </div>
+
+                <div class="settings-session">
+                  <div>
+                    <strong>Zebra TC52x Handheld Scanner</strong>
+                    <span class="settings-tag slate ml-1">Mobile DC</span>
+                    <p>IP: 10.24.112.18 · Zona Lorong B3</p>
+                  </div>
+                  <span class="settings-session-time">12 menit lalu</span>
+                </div>
+              </section>
+            </div>
+
+            <!-- INTERFACE PANEL -->
+
+            <div class="settings-panel space-y-3" data-panel="interface" hidden>
+              <section class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3>Preferensi Antarmuka &amp; Regional</h3>
+                    <p>
+                      Atur bahasa, format ekspor, dan konfigurasi regional
+                      sistem inventaris.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="settings-form-grid">
+                  <div class="settings-field">
+                    <label for="language">Bahasa Antarmuka</label>
+                    <select id="language">
+                      <option>Bahasa Indonesia</option>
+                      <option>English</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-field">
+                    <label for="export-format">Format Ekspor Default</label>
+                    <select id="export-format">
+                      <option value="xlsx">Excel (.xlsx)</option>
+                      <option value="pdf">PDF (.pdf)</option>
+                      <option value="csv">CSV (.csv)</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-field">
+                    <label for="timezone">Zona Waktu Operasional</label>
+                    <select id="timezone">
+                      <option>WIB (Asia/Jakarta - UTC+07:00)</option>
+                      <option>WITA (Asia/Makassar - UTC+08:00)</option>
+                      <option>WIT (Asia/Jayapura - UTC+09:00)</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-field">
+                    <label for="date-format">Format Tanggal</label>
+                    <select id="date-format">
+                      <option>DD/MM/YYYY</option>
+                      <option>YYYY-MM-DD</option>
+                      <option>DD MMM YYYY</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <section class="settings-card">
+                <h3 class="font-bold text-slate-800 text-[13px]">
+                  Preferensi Tampilan
+                </h3>
+
+                <div class="settings-row mt-3">
+                  <div>
+                    <strong>Animasi Antarmuka</strong>
+                    <p>
+                      Aktifkan transisi ringan pada navigasi dan panel sistem.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle active"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Animasi antarmuka"
+                  ></button>
+                </div>
+
+                <div class="settings-row">
+                  <div>
+                    <strong>Tampilan Ringkas Tabel</strong>
+                    <p>
+                      Gunakan jarak baris lebih rapat untuk tabel inventaris.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="settings-toggle"
+                    role="switch"
+                    aria-checked="false"
+                    aria-label="Tampilan ringkas tabel"
+                  ></button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <!-- ASIDE -->
+
+          <aside class="settings-aside">
+            <section class="settings-side-card">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h3 class="mb-0">Profil Approver</h3>
+                <span class="settings-tag blue">Tingkat 3</span>
+              </div>
+
+              <div class="settings-side-icon">
+                <i data-lucide="user-round"></i>
+              </div>
+
+              <strong class="block text-slate-800 text-[13px]">
+                Budi Santoso
+              </strong>
+
+              <p class="mt-1 mb-3">HR Approver · Astro Inventory</p>
+
+              <div class="settings-detail-list">
+                <div class="settings-detail">
+                  <span>NIP</span>
+                  <strong>AST-DPR-77840</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Wewenang</span>
+                  <strong>Mutasi &amp; Write-Off</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Terminal</span>
+                  <strong>Cakung DC-01</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Status</span>
+                  <strong>ISO-28000</strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-side-card">
+              <h3>Kapasitas Audit Log</h3>
+
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-slate-500 text-[10px]">
+                  Penyimpanan sesi
+                </span>
+                <strong class="text-slate-800 text-[12px]">84%</strong>
+              </div>
+
+              <div class="settings-progress">
+                <div style="width: 84%"></div>
+              </div>
+
+              <p class="mt-3 mb-0">
+                Auto-arsip tersisa 48 jam sebelum rotasi bulanan.
+              </p>
+            </section>
+
+            <section class="settings-side-card">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h3 class="mb-0">Integrasi Sistem</h3>
+                <span class="settings-tag green">Aktif</span>
+              </div>
+
+              <div class="settings-detail-list">
+                <div class="settings-detail">
+                  <span>Telegram Bot</span>
+                  <strong class="text-green-700">Terkoneksi</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Gateway DC-01</span>
+                  <strong class="text-green-700">Online</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Sinkronisasi</span>
+                  <strong>Real-time</strong>
+                </div>
+                <div class="settings-detail">
+                  <span>Enkripsi</span>
+                  <strong>AES-256</strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-compliance">
+              <h3>
+                <i data-lucide="shield-check" class="inline w-4 h-4 mr-1"></i>
+                Kepatuhan Audit Logistik
+              </h3>
+
+              <p>
+                Setiap perubahan konfigurasi sistem persetujuan dicatat otomatis
+                dalam dokumen kepatuhan logistik AST-SPO-2024. Salinan log
+                terenkripsi ditransmisikan ke Divisi Kepatuhan Internal DC
+                Utama.
+              </p>
+
+              <p class="font-bold text-green-700">
+                <i data-lucide="badge-check" class="inline w-3 h-3 mr-1"></i>
+                Tanda tangan digital terverifikasi
+              </p>
+            </section>
+          </aside>
+        </div>
+      </main>
+
+      <!-- TOAST -->
+
+      <div class="settings-toast" id="settings-toast">
+        <i data-lucide="info"></i>
+        <span id="settings-toast-message"></span>
+      </div>
+    </template>
+
+    <!-- PAGE INITIALIZATION -->
+
+    <script>
+      "use strict";
+
+      async function loadSettingsLayout() {
+        const app = document.getElementById("app");
+
+        if (!app) {
+          console.error("Elemen #app tidak ditemukan.");
+          return;
+        }
+
+        try {
+          const response = await fetch("../../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html gagal dimuat: HTTP " + response.status,
+            );
+          }
+
+          const layoutHTML = await response.text();
+
+          app.innerHTML = layoutHTML;
+
+          const content = document.getElementById("content");
+          const template = document.getElementById("page");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html.",
+            );
+          }
+
+          if (!template) {
+            throw new Error("Template halaman Pengaturan tidak ditemukan.");
+          }
+
+          content.innerHTML = template.innerHTML;
+
+          if (typeof window.initMainLayout !== "function") {
+            throw new Error(
+              "initMainLayout tidak ditemukan. Periksa layouts/main-layout.js.",
+            );
+          }
+
+          const initialized = window.initMainLayout();
+
+          if (initialized === false) {
+            throw new Error("Inisialisasi MainLayout gagal.");
+          }
+
+          initSettingsPage();
+
+          if (typeof window.refreshLucideIcons === "function") {
+            window.refreshLucideIcons();
+          } else if (window.lucide) {
+            window.lucide.createIcons();
+          }
+
+          console.info("Astro Inventory: Halaman Pengaturan berhasil dimuat.");
+        } catch (error) {
+          console.error("Gagal memuat halaman Pengaturan:", error);
+
+          app.innerHTML = `
+            <div style="
+              margin:24px;
+              padding:20px;
+              border:1px solid #fecaca;
+              border-radius:10px;
+              background:#fef2f2;
+              color:#991b1b;
+              font-family:Arial,sans-serif;
+              font-size:13px;
+            ">
+              <strong>Gagal memuat halaman Pengaturan.</strong>
+              <p style="margin-top:8px;">${error.message}</p>
+              <p style="margin-top:8px;">
+                Periksa lokasi MainLayout.html dan main-layout.js.
+              </p>
+            </div>
+          `;
+        }
+      }
+
+      function initSettingsPage() {
+        const page = document.querySelector(".settings-page");
+
+        if (!page) {
+          console.error("Konten Pengaturan tidak ditemukan.");
+          return;
+        }
+
+        const tabs = page.querySelectorAll("[data-tab]");
+        const panels = page.querySelectorAll("[data-panel]");
+        const toast = document.getElementById("settings-toast");
+        const toastMessage = document.getElementById("settings-toast-message");
+
+        let toastTimer = null;
+
+        function showToast(message) {
+          if (!toast || !toastMessage) return;
+
+          toastMessage.textContent = message;
+          toast.classList.add("show");
+
+          clearTimeout(toastTimer);
+
+          toastTimer = setTimeout(function () {
+            toast.classList.remove("show");
+          }, 3000);
+        }
+
+        /* TAB NAVIGATION */
+
+        tabs.forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            const target = tab.dataset.tab;
+
+            tabs.forEach(function (item) {
+              item.classList.toggle("active", item === tab);
+            });
+
+            panels.forEach(function (panel) {
+              panel.hidden = panel.dataset.panel !== target;
+            });
+
+            if (typeof window.refreshLucideIcons === "function") {
+              window.refreshLucideIcons();
+            }
+          });
+        });
+
+        /* TOGGLE SWITCHES */
+
+        page.querySelectorAll(".settings-toggle").forEach(function (toggle) {
+          toggle.addEventListener("click", function () {
+            const active = toggle.classList.toggle("active");
+
+            toggle.setAttribute("aria-checked", String(active));
+          });
+        });
+
+        /* AUTHORIZATION RANGE */
+
+        const limitInput = page.querySelector("#authorization-limit");
+        const limitDisplay = page.querySelector("#limit-display");
+
+        function updateLimit() {
+          if (!limitInput || !limitDisplay) return;
+
+          const value = Number(limitInput.value);
+
+          limitDisplay.textContent =
+            "Rp " + value.toLocaleString("id-ID") + " Juta";
+        }
+
+        if (limitInput) {
+          limitInput.addEventListener("input", updateLimit);
+          updateLimit();
+        }
+
+        /* BUTTON ACTIONS */
+
+        page.addEventListener("click", function (event) {
+          const button = event.target.closest("[data-action]");
+
+          if (!button || !page.contains(button)) return;
+
+          const action = button.dataset.action;
+
+          switch (action) {
+            case "save":
+              showToast(
+                "Pengaturan berhasil divalidasi. Penyimpanan database belum terhubung.",
+              );
+              break;
+
+            case "reset":
+              resetSettings();
+              showToast("Pengaturan formulir telah dipulihkan ke nilai awal.");
+              break;
+
+            case "test-bot":
+              showToast("Tes pesan Bot memerlukan koneksi Telegram.");
+              break;
+
+            case "disconnect-sessions":
+              showToast(
+                "Pemutusan sesi memerlukan layanan autentikasi backend.",
+              );
+              break;
+
+            default:
+              break;
+          }
+        });
+
+        /* RESET SETTINGS */
+
+        function resetSettings() {
+          const confirmed = window.confirm(
+            "Pulihkan semua preferensi ke nilai awal?",
+          );
+
+          if (!confirmed) return;
+
+          if (limitInput) {
+            limitInput.value = "100";
+            updateLimit();
+          }
+
+          page.querySelectorAll(".settings-toggle").forEach(function (toggle) {
+            const defaultActive =
+              toggle.getAttribute("aria-label") === "Tampilan ringkas tabel"
+                ? false
+                : true;
+
+            toggle.classList.toggle("active", defaultActive);
+            toggle.setAttribute("aria-checked", String(defaultActive));
+          });
+
+          const timeoutDefault = page.querySelector(
+            'input[name="timeout"][value="30"]',
+          );
+
+          if (timeoutDefault) {
+            timeoutDefault.checked = true;
+          }
+
+          const exportDefault = page.querySelector("#export-format");
+
+          if (exportDefault) {
+            exportDefault.value = "xlsx";
+          }
+
+          const languageDefault = page.querySelector("#language");
+
+          if (languageDefault) {
+            languageDefault.selectedIndex = 0;
+          }
+
+          const timezoneDefault = page.querySelector("#timezone");
+
+          if (timezoneDefault) {
+            timezoneDefault.selectedIndex = 0;
+          }
+
+          const dateDefault = page.querySelector("#date-format");
+
+          if (dateDefault) {
+            dateDefault.selectedIndex = 0;
+          }
+
+          const digestDefault = page.querySelector("#digest-frequency");
+
+          if (digestDefault) {
+            digestDefault.value = "Real-time";
+          }
+
+          const quietDefault = page.querySelector("#quiet-hours");
+
+          if (quietDefault) {
+            quietDefault.value = "Nonaktif";
+          }
+        }
+
+        console.info("Astro Inventory: Settings page initialized.");
+      }
+
+      loadSettingsLayout();
+    </script>
+  </body>
+</html>

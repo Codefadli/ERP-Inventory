@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Laporan Audit | Astro Inventory</title>
+
+    <!-- TAILWIND -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- LUCIDE -->
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <!-- GLOBAL CSS -->
+    <link rel="stylesheet" href="../../styles/global.css" />
+
+    <style>
+      /* =========================================
+       ASTRO INVENTORY - LAPORAN AUDIT
+       UKURAN KONSISTEN DENGAN LOG AKTIVITAS
+    ========================================= */
+
+      html,
+      body,
+      #app,
+      #app * {
+        font-family: "Inter", Arial, sans-serif !important;
+      }
+
+      #content {
+        width: 100%;
+        min-width: 0;
+        color: #172033;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 12px !important;
+        line-height: 1.5;
+      }
+
+      #content *,
+      #content *::before,
+      #content *::after {
+        box-sizing: border-box;
+      }
+
+      /* PAGE */
+
+      #content .report-page {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      /* TYPOGRAPHY */
+
+      #content h1 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px !important;
+        font-weight: 700;
+        line-height: 1.35 !important;
+        letter-spacing: -0.35px;
+      }
+
+      #content h2,
+      #content h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 14px !important;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      #content p {
+        line-height: 1.5;
+      }
+
+      #content .text-3xl {
+        font-size: 30px !important;
+        line-height: 1.3 !important;
+        font-weight: 700;
+      }
+
+      #content .text-xl {
+        font-size: 22px !important;
+      }
+
+      #content .text-lg {
+        font-size: 17px !important;
+      }
+
+      #content .text-sm {
+        font-size: 12px !important;
+      }
+
+      #content .text-xs {
+        font-size: 11px !important;
+      }
+
+      #content .text-\[9px\] {
+        font-size: 9px !important;
+      }
+
+      #content .text-\[10px\] {
+        font-size: 10px !important;
+      }
+
+      #content .text-\[11px\] {
+        font-size: 11px !important;
+      }
+
+      /* ICON */
+
+      #content svg,
+      #sidebar svg,
+      .astro-topbar svg {
+        display: inline-block;
+        flex-shrink: 0;
+        vertical-align: middle;
+        visibility: visible;
+        opacity: 1;
+      }
+
+      #content i[data-lucide] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+      }
+
+      #content i[data-lucide] svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* HEADER */
+
+      #content .report-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      #content .report-header-description {
+        max-width: 760px;
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      #content .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* BUTTON */
+
+      #content button,
+      #content .btn {
+        font-family: "Inter", Arial, sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600;
+        line-height: 1.4;
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      #content .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
+      }
+
+      #content .btn:hover {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+      }
+
+      #content .btn-primary {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        box-shadow: 0 2px 5px rgba(29, 78, 216, 0.15);
+      }
+
+      #content .btn-primary:hover {
+        color: #fff;
+        border-color: #1e40af;
+        background: #1e40af;
+      }
+
+      #content .btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      #content button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      /* STATISTICS */
+
+      #content .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      #content .stat-card {
+        min-width: 0;
+        min-height: 112px;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .stat-label {
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 1.5;
+      }
+
+      #content .stat-value {
+        margin-top: 7px;
+        color: #0f172a;
+        font-size: 30px !important;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+      }
+
+      #content .stat-value small {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+
+      #content .stat-note {
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      /* FEATURED REPORT */
+
+      #content .featured-report {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 16px;
+        overflow: hidden;
+        border: 1px solid #1e40af;
+        border-radius: 11px;
+        background: linear-gradient(120deg, #1e40af, #1d4ed8);
+        color: #fff;
+      }
+
+      #content .featured-content {
+        flex: 1;
+        min-width: 240px;
+        max-width: 760px;
+      }
+
+      #content .featured-label {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+        color: #dbeafe;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+
+      #content .featured-title {
+        margin-top: 8px;
+        color: #fff;
+        font-size: 17px !important;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      #content .featured-description {
+        margin-top: 8px;
+        color: #dbeafe;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      #content .featured-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 190px;
+      }
+
+      #content .featured-actions .btn {
+        width: 100%;
+        min-height: 36px;
+        white-space: normal;
+      }
+
+      #content .featured-actions .btn-featured {
+        color: #1e40af;
+        border-color: #fff;
+        background: #fff;
+      }
+
+      #content .featured-actions .btn-featured:hover {
+        background: #eff6ff;
+      }
+
+      #content .featured-actions .btn-outline {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      #content .featured-actions .btn-outline:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      /* FILTER */
+
+      #content .filter-panel {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 9px;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.035);
+      }
+
+      #content input,
+      #content select {
+        font-family: "Inter", Arial, sans-serif !important;
+        font-size: 12px !important;
+      }
+
+      #content input:focus,
+      #content select:focus {
+        outline: none;
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      }
+
+      #content .filter-control {
+        flex: 1;
+        min-width: 150px;
+        min-height: 38px;
+        height: 38px;
+        padding: 8px 10px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #334155;
+        line-height: 1.4;
+      }
+
+      #content select.filter-control {
+        padding: 6px 28px 6px 10px;
+        background-color: #fff;
+      }
+
+      /* PANEL & TABLE */
+
+      #content .panel {
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .panel-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      #content .panel-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 14px !important;
+        font-weight: 700;
+      }
+
+      #content .panel-count {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 6px;
+        background: #dbeafe;
+        color: #1e40af;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      #content .table-scroll {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+      }
+
+      #content .table-scroll::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      #content .table-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      #content .table-scroll::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+      }
+
+      #content .report-table {
+        width: 100%;
+        min-width: 1220px;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: auto;
+        text-align: left;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      #content .report-table thead {
+        background: #f8fafc;
+      }
+
+      #content .report-table th {
+        padding: 13px 9px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 11px !important;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+      }
+
+      #content .report-table td {
+        padding: 12px 9px;
+        border-bottom: 1px solid #edf1f6;
+        color: #334155;
+        font-size: 12px !important;
+        line-height: 1.5;
+        vertical-align: middle;
+      }
+
+      #content .report-table tbody tr {
+        background: #fff;
+        transition: background 0.15s ease;
+      }
+
+      #content .report-table tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      #content .report-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      #content .document-title {
+        display: block;
+        margin-bottom: 4px;
+        color: #1e293b;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      #content .document-id {
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      #content .report-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        max-width: 100%;
+        padding: 5px 9px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        font-size: 10px !important;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      #content .badge-blue {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      #content .badge-green {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      #content .badge-gray {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      #content .table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      #content .table-actions .btn {
+        min-height: 30px;
+        padding: 6px 9px;
+        font-size: 10px !important;
+      }
+
+      #content .table-actions .btn svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      /* TABLE FOOTER */
+
+      #content .table-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      #content .pagination {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      #content .pagination button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        min-height: 30px;
+        padding: 5px 9px;
+        border: 1px solid #dbe4f0;
+        border-radius: 7px;
+        background: #fff;
+        color: #475569;
+        font-size: 11px !important;
+        font-weight: 600;
+      }
+
+      #content .pagination button:hover:not(:disabled) {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+      }
+
+      #content .pagination button.current {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+      }
+
+      /* EMPTY STATE */
+
+      #content .empty-state {
+        display: none;
+        padding: 26px 16px;
+        color: #64748b;
+        text-align: center;
+        font-size: 11px;
+      }
+
+      /* BOTTOM GRID */
+
+      #content .bottom-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      #content .content-card {
+        min-width: 0;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .card-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 14px !important;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      #content .card-description {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      /* SCORE */
+
+      #content .score-item {
+        margin-top: 14px;
+      }
+
+      #content .score-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      #content .score-track {
+        height: 7px;
+        margin-top: 7px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e2e8f0;
+      }
+
+      #content .score-fill {
+        height: 100%;
+        border-radius: 20px;
+      }
+
+      #content .score-note {
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      #content .trend-note {
+        padding: 10px;
+        margin-top: 14px;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #1e40af;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      /* GENERATOR */
+
+      #content .generator-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        margin-top: 13px;
+      }
+
+      #content .generator-item {
+        min-width: 0;
+        min-height: 58px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      #content .generator-item strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      #content .generator-checks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 13px;
+      }
+
+      #content .generator-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        color: #475569;
+        font-size: 10px;
+        line-height: 1.5;
+        cursor: pointer;
+      }
+
+      #content .generator-check input {
+        width: 14px;
+        height: 14px;
+        margin-top: 1px;
+        accent-color: #1d4ed8;
+        cursor: pointer;
+      }
+
+      #content .generator-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 13px;
+        margin-top: 13px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      #content .generator-footer-note {
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      #content .generator-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* NOTICE */
+
+      #content .notice {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 9999;
+        display: none;
+        max-width: min(360px, calc(100vw - 32px));
+        padding: 12px 16px;
+        border: 1px solid #bfdbfe;
+        border-radius: 9px;
+        background: #fff;
+        color: #1e40af;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.5;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.12);
+      }
+
+      /* ACCESSIBILITY */
+
+      #content button:focus-visible,
+      #content input:focus-visible,
+      #content select:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.2);
+        outline-offset: 2px;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1024px) {
+        #content .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #content .stat-value {
+          font-size: 26px !important;
+        }
+
+        #content .content-card {
+          padding: 12px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #content .report-page {
+          gap: 14px;
+        }
+
+        #content h1 {
+          font-size: 19px !important;
+        }
+
+        #content h2,
+        #content h3 {
+          font-size: 13px !important;
+        }
+
+        #content .report-header {
+          flex-direction: column;
+        }
+
+        #content .header-actions {
+          width: 100%;
+        }
+
+        #content .header-actions .btn {
+          flex: 1;
+          white-space: normal;
+        }
+
+        #content .stat-value {
+          font-size: 25px !important;
+        }
+
+        #content .featured-report {
+          padding: 14px;
+        }
+
+        #content .featured-title {
+          font-size: 16px !important;
+        }
+
+        #content .featured-actions {
+          width: 100%;
+          flex-direction: row;
+        }
+
+        #content .featured-actions .btn {
+          flex: 1;
+        }
+
+        #content .filter-control {
+          min-width: 100%;
+        }
+
+        #content .bottom-grid {
+          grid-template-columns: 1fr;
+        }
+
+        #content .generator-footer {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        #content .report-table th {
+          padding: 11px 8px;
+          font-size: 10px !important;
+        }
+
+        #content .report-table td {
+          padding: 10px 8px;
+          font-size: 11px !important;
+        }
+
+        #content .btn {
+          min-height: 34px;
+          padding: 7px 10px;
+          font-size: 11px !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #content .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 9px;
+        }
+
+        #content .stat-card {
+          min-height: 105px;
+          padding: 11px;
+          border-radius: 10px;
+        }
+
+        #content .stat-label {
+          min-height: 30px;
+          font-size: 10px;
+        }
+
+        #content .stat-value {
+          font-size: 22px !important;
+        }
+
+        #content .header-actions {
+          flex-direction: column;
+        }
+
+        #content .header-actions .btn {
+          width: 100%;
+        }
+
+        #content .featured-actions {
+          flex-direction: column;
+        }
+
+        #content .featured-actions .btn {
+          width: 100%;
+        }
+
+        #content .generator-grid {
+          grid-template-columns: 1fr;
+        }
+
+        #content .generator-actions {
+          width: 100%;
+          flex-direction: column;
+        }
+
+        #content .generator-actions .btn {
+          width: 100%;
+        }
+
+        #content .content-card {
+          padding: 11px;
+          border-radius: 10px;
+        }
+
+        #content .table-footer {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        #content .notice {
+          right: 12px;
+          bottom: 12px;
+        }
+      }
+    </style>
+  </head>
+
+  <!-- PENTING: data-active HARUS SAMA DENGAN IDENTITAS MENU LAPORAN -->
+  <body data-active="laporan" class="bg-slate-50 text-slate-800">
+    <!-- MAIN LAYOUT -->
+    <div id="app" class="flex min-h-screen"></div>
+
+    <!-- PAGE CONTENT -->
+    <template id="page">
+      <main class="report-page">
+        <!-- HEADER -->
+        <section class="space-y-3">
+          <p class="text-[10px] text-slate-500 font-medium">
+            Kepatuhan &amp; Audit
+            <span class="text-slate-400">&gt;</span>
+            Investigasi &amp; Kepatuhan
+            <span class="text-slate-400">&gt;</span>
+            <span class="text-blue-700">Laporan Audit</span>
+          </p>
+
+          <div class="report-header">
+            <div class="max-w-2xl">
+              <h1>Laporan &amp; Rekapitulasi Audit Kepatuhan</h1>
+
+              <p class="report-header-description">
+                Pusat penerbitan laporan formal audit internal, lembar opini
+                kepatuhan ISO/IEC 27001 &amp; ISO 28000, evaluasi integritas
+                persediaan, serta arsip berita acara tersumpah.
+              </p>
+            </div>
+
+            <div class="header-actions">
+              <button type="button" class="btn" id="schedule-report">
+                <i data-lucide="calendar-clock"></i>
+                Jadwalkan Laporan Otomatis
+              </button>
+
+              <button type="button" class="btn btn-primary" id="create-report">
+                <i data-lucide="plus"></i>
+                Terbitkan Laporan Audit Baru
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Indeks Kepatuhan Logistik (Q4)</p>
+            <p class="stat-value text-green-600">98,8%</p>
+            <p class="stat-note">Taraf sangat patuh (Grade A)</p>
+          </div>
+
+          <div class="stat-card">
+            <p class="stat-label">Total Laporan Terbit</p>
+            <p class="stat-value">28 <small>Berkas</small></p>
+            <p class="stat-note">18 laporan bulanan, 10 laporan insidental</p>
+          </div>
+
+          <div class="stat-card">
+            <p class="stat-label">Kerugian Termitigasi (YTD)</p>
+            <p class="stat-value">Rp 142,5 <small>Juta</small></p>
+            <p class="stat-note">Klaim vendor &amp; rekonsiliasi sukses</p>
+          </div>
+
+          <div class="stat-card">
+            <p class="stat-label">Temuan Belum Terselesaikan</p>
+            <p class="stat-value text-red-600">4 <small>LTA Aktif</small></p>
+            <p class="stat-note">Dalam batas toleransi SLA</p>
+          </div>
+        </section>
+
+        <!-- FEATURED REPORT -->
+        <section class="featured-report">
+          <div class="featured-content">
+            <p class="featured-label">
+              <i data-lucide="award"></i>
+              DOKUMEN UNGGULAN KUARTAL
+              <span>·</span>
+              Ref: #AUD-REP-2025-Q3
+              <span>·</span>
+              SHA-256 validated
+            </p>
+
+            <h2 class="featured-title">
+              Laporan Audit Komprehensif Penutupan Buku Q3-2025 (Hub Cakung
+              DC-01)
+            </h2>
+
+            <p class="featured-description">
+              Valuasi diaudit Rp 48,2 Miliar, tingkat presisi stock ledger
+              99,82%, 18 temuan selesai ditindaklanjuti. Ditandatangani secara
+              digital oleh Dewi Anggraini, S.Ak &amp; disahkan oleh VP Supply
+              Chain.
+            </p>
+          </div>
+
+          <div class="featured-actions">
+            <button
+              type="button"
+              class="btn btn-featured"
+              id="download-featured"
+            >
+              <i data-lucide="file-down"></i>
+              Unduh Laporan Lengkap (PDF 24 Hal)
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              id="view-featured-excel"
+            >
+              <i data-lucide="file-spreadsheet"></i>
+              Lihat Lampiran Matriks Excel
+            </button>
+          </div>
+        </section>
+
+        <!-- FILTER -->
+        <section class="filter-panel">
+          <select id="type-filter" class="filter-control">
+            <option value="">Tipe Laporan: Semua Tipe Laporan</option>
+            <option value="forensik">Audit Forensik Insidental</option>
+            <option value="mutasi">Audit Mutasi &amp; Logistik</option>
+            <option value="vendor">Audit Vendor &amp; QC</option>
+            <option value="eksekutif">Laporan Eksekutif Direksi</option>
+          </select>
+
+          <select id="period-filter" class="filter-control">
+            <option value="">Periode Audit: Semua Periode</option>
+            <option value="2025-10">Tahun 2025 - Oktober</option>
+            <option value="2025-09">Tahun 2025 - September</option>
+            <option value="2025-06">Tahun 2025 - Juni</option>
+          </select>
+
+          <select id="format-filter" class="filter-control">
+            <option value="">Format Berkas: Semua Format</option>
+            <option value="pdf">PDF</option>
+            <option value="xls">XLS / Excel</option>
+            <option value="zip">ZIP</option>
+          </select>
+
+          <button type="button" class="btn btn-primary" id="apply-filter">
+            <i data-lucide="filter"></i>
+            Filter Laporan
+          </button>
+
+          <button type="button" class="btn" id="reset-filter">
+            <i data-lucide="rotate-ccw"></i>
+            Reset
+          </button>
+        </section>
+
+        <!-- REPORT TABLE -->
+        <section class="panel">
+          <div class="panel-heading">
+            <h2 class="panel-title">Daftar Rekapitulasi Berkas Audit Resmi</h2>
+            <span class="panel-count" id="report-count">4 Ditampilkan</span>
+          </div>
+
+          <div class="table-scroll">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>No. Dokumen &amp; Judul Laporan</th>
+                  <th>Periode Audit</th>
+                  <th>Kategori &amp; Lingkup</th>
+                  <th>Penanggung Jawab Auditor</th>
+                  <th>Status Pengesahan</th>
+                  <th>Ukuran &amp; Format</th>
+                  <th>Aksi Unduh</th>
+                </tr>
+              </thead>
+
+              <tbody id="report-table-body">
+                <tr
+                  data-type="forensik"
+                  data-period="2025-10"
+                  data-format="pdf"
+                >
+                  <td>
+                    <span class="document-title">
+                      Laporan Audit Selisih Stok Opname Lorong Rak C-02
+                      (Elektronik)
+                    </span>
+                    <span class="document-id">#AUD-REP-2025-10-A</span>
+                    <p class="mt-1">· 3 unit discrepancy teridentifikasi</p>
+                  </td>
+
+                  <td>
+                    18 Okt 2025<br />
+                    09:30 WIB
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-blue">
+                      Audit Forensik Insidental
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="text-slate-800">Dewi Anggraini</strong>
+                    <br />
+                    Lead Internal Auditor
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-green">
+                      Pengesahan Lengkap
+                    </span>
+                  </td>
+
+                  <td>
+                    PDF (3,2 MB)<br />
+                    Stempel QR-Code valid
+                  </td>
+
+                  <td>
+                    <div class="table-actions">
+                      <button
+                        type="button"
+                        class="btn"
+                        data-report-action="Pratinjau"
+                        data-report-id="AUD-REP-2025-10-A"
+                      >
+                        <i data-lucide="eye"></i>
+                        Pratinjau
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-report-action="Unduh PDF"
+                        data-report-id="AUD-REP-2025-10-A"
+                      >
+                        <i data-lucide="download"></i>
+                        Unduh PDF
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-type="mutasi" data-period="2025-09" data-format="zip">
+                  <td>
+                    <span class="document-title">
+                      Laporan Kepatuhan Integritas Mutasi Antar-Hub Periode
+                      September
+                    </span>
+                    <span class="document-id">#AUD-REP-2025-09-M</span>
+                    <p class="mt-1">· DC Cakung ↔ DC Surabaya &amp; Medan</p>
+                  </td>
+
+                  <td>
+                    Sep 2025<br />
+                    Penutupan siklus
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-blue">
+                      Audit Mutasi &amp; Logistik
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="text-slate-800">Dewi Anggraini</strong>
+                    <br />
+                    Lead Internal Auditor
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-blue">
+                      Terverifikasi Komite
+                    </span>
+                  </td>
+
+                  <td>
+                    PDF + XLS (8,5 MB)<br />
+                    Paket berkas lengkap
+                  </td>
+
+                  <td>
+                    <div class="table-actions">
+                      <button
+                        type="button"
+                        class="btn"
+                        data-report-action="Pratinjau"
+                        data-report-id="AUD-REP-2025-09-M"
+                      >
+                        <i data-lucide="eye"></i>
+                        Pratinjau
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-report-action="Unduh ZIP"
+                        data-report-id="AUD-REP-2025-09-M"
+                      >
+                        <i data-lucide="download"></i>
+                        Unduh ZIP
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-type="vendor" data-period="2025-09" data-format="pdf">
+                  <td>
+                    <span class="document-title">
+                      Evaluasi Discrepancy &amp; Integritas Segel Kontainer
+                      Inbound Vendor
+                    </span>
+                    <span class="document-id">#AUD-REP-2025-09-IB</span>
+                    <p class="mt-1">· SLA vendor 100% tercapai</p>
+                  </td>
+
+                  <td>
+                    Sep 2025<br />
+                    Rekapitulasi bulanan
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-blue">
+                      Audit Vendor &amp; QC
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="text-slate-800">Tim Kepatuhan DC-01</strong>
+                    <br />
+                    Inbound Inspec Section
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-green">
+                      Pengesahan Lengkap
+                    </span>
+                  </td>
+
+                  <td>
+                    PDF (4,1 MB)<br />
+                    Termasuk foto bukti segel
+                  </td>
+
+                  <td>
+                    <div class="table-actions">
+                      <button
+                        type="button"
+                        class="btn"
+                        data-report-action="Pratinjau"
+                        data-report-id="AUD-REP-2025-09-IB"
+                      >
+                        <i data-lucide="eye"></i>
+                        Pratinjau
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-report-action="Unduh PDF"
+                        data-report-id="AUD-REP-2025-09-IB"
+                      >
+                        <i data-lucide="download"></i>
+                        Unduh PDF
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr
+                  data-type="eksekutif"
+                  data-period="2025-06"
+                  data-format="pdf"
+                >
+                  <td>
+                    <span class="document-title">
+                      Executive Summary Kepatuhan Regulasi SOX &amp; ISO 28000
+                      Semester 1
+                    </span>
+                    <span class="document-id">#AUD-REP-2025-S1-REV</span>
+                    <p class="mt-1">· Arsip statutory external auditor</p>
+                  </td>
+
+                  <td>
+                    Jun 2025<br />
+                    Semester 1 - 2025
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-blue">
+                      Laporan Eksekutif Direksi
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="text-slate-800">
+                      Dewi Anggraini &amp; Ext. Auditor
+                    </strong>
+                    <br />
+                    KPMG Indonesia Panel
+                  </td>
+
+                  <td>
+                    <span class="report-badge badge-gray">
+                      Arsip Permanen
+                    </span>
+                  </td>
+
+                  <td>
+                    PDF (12,4 MB)<br />
+                    Terenkripsi AES-256
+                  </td>
+
+                  <td>
+                    <div class="table-actions">
+                      <button
+                        type="button"
+                        class="btn"
+                        data-report-action="Pratinjau"
+                        data-report-id="AUD-REP-2025-S1-REV"
+                      >
+                        <i data-lucide="eye"></i>
+                        Pratinjau
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-report-action="Unduh PDF"
+                        data-report-id="AUD-REP-2025-S1-REV"
+                      >
+                        <i data-lucide="download"></i>
+                        Unduh PDF
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="report-empty" class="empty-state">
+            <i data-lucide="file-search"></i>
+            <p class="mt-2">Tidak ada laporan yang sesuai dengan filter.</p>
+          </div>
+
+          <div class="table-footer">
+            <span id="report-table-info">
+              Menampilkan 1 - 4 dari total 28 berkas laporan resmi
+            </span>
+
+            <div class="pagination">
+              <button type="button" class="current">1</button>
+              <button type="button" disabled>2</button>
+              <button type="button" disabled>3</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- BOTTOM GRID -->
+        <section class="bottom-grid">
+          <!-- AUDIT SCORE -->
+          <div class="content-card">
+            <h2 class="card-title">Distribusi Skor Audit Kepatuhan</h2>
+
+            <p class="card-description">
+              Evaluasi konsistensi SOP penanganan stok, verifikasi barcode
+              fisik, dan integritas pencatatan WMS.
+            </p>
+
+            <div class="score-item">
+              <div class="score-heading">
+                <span>Outbound Dispatch &amp; Staging</span>
+                <span>99.8%</span>
+              </div>
+
+              <div class="score-track">
+                <div class="score-fill bg-green-600" style="width: 99.8%"></div>
+              </div>
+
+              <p class="score-note">0 deviasi dari 14.280 pesanan terkirim</p>
+            </div>
+
+            <div class="score-item">
+              <div class="score-heading">
+                <span>Administrasi Ledger &amp; SAP Sync</span>
+                <span>99.2%</span>
+              </div>
+
+              <div class="score-track">
+                <div class="score-fill bg-blue-700" style="width: 99.2%"></div>
+              </div>
+
+              <p class="score-note">
+                Sinkronisasi batch ledger real-time tanpa delay
+              </p>
+            </div>
+
+            <div class="score-item">
+              <div class="score-heading">
+                <span>Gudang Penyimpanan (Aisle A - H)</span>
+                <span>98.6%</span>
+              </div>
+
+              <div class="score-track">
+                <div class="score-fill bg-slate-700" style="width: 98.6%"></div>
+              </div>
+
+              <p class="score-note">1 temuan minor tata letak di Lorong B</p>
+            </div>
+
+            <div class="score-item">
+              <div class="score-heading">
+                <span>Inbound Gate &amp; QC Receiving</span>
+                <span>97.4%</span>
+              </div>
+
+              <div class="score-track">
+                <div class="score-fill bg-slate-500" style="width: 97.4%"></div>
+              </div>
+
+              <p class="score-note">Koreksi manifes supplier pihak ketiga</p>
+            </div>
+
+            <div class="trend-note">
+              <strong>Tren kepatuhan 6 bulan:</strong>
+              +2,4% peningkatan kepatuhan.
+            </div>
+          </div>
+
+          <!-- REPORT GENERATOR -->
+          <div class="content-card">
+            <h2 class="card-title">
+              Generator Berita Acara &amp; Ringkasan Eksekutif Instan
+            </h2>
+
+            <p class="card-description">
+              Kompilasi otomatis temuan audit, log auditor, dan stempel digital
+              ke dalam lembar baku Berita Acara Pemeriksaan (BAP) resmi.
+            </p>
+
+            <div class="generator-grid">
+              <div class="generator-item">
+                <strong>Rentang Periode</strong>
+                01 Okt 2025 - 19 Okt 2025
+              </div>
+
+              <div class="generator-item">
+                <strong>Template Dokumen</strong>
+                BAP Selisih Fisik &amp; Nilai Ledger
+              </div>
+
+              <div class="generator-item">
+                <strong>Auditor Pemeriksa</strong>
+                Dewi Anggraini (Lead) + Bpk. Hendra (Spv DC)
+              </div>
+
+              <div class="generator-item">
+                <strong>No. Registrasi</strong>
+                BAP/ASTRO-DC01/2025/X/084
+              </div>
+            </div>
+
+            <div class="generator-checks">
+              <label class="generator-check">
+                <input type="checkbox" id="include-hash" checked />
+                <span>Sertakan hash kriptografi SHA-256</span>
+              </label>
+
+              <label class="generator-check">
+                <input type="checkbox" id="include-barcode" checked />
+                <span>Sisipkan lampiran barcode scan log</span>
+              </label>
+
+              <label class="generator-check">
+                <input type="checkbox" id="notify-director" />
+                <span>Kirim notifikasi direksi</span>
+              </label>
+            </div>
+
+            <div class="generator-footer">
+              <span class="generator-footer-note">
+                Format dokumen: PDF/A-1b Legal Standard
+              </span>
+
+              <div class="generator-actions">
+                <button type="button" class="btn" id="preview-generator">
+                  <i data-lucide="eye"></i>
+                  Cetak Pratinjau
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="compile-report"
+                >
+                  <i data-lucide="file-check"></i>
+                  Kompilasi &amp; Cetak Dokumen Resmi
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- NOTIFICATION -->
+        <div
+          id="report-notice"
+          class="notice"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </main>
+    </template>
+
+    <!-- MAIN LAYOUT SCRIPT -->
+    <script src="../../layouts/main-layout.js"></script>
+
+    <!-- PAGE SCRIPT -->
+    <script>
+      "use strict";
+
+      /* =========================================
+       ICON
+    ========================================= */
+
+      function refreshReportIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons({
+            attrs: {
+              "stroke-width": 1.8,
+            },
+          });
+        }
+
+        if (typeof window.refreshLucideIcons === "function") {
+          window.refreshLucideIcons();
+        }
+      }
+
+      /* =========================================
+       SIDEBAR NAVIGATION
+       SUPPORT data-nav="laporan"
+       DAN data-nav="laporan-audit"
+    ========================================= */
+
+      function setupReportSidebar() {
+        const activePage = document.body.dataset.active;
+
+        const auditMenus = [
+          "log-aktivitas",
+          "temuan-audit",
+          "tindak-lanjut",
+          "laporan",
+          "laporan-audit",
+        ];
+
+        document
+          .querySelectorAll(".sidebar-navigation [data-nav]")
+          .forEach((link) => {
+            const menu = link.dataset.nav;
+
+            /* ATUR LINK MENU AUDIT */
+            if (auditMenus.includes(menu)) {
+              if (menu === "laporan" || menu === "laporan-audit") {
+                link.href = "./laporan.html";
+              } else {
+                link.href = "./" + menu + ".html";
+              }
+            } else {
+              link.href = "../" + menu + ".html";
+            }
+
+            /* DETEKSI MENU AKTIF */
+            const isReportMenu =
+              activePage === "laporan" &&
+              (menu === "laporan" || menu === "laporan-audit");
+
+            const isActive = menu === activePage || isReportMenu;
+
+            link.classList.toggle("active", isActive);
+            link.classList.toggle("nav-active", isActive);
+
+            if (isActive) {
+              link.setAttribute("aria-current", "page");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          });
+      }
+
+      /* =========================================
+       LOAD MAIN LAYOUT
+    ========================================= */
+
+      async function loadReportLayout() {
+        const app = document.getElementById("app");
+
+        if (!app) {
+          console.error("Elemen #app tidak ditemukan.");
+          return;
+        }
+
+        try {
+          const response = await fetch("../../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html gagal dimuat. Status: " + response.status,
+            );
+          }
+
+          const layoutHTML = await response.text();
+
+          app.innerHTML = layoutHTML;
+
+          const content = document.getElementById("content");
+          const template = document.getElementById("page");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html.",
+            );
+          }
+
+          if (!template) {
+            throw new Error("Template halaman #page tidak ditemukan.");
+          }
+
+          /* MASUKKAN KONTEN HALAMAN */
+          content.appendChild(template.content.cloneNode(true));
+
+          /* ATUR MENU SIDEBAR */
+          setupReportSidebar();
+
+          /* INITIALIZE MAIN LAYOUT */
+          if (typeof window.initMainLayout === "function") {
+            const initialized = window.initMainLayout();
+
+            if (initialized === false) {
+              throw new Error("Inisialisasi MainLayout gagal.");
+            }
+          } else {
+            throw new Error(
+              "initMainLayout tidak ditemukan. Periksa main-layout.js.",
+            );
+          }
+
+          /* INITIALIZE PAGE */
+          initReportPage();
+
+          /* REFRESH ICON */
+          refreshReportIcons();
+
+          console.info("Halaman Laporan Audit berhasil dimuat.");
+        } catch (error) {
+          console.error("Gagal memuat Laporan Audit:", error);
+
+          app.innerHTML = `
+          <div style="
+            width:100%;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:24px;
+            font-family:Arial,sans-serif;
+          ">
+            <div style="
+              width:100%;
+              max-width:440px;
+              padding:22px;
+              border:1px solid #fecaca;
+              border-radius:12px;
+              background:#fff;
+              text-align:center;
+            ">
+              <div style="
+                width:44px;
+                height:44px;
+                margin:0 auto 12px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:50%;
+                background:#fef2f2;
+                color:#dc2626;
+              ">
+                <i data-lucide="alert-circle"></i>
+              </div>
+
+              <h2 style="
+                color:#0f172a;
+                font-size:16px;
+                font-weight:700;
+              ">
+                Gagal Memuat Laporan Audit
+              </h2>
+
+              <p
+                id="report-load-error"
+                style="
+                  margin-top:8px;
+                  color:#64748b;
+                  font-size:12px;
+                  line-height:1.6;
+                "
+              ></p>
+
+              <button
+                type="button"
+                onclick="location.reload()"
+                style="
+                  margin-top:16px;
+                  padding:9px 16px;
+                  border:0;
+                  border-radius:8px;
+                  background:#1d4ed8;
+                  color:#fff;
+                  font-size:12px;
+                  font-weight:600;
+                  cursor:pointer;
+                "
+              >
+                Muat Ulang
+              </button>
+            </div>
+          </div>
+        `;
+
+          const errorText = document.getElementById("report-load-error");
+
+          if (errorText) {
+            errorText.textContent = error.message;
+          }
+
+          refreshReportIcons();
+        }
+      }
+
+      /* =========================================
+       INITIALIZE REPORT PAGE
+    ========================================= */
+
+      function initReportPage() {
+        initReportFilters();
+        initReportActions();
+        initReportGenerator();
+      }
+
+      /* =========================================
+       NOTIFICATION
+    ========================================= */
+
+      function showReportNotice(message) {
+        const notice = document.getElementById("report-notice");
+
+        if (!notice) return;
+
+        notice.textContent = message;
+        notice.style.display = "block";
+
+        if (window.reportNoticeTimeout) {
+          clearTimeout(window.reportNoticeTimeout);
+        }
+
+        window.reportNoticeTimeout = setTimeout(() => {
+          notice.style.display = "none";
+        }, 3500);
+      }
+
+      /* =========================================
+       REPORT FILTER
+    ========================================= */
+
+      function initReportFilters() {
+        const typeFilter = document.getElementById("type-filter");
+        const periodFilter = document.getElementById("period-filter");
+        const formatFilter = document.getElementById("format-filter");
+
+        const applyButton = document.getElementById("apply-filter");
+        const resetButton = document.getElementById("reset-filter");
+
+        const tableBody = document.getElementById("report-table-body");
+        const emptyState = document.getElementById("report-empty");
+        const reportCount = document.getElementById("report-count");
+        const tableInfo = document.getElementById("report-table-info");
+
+        if (
+          !typeFilter ||
+          !periodFilter ||
+          !formatFilter ||
+          !applyButton ||
+          !resetButton ||
+          !tableBody
+        ) {
+          console.error("Elemen filter laporan tidak lengkap.");
+          return;
+        }
+
+        const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+        function applyFilters(showNotice = true) {
+          let visibleCount = 0;
+
+          rows.forEach((row) => {
+            const matchType =
+              !typeFilter.value || row.dataset.type === typeFilter.value;
+
+            const matchPeriod =
+              !periodFilter.value || row.dataset.period === periodFilter.value;
+
+            const matchFormat =
+              !formatFilter.value || row.dataset.format === formatFilter.value;
+
+            const visible = matchType && matchPeriod && matchFormat;
+
+            row.style.display = visible ? "" : "none";
+
+            if (visible) {
+              visibleCount++;
+            }
+          });
+
+          if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? "block" : "none";
+          }
+
+          if (reportCount) {
+            reportCount.textContent = visibleCount + " Ditampilkan";
+          }
+
+          if (tableInfo) {
+            tableInfo.textContent =
+              "Menampilkan " +
+              visibleCount +
+              " dari " +
+              rows.length +
+              " berkas pada halaman ini · total 28 berkas laporan resmi";
+          }
+
+          if (showNotice) {
+            showReportNotice(
+              visibleCount + " laporan ditemukan berdasarkan filter.",
+            );
+          }
+        }
+
+        applyButton.addEventListener("click", () => {
+          applyFilters(true);
+        });
+
+        resetButton.addEventListener("click", () => {
+          typeFilter.value = "";
+          periodFilter.value = "";
+          formatFilter.value = "";
+
+          applyFilters(false);
+
+          showReportNotice("Filter laporan berhasil direset.");
+        });
+
+        applyFilters(false);
+      }
+
+      /* =========================================
+       REPORT ACTIONS
+    ========================================= */
+
+      function initReportActions() {
+        const tableBody = document.getElementById("report-table-body");
+
+        if (tableBody) {
+          tableBody.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-report-action]");
+
+            if (!button) return;
+
+            const action = button.dataset.reportAction;
+            const reportId = button.dataset.reportId;
+
+            showReportNotice(
+              action +
+                " dokumen " +
+                reportId +
+                ". Hubungkan dengan penyimpanan dokumen untuk membuka berkas.",
+            );
+          });
+        }
+
+        /* SCHEDULE REPORT */
+        const scheduleButton = document.getElementById("schedule-report");
+
+        scheduleButton?.addEventListener("click", () => {
+          showReportNotice(
+            "Fitur jadwal laporan otomatis siap diintegrasikan dengan sistem penjadwalan.",
+          );
+        });
+
+        /* CREATE REPORT */
+        const createButton = document.getElementById("create-report");
+
+        createButton?.addEventListener("click", () => {
+          showReportNotice(
+            "Form penerbitan laporan audit baru siap diintegrasikan dengan modul audit.",
+          );
+        });
+
+        /* FEATURED DOWNLOAD */
+        const featuredDownload = document.getElementById("download-featured");
+
+        featuredDownload?.addEventListener("click", () => {
+          showReportNotice(
+            "Berkas laporan unggulan memerlukan lokasi file PDF yang terdaftar.",
+          );
+        });
+
+        /* FEATURED EXCEL */
+        const featuredExcel = document.getElementById("view-featured-excel");
+
+        featuredExcel?.addEventListener("click", () => {
+          showReportNotice(
+            "Lampiran matriks Excel memerlukan lokasi berkas yang terdaftar.",
+          );
+        });
+      }
+
+      /* =========================================
+       REPORT GENERATOR
+    ========================================= */
+
+      function initReportGenerator() {
+        const previewButton = document.getElementById("preview-generator");
+        const compileButton = document.getElementById("compile-report");
+
+        previewButton?.addEventListener("click", () => {
+          showReportNotice(
+            "Pratinjau BAP siap dibuat setelah data laporan dan template dokumen terhubung.",
+          );
+        });
+
+        compileButton?.addEventListener("click", () => {
+          const includeHash =
+            document.getElementById("include-hash")?.checked || false;
+
+          const includeBarcode =
+            document.getElementById("include-barcode")?.checked || false;
+
+          const notifyDirector =
+            document.getElementById("notify-director")?.checked || false;
+
+          const options = [];
+
+          if (includeHash) {
+            options.push("SHA-256");
+          }
+
+          if (includeBarcode) {
+            options.push("Barcode scan log");
+          }
+
+          if (notifyDirector) {
+            options.push("Notifikasi direksi");
+          }
+
+          showReportNotice(
+            "Konfigurasi dokumen: " +
+              (options.length
+                ? options.join(", ")
+                : "tanpa lampiran tambahan") +
+              ". Generator PDF/A memerlukan integrasi backend.",
+          );
+        });
+      }
+
+      /* =========================================
+       RUN PAGE
+    ========================================= */
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", loadReportLayout, {
+          once: true,
+        });
+      } else {
+        loadReportLayout();
+      }
+    </script>
+  </body>
+</html>

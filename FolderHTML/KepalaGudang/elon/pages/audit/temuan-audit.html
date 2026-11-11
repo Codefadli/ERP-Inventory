@@ -1,0 +1,1622 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Temuan Audit | Astro Inventory</title>
+
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- LUCIDE ICON -->
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <!-- GLOBAL CSS -->
+    <link rel="stylesheet" href="../../styles/global.css" />
+
+    <style>
+      /* =========================================
+         ASTRO INVENTORY - TEMUAN AUDIT
+      ========================================= */
+
+      html,
+      body,
+      #app,
+      #app * {
+        font-family: "Inter", Arial, sans-serif !important;
+      }
+
+      #content {
+        width: 100%;
+        min-width: 0;
+        color: #172033;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 12px !important;
+        line-height: 1.5;
+      }
+
+      #content *,
+      #content *::before,
+      #content *::after {
+        box-sizing: border-box;
+      }
+
+      /* PAGE */
+
+      #content .audit-page {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* TYPOGRAPHY */
+
+      #content h1 {
+        margin: 0;
+        font-size: 22px !important;
+        line-height: 1.35 !important;
+        font-weight: 700;
+        letter-spacing: -0.35px;
+      }
+
+      #content h2,
+      #content h3 {
+        font-size: 14px !important;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
+      #content p {
+        line-height: 1.5;
+      }
+
+      #content .text-3xl {
+        font-size: 30px !important;
+        line-height: 1.3 !important;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      #content .text-2xl {
+        font-size: 22px !important;
+      }
+
+      #content .text-xl {
+        font-size: 20px !important;
+      }
+
+      #content .text-lg {
+        font-size: 16px !important;
+      }
+
+      #content .text-base {
+        font-size: 14px !important;
+      }
+
+      #content .text-sm {
+        font-size: 12px !important;
+      }
+
+      #content .text-xs {
+        font-size: 11px !important;
+      }
+
+      #content .text-\[9px\] {
+        font-size: 9px !important;
+      }
+
+      #content .text-\[10px\] {
+        font-size: 10px !important;
+      }
+
+      /* CARD */
+
+      #content .audit-card {
+        min-width: 0;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .audit-stat {
+        min-height: 112px;
+      }
+
+      #content .audit-stat-value {
+        margin-top: 7px;
+        font-size: 30px !important;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+      }
+
+      /* BUTTON */
+
+      #content button {
+        font-family: "Inter", Arial, sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600;
+        line-height: 1.4;
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      #content .audit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
+      }
+
+      #content .audit-button:hover {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+      }
+
+      #content .audit-button.primary {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        box-shadow: 0 2px 5px rgba(29, 78, 216, 0.16);
+      }
+
+      #content .audit-button.primary:hover {
+        color: #fff;
+        border-color: #1e40af;
+        background: #1e40af;
+      }
+
+      #content .audit-button.success {
+        color: #fff;
+        border-color: #15803d;
+        background: #15803d;
+      }
+
+      #content .audit-button.success:hover {
+        color: #fff;
+        border-color: #166534;
+        background: #166534;
+      }
+
+      #content .audit-button svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+
+      /* ICON */
+
+      #content svg {
+        display: inline-block;
+        flex-shrink: 0;
+        vertical-align: middle;
+      }
+
+      #content .audit-icon-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 10px;
+      }
+
+      #content .audit-icon-box svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      /* FILTER */
+
+      #content .audit-filter-control {
+        width: 100%;
+        min-width: 0;
+        height: 38px;
+        min-height: 38px;
+        padding: 8px 11px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 12px !important;
+        line-height: 1.4;
+      }
+
+      #content .audit-filter-control::placeholder {
+        color: #94a3b8;
+      }
+
+      #content select.audit-filter-control {
+        height: 34px;
+        min-height: 34px;
+        padding: 6px 28px 6px 10px;
+        background-color: #fff;
+      }
+
+      #content input:focus,
+      #content select:focus {
+        outline: none;
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      }
+
+      /* CATEGORY TABS */
+
+      #content .audit-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 6px 10px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #64748b;
+        font-size: 11px !important;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      #content .audit-tab:hover {
+        background: #f8fafc;
+        color: #1d4ed8;
+      }
+
+      #content .audit-tab.active {
+        color: #1d4ed8;
+        border-color: #dbeafe;
+        background: #eff6ff;
+      }
+
+      #content .audit-tab-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      #content .audit-tab.active .audit-tab-count {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      /* FINDING CARD */
+
+      #content .audit-finding {
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .audit-finding-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      #content .audit-finding-body {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      #content .audit-finding-description {
+        flex: 1 1 500px;
+        min-width: 0;
+      }
+
+      #content .audit-finding-description h3 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+        margin: 0;
+        color: #172033;
+        font-size: 14px !important;
+      }
+
+      #content .audit-finding-description p {
+        margin-top: 9px;
+        color: #64748b;
+        font-size: 12px !important;
+        line-height: 1.7;
+      }
+
+      #content .audit-finding-status {
+        margin-top: 12px;
+        color: #334155;
+        font-size: 11px !important;
+        font-weight: 600;
+      }
+
+      #content .audit-finding-value {
+        min-width: 160px;
+        text-align: right;
+      }
+
+      #content .audit-finding-value strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 20px !important;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+
+      #content .audit-finding-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 11px 14px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+      }
+
+      /* BADGE */
+
+      #content .audit-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        font-size: 10px !important;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+      }
+
+      /* INVESTIGATION FLOW */
+
+      #content .audit-flow-step {
+        min-width: 0;
+        min-height: 108px;
+        padding: 11px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+      }
+
+      #content .audit-flow-step.active {
+        border-color: #93c5fd;
+        background: #eff6ff;
+      }
+
+      #content .audit-flow-step strong {
+        display: block;
+        color: #334155;
+        font-size: 11px !important;
+        line-height: 1.5;
+      }
+
+      #content .audit-flow-step p {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 10px !important;
+        line-height: 1.5;
+      }
+
+      /* CAPA */
+
+      #content .audit-capa-item {
+        padding: 11px;
+        border: 1px solid #edf1f6;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 11px !important;
+        line-height: 1.6;
+      }
+
+      /* EMPTY STATE */
+
+      #content .audit-empty {
+        display: none;
+        padding: 32px 16px;
+        text-align: center;
+        color: #64748b;
+      }
+
+      #content .audit-empty svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 auto 10px;
+        color: #94a3b8;
+      }
+
+      /* FOCUS */
+
+      #content button:focus-visible,
+      #content input:focus-visible,
+      #content select:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.2);
+        outline-offset: 2px;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1024px) {
+        #content .audit-card {
+          padding: 12px;
+        }
+
+        #content .audit-stat-value {
+          font-size: 26px !important;
+        }
+
+        #content .audit-finding-value strong {
+          font-size: 18px !important;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #content .audit-page {
+          gap: 14px;
+        }
+
+        #content h1 {
+          font-size: 19px !important;
+        }
+
+        #content h2,
+        #content h3 {
+          font-size: 13px !important;
+        }
+
+        #content .audit-stat-value {
+          font-size: 25px !important;
+        }
+
+        #content .audit-button {
+          min-height: 34px;
+          padding: 7px 10px;
+          font-size: 11px !important;
+        }
+
+        #content .audit-filter-control {
+          height: 36px;
+          min-height: 36px;
+          font-size: 11px !important;
+        }
+
+        #content select.audit-filter-control {
+          height: 34px;
+          min-height: 34px;
+        }
+
+        #content .audit-finding-body {
+          padding: 13px;
+        }
+
+        #content .audit-finding-value {
+          width: 100%;
+          text-align: left;
+        }
+
+        #content .audit-finding-actions {
+          justify-content: flex-start;
+        }
+
+        #content .audit-flow-step {
+          min-height: 100px;
+          padding: 9px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #content .audit-card {
+          padding: 11px;
+          border-radius: 10px;
+        }
+
+        #content .audit-stat-value {
+          font-size: 22px !important;
+        }
+
+        #content .audit-finding-header {
+          padding: 9px 11px;
+        }
+
+        #content .audit-finding-actions {
+          padding: 10px;
+        }
+
+        #content .audit-finding-actions .audit-button {
+          flex: 1 1 auto;
+        }
+
+        #content .audit-flow-step {
+          min-height: 115px;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-active="temuan-audit" class="bg-slate-50 text-slate-800">
+    <!-- MAIN LAYOUT -->
+    <div id="app" class="flex min-h-screen"></div>
+
+    <!-- PAGE CONTENT -->
+    <template id="page">
+      <div class="audit-page">
+        <!-- BREADCRUMB -->
+        <section>
+          <p class="text-[10px] text-slate-500">
+            Kepatuhan &amp; Audit
+            <span class="mx-1 text-slate-400">&gt;</span>
+            Investigasi &amp; Kepatuhan
+            <span class="mx-1 text-slate-400">&gt;</span>
+            <span class="font-semibold text-blue-700">Temuan Audit</span>
+          </p>
+        </section>
+
+        <!-- PAGE HEADER -->
+        <section
+          class="audit-card flex flex-wrap justify-between items-start gap-4"
+        >
+          <div class="max-w-2xl">
+            <h1 class="text-slate-900">Pusat Temuan Audit (Discrepancy Log)</h1>
+
+            <p class="mt-2 text-xs text-slate-500">
+              Daftar resmi ketidaksesuaian kuantitas fisik, anomali dokumen
+              mutasi, kerusakan logistik, dan potensi penyimpangan SOP gudang di
+              Hub Cakung DC-01.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="exportFindings" class="audit-button">
+              <i data-lucide="file-spreadsheet"></i>
+              Ekspor Matriks Temuan (CSV)
+            </button>
+
+            <button
+              type="button"
+              id="createFinding"
+              class="audit-button primary"
+            >
+              <i data-lucide="plus-circle"></i>
+              Buat Lembar Temuan Baru (LTA)
+            </button>
+          </div>
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="audit-card audit-stat">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500">Total Temuan Periode Ini</p>
+
+              <span class="audit-icon-box bg-blue-50 text-blue-700">
+                <i data-lucide="clipboard-list"></i>
+              </span>
+            </div>
+
+            <p class="audit-stat-value text-slate-900">14</p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              Siklus Q4 (Okt - Des 2025)
+            </p>
+          </div>
+
+          <div class="audit-card audit-stat">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500">Temuan Status Kritis</p>
+
+              <span class="audit-icon-box bg-red-50 text-red-700">
+                <i data-lucide="alert-triangle"></i>
+              </span>
+            </div>
+
+            <p class="audit-stat-value text-red-600">4</p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              Kasus terbuka · wajib SLA klarifikasi &lt; 24 jam
+            </p>
+          </div>
+
+          <div class="audit-card audit-stat">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500">Dalam Tindak Lanjut</p>
+
+              <span class="audit-icon-box bg-amber-50 text-amber-700">
+                <i data-lucide="clock-3"></i>
+              </span>
+            </div>
+
+            <p class="audit-stat-value text-slate-900">6</p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              Koreksi &amp; stock adjustment diproses
+            </p>
+          </div>
+
+          <div class="audit-card audit-stat">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] text-slate-500">
+                Terselesaikan &amp; Ditutup
+              </p>
+
+              <span class="audit-icon-box bg-green-50 text-green-700">
+                <i data-lucide="check-circle-2"></i>
+              </span>
+            </div>
+
+            <p class="audit-stat-value text-green-600">4</p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              Klaim disetujui &amp; BAP sah
+            </p>
+          </div>
+        </section>
+
+        <!-- FILTER DAN TAB -->
+        <section class="audit-card space-y-3">
+          <!-- CATEGORY TABS -->
+          <div
+            class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3"
+          >
+            <button type="button" class="audit-tab active" data-category="all">
+              Semua Temuan
+              <span class="audit-tab-count">14</span>
+            </button>
+
+            <button type="button" class="audit-tab" data-category="critical">
+              Kritis / Deviasi Fisik
+              <span class="audit-tab-count">4</span>
+            </button>
+
+            <button
+              type="button"
+              class="audit-tab"
+              data-category="administrative"
+            >
+              Administratif &amp; Dokumen
+              <span class="audit-tab-count">6</span>
+            </button>
+
+            <button type="button" class="audit-tab" data-category="closed">
+              Selesai &amp; Ditutup
+              <span class="audit-tab-count">4</span>
+            </button>
+          </div>
+
+          <!-- FILTER CONTROLS -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+            <input
+              type="search"
+              id="searchFinding"
+              class="audit-filter-control"
+              placeholder="Cari nomor LTA, SKU, dokumen..."
+              aria-label="Cari temuan audit"
+            />
+
+            <select
+              id="filterRisk"
+              class="audit-filter-control"
+              aria-label="Filter tingkat risiko"
+            >
+              <option value="">Tingkat Risiko (Semua)</option>
+              <option value="critical">Kritis</option>
+              <option value="medium">Sedang</option>
+              <option value="low">Rendah / Minor</option>
+            </select>
+
+            <select
+              id="filterDepartment"
+              class="audit-filter-control"
+              aria-label="Filter departemen"
+            >
+              <option value="">Departemen Terkait (Semua)</option>
+              <option value="warehouse">Gudang</option>
+              <option value="inbound">Inbound</option>
+              <option value="procurement">Pengadaan</option>
+              <option value="distribution">Distribusi</option>
+            </select>
+
+            <select
+              id="sortFinding"
+              class="audit-filter-control"
+              aria-label="Urutkan temuan"
+            >
+              <option value="priority">Urutan: SLA Terdekat</option>
+              <option value="newest">Tanggal Terbaru</option>
+              <option value="oldest">Tanggal Terlama</option>
+              <option value="risk">Risiko Tertinggi</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <p id="findingCount" class="text-[10px] text-slate-500">
+              Menampilkan 3 temuan audit
+            </p>
+
+            <button type="button" id="resetFindingFilter" class="audit-button">
+              <i data-lucide="rotate-ccw"></i>
+              Reset Filter
+            </button>
+          </div>
+        </section>
+
+        <!-- FINDING 1: KRITIS -->
+        <article
+          class="audit-finding"
+          data-finding
+          data-category="critical"
+          data-risk="critical"
+          data-department="warehouse"
+          data-date="2025-10-18"
+          data-priority="1"
+          data-id="LTA-2025-041"
+        >
+          <div class="audit-finding-header bg-red-100 text-red-700">
+            <span>
+              <i
+                data-lucide="alert-octagon"
+                class="inline w-3.5 h-3.5 mr-1"
+              ></i>
+              PRIORITAS KRITIS · #LTA-2025-041 · 18 Okt 2025 (Pkl 11:24 WIB) ·
+              Auditor: Dewi Anggraini, S.Ak
+            </span>
+
+            <span class="audit-badge bg-red-200 text-red-800"> OPEN </span>
+          </div>
+
+          <div class="audit-finding-body">
+            <div class="audit-finding-description">
+              <h3>
+                Selisih Fisik Stok Opname: Defisit -3 Unit
+
+                <span class="audit-badge bg-red-100 text-red-700">
+                  High Shrinkage Risk
+                </span>
+              </h3>
+
+              <p>
+                Pemeriksaan fisik pada rak penyimpanan elektronik bernilai
+                tinggi menemukan SKU #SSD-SD1TB (Sandisk Extreme Portable SSD
+                1TB) di lokasi C-02-B4 hanya berjumlah 82 unit dibanding saldo
+                buku 85 unit. Indikasi kehilangan saat staging shift malam; CCTV
+                blindspot teridentifikasi di lorong C-02.
+              </p>
+
+              <p class="audit-finding-status">
+                Status: Menunggu tanggapan auditee (Ka. Gudang DC Cakung)
+              </p>
+            </div>
+
+            <div class="audit-finding-value">
+              <p class="text-[10px] text-slate-500">
+                Potensi kerugian fisik · @ Rp 1.250.000 / unit
+              </p>
+
+              <strong class="text-red-700"> Rp 3.750.000 </strong>
+
+              <p class="mt-1 text-[10px] text-slate-500">
+                Estimasi nilai kerugian
+              </p>
+            </div>
+          </div>
+
+          <div class="audit-finding-actions">
+            <button
+              type="button"
+              class="audit-button"
+              data-finding-action="bap"
+            >
+              <i data-lucide="paperclip"></i>
+              Lihat BAP &amp; Lampiran
+            </button>
+
+            <button
+              type="button"
+              class="audit-button"
+              data-finding-action="warning"
+            >
+              <i data-lucide="bell-ring"></i>
+              Kirim Peringatan SLA
+            </button>
+
+            <button
+              type="button"
+              class="audit-button primary"
+              data-finding-action="clarification"
+            >
+              <i data-lucide="file-search"></i>
+              Tinjau Jawaban &amp; Klarifikasi
+            </button>
+          </div>
+        </article>
+
+        <!-- FINDING 2: SEDANG -->
+        <article
+          class="audit-finding"
+          data-finding
+          data-category="administrative"
+          data-risk="medium"
+          data-department="inbound"
+          data-date="2025-10-17"
+          data-priority="2"
+          data-id="LTA-2025-039"
+        >
+          <div class="audit-finding-header bg-slate-100 text-slate-700">
+            <span>
+              <i data-lucide="alert-circle" class="inline w-3.5 h-3.5 mr-1"></i>
+              PRIORITAS SEDANG · #LTA-2025-039 · 17 Okt 2025 (Pkl 16:40 WIB) ·
+              Inbound Receiving Audit
+            </span>
+
+            <span class="audit-badge bg-amber-100 text-amber-700">
+              IN PROGRESS
+            </span>
+          </div>
+
+          <div class="audit-finding-body">
+            <div class="audit-finding-description">
+              <h3>
+                Pelanggaran Segel &amp; Prosedur Inbound PO Vendor
+
+                <span class="audit-badge bg-slate-100 text-slate-600">
+                  SOP Inbound Violation
+                </span>
+              </h3>
+
+              <p>
+                Penerimaan muatan armada truk Kontainer B-9821-UQ atas PO-774
+                dari mitra ekspedisi PT Mitra Logistik Trans diterima tanpa
+                nomor segel yang sesuai dengan Surat Jalan (SJ: #SJ-8890).
+                Sebanyak 450 unit barcode scanner dibongkar ke staging dock
+                tanpa verifikasi gembok segel oleh Tim Penerimaan.
+              </p>
+
+              <p class="audit-finding-status">
+                Status: Eskalasi ke Manajer Pengadaan &amp; klarifikasi tertulis
+                vendor
+              </p>
+            </div>
+
+            <div class="audit-finding-value">
+              <p class="text-[10px] text-slate-500">
+                Nilai muatan risiko · 450 unit perangkat scanner
+              </p>
+
+              <strong class="text-slate-700"> Rp 112.500.000 </strong>
+
+              <p class="mt-1 text-[10px] text-slate-500">
+                Nilai barang terkait temuan
+              </p>
+            </div>
+          </div>
+
+          <div class="audit-finding-actions">
+            <button
+              type="button"
+              class="audit-button"
+              data-finding-action="document"
+            >
+              <i data-lucide="file-text"></i>
+              Lihat Surat Jalan
+            </button>
+
+            <button
+              type="button"
+              class="audit-button primary"
+              data-finding-action="recheck"
+            >
+              <i data-lucide="clipboard-check"></i>
+              Instruksikan Verifikasi Ulang
+            </button>
+          </div>
+        </article>
+
+        <!-- FINDING 3: RENDAH -->
+        <article
+          class="audit-finding"
+          data-finding
+          data-category="closed"
+          data-risk="low"
+          data-department="distribution"
+          data-date="2025-10-16"
+          data-priority="3"
+          data-id="LTA-2025-035"
+        >
+          <div class="audit-finding-header bg-green-100 text-green-700">
+            <span>
+              <i data-lucide="check-circle" class="inline w-3.5 h-3.5 mr-1"></i>
+              PRIORITAS RENDAH / MINOR · #LTA-2025-035 · 16 Okt 2025 · Audit
+              Mutasi Antar-Hub
+            </span>
+
+            <span class="audit-badge bg-green-200 text-green-800">
+              RESOLVED
+            </span>
+          </div>
+
+          <div class="audit-finding-body">
+            <div class="audit-finding-description">
+              <h3>
+                Keterlambatan Input Mutasi Antar-Hub (&gt; 6 Jam dari Berita
+                Acara)
+
+                <span class="audit-badge bg-green-100 text-green-700">
+                  Administrative Latency
+                </span>
+              </h3>
+
+              <p>
+                Dokumen transfer antar-hub TRX-MUT-20251016-09 dari DC Cakung ke
+                Hub Karawang tiba fisik pkl 08:00 WIB, namun status WMS baru
+                diperbarui pada pkl 15:30 WIB. Keterlambatan disebabkan kendala
+                jaringan lokal terminal scanner di Karawang; tidak ada selisih
+                kuantitas unit fisik.
+              </p>
+
+              <p class="audit-finding-status">
+                Status: Telah diklarifikasi - menunggu penutupan kasus (sign-off
+                Dewi Anggraini)
+              </p>
+            </div>
+
+            <div class="audit-finding-value">
+              <p class="text-[10px] text-slate-500">
+                Dampak nilai · kendala latensi sistem
+              </p>
+
+              <strong class="text-green-700"> Rp 0 (Nihil) </strong>
+
+              <p class="mt-1 text-[10px] text-slate-500">
+                Tidak ada selisih fisik
+              </p>
+            </div>
+          </div>
+
+          <div class="audit-finding-actions">
+            <button
+              type="button"
+              class="audit-button"
+              data-finding-action="justification"
+            >
+              <i data-lucide="file-check"></i>
+              Baca Dokumen Justifikasi
+            </button>
+
+            <button
+              type="button"
+              class="audit-button success"
+              data-finding-action="close"
+            >
+              <i data-lucide="check-circle-2"></i>
+              Setujui &amp; Tutup Temuan (Close Case)
+            </button>
+          </div>
+        </article>
+
+        <!-- EMPTY STATE -->
+        <div id="findingEmpty" class="audit-card audit-empty">
+          <i data-lucide="search-x"></i>
+
+          <p class="font-semibold text-slate-700">
+            Temuan audit tidak ditemukan
+          </p>
+
+          <p class="mt-1 text-xs text-slate-500">
+            Coba ubah kata kunci atau kriteria filter.
+          </p>
+        </div>
+
+        <!-- INVESTIGATION FLOW & CAPA -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- INVESTIGATION FLOW -->
+          <div class="audit-card">
+            <div class="flex items-center gap-2">
+              <span class="audit-icon-box bg-blue-50 text-blue-700">
+                <i data-lucide="workflow"></i>
+              </span>
+
+              <h3 class="text-slate-900">
+                Alur Investigasi &amp; Penegakan Kepatuhan (SOP ASTRO-AUD)
+              </h3>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="audit-flow-step">
+                <strong>1. Pencatatan LTA</strong>
+
+                <p>Penerbitan lembar audit &amp; foto bukti hash.</p>
+              </div>
+
+              <div class="audit-flow-step active">
+                <strong class="text-blue-800"> 2. Klarifikasi Auditee </strong>
+
+                <p>Respon resmi Ka. Gudang &amp; Tim Inbound.</p>
+              </div>
+
+              <div class="audit-flow-step">
+                <strong>3. Koreksi &amp; Adjust</strong>
+
+                <p>BAP stock adjustment &amp; klaim ganti rugi.</p>
+              </div>
+
+              <div class="audit-flow-step">
+                <strong>4. Penutupan Kasus</strong>
+
+                <p>Sign-off digital oleh Lead Internal Auditor.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAPA -->
+          <div class="audit-card">
+            <div class="flex items-center gap-2">
+              <span class="audit-icon-box bg-emerald-50 text-emerald-700">
+                <i data-lucide="shield-check"></i>
+              </span>
+
+              <h3 class="text-slate-900">Matriks Rekomendasi Auditor (CAPA)</h3>
+            </div>
+
+            <div class="mt-4 space-y-2">
+              <div class="audit-capa-item flex gap-2">
+                <i data-lucide="video" class="w-4 h-4 text-blue-600 mt-0.5"></i>
+
+                <span>
+                  Relokasi titik CCTV Cage C-02 menghilangkan blindspot lorong
+                  High Value Storage dalam 7 hari kalender.
+                </span>
+              </div>
+
+              <div class="audit-capa-item flex gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-blue-600 mt-0.5"></i>
+
+                <span>
+                  Mandatory Dual-Sign Handover: verifikasi ganda saat rotasi
+                  shift malam di Hub DC-01.
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <!-- MAIN LAYOUT SCRIPT -->
+    <script src="../../layouts/main-layout.js"></script>
+
+    <!-- PAGE SCRIPT -->
+    <script>
+      /* =========================================
+         UTILITIES
+      ========================================= */
+
+      function refreshAuditIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons({
+            attrs: {
+              "stroke-width": 1.8,
+            },
+          });
+        }
+
+        if (typeof window.refreshLucideIcons === "function") {
+          window.refreshLucideIcons();
+        }
+      }
+
+      /* =========================================
+         SIDEBAR PATH - AUDIT
+      ========================================= */
+
+      function setupAuditSidebar() {
+        const activePage = document.body.dataset.active;
+
+        const auditMenus = [
+          "log-aktivitas",
+          "temuan-audit",
+          "tindak-lanjut",
+          "laporan-audit",
+        ];
+
+        document
+          .querySelectorAll(".sidebar-navigation [data-nav]")
+          .forEach((link) => {
+            const menu = link.dataset.nav;
+
+            if (auditMenus.includes(menu)) {
+              link.href = "./" + menu + ".html";
+            } else {
+              link.href = "../" + menu + ".html";
+            }
+
+            const isActive = menu === activePage;
+
+            link.classList.toggle("active", isActive);
+            link.classList.toggle("nav-active", isActive);
+
+            if (isActive) {
+              link.setAttribute("aria-current", "page");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          });
+      }
+
+      /* =========================================
+         LOAD MAIN LAYOUT
+      ========================================= */
+
+      async function loadMainLayout() {
+        const app = document.getElementById("app");
+
+        if (!app) {
+          console.error("Elemen #app tidak ditemukan.");
+          return;
+        }
+
+        try {
+          const response = await fetch("../../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html gagal dimuat. Status: " + response.status,
+            );
+          }
+
+          const html = await response.text();
+
+          app.innerHTML = html;
+
+          const content = document.getElementById("content");
+          const template = document.getElementById("page");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html.",
+            );
+          }
+
+          if (!template) {
+            throw new Error("Template halaman #page tidak ditemukan.");
+          }
+
+          /* MASUKKAN KONTEN KE MAIN LAYOUT */
+          content.appendChild(template.content.cloneNode(true));
+
+          /* SET LINK SIDEBAR */
+          setupAuditSidebar();
+
+          /* INITIALIZE MAIN LAYOUT */
+          if (typeof window.initMainLayout === "function") {
+            window.initMainLayout();
+          }
+
+          /* INITIALIZE PAGE */
+          initTemuanAudit();
+
+          /* REFRESH ICON */
+          refreshAuditIcons();
+        } catch (error) {
+          console.error("Gagal memuat halaman:", error);
+
+          app.innerHTML = `
+            <div class="w-full min-h-screen flex items-center justify-center p-6">
+              <div class="max-w-md w-full bg-white border border-red-200 rounded-xl p-6 text-center">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                  <i data-lucide="alert-circle"></i>
+                </div>
+
+                <h2 class="text-lg font-bold text-slate-900">
+                  Gagal Memuat Halaman
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-2">
+                  ${String(error.message).replace(
+                    /[&<>"']/g,
+                    (character) =>
+                      ({
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#039;",
+                      })[character],
+                  )}
+                </p>
+
+                <button
+                  type="button"
+                  onclick="location.reload()"
+                  class="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
+                >
+                  Muat Ulang
+                </button>
+              </div>
+            </div>
+          `;
+
+          refreshAuditIcons();
+        }
+      }
+
+      /* =========================================
+         TEMUAN AUDIT
+      ========================================= */
+
+      function initTemuanAudit() {
+        const searchInput = document.getElementById("searchFinding");
+        const riskFilter = document.getElementById("filterRisk");
+        const departmentFilter = document.getElementById("filterDepartment");
+        const sortSelect = document.getElementById("sortFinding");
+
+        const resetButton = document.getElementById("resetFindingFilter");
+
+        const countLabel = document.getElementById("findingCount");
+
+        const emptyState = document.getElementById("findingEmpty");
+
+        const exportButton = document.getElementById("exportFindings");
+
+        const createButton = document.getElementById("createFinding");
+
+        const tabs = Array.from(document.querySelectorAll("[data-category]"));
+
+        const findings = Array.from(
+          document.querySelectorAll("[data-finding]"),
+        );
+
+        if (
+          !searchInput ||
+          !riskFilter ||
+          !departmentFilter ||
+          !sortSelect ||
+          !resetButton ||
+          !countLabel ||
+          !emptyState
+        ) {
+          console.error("Elemen filter Temuan Audit tidak lengkap.");
+          return;
+        }
+
+        let activeCategory = "all";
+
+        /* =========================================
+           FILTER DAN SORTING
+        ========================================= */
+
+        function applyFindingFilters() {
+          const keyword = searchInput.value.trim().toLocaleLowerCase("id");
+
+          const risk = riskFilter.value;
+          const department = departmentFilter.value;
+
+          let visibleCount = 0;
+
+          findings.forEach((finding) => {
+            const text = finding.innerText.toLocaleLowerCase("id");
+
+            const matchKeyword = !keyword || text.includes(keyword);
+
+            const matchRisk = !risk || finding.dataset.risk === risk;
+
+            const matchDepartment =
+              !department || finding.dataset.department === department;
+
+            const matchCategory =
+              activeCategory === "all" ||
+              finding.dataset.category === activeCategory;
+
+            const visible =
+              matchKeyword && matchRisk && matchDepartment && matchCategory;
+
+            finding.style.display = visible ? "" : "none";
+
+            if (visible) visibleCount++;
+          });
+
+          /* SORTING */
+          const visibleFindings = findings
+            .filter((finding) => finding.style.display !== "none")
+            .sort((a, b) => {
+              const sortValue = sortSelect.value;
+
+              if (sortValue === "newest") {
+                return b.dataset.date.localeCompare(a.dataset.date);
+              }
+
+              if (sortValue === "oldest") {
+                return a.dataset.date.localeCompare(b.dataset.date);
+              }
+
+              if (sortValue === "risk") {
+                const riskOrder = {
+                  critical: 1,
+                  medium: 2,
+                  low: 3,
+                };
+
+                return riskOrder[a.dataset.risk] - riskOrder[b.dataset.risk];
+              }
+
+              return Number(a.dataset.priority) - Number(b.dataset.priority);
+            });
+
+          const parent = findings[0]?.parentElement;
+
+          if (parent) {
+            visibleFindings.forEach((finding) => {
+              parent.insertBefore(finding, emptyState);
+            });
+          }
+
+          countLabel.textContent =
+            "Menampilkan " +
+            visibleCount +
+            " dari " +
+            findings.length +
+            " temuan audit pada daftar ini";
+
+          emptyState.style.display = visibleCount === 0 ? "block" : "none";
+        }
+
+        /* =========================================
+           EVENT FILTER
+        ========================================= */
+
+        searchInput.addEventListener("input", applyFindingFilters);
+
+        riskFilter.addEventListener("change", applyFindingFilters);
+
+        departmentFilter.addEventListener("change", applyFindingFilters);
+
+        sortSelect.addEventListener("change", applyFindingFilters);
+
+        /* =========================================
+           CATEGORY TABS
+        ========================================= */
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            activeCategory = tab.dataset.category;
+
+            tabs.forEach((item) => {
+              item.classList.toggle("active", item === tab);
+            });
+
+            applyFindingFilters();
+          });
+        });
+
+        /* =========================================
+           RESET FILTER
+        ========================================= */
+
+        resetButton.addEventListener("click", () => {
+          searchInput.value = "";
+          riskFilter.value = "";
+          departmentFilter.value = "";
+          sortSelect.value = "priority";
+
+          activeCategory = "all";
+
+          tabs.forEach((tab) => {
+            tab.classList.toggle("active", tab.dataset.category === "all");
+          });
+
+          applyFindingFilters();
+        });
+
+        /* =========================================
+           EXPORT CSV
+        ========================================= */
+
+        exportButton?.addEventListener("click", () => {
+          const visibleFindings = findings.filter(
+            (finding) => finding.style.display !== "none",
+          );
+
+          if (visibleFindings.length === 0) {
+            alert("Tidak ada data temuan yang dapat diekspor.");
+            return;
+          }
+
+          const headers = [
+            "Nomor LTA",
+            "Prioritas",
+            "Tanggal",
+            "Judul Temuan",
+            "Departemen",
+            "Status",
+            "Deskripsi",
+          ];
+
+          const csvRows = visibleFindings.map((finding) => {
+            const header = finding.querySelector(".audit-finding-header");
+
+            const title = finding.querySelector(
+              ".audit-finding-description h3",
+            );
+
+            const description = finding.querySelector(
+              ".audit-finding-description p",
+            );
+
+            const status = finding.querySelector(".audit-finding-status");
+
+            const priority = finding.dataset.risk;
+
+            const priorityLabel =
+              {
+                critical: "Kritis",
+                medium: "Sedang",
+                low: "Rendah / Minor",
+              }[priority] || priority;
+
+            const departmentLabel =
+              {
+                warehouse: "Gudang",
+                inbound: "Inbound",
+                procurement: "Pengadaan",
+                distribution: "Distribusi",
+              }[finding.dataset.department] || "";
+
+            const statusText = header?.innerText || "";
+
+            const date = finding.dataset.date || "";
+
+            return [
+              finding.dataset.id || "",
+              priorityLabel,
+              date,
+              title?.innerText || "",
+              departmentLabel,
+              status?.innerText || statusText,
+              description?.innerText || "",
+            ];
+          });
+
+          const escapeCSV = (value) =>
+            '"' + String(value).replace(/"/g, '""') + '"';
+
+          const csvContent = [headers, ...csvRows]
+            .map((row) => row.map(escapeCSV).join(","))
+            .join("\n");
+
+          const blob = new Blob(["\uFEFF" + csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = "temuan-audit-astro-inventory.csv";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+
+        /* =========================================
+           BUAT TEMUAN BARU
+        ========================================= */
+
+        createButton?.addEventListener("click", () => {
+          alert(
+            "Form Lembar Temuan Audit (LTA) baru belum terhubung ke backend.",
+          );
+        });
+
+        /* =========================================
+           AKSI SETIAP TEMUAN
+        ========================================= */
+
+        document.querySelectorAll("[data-finding-action]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const finding = button.closest("[data-finding]");
+
+            if (!finding) return;
+
+            const findingId = finding.dataset.id || "Temuan Audit";
+
+            const action = button.dataset.findingAction;
+
+            const messages = {
+              bap:
+                "Dokumen BAP dan lampiran untuk " +
+                findingId +
+                " belum terhubung ke penyimpanan dokumen.",
+
+              warning:
+                "Fitur pengiriman peringatan SLA untuk " +
+                findingId +
+                " belum terhubung ke sistem notifikasi.",
+
+              clarification:
+                "Halaman klarifikasi untuk " +
+                findingId +
+                " belum terhubung ke modul tindak lanjut.",
+
+              document:
+                "Dokumen surat jalan untuk " +
+                findingId +
+                " belum tersedia pada integrasi dokumen.",
+
+              recheck:
+                "Instruksi verifikasi ulang untuk " +
+                findingId +
+                " belum terhubung ke workflow inbound.",
+
+              justification:
+                "Dokumen justifikasi untuk " +
+                findingId +
+                " belum terhubung ke penyimpanan dokumen.",
+
+              close:
+                "Penutupan temuan " +
+                findingId +
+                " memerlukan persetujuan dan sign-off auditor.",
+            };
+
+            alert(messages[action] || "Aksi untuk " + findingId);
+          });
+        });
+
+        /* =========================================
+           FILTER AWAL
+        ========================================= */
+
+        applyFindingFilters();
+      }
+
+      /* =========================================
+         START APPLICATION
+      ========================================= */
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", loadMainLayout, {
+          once: true,
+        });
+      } else {
+        loadMainLayout();
+      }
+    </script>
+  </body>
+</html>

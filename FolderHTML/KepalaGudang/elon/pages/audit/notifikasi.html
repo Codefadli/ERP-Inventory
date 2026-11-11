@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Notifikasi | Astro Inventory</title>
+
+    <!-- =========================================
+       LIBRARY
+  ========================================== -->
+
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <!-- =========================================
+       GLOBAL STYLES & JAVASCRIPT
+  ========================================== -->
+
+    <link rel="stylesheet" href="../../styles/global.css" />
+
+    <script src="../../layouts/main-layout.js"></script>
+
+    <!-- =========================================
+       NOTIFICATION PAGE STYLES
+  ========================================== -->
+
+    <style>
+      body {
+        font-family: "Inter", Arial, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        font-size: 12px;
+      }
+
+      #content {
+        min-width: 0;
+      }
+
+      .notification-page {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .notification-page * {
+        box-sizing: border-box;
+      }
+
+      .notification-page button,
+      .notification-page input {
+        font: inherit;
+      }
+
+      .notification-page button {
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      .notification-page button:focus-visible,
+      .notification-page input:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      /* HEADER */
+
+      .notification-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+      }
+
+      .notification-header h1 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.35;
+        letter-spacing: -0.35px;
+      }
+
+      .notification-header p {
+        max-width: 700px;
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      /* BUTTONS */
+
+      .notification-btn {
+        display: inline-flex;
+        min-height: 36px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      }
+
+      .notification-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+      }
+
+      .notification-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .notification-btn.primary {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #fff;
+      }
+
+      .notification-btn.primary:hover {
+        background: #1e40af;
+      }
+
+      /* MAIN LAYOUT */
+
+      .notification-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.9fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .notification-main,
+      .notification-aside {
+        min-width: 0;
+      }
+
+      .notification-main {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .notification-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      /* TOOLBAR */
+
+      .notification-toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-height: 42px;
+      }
+
+      .notification-tabs {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .notification-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .notification-tab:hover {
+        background: #f1f5f9;
+      }
+
+      .notification-tab.active {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #fff;
+      }
+
+      .notification-tab .tab-count {
+        display: inline-flex;
+        min-width: 19px;
+        height: 19px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        border-radius: 5px;
+        background: #e2e8f0;
+        color: #334155;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .notification-tab.active .tab-count {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+      }
+
+      .notification-read-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #475569;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .notification-read-filter input {
+        width: 14px;
+        height: 14px;
+        accent-color: #1d4ed8;
+      }
+
+      .notification-sort {
+        margin-left: auto;
+        color: #64748b;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      /* DATE */
+
+      .notification-date-label {
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.35px;
+        text-transform: uppercase;
+      }
+
+      /* NOTIFICATION CARD */
+
+      .notification-card {
+        position: relative;
+        padding: 15px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #cbd5e1;
+        border-radius: 10px;
+        background: #fff;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+
+      .notification-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.045);
+      }
+
+      .notification-card.critical {
+        border-left-color: #dc2626;
+      }
+
+      .notification-card.info {
+        border-left-color: #2563eb;
+      }
+
+      .notification-card.success {
+        border-left-color: #16a34a;
+      }
+
+      .notification-card.is-read {
+        opacity: 0.82;
+      }
+
+      .notification-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .notification-card-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      .notification-tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 21px;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .tag-red {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .tag-blue {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .tag-green {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      .tag-slate {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      .notification-reference {
+        color: #94a3b8;
+        font-size: 10px;
+      }
+
+      .notification-time {
+        color: #94a3b8;
+        font-size: 10px;
+        white-space: nowrap;
+      }
+
+      .notification-card h3 {
+        margin-top: 10px;
+        color: #172033;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .notification-card p {
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .notification-card-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 13px;
+      }
+
+      .notification-card-actions .notification-btn {
+        min-height: 31px;
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .notification-card-actions .notification-btn svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      /* CARD DOT - SCOPED TO AVOID TOPBAR CONFLICT */
+
+      .notification-card .notification-dot {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        border-radius: 50%;
+        background: #2563eb;
+      }
+
+      .notification-card.is-read .notification-dot {
+        background: #cbd5e1;
+      }
+
+      /* LOAD MORE */
+
+      .notification-load-more {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 0 5px;
+        color: #64748b;
+        font-size: 10px;
+        text-align: center;
+      }
+
+      /* SIDE CARDS */
+
+      .notification-side-card {
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #fff;
+      }
+
+      .notification-side-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 9px;
+      }
+
+      .notification-side-title h3 {
+        color: #172033;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .notification-side-card > p {
+        margin-bottom: 12px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      /* CHANNELS */
+
+      .notification-channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .notification-channel {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #e0edff;
+        border-radius: 8px;
+        background: #f1f7ff;
+      }
+
+      .notification-channel-icon {
+        display: flex;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .notification-channel-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .notification-channel strong {
+        display: block;
+        color: #1e293b;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .notification-channel span {
+        display: block;
+        margin-top: 2px;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      /* TEXT LINK */
+
+      .notification-text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 12px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .notification-text-link:hover {
+        color: #1e40af;
+        text-decoration: underline;
+      }
+
+      .notification-text-link svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      /* GATEWAY */
+
+      .notification-gateway-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .notification-gateway-stat {
+        padding: 11px;
+        border: 1px solid #eef2f7;
+        border-radius: 8px;
+        background: #f8fafc;
+      }
+
+      .notification-gateway-stat span {
+        display: block;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      .notification-gateway-stat strong {
+        display: block;
+        margin-top: 5px;
+        color: #172033;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .notification-gateway-stat small {
+        display: block;
+        margin-top: 4px;
+        color: #16a34a;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .notification-sync {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid #eef2f7;
+        color: #94a3b8;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      /* HELP */
+
+      .notification-help-card {
+        padding: 16px;
+        border: 1px solid #bfdbfe;
+        border-radius: 11px;
+        background: #eff6ff;
+      }
+
+      .notification-help-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1e3a8a;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .notification-help-card h3 svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .notification-help-card p {
+        margin-top: 8px;
+        color: #475569;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .notification-help-card .notification-btn {
+        width: 100%;
+        margin-top: 13px;
+      }
+
+      /* EMPTY STATE */
+
+      .notification-empty {
+        display: none;
+        padding: 35px 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #fff;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .notification-empty svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 auto 10px;
+        color: #94a3b8;
+      }
+
+      .notification-empty strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #334155;
+        font-size: 12px;
+      }
+
+      /* TOAST */
+
+      .notification-toast {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        max-width: min(380px, calc(100vw - 32px));
+        padding: 12px 15px;
+        border: 1px solid #dbe4f0;
+        border-radius: 10px;
+        background: #fff;
+        color: #334155;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.13);
+        font-size: 11px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+      }
+
+      .notification-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .notification-toast svg {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        color: #2563eb;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1050px) {
+        .notification-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .notification-aside {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .notification-help-card {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .notification-header {
+          padding: 16px;
+        }
+
+        .notification-header h1 {
+          font-size: 19px;
+        }
+
+        .notification-aside {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .notification-toolbar {
+          align-items: flex-start;
+        }
+
+        .notification-sort {
+          margin-left: 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .notification-card {
+          padding: 12px;
+        }
+
+        .notification-card-top {
+          align-items: flex-start;
+        }
+
+        .notification-time {
+          width: 100%;
+        }
+
+        .notification-header .notification-btn {
+          width: 100%;
+        }
+
+        .notification-tab {
+          font-size: 10px;
+          padding: 6px 8px;
+        }
+
+        .notification-gateway-stat strong {
+          font-size: 19px;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-active="notifikasi">
+    <!-- =========================================
+       APPLICATION ROOT
+  ========================================== -->
+
+    <div id="app"></div>
+
+    <!-- =========================================
+       NOTIFICATION PAGE TEMPLATE
+  ========================================== -->
+
+    <template id="page">
+      <main class="notification-page space-y-5">
+        <!-- HEADER -->
+
+        <section class="notification-header">
+          <div>
+            <div
+              class="flex items-center gap-2 mb-2 text-slate-400 text-[10px] font-semibold"
+            >
+              <span>Dashboard</span>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              <span class="text-blue-700">Notifikasi</span>
+            </div>
+
+            <h1>Pusat Notifikasi</h1>
+
+            <p>
+              Pemberitahuan langsung terkait antrean persetujuan mutasi,
+              peringatan ambang batas ROP, dan otorisasi audit log gudang
+              terintegrasi.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="notification-btn primary"
+              data-action="notification-settings"
+            >
+              <i data-lucide="settings"></i>
+              Pengaturan Notifikasi
+            </button>
+          </div>
+        </section>
+
+        <!-- MAIN CONTENT -->
+
+        <div class="notification-layout">
+          <!-- NOTIFICATION LIST -->
+
+          <section class="notification-main">
+            <!-- FILTER TOOLBAR -->
+
+            <div class="notification-toolbar">
+              <div
+                class="notification-tabs"
+                role="group"
+                aria-label="Kategori notifikasi"
+              >
+                <button
+                  type="button"
+                  class="notification-tab active"
+                  data-filter="all"
+                >
+                  Semua
+                  <span class="tab-count">12</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-tab"
+                  data-filter="approval"
+                >
+                  Menunggu Otorisasi
+                  <span class="tab-count">5</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-tab"
+                  data-filter="stock"
+                >
+                  Stok Kritis &amp; ROP
+                  <span class="tab-count">3</span>
+                </button>
+              </div>
+
+              <label class="notification-read-filter">
+                <input type="checkbox" id="only-unread" />
+                Hanya belum dibaca
+              </label>
+
+              <span class="notification-sort">
+                <i data-lucide="clock-3" class="inline w-3 h-3 mr-1"></i>
+                Urutan: Terkini
+              </span>
+            </div>
+
+            <!-- TODAY -->
+
+            <div class="notification-date-label">
+              Hari Ini — 18 Oktober 2025 · 4 pemberitahuan prioritas
+            </div>
+
+            <!-- NOTIFICATION 1 -->
+
+            <article
+              class="notification-card critical unread"
+              data-category="approval"
+              data-read="false"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-red">Prioritas Kritis</span>
+                  <span class="notification-reference">#TRX-2025-0891</span>
+                </div>
+
+                <span class="notification-time">10 menit lalu</span>
+              </div>
+
+              <h3>Permintaan Mutasi Urgent Mendekati Batas SLA</h3>
+
+              <p>
+                Hub Cakung DC-01 ke Halim DC-02 mendekati batas waktu SLA
+                otorisasi HR &amp; Dispatch (sisa 20 menit).
+              </p>
+
+              <div class="notification-card-actions">
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="review-transfer"
+                >
+                  <i data-lucide="eye"></i>
+                  Tinjau Sekarang
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="reject-transfer"
+                >
+                  <i data-lucide="x-circle"></i>
+                  Tolak Cepat
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="mark-read"
+                >
+                  <i data-lucide="check"></i>
+                  Tandai Dibaca
+                </button>
+              </div>
+            </article>
+
+            <!-- NOTIFICATION 2 -->
+
+            <article
+              class="notification-card info unread"
+              data-category="stock"
+              data-read="false"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-blue">
+                    Peringatan Stok &amp; ROP
+                  </span>
+                </div>
+
+                <span class="notification-time">35 menit lalu</span>
+              </div>
+
+              <h3>Stok di Bawah Batas Reorder Point (ROP)</h3>
+
+              <p>
+                SKU #CAM-600D di Bin Lokasi WH01-RACK-A4 tersisa 4 unit (ambang
+                batas ROP: 25 unit). Kapasitas buffer tersisa 16%. Diperlukan
+                tindakan pengadaan segera.
+              </p>
+
+              <div class="notification-card-actions">
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="stock-detail"
+                >
+                  <i data-lucide="package-search"></i>
+                  Lihat Detail Stok
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="mark-read"
+                >
+                  <i data-lucide="check"></i>
+                  Tandai Dibaca
+                </button>
+              </div>
+            </article>
+
+            <!-- NOTIFICATION 3 -->
+
+            <article
+              class="notification-card success unread"
+              data-category="approval"
+              data-read="false"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-green">
+                    Sukses Otorisasi
+                  </span>
+                  <span class="notification-reference">
+                    Ref #MUT-2023-0941
+                  </span>
+                </div>
+
+                <span class="notification-time">1 jam lalu</span>
+              </div>
+
+              <h3>Transaksi Otorisasi Mutasi Berhasil Disetujui</h3>
+
+              <p>
+                Surat Jalan elektronik SPO-WMS-019 telah terbit dan siap cetak
+                untuk armada truk Box C-04. Pengeluaran logistik telah
+                disinkronkan ke buku inventaris utama Cakung.
+              </p>
+
+              <div class="notification-card-actions">
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="download-manifest"
+                >
+                  <i data-lucide="download"></i>
+                  Unduh Manifest &amp; QR SPO
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="mark-read"
+                >
+                  <i data-lucide="check"></i>
+                  Tandai Dibaca
+                </button>
+              </div>
+            </article>
+
+            <!-- NOTIFICATION 4 -->
+
+            <article
+              class="notification-card info unread"
+              data-category="audit"
+              data-read="false"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-blue">
+                    Audit Kepatuhan
+                  </span>
+                </div>
+
+                <span class="notification-time">3 jam lalu</span>
+              </div>
+
+              <h3>Log Audit Mingguan Terenkripsi Tersedia</h3>
+
+              <p>
+                Rekapitulasi log otorisasi minggu ke-42 telah selesai
+                diverifikasi oleh hash SHA-256 (3fa2b9...890c). Semua 1.480
+                aktivitas mutasi dinyatakan valid tanpa deviasi anomali.
+              </p>
+
+              <div class="notification-card-actions">
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="audit-document"
+                >
+                  <i data-lucide="file-text"></i>
+                  Buka Dokumen Audit
+                </button>
+
+                <button
+                  type="button"
+                  class="notification-btn"
+                  data-action="mark-read"
+                >
+                  <i data-lucide="check"></i>
+                  Tandai Dibaca
+                </button>
+              </div>
+            </article>
+
+            <!-- YESTERDAY -->
+
+            <div class="notification-date-label">
+              Kemarin — 17 Oktober 2025 · Telah ditinjau
+            </div>
+
+            <!-- NOTIFICATION 5 -->
+
+            <article
+              class="notification-card"
+              data-category="security"
+              data-read="true"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-slate">
+                    Keamanan &amp; RBAC
+                  </span>
+                </div>
+
+                <span class="notification-time">Kemarin, 16:42 WIB</span>
+              </div>
+
+              <h3>Pembaruan Hak Akses Staf Lapangan</h3>
+
+              <p>
+                Perubahan wewenang otorisasi cetak label manifest di lorong WH01
+                telah diperbarui oleh Admin Rian Hidayat untuk 3 operator
+                barcode scanner.
+              </p>
+            </article>
+
+            <!-- NOTIFICATION 6 -->
+
+            <article
+              class="notification-card"
+              data-category="stock"
+              data-read="true"
+            >
+              <div class="notification-card-top">
+                <div class="notification-card-meta">
+                  <span class="notification-dot"></span>
+                  <span class="notification-tag tag-slate"> Stok Opname </span>
+                </div>
+
+                <span class="notification-time">Kemarin, 11:20 WIB</span>
+              </div>
+
+              <h3>Rekonsiliasi Fisik Batch SO-2023-112 Selesai</h3>
+
+              <p>
+                Deviasi minus 3 unit pada Lorong B3 (Rak Elektronik) telah
+                di-input ke modul Write-Off Minor. Menunggu tinjauan berita
+                acara dari Kepala Logistik Pusat.
+              </p>
+            </article>
+
+            <!-- EMPTY STATE -->
+
+            <div class="notification-empty" id="notification-empty">
+              <i data-lucide="inbox"></i>
+
+              <strong>Tidak ada notifikasi ditemukan</strong>
+
+              <span>
+                Ubah kategori atau filter untuk melihat notifikasi lainnya.
+              </span>
+            </div>
+
+            <!-- LOAD MORE -->
+
+            <div class="notification-load-more" id="notification-load-more">
+              <span id="notification-count">
+                Menampilkan 6 dari 12 notifikasi tersimpan
+              </span>
+
+              <button
+                type="button"
+                class="notification-btn"
+                data-action="load-more"
+              >
+                <i data-lucide="history"></i>
+                Muat Notifikasi Terdahulu
+              </button>
+            </div>
+          </section>
+
+          <!-- SIDEBAR INFORMATION -->
+
+          <aside class="notification-aside">
+            <!-- ACTIVE CHANNELS -->
+
+            <section class="notification-side-card">
+              <div class="notification-side-title">
+                <h3>Kanal Pengiriman Aktif</h3>
+                <span class="notification-tag tag-green">3 Aktif</span>
+              </div>
+
+              <p>
+                Notifikasi darurat diteruskan paralel ke kanal operasional resmi
+                berikut:
+              </p>
+
+              <div class="notification-channel-list">
+                <div class="notification-channel">
+                  <div class="notification-channel-icon">
+                    <i data-lucide="monitor"></i>
+                  </div>
+
+                  <div>
+                    <strong>In-App Alert Dashboard</strong>
+                    <span>Pop-up real-time &amp; banner</span>
+                  </div>
+                </div>
+
+                <div class="notification-channel">
+                  <div class="notification-channel-icon">
+                    <i data-lucide="send"></i>
+                  </div>
+
+                  <div>
+                    <strong>Bot Telegram Lapangan</strong>
+                    <span>@astro_hr_bot</span>
+                  </div>
+                </div>
+
+                <div class="notification-channel">
+                  <div class="notification-channel-icon">
+                    <i data-lucide="mail"></i>
+                  </div>
+
+                  <div>
+                    <strong>Email Kedinasan</strong>
+                    <span>hrd.approval@astro.co.id</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="notification-text-link"
+                data-action="notification-preferences"
+              >
+                Kelola Preferensi &amp; Jam Senyap
+                <i data-lucide="arrow-right"></i>
+              </button>
+            </section>
+
+            <!-- GATEWAY -->
+
+            <section class="notification-side-card">
+              <div class="notification-side-title">
+                <h3>Gateway Telemetri</h3>
+                <span class="notification-tag tag-green">99,98% Up</span>
+              </div>
+
+              <div class="notification-gateway-grid">
+                <div class="notification-gateway-stat">
+                  <span>Antrean Push</span>
+                  <strong>0</strong>
+                  <small>Zero backlog</small>
+                </div>
+
+                <div class="notification-gateway-stat">
+                  <span>Latensi Rata-rata</span>
+                  <strong>14 ms</strong>
+                  <small>Optimal hub</small>
+                </div>
+              </div>
+
+              <div class="notification-sync">
+                <div class="flex items-center justify-between gap-2">
+                  <span>Sinkronisasi terakhir</span>
+                  <strong class="text-slate-600">10:48:12 WIB</strong>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 mt-1">
+                  <span>Node Gateway</span>
+                  <strong class="text-slate-600">dc01-edge-03</strong>
+                </div>
+              </div>
+            </section>
+
+            <!-- HELP -->
+
+            <section class="notification-help-card">
+              <h3>
+                <i data-lucide="headset"></i>
+                Bantuan Otorisasi Urgent
+              </h3>
+
+              <p>
+                Menemukan notifikasi yang tertahan lebih dari 60 menit tanpa
+                persetujuan tim supervisor? Segera eskalasikan ke Dispatcher
+                Utama.
+              </p>
+
+              <button
+                type="button"
+                class="notification-btn primary"
+                data-action="dispatch-hotline"
+              >
+                <i data-lucide="phone"></i>
+                Hubungi Hotline Dispatch DC-01
+              </button>
+            </section>
+          </aside>
+        </div>
+      </main>
+
+      <!-- TOAST -->
+
+      <div class="notification-toast" id="notification-toast">
+        <i data-lucide="info"></i>
+        <span id="notification-toast-message"></span>
+      </div>
+    </template>
+
+    <!-- =========================================
+       PAGE INITIALIZATION
+  ========================================== -->
+
+    <script>
+      "use strict";
+
+      /* =========================================
+       LOAD MAIN LAYOUT
+    ========================================== */
+
+      async function loadNotificationLayout() {
+        const app = document.getElementById("app");
+
+        if (!app) {
+          console.error("Elemen #app tidak ditemukan.");
+          return;
+        }
+
+        try {
+          // LOAD MAIN LAYOUT
+          const response = await fetch("../../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html gagal dimuat: HTTP " + response.status,
+            );
+          }
+
+          const layoutHTML = await response.text();
+
+          // INSERT LAYOUT
+          app.innerHTML = layoutHTML;
+
+          // GET PAGE ELEMENTS
+          const content = document.getElementById("content");
+          const template = document.getElementById("page");
+
+          if (!content) {
+            throw new Error("Elemen #content tidak ditemukan.");
+          }
+
+          if (!template) {
+            throw new Error("Template notifikasi tidak ditemukan.");
+          }
+
+          // INSERT NOTIFICATION PAGE
+          content.innerHTML = template.innerHTML;
+
+          // INITIALIZE MAIN LAYOUT
+          if (typeof window.initMainLayout !== "function") {
+            throw new Error(
+              "initMainLayout tidak ditemukan. Periksa main-layout.js.",
+            );
+          }
+
+          const initialized = window.initMainLayout();
+
+          if (!initialized) {
+            throw new Error("Inisialisasi MainLayout gagal.");
+          }
+
+          // INITIALIZE NOTIFICATION PAGE
+          initNotificationPage();
+
+          // REFRESH ICONS
+          if (typeof window.refreshLucideIcons === "function") {
+            window.refreshLucideIcons();
+          }
+
+          console.info("Astro Inventory: Halaman Notifikasi berhasil dimuat.");
+        } catch (error) {
+          console.error("Gagal memuat halaman Notifikasi:", error);
+
+          app.innerHTML = `
+          <div style="
+            margin:24px;
+            padding:20px;
+            border:1px solid #fecaca;
+            border-radius:10px;
+            background:#fef2f2;
+            color:#991b1b;
+            font-family:Arial,sans-serif;
+            font-size:13px;
+          ">
+            <strong>Gagal memuat halaman Notifikasi.</strong>
+
+            <p style="margin-top:8px;">
+              ${error.message}
+            </p>
+
+            <p style="margin-top:8px;">
+              Periksa Console browser dan lokasi file MainLayout.
+            </p>
+          </div>
+        `;
+        }
+      }
+
+      /* =========================================
+       NOTIFICATION PAGE INITIALIZATION
+    ========================================== */
+
+      function initNotificationPage() {
+        const page = document.querySelector(".notification-page");
+
+        if (!page) {
+          console.error("Konten notifikasi tidak ditemukan.");
+          return;
+        }
+
+        const tabs = page.querySelectorAll("[data-filter]");
+        const cards = page.querySelectorAll(".notification-card");
+
+        const unreadCheckbox = page.querySelector("#only-unread");
+        const emptyState = page.querySelector("#notification-empty");
+        const loadMore = page.querySelector("#notification-load-more");
+
+        const toast = document.querySelector("#notification-toast");
+
+        const toastMessage = document.querySelector(
+          "#notification-toast-message",
+        );
+
+        let activeFilter = "all";
+        let toastTimer = null;
+
+        /* =========================================
+         TOAST MESSAGE
+      ========================================== */
+
+        function showNotificationToast(message) {
+          if (!toast || !toastMessage) return;
+
+          toastMessage.textContent = message;
+          toast.classList.add("show");
+
+          if (toastTimer) {
+            clearTimeout(toastTimer);
+          }
+
+          toastTimer = setTimeout(function () {
+            toast.classList.remove("show");
+          }, 3000);
+        }
+
+        /* =========================================
+         FILTER NOTIFICATIONS
+      ========================================== */
+
+        function filterNotifications() {
+          let visibleCount = 0;
+
+          cards.forEach(function (card) {
+            const category = card.dataset.category;
+            const isRead = card.dataset.read === "true";
+
+            let matchesCategory = true;
+            let matchesRead = true;
+
+            if (activeFilter === "approval") {
+              matchesCategory = category === "approval";
+            } else if (activeFilter === "stock") {
+              matchesCategory = category === "stock";
+            }
+
+            if (unreadCheckbox && unreadCheckbox.checked) {
+              matchesRead = !isRead;
+            }
+
+            const shouldShow = matchesCategory && matchesRead;
+
+            card.style.display = shouldShow ? "" : "none";
+
+            if (shouldShow) {
+              visibleCount++;
+            }
+          });
+
+          if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? "block" : "none";
+          }
+
+          if (loadMore) {
+            const showLoadMore =
+              activeFilter === "all" &&
+              !(unreadCheckbox && unreadCheckbox.checked);
+
+            loadMore.style.display = showLoadMore ? "flex" : "none";
+          }
+        }
+
+        /* =========================================
+         FILTER TABS
+      ========================================== */
+
+        tabs.forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            tabs.forEach(function (item) {
+              item.classList.remove("active");
+            });
+
+            tab.classList.add("active");
+
+            activeFilter = tab.dataset.filter;
+
+            filterNotifications();
+          });
+        });
+
+        /* =========================================
+         UNREAD FILTER
+      ========================================== */
+
+        if (unreadCheckbox) {
+          unreadCheckbox.addEventListener("change", filterNotifications);
+        }
+
+        /* =========================================
+         MARK AS READ
+      ========================================== */
+
+        function markAsRead(card) {
+          if (!card) return;
+
+          card.dataset.read = "true";
+
+          card.classList.remove("unread");
+          card.classList.add("is-read");
+
+          filterNotifications();
+
+          showNotificationToast("Notifikasi berhasil ditandai sudah dibaca.");
+        }
+
+        /* =========================================
+         BUTTON ACTIONS
+      ========================================== */
+
+        page.addEventListener("click", function (event) {
+          const button = event.target.closest("[data-action]");
+
+          if (!button || !page.contains(button)) {
+            return;
+          }
+
+          const action = button.dataset.action;
+          const card = button.closest(".notification-card");
+
+          switch (action) {
+            case "mark-read":
+              markAsRead(card);
+              break;
+
+            case "notification-settings":
+            case "notification-preferences":
+              showNotificationToast(
+                "Halaman pengaturan notifikasi belum terhubung.",
+              );
+              break;
+
+            case "review-transfer":
+              showNotificationToast(
+                "Modul persetujuan mutasi belum terhubung.",
+              );
+              break;
+
+            case "reject-transfer":
+              showNotificationToast("Penolakan mutasi memerlukan otorisasi.");
+              break;
+
+            case "stock-detail":
+              showNotificationToast("Modul detail stok belum terhubung.");
+              break;
+
+            case "download-manifest":
+              showNotificationToast(
+                "Dokumen Manifest belum tersedia untuk diunduh.",
+              );
+              break;
+
+            case "audit-document":
+              showNotificationToast("Dokumen audit belum terhubung.");
+              break;
+
+            case "dispatch-hotline":
+              showNotificationToast(
+                "Kontak Hotline Dispatch belum dikonfigurasi.",
+              );
+              break;
+
+            case "load-more":
+              showNotificationToast(
+                "Data notifikasi berikutnya memerlukan koneksi database.",
+              );
+              break;
+
+            default:
+              break;
+          }
+        });
+
+        /* =========================================
+         INITIAL FILTER
+      ========================================== */
+
+        filterNotifications();
+
+        console.info("Astro Inventory: Notification page initialized.");
+      }
+
+      /* =========================================
+       START APPLICATION
+    ========================================== */
+
+      loadNotificationLayout();
+    </script>
+  </body>
+</html>

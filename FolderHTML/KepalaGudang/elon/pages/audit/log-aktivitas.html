@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Log Aktivitas | Astro Inventory</title>
+
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- LUCIDE ICON -->
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <!-- GLOBAL CSS -->
+    <link rel="stylesheet" href="../../styles/global.css" />
+
+    <style>
+      /* =========================================
+         ASTRO INVENTORY - LOG AKTIVITAS
+         UKURAN KONSISTEN DENGAN HALAMAN LAIN
+      ========================================= */
+
+      html,
+      body,
+      #app,
+      #app * {
+        font-family: "Inter", Arial, sans-serif !important;
+      }
+
+      #content {
+        width: 100%;
+        min-width: 0;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 12px !important;
+        line-height: 1.5;
+        color: #172033;
+      }
+
+      #content *,
+      #content *::before,
+      #content *::after {
+        box-sizing: border-box;
+      }
+
+      /* PAGE WRAPPER */
+
+      #content .log-page {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* TYPOGRAPHY */
+
+      #content h1 {
+        margin: 0;
+        font-size: 22px !important;
+        line-height: 1.35 !important;
+        font-weight: 700;
+        letter-spacing: -0.35px;
+      }
+
+      #content h2 {
+        font-size: 14px !important;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
+      #content h3 {
+        font-size: 14px !important;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
+      #content p {
+        line-height: 1.5;
+      }
+
+      #content .text-3xl {
+        font-size: 30px !important;
+        line-height: 1.3 !important;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      #content .text-xl {
+        font-size: 22px !important;
+      }
+
+      #content .text-lg {
+        font-size: 17px !important;
+      }
+
+      #content .text-sm {
+        font-size: 12px !important;
+      }
+
+      #content .text-xs {
+        font-size: 11px !important;
+      }
+
+      #content .text-\[9px\] {
+        font-size: 9px !important;
+      }
+
+      #content .text-\[10px\] {
+        font-size: 10px !important;
+      }
+
+      #content .text-\[11px\] {
+        font-size: 11px !important;
+      }
+
+      /* CARD */
+
+      #content .log-card {
+        min-width: 0;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      }
+
+      #content .log-card.p-0 {
+        padding: 0 !important;
+      }
+
+      #content .log-stat {
+        min-height: 112px;
+      }
+
+      #content .log-stat-value {
+        margin-top: 7px;
+        font-size: 30px !important;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+      }
+
+      #content .log-stat-value span {
+        font-size: 12px !important;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+
+      /* ICON */
+
+      #content svg,
+      #sidebar svg,
+      .astro-topbar svg {
+        display: inline-block;
+        flex-shrink: 0;
+        vertical-align: middle;
+        visibility: visible;
+        opacity: 1;
+      }
+
+      #content i[data-lucide] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+      }
+
+      #content .log-icon-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 10px;
+      }
+
+      #content .log-icon-box svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      /* BUTTON */
+
+      #content button,
+      #content .log-button {
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 12px !important;
+        font-weight: 600;
+        line-height: 1.4;
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      #content .log-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #183153;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035);
+      }
+
+      #content .log-button:hover {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+      }
+
+      #content .log-button.primary {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        box-shadow: 0 2px 5px rgba(29, 78, 216, 0.18);
+      }
+
+      #content .log-button.primary:hover {
+        color: #fff;
+        border-color: #1e40af;
+        background: #1e40af;
+      }
+
+      #content .log-button svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      #content button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      /* INPUT DAN DROPDOWN */
+
+      #content input,
+      #content select {
+        font-family: "Inter", Arial, sans-serif !important;
+        font-size: 12px !important;
+      }
+
+      #content input:focus,
+      #content select:focus {
+        outline: none;
+        border-color: #93b4f5;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      }
+
+      #content .log-filter-control {
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        height: 38px;
+        padding: 8px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #334155;
+        line-height: 1.4;
+      }
+
+      #content input.log-filter-control::placeholder {
+        color: #94a3b8;
+      }
+
+      #content select.log-filter-control {
+        padding: 6px 28px 6px 10px;
+        background-color: #fff;
+      }
+
+      #content .log-verification-input {
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        height: 38px;
+        padding: 9px 11px;
+        border: 1px solid #dbe4f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #334155;
+      }
+
+      /* BADGE */
+
+      #content .log-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        max-width: 100%;
+        padding: 5px 9px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        font-size: 10px !important;
+        font-weight: 600;
+        line-height: 1.35;
+        white-space: nowrap;
+      }
+
+      /* TABLE */
+
+      #content .log-table-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+      }
+
+      #content .log-table-wrapper::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      #content .log-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      #content .log-table-wrapper::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+      }
+
+      #content .log-table {
+        width: 100%;
+        min-width: 1220px;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: auto;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      #content .log-table thead {
+        background: #f8fafc;
+      }
+
+      #content .log-table thead th {
+        padding: 13px 9px;
+        background: #f8fafc;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px !important;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+
+      #content .log-table tbody td {
+        padding: 12px 9px;
+        color: #334155;
+        border-bottom: 1px solid #edf1f6;
+        font-size: 12px !important;
+        line-height: 1.5;
+        vertical-align: middle;
+      }
+
+      #content .log-table tbody tr {
+        background: #fff;
+        transition: background 0.15s ease;
+      }
+
+      #content .log-table tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      #content .log-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      #content .log-code {
+        color: #1d4ed8;
+        font-size: 12px !important;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      #content .log-hash {
+        display: inline-block;
+        max-width: 130px;
+        overflow: hidden;
+        color: #94a3b8;
+        font-family: monospace !important;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      #content .log-risk {
+        color: #dc2626;
+      }
+
+      #content .log-mono {
+        font-family: monospace !important;
+        overflow-wrap: anywhere;
+      }
+
+      /* TABLE FOOTER */
+
+      #content .log-footer {
+        padding: 12px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+      }
+
+      #content .log-footer button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        min-height: 30px;
+        padding: 5px 9px;
+        border: 1px solid #dbe4f0;
+        border-radius: 7px;
+        background: #fff;
+        color: #475569;
+        font-size: 11px !important;
+        font-weight: 600;
+      }
+
+      #content .log-footer button:hover:not(:disabled) {
+        color: #1d4ed8;
+        border-color: #93b4f5;
+        background: #f5f8ff;
+      }
+
+      #content .log-footer button.active {
+        color: #fff;
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+      }
+
+      #content .log-footer button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      /* VERIFICATION */
+
+      #content .log-verification-result {
+        min-height: 74px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: monospace !important;
+        font-size: 11px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+      }
+
+      /* ACCESSIBILITY */
+
+      #content button:focus-visible,
+      #content input:focus-visible,
+      #content select:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.2);
+        outline-offset: 2px;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1024px) {
+        #content .log-card {
+          padding: 12px;
+        }
+
+        #content .log-card.p-0 {
+          padding: 0 !important;
+        }
+
+        #content .log-stat-value {
+          font-size: 26px !important;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #content .log-page {
+          gap: 14px;
+        }
+
+        #content h1 {
+          font-size: 19px !important;
+        }
+
+        #content h2,
+        #content h3 {
+          font-size: 13px !important;
+        }
+
+        #content .log-stat-value {
+          font-size: 25px !important;
+        }
+
+        #content .log-table thead th {
+          padding: 11px 8px;
+          font-size: 10px !important;
+        }
+
+        #content .log-table tbody td {
+          padding: 10px 8px;
+          font-size: 11px !important;
+        }
+
+        #content .log-button {
+          min-height: 34px;
+          padding: 7px 10px;
+          font-size: 11px !important;
+        }
+
+        #content .log-filter-control {
+          min-height: 36px;
+          height: 36px;
+          font-size: 11px !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #content .log-card {
+          padding: 11px;
+          border-radius: 10px;
+        }
+
+        #content .log-card.p-0 {
+          padding: 0 !important;
+        }
+
+        #content .log-stat-value {
+          font-size: 22px !important;
+        }
+
+        #content .log-footer {
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-active="log-aktivitas" class="bg-slate-50 text-slate-800">
+    <!-- MAIN LAYOUT -->
+    <div id="app" class="flex min-h-screen"></div>
+
+    <!-- PAGE CONTENT -->
+    <template id="page">
+      <div class="log-page">
+        <!-- HEADER -->
+        <section class="space-y-3">
+          <p class="text-[10px] text-slate-500 font-medium">
+            Kepatuhan &amp; Audit
+            <span class="text-slate-400">&gt;</span>
+            Investigasi &amp; Kepatuhan
+            <span class="text-slate-400">&gt;</span>
+            <span class="text-blue-700">Log Aktivitas</span>
+          </p>
+
+          <div class="flex flex-wrap justify-between items-start gap-3">
+            <div class="max-w-2xl">
+              <h1 class="text-slate-900">
+                Log Aktivitas &amp; Audit Trail Kriptografis
+              </h1>
+
+              <p class="mt-2 text-xs text-slate-500">
+                Rekam jejak forensik digital real-time setiap manipulasi stok,
+                verifikasi segel, bypass otorisasi, penyesuaian ledger, dan
+                intervensi operasional pergudangan Hub Cakung DC-01.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="exportLog" class="log-button">
+                <i data-lucide="download"></i>
+                Ekspor Log Terenkripsi (PDF/CSV)
+              </button>
+
+              <button
+                type="button"
+                id="verifyLedger"
+                class="log-button primary"
+              >
+                <i data-lucide="shield-check"></i>
+                Verifikasi Hash Ledger Merkle
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STATISTIK -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="log-card log-stat">
+            <p class="text-[10px] text-slate-500">Total Entri Log Hari Ini</p>
+
+            <p class="log-stat-value text-slate-900">
+              14.820
+              <span class="text-slate-500">Event</span>
+            </p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              +8,2% vs rata-rata harian
+            </p>
+          </div>
+
+          <div class="log-card log-stat">
+            <p class="text-[10px] text-slate-500">Deteksi Anomali / Warning</p>
+
+            <p class="log-stat-value text-red-600">
+              5
+              <span class="text-slate-500">Intervensi</span>
+            </p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              3 Bypass SOP · 2 Luar Shift
+            </p>
+          </div>
+
+          <div class="log-card log-stat">
+            <p class="text-[10px] text-slate-500">Integritas Hash SHA-256</p>
+
+            <p class="log-stat-value text-green-600">
+              100%
+              <span class="text-slate-500">Valid</span>
+            </p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              0 Modifikasi Liar (Zero Tampering)
+            </p>
+          </div>
+
+          <div class="log-card log-stat">
+            <p class="text-[10px] text-slate-500">
+              Pengguna &amp; Service Aktif
+            </p>
+
+            <p class="log-stat-value text-slate-900">
+              42
+              <span class="text-slate-500">Aktor</span>
+            </p>
+
+            <p class="mt-2 text-[10px] text-slate-500">
+              38 Staf · 4 Supervisor · 2 Daemon
+            </p>
+          </div>
+        </section>
+
+        <!-- FILTER LOG -->
+        <section class="log-card space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+            <input
+              id="searchLog"
+              type="search"
+              class="log-filter-control"
+              placeholder="Cari ID Log, Hash SHA-256, User / NIP..."
+              aria-label="Cari log aktivitas"
+            />
+
+            <select
+              id="filterModul"
+              class="log-filter-control"
+              aria-label="Filter kategori modul"
+            >
+              <option value="">Semua Kategori Modul</option>
+              <option value="Mutasi Antar-Hub">Mutasi Antar-Hub</option>
+              <option value="Outbound Dispatch">Outbound Dispatch</option>
+              <option value="Rekonsiliasi Ledger">Rekonsiliasi Ledger</option>
+              <option value="Inbound PO">Inbound PO</option>
+              <option value="Sesi & Keamanan">Sesi &amp; Keamanan</option>
+            </select>
+
+            <select
+              id="filterRisiko"
+              class="log-filter-control"
+              aria-label="Filter tingkat risiko"
+            >
+              <option value="">Semua Tingkat Kepentingan</option>
+              <option value="Anomali Deviasi">Anomali Deviasi</option>
+              <option value="Peringatan Sistem">Peringatan Sistem</option>
+              <option value="Otorisasi Sah">Otorisasi Sah</option>
+              <option value="Dokumen Resmi">Dokumen Resmi</option>
+              <option value="Akses Aman">Akses Aman</option>
+            </select>
+
+            <select
+              id="filterWaktu"
+              class="log-filter-control"
+              aria-label="Filter waktu"
+            >
+              <option value="">Semua Rentang Waktu</option>
+              <option value="18 Okt 2025">18 Oktober 2025</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label
+              class="flex flex-wrap items-center gap-2 text-xs text-slate-600"
+            >
+              <input
+                type="checkbox"
+                id="filterRisikoTinggi"
+                class="accent-blue-600"
+              />
+
+              Hanya tampilkan aktivitas berisiko tinggi / deviasi integritas
+
+              <span class="log-badge bg-red-100 text-red-700"> 5 Event </span>
+            </label>
+
+            <button type="button" id="resetLogFilter" class="log-button">
+              <i data-lucide="rotate-ccw"></i>
+              Reset Filter
+            </button>
+          </div>
+        </section>
+
+        <!-- TABEL LOG AKTIVITAS -->
+        <section class="log-card p-0 overflow-hidden">
+          <div class="log-table-wrapper">
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th>Timestamp (WIB)</th>
+                  <th>Hash SHA-256 &amp; ID Event</th>
+                  <th>Aktor &amp; Peran</th>
+                  <th>Modul / Layanan</th>
+                  <th>Deskripsi Aktivitas &amp; Payload</th>
+                  <th>Tingkat Risiko</th>
+                  <th>Aksi Forensik</th>
+                </tr>
+              </thead>
+
+              <tbody id="logTable">
+                <!-- LOG 1 -->
+                <tr
+                  data-module="Mutasi Antar-Hub"
+                  data-risk="Otorisasi Sah"
+                  data-date="18 Okt 2025"
+                >
+                  <td>
+                    18 Okt 2025<br />
+                    14:15:22 WIB
+                  </td>
+
+                  <td>
+                    <span class="log-code">#EVT-LOG-98124</span>
+                    <br />
+                    <span class="log-hash">9f8a...3b21</span>
+                  </td>
+
+                  <td>
+                    <b>Budi Santoso</b>
+                    <br />
+                    Ka. Gudang DC-01
+                    <br />
+                    <span class="text-slate-500">NIP 19850211</span>
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-blue-100 text-blue-800">
+                      Mutasi Antar-Hub
+                    </span>
+                  </td>
+
+                  <td>
+                    Otorisasi persetujuan darurat mutasi 150 unit Titan Smart
+                    Watch ke Surabaya DC-01
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-green-100 text-green-700">
+                      Otorisasi Sah
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="log-button"
+                      data-log-action="payload"
+                    >
+                      Payload
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- LOG 2 -->
+                <tr
+                  data-module="Outbound Dispatch"
+                  data-risk="Anomali Deviasi"
+                  data-date="18 Okt 2025"
+                  data-high-risk="true"
+                >
+                  <td>
+                    <span class="text-red-600">
+                      18 Okt 2025<br />
+                      13:42:09 WIB
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="log-code text-red-600"> #EVT-LOG-98118 </span>
+                    <br />
+                    <span class="log-hash">4c1d...7a90</span>
+                  </td>
+
+                  <td>
+                    <b>Rian Hidayat</b>
+                    <br />
+                    Staf Picking
+                    <br />
+                    <span class="text-slate-500">NIP 20010419</span>
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-red-100 text-red-700">
+                      Outbound Dispatch
+                    </span>
+                  </td>
+
+                  <td class="text-red-600">
+                    Percobaan scan barcode serial number tidak cocok pada muatan
+                    Gate Bay 04 (iWatch Gen 4 - Kemasan Cacat)
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-red-100 text-red-700">
+                      Anomali Deviasi
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="log-button"
+                      data-log-action="investigasi"
+                    >
+                      Investigasi
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- LOG 3 -->
+                <tr
+                  data-module="Rekonsiliasi Ledger"
+                  data-risk="Peringatan Sistem"
+                  data-date="18 Okt 2025"
+                >
+                  <td>
+                    18 Okt 2025<br />
+                    11:20:45 WIB
+                  </td>
+
+                  <td>
+                    <span class="log-code">#EVT-LOG-98102</span>
+                    <br />
+                    <span class="log-hash">e2b8...11f3</span>
+                  </td>
+
+                  <td>
+                    <b>Cron Daemon WMS-AUTO</b>
+                    <br />
+                    Sistem Otomatis
+                    <br />
+                    <span class="text-slate-500">Service ID #SRV-002</span>
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-slate-100 text-slate-600">
+                      Rekonsiliasi Ledger
+                    </span>
+                  </td>
+
+                  <td>
+                    Deteksi selisih fisik opname defisit -3 unit Sandisk SSD 1TB
+                    di Rak C-02
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-blue-100 text-blue-800">
+                      Peringatan Sistem
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="log-button"
+                      data-log-action="detail"
+                    >
+                      Detail Log
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- LOG 4 -->
+                <tr
+                  data-module="Inbound PO"
+                  data-risk="Dokumen Resmi"
+                  data-date="18 Okt 2025"
+                >
+                  <td>
+                    18 Okt 2025<br />
+                    09:30:12 WIB
+                  </td>
+
+                  <td>
+                    <span class="log-code">#EVT-LOG-98089</span>
+                    <br />
+                    <span class="log-hash">77a1...cc45</span>
+                  </td>
+
+                  <td>
+                    <b>Fajar Kurnia</b>
+                    <br />
+                    Checker Inbound
+                    <br />
+                    <span class="text-slate-500">NIP 19960814</span>
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-blue-100 text-blue-800">
+                      Inbound PO
+                    </span>
+                  </td>
+
+                  <td>
+                    Pencatatan Berita Acara Kerusakan kontainer vendor PT Optik
+                    Maju Sentosa (1 unit lensa rusak)
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-blue-100 text-blue-800">
+                      Dokumen Resmi
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="log-button"
+                      data-log-action="bap"
+                    >
+                      Lihat BAP
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- LOG 5 -->
+                <tr
+                  data-module="Sesi & Keamanan"
+                  data-risk="Akses Aman"
+                  data-date="18 Okt 2025"
+                >
+                  <td>
+                    18 Okt 2025<br />
+                    08:05:01 WIB
+                  </td>
+
+                  <td>
+                    <span class="log-code">#EVT-LOG-98064</span>
+                    <br />
+                    <span class="log-hash">110f...89e2</span>
+                  </td>
+
+                  <td>
+                    <b>Dewi Anggraini, S.Ak</b>
+                    <br />
+                    Lead Auditor
+                    <br />
+                    <span class="text-slate-500">NIP 19930718</span>
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-blue-100 text-blue-800">
+                      Sesi &amp; Keamanan
+                    </span>
+                  </td>
+
+                  <td>
+                    Login audit mode menggunakan 2FA YubiKey hardware token dari
+                    terminal IP Intranet
+                  </td>
+
+                  <td>
+                    <span class="log-badge bg-green-100 text-green-700">
+                      Akses Aman
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="log-button"
+                      data-log-action="sesi"
+                    >
+                      Detail Sesi
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- FOOTER TABEL -->
+          <div
+            class="log-footer flex flex-wrap justify-between items-center gap-3"
+          >
+            <span id="logTotal" class="text-[10px] text-slate-500">
+              Menampilkan 1-5 dari 14.820 entri log
+            </span>
+
+            <div class="flex items-center gap-1">
+              <button type="button" disabled aria-label="Halaman sebelumnya">
+                <i data-lucide="chevron-left" class="w-3 h-3"></i>
+              </button>
+
+              <button type="button" class="active">1</button>
+              <button type="button">2</button>
+              <button type="button">3</button>
+
+              <span class="px-2 text-slate-400">...</span>
+
+              <button type="button">2964</button>
+
+              <button type="button" aria-label="Halaman berikutnya">
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALISIS DAN VERIFIKASI -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- MERKLE -->
+          <div class="log-card">
+            <div class="flex items-center gap-2">
+              <span class="log-icon-box bg-blue-50 text-blue-700">
+                <i data-lucide="network"></i>
+              </span>
+
+              <h3 class="text-slate-900">
+                Distribusi Event &amp; Rantai Merkle Terverifikasi
+              </h3>
+            </div>
+
+            <p class="text-xs text-slate-500 mt-2">
+              Pohon hash blok periodik per 1.000 transaksi mutasi gudang Hub
+              Cakung DC-01.
+            </p>
+
+            <div
+              class="mt-4 p-3 rounded-lg bg-slate-100 border border-slate-200"
+            >
+              <p class="text-[10px] text-slate-500 font-semibold mb-2">
+                MERKLE ROOT HASH (BLOK #2025-W42)
+              </p>
+
+              <p class="log-mono text-[10px] text-slate-700">
+                0x7f9a882e9104bdca8234ea71b293021948ba81230cdba821947bca881726a
+              </p>
+            </div>
+
+            <div
+              class="mt-3 h-24 rounded-lg bg-blue-50 border border-blue-100 flex flex-col items-center justify-center text-blue-700"
+            >
+              <i data-lucide="chart-no-axes-combined" class="w-6 h-6 mb-2"></i>
+
+              <p class="text-xs font-semibold">
+                Grafik Throughput Log (24 Jam)
+              </p>
+
+              <p class="text-[10px] text-slate-500 mt-1">
+                Puncak 48,2 event/detik
+              </p>
+            </div>
+          </div>
+
+          <!-- VERIFIKASI HASH -->
+          <div class="log-card">
+            <div class="flex items-center gap-2">
+              <span class="log-icon-box bg-emerald-50 text-emerald-700">
+                <i data-lucide="shield-check"></i>
+              </span>
+
+              <h3 class="text-slate-900">
+                Alat Forensik &amp; Verifikasi Hash Mandiri
+              </h3>
+            </div>
+
+            <p class="text-xs text-slate-500 mt-2">
+              Validasi keaslian rekaman tanpa melibatkan API write.
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <input
+                id="hashInput"
+                type="text"
+                class="log-verification-input flex-1"
+                placeholder="Masukkan hash SHA-256 untuk diverifikasi..."
+                aria-label="Hash SHA-256"
+              />
+
+              <button type="button" id="verifyHash" class="log-button primary">
+                <i data-lucide="shield-check"></i>
+                Verifikasi Hash
+              </button>
+            </div>
+
+            <div id="verificationResult" class="log-verification-result mt-3">
+              <span class="text-green-400"> ✓ Node: Intranet Core Cakung </span>
+              <br />
+              Sync Target: Block #1049
+              <br />
+              Masukkan hash atau klik baris tabel untuk memvalidasi proof tanpa
+              jeda latensi.
+            </div>
+
+            <p class="mt-3 text-[10px] text-slate-500">
+              Kepatuhan Standar: ISO/IEC 27001/2022 A.12.4
+            </p>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <!-- MAIN LAYOUT SCRIPT -->
+    <script src="../../layouts/main-layout.js"></script>
+
+    <!-- PAGE SCRIPT -->
+    <script>
+      /* =========================================
+         UTILITIES
+      ========================================= */
+
+      function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, (character) => {
+          const entities = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;",
+          };
+
+          return entities[character];
+        });
+      }
+
+      function refreshIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons({
+            attrs: {
+              "stroke-width": 1.8,
+            },
+          });
+        }
+
+        if (typeof window.refreshLucideIcons === "function") {
+          window.refreshLucideIcons();
+        }
+      }
+
+      /* =========================================
+         SIDEBAR PATH UNTUK FOLDER AUDIT
+      ========================================= */
+
+      function setupAuditSidebar() {
+        const activePage = document.body.dataset.active;
+
+        const auditMenus = [
+          "log-aktivitas",
+          "temuan-audit",
+          "tindak-lanjut",
+          "laporan-audit",
+        ];
+
+        document
+          .querySelectorAll(".sidebar-navigation [data-nav]")
+          .forEach((link) => {
+            const menu = link.dataset.nav;
+
+            if (auditMenus.includes(menu)) {
+              link.href = "./" + menu + ".html";
+            } else {
+              link.href = "../" + menu + ".html";
+            }
+
+            const isActive = menu === activePage;
+
+            link.classList.toggle("active", isActive);
+            link.classList.toggle("nav-active", isActive);
+
+            if (isActive) {
+              link.setAttribute("aria-current", "page");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          });
+      }
+
+      /* =========================================
+         LOAD MAIN LAYOUT
+      ========================================= */
+
+      async function loadMainLayout() {
+        const app = document.getElementById("app");
+
+        if (!app) {
+          console.error("Elemen #app tidak ditemukan.");
+          return;
+        }
+
+        try {
+          const response = await fetch("../../layouts/MainLayout.html");
+
+          if (!response.ok) {
+            throw new Error(
+              "MainLayout.html gagal dimuat. Status: " + response.status,
+            );
+          }
+
+          const html = await response.text();
+
+          app.innerHTML = html;
+
+          const content = document.getElementById("content");
+          const template = document.getElementById("page");
+
+          if (!content) {
+            throw new Error(
+              "Elemen #content tidak ditemukan di MainLayout.html.",
+            );
+          }
+
+          if (!template) {
+            throw new Error("Template halaman #page tidak ditemukan.");
+          }
+
+          /* MASUKKAN KONTEN KE MAIN LAYOUT */
+          content.appendChild(template.content.cloneNode(true));
+
+          /* SET LINK DAN MENU AKTIF */
+          setupAuditSidebar();
+
+          /* INITIALIZE MAIN LAYOUT */
+          if (typeof window.initMainLayout === "function") {
+            window.initMainLayout();
+          }
+
+          /* INITIALIZE PAGE */
+          initLogAktivitas();
+
+          /* REFRESH ICON */
+          refreshIcons();
+        } catch (error) {
+          console.error("Gagal memuat halaman:", error);
+
+          app.innerHTML = `
+            <div class="w-full min-h-screen flex items-center justify-center p-6">
+              <div class="max-w-md w-full bg-white border border-red-200 rounded-xl p-6 text-center">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                  <i data-lucide="alert-circle"></i>
+                </div>
+
+                <h2 class="text-lg font-bold text-slate-900">
+                  Gagal Memuat Halaman
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-2">
+                  ${escapeHTML(error.message)}
+                </p>
+
+                <button
+                  type="button"
+                  onclick="location.reload()"
+                  class="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold"
+                >
+                  Muat Ulang
+                </button>
+              </div>
+            </div>
+          `;
+
+          refreshIcons();
+        }
+      }
+
+      /* =========================================
+         LOG AKTIVITAS
+      ========================================= */
+
+      function initLogAktivitas() {
+        const searchInput = document.getElementById("searchLog");
+        const filterModul = document.getElementById("filterModul");
+        const filterRisiko = document.getElementById("filterRisiko");
+        const filterWaktu = document.getElementById("filterWaktu");
+        const filterRisikoTinggi =
+          document.getElementById("filterRisikoTinggi");
+
+        const resetButton = document.getElementById("resetLogFilter");
+        const table = document.getElementById("logTable");
+        const totalLabel = document.getElementById("logTotal");
+
+        const hashInput = document.getElementById("hashInput");
+        const verifyButton = document.getElementById("verifyHash");
+        const resultBox = document.getElementById("verificationResult");
+
+        const verifyLedgerButton = document.getElementById("verifyLedger");
+
+        const exportButton = document.getElementById("exportLog");
+
+        if (
+          !searchInput ||
+          !filterModul ||
+          !filterRisiko ||
+          !filterWaktu ||
+          !filterRisikoTinggi ||
+          !resetButton ||
+          !table ||
+          !totalLabel
+        ) {
+          console.error("Elemen halaman Log Aktivitas tidak lengkap.");
+          return;
+        }
+
+        const rows = Array.from(table.querySelectorAll("tr"));
+
+        /* =========================================
+           FILTER DATA LOG
+        ========================================= */
+
+        function filterLogs() {
+          const keyword = searchInput.value.trim().toLocaleLowerCase("id");
+
+          const moduleValue = filterModul.value;
+          const riskValue = filterRisiko.value;
+          const dateValue = filterWaktu.value;
+          const highRiskOnly = filterRisikoTinggi.checked;
+
+          let visible = 0;
+
+          rows.forEach((row) => {
+            const text = row.innerText.toLocaleLowerCase("id");
+
+            const matchSearch = !keyword || text.includes(keyword);
+
+            const matchModule =
+              !moduleValue || row.dataset.module === moduleValue;
+
+            const matchRisk = !riskValue || row.dataset.risk === riskValue;
+
+            const matchDate = !dateValue || row.dataset.date === dateValue;
+
+            const matchHighRisk =
+              !highRiskOnly || row.dataset.highRisk === "true";
+
+            const show =
+              matchSearch &&
+              matchModule &&
+              matchRisk &&
+              matchDate &&
+              matchHighRisk;
+
+            row.style.display = show ? "" : "none";
+
+            if (show) visible++;
+          });
+
+          totalLabel.textContent =
+            "Menampilkan " +
+            visible +
+            " dari " +
+            rows.length +
+            " data log pada halaman ini";
+        }
+
+        /* =========================================
+           EVENT FILTER
+        ========================================= */
+
+        searchInput.addEventListener("input", filterLogs);
+        filterModul.addEventListener("change", filterLogs);
+        filterRisiko.addEventListener("change", filterLogs);
+        filterWaktu.addEventListener("change", filterLogs);
+        filterRisikoTinggi.addEventListener("change", filterLogs);
+
+        /* =========================================
+           RESET FILTER
+        ========================================= */
+
+        resetButton.addEventListener("click", () => {
+          searchInput.value = "";
+          filterModul.value = "";
+          filterRisiko.value = "";
+          filterWaktu.value = "";
+          filterRisikoTinggi.checked = false;
+
+          filterLogs();
+        });
+
+        /* =========================================
+           AKSI TABEL
+        ========================================= */
+
+        table.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-log-action]");
+
+          if (!button) return;
+
+          const row = button.closest("tr");
+
+          if (!row) return;
+
+          const eventId =
+            row.querySelector(".log-code")?.textContent.trim() || "-";
+
+          const action = button.dataset.logAction;
+
+          const messages = {
+            payload:
+              "Detail payload untuk " +
+              eventId +
+              "\n\nData payload ditampilkan sebagai simulasi antarmuka.",
+
+            investigasi:
+              "Event " +
+              eventId +
+              "\n\nStatus: Memerlukan investigasi lebih lanjut.",
+
+            detail:
+              "Detail log " + eventId + "\n\nInformasi rekonsiliasi ledger.",
+
+            bap: "Berita Acara Pemeriksaan untuk " + eventId,
+
+            sesi: "Detail sesi keamanan untuk " + eventId,
+          };
+
+          alert(messages[action] || "Detail aktivitas " + eventId);
+        });
+
+        /* =========================================
+           VERIFIKASI HASH
+        ========================================= */
+
+        function verifyHash() {
+          if (!hashInput || !resultBox) return;
+
+          const hash = hashInput.value.trim();
+
+          if (!hash) {
+            resultBox.innerHTML =
+              '<span class="text-amber-400">⚠ Masukkan hash terlebih dahulu.</span>';
+
+            hashInput.focus();
+            return;
+          }
+
+          const isValidFormat = /^[a-fA-F0-9]{64}$/.test(hash);
+
+          if (!isValidFormat) {
+            resultBox.innerHTML =
+              '<span class="text-red-400">✕ Format hash tidak valid.</span>' +
+              "<br>Hash SHA-256 harus terdiri dari 64 karakter hexadecimal.";
+
+            return;
+          }
+
+          resultBox.innerHTML =
+            '<span class="text-blue-400">✓ Format hash SHA-256 valid.</span>' +
+            "<br>Hash: " +
+            escapeHTML(hash) +
+            "<br><br>" +
+            '<span class="text-amber-400">Status: Simulasi validasi lokal.</span>' +
+            "<br>Verifikasi kriptografis aktual memerlukan data ledger dan backend.";
+        }
+
+        verifyButton?.addEventListener("click", verifyHash);
+
+        hashInput?.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            verifyHash();
+          }
+        });
+
+        /* =========================================
+           TOMBOL VERIFIKASI LEDGER
+        ========================================= */
+
+        verifyLedgerButton?.addEventListener("click", () => {
+          hashInput?.focus();
+
+          resultBox?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        });
+
+        /* =========================================
+           EKSPOR CSV
+        ========================================= */
+
+        exportButton?.addEventListener("click", () => {
+          const visibleRows = rows.filter(
+            (row) => row.style.display !== "none",
+          );
+
+          const headers = [
+            "Timestamp",
+            "ID Event",
+            "Hash",
+            "Aktor",
+            "Modul",
+            "Deskripsi",
+            "Risiko",
+          ];
+
+          const csvRows = visibleRows.map((row) => {
+            const cells = row.querySelectorAll("td");
+
+            const timestamp = cells[0]?.innerText || "";
+
+            const eventId =
+              cells[1]?.querySelector(".log-code")?.innerText || "";
+
+            const hash = cells[1]?.querySelector(".log-hash")?.innerText || "";
+
+            const actor = cells[2]?.innerText || "";
+            const module = cells[3]?.innerText || "";
+            const description = cells[4]?.innerText || "";
+            const risk = cells[5]?.innerText || "";
+
+            return [timestamp, eventId, hash, actor, module, description, risk];
+          });
+
+          const escapeCSV = (value) =>
+            '"' + String(value).replace(/"/g, '""') + '"';
+
+          const csvContent = [headers, ...csvRows]
+            .map((row) => row.map(escapeCSV).join(","))
+            .join("\n");
+
+          const blob = new Blob(["\uFEFF" + csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = "log-aktivitas-astro-inventory.csv";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(url);
+        });
+
+        /* =========================================
+           FILTER AWAL
+        ========================================= */
+
+        filterLogs();
+      }
+
+      /* =========================================
+         JALANKAN HALAMAN
+      ========================================= */
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", loadMainLayout, {
+          once: true,
+        });
+      } else {
+        loadMainLayout();
+      }
+    </script>
+  </body>
+</html>
