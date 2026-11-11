@@ -544,109 +544,99 @@
         @endif
         
         @if(auth()->user()->isPegawai())
+        <!-- Pegawai Breadcrumb -->
+        <nav class="flex items-center gap-1.5 text-[11px] tracking-[0.04em] uppercase mb-2 anim-fade-in">
+            <span class="text-slate-400 font-semibold">PORTAL OPERASIONAL PEGAWAI</span>
+            <i class="fas fa-chevron-right text-[9px] text-slate-300"></i>
+            <span class="text-slate-400 font-semibold">DASHBOARD KERJA HARIAN</span>
+            <i class="fas fa-chevron-right text-[9px] text-slate-300"></i>
+            <span class="text-blue-600 font-bold">HUB-CKG-01</span>
+        </nav>
+
         <!-- Pegawai Header -->
-        <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6 anim-fade-up">
             <div>
-                <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">
-                    Portal Operasional Pegawai / Monitoring & Laporan / 
-                    <span class="text-blue-700">Status & Pelacakan Permintaan Operasional</span>
-                </p>
-                <h1 class="mt-1 text-[24px] font-bold leading-tight tracking-tight">Status Permintaan Staf & Logistik</h1>
-                <p class="mt-1.5 max-w-3xl text-[12px] leading-relaxed text-slate-500">
-                    Pantau status pengajuan izin barang keluar darurat, penggantian alat scanner rusak, penambahan pallet/box, dan pengadaan perlengkapan operasional shift.
-                </p>
+                <h1 class="text-[26px] md:text-[30px] font-extrabold text-slate-900 leading-tight">Dashboard Operasional Pegawai</h1>
+                <p class="text-[13.5px] text-slate-500 mt-1.5 max-w-3xl">Selamat datang kembali, {{ auth()->user()->nama_lengkap }} (NIK: {{ auth()->user()->nik ?? 'STF-90214' }}). Kelola penanganan fisik barang masuk, barang keluar, pemindaian barcode rak, dan verifikasi stok harian Hub Cakung DC-01.</p>
             </div>
-            <div class="flex flex-wrap gap-2">
-                <button class="flex h-10 items-center rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm">
-                    Riwayat Tiket Selesai
+            <div class="flex flex-wrap items-center gap-2.5 flex-none">
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 text-[12.5px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/30">
+                    <i class="fas fa-barcode"></i> Scan Barcode Cepat
                 </button>
-                <button class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700">
-                    <i class="fas fa-plus"></i>Buat Pengajuan / Permintaan Baru
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 text-[12.5px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all">
+                    <i class="fas fa-arrow-down"></i> Input Barang Masuk Baru
+                </button>
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 text-[12.5px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all">
+                    <i class="fas fa-arrow-up"></i> Permintaan Pengeluaran
                 </button>
             </div>
         </div>
         @endif
         
         @if(auth()->user()->isAuditor())
+        <!-- Auditor Breadcrumb -->
+        <nav class="flex items-center gap-1.5 text-[11px] tracking-[0.04em] uppercase mb-2 anim-fade-in">
+            <span class="text-slate-400 font-semibold">KEPATUHAN & AUDIT</span>
+            <i class="fas fa-chevron-right text-[9px] text-slate-300"></i>
+            <span class="text-blue-600 font-bold">DASHBOARD AUDIT (OVERVIEW)</span>
+        </nav>
+
         <!-- Auditor Header -->
-        <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
-            <span>Beranda</span>
-            <i class="fas fa-chevron-right text-[9px]"></i>
-            <span class="text-blue-600 font-semibold">Dashboard Auditor</span>
-        </div>
-        
-        <div class="mb-6">
-            <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Dashboard Audit & Pemeriksaan</h1>
-            <p class="text-sm text-gray-600">Monitoring audit inventory, temuan critical, dan compliance rate sistem inventaris.</p>
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6 anim-fade-up">
+            <div>
+                <h1 class="text-[26px] md:text-[30px] font-extrabold text-slate-900 leading-tight">Dasbor Kepatuhan & Pusat Pemeriksaan Audit</h1>
+                <p class="text-[13.5px] text-slate-500 mt-1.5 max-w-3xl">Pemantauan integritas buku inventaris, deviasi stok fisik vs sistem, transparansi mutasi logistik, dan rekam jejak kepatuhan ISO/IEC 27001 Hub Cakung DC-01.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 flex-none">
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all">
+                    <i class="fas fa-download"></i> Ekspor Audit Trail (PDF/CSV)
+                </button>
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/30">
+                    <i class="fas fa-flask"></i> Mulai Uji Petik Mandiri (Sample Test)
+                </button>
+            </div>
         </div>
         @endif
 
         <!-- Metrics Grid -->
         @if(auth()->user()->isSuperAdmin())
         <!-- Super Admin Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up delay-1">
-            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+            <div class="metric-card panel p-4 lg:p-5">
                 <div class="flex items-start justify-between mb-2">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-users-gear text-blue-600"></i>
-                    </div>
-                    <span class="bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <i class="fas fa-arrow-trend-up"></i>+12% bln lalu
-                    </span>
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-users-gear text-blue-600"></i></div>
+                    <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-trend-up"></i>+12% bln lalu</span>
                 </div>
                 <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">TOTAL PENGGUNA & ADMIN</p>
-                <p class="text-3xl font-extrabold text-gray-900 mt-1">1,420</p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1"></span>18 Admin Hub aktif bertugas
-                </p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">1.420</p>
+                <p class="text-xs text-gray-500 mt-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1"></span>18 Admin Hub aktif bertugas</p>
             </div>
-
-            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div class="metric-card panel p-4 lg:p-5">
                 <div class="flex items-start justify-between mb-2">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-box-archive text-blue-600"></i>
-                    </div>
-                    <span class="bg-blue-50 text-blue-700 text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <i class="fas fa-bullseye"></i>99.8% Akurasi
-                    </span>
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-box-archive text-blue-600"></i></div>
+                    <span class="badge bg-blue-50 text-blue-700"><i class="fas fa-bullseye"></i>99.8% Akurasi</span>
                 </div>
                 <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">SKU AKTIF TERSIMPAN</p>
-                <p class="text-3xl font-extrabold text-gray-900 mt-1">8,650 <span class="text-sm font-semibold text-gray-500">SKU</span></p>
-                <p class="text-xs text-emerald-600 mt-1">
-                    <i class="fas fa-circle-check"></i> 99.2% Stok Tersedia Siap Alokasi
-                </p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">8.650 <span class="text-sm font-semibold text-gray-500">SKU</span></p>
+                <p class="text-xs text-emerald-600 mt-1"><i class="fas fa-circle-check"></i> 99.2% Stok Tersedia Siap Alokasi</p>
             </div>
-
-            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div class="metric-card panel p-4 lg:p-5">
                 <div class="flex items-start justify-between mb-2">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-circle-check text-emerald-600"></i>
-                    </div>
-                    <span class="bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <i class="fas fa-arrow-up"></i>+8.4% target
-                    </span>
+                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"><i class="fas fa-circle-check text-emerald-600"></i></div>
+                    <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-up"></i>+8.4% target</span>
                 </div>
                 <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">BARANG MASUK HARI INI</p>
-                <p class="text-3xl font-extrabold text-gray-900 mt-1">1,240 <span class="text-sm font-semibold text-gray-500">Unit</span></p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-file-lines mr-1"></i>12 Surat Jalan Selesai
-                </p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">1.240 <span class="text-sm font-semibold text-gray-500">Unit</span></p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-file-lines mr-1"></i>12 Surat Jalan (Surat Jalan Selesai)</p>
             </div>
-
-            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div class="metric-card panel p-4 lg:p-5">
                 <div class="flex items-start justify-between mb-2">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-arrow-up-from-bracket text-blue-600"></i>
-                    </div>
-                    <span class="bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <i class="fas fa-rocket"></i>100% Siap
-                    </span>
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-arrow-up-from-bracket text-blue-600"></i></div>
+                    <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-rocket"></i>100% Siap</span>
                 </div>
                 <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">BARANG KELUAR HARI INI</p>
                 <p class="text-3xl font-extrabold text-gray-900 mt-1">980 <span class="text-sm font-semibold text-gray-500">Unit</span></p>
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-truck-fast mr-1"></i>94 Batch Pengiriman Siap Dispatch
-                </p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-truck-fast mr-1"></i>94 Batch Pengiriman Siap Dispatch</p>
             </div>
         </div>
         
@@ -1664,108 +1654,302 @@
         @endif
 
         @if(auth()->user()->isPegawai())
-        <!-- Pegawai Metrics -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition">
-                            <p class="text-[11px] text-gray-500">Rata-rata Harian</p>
-                            <p class="font-bold text-gray-900 mt-0.5">1.202 <span class="text-xs font-semibold text-gray-500">Unit/Hari</span></p>
+        <!-- Pegawai Metrics (4 Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+            <div class="metric-card panel p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+                        <i class="fas fa-clipboard-check text-blue-600"></i>
+                    </div>
+                    <span class="badge bg-blue-50 text-blue-600 border border-blue-100 uppercase !text-[9.5px]">SHIFT BERJALAN</span>
+                </div>
+                <div class="text-[10.5px] font-bold tracking-[0.07em] text-slate-400 uppercase">TUGAS MASUK HARI INI</div>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span class="text-[32px] font-extrabold text-slate-900 leading-none">18</span>
+                    <span class="text-[13px] font-bold text-slate-400">Surat Jalan</span>
+                </div>
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400 flex-none"></span> 14 Selesai di-Staging, 4 Menunggu QC
+                </div>
+            </div>
+
+            <div class="metric-card panel p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                        <i class="fas fa-truck text-emerald-600"></i>
+                    </div>
+                    <span class="badge bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase !text-[9.5px]">PRIORITAS HUB</span>
+                </div>
+                <div class="text-[10.5px] font-bold tracking-[0.07em] text-slate-400 uppercase">TUGAS KELUAR HARI INI</div>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span class="text-[32px] font-extrabold text-slate-900 leading-none">26</span>
+                    <span class="text-[13px] font-bold text-slate-400">Order Dispatch</span>
+                </div>
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-none"></span> 21 Siap Muat Armada, 5 Picking
+                </div>
+            </div>
+
+            <div class="metric-card panel p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-indigo-600"></i>
+                    </div>
+                    <span class="badge bg-red-50 text-red-600 border border-red-100 uppercase !text-[9.5px]">2 JAM TERSISA</span>
+                </div>
+                <div class="text-[10.5px] font-bold tracking-[0.07em] text-slate-400 uppercase">JADWAL STOK OPNAME FISIK</div>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span class="text-[32px] font-extrabold text-slate-900 leading-none">3</span>
+                    <span class="text-[13px] font-bold text-slate-400">Rak Audit</span>
+                </div>
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                    <i class="fas fa-check-circle text-slate-400"></i> Rak A-04, B-12, C-02 • 15:30 WIB
+                </div>
+            </div>
+
+            <div class="metric-card panel p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+                        <i class="fas fa-clock text-blue-600"></i>
+                    </div>
+                    <span class="badge bg-slate-100 text-slate-600 border border-slate-200 uppercase !text-[9.5px]">DALAM REVIEW</span>
+                </div>
+                <div class="text-[10.5px] font-bold tracking-[0.07em] text-slate-400 uppercase">PERMINTAAN MENUNGGU OTORISASI</div>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span class="text-[32px] font-extrabold text-slate-900 leading-none">2</span>
+                    <span class="text-[13px] font-bold text-slate-400">Permintaan</span>
+                </div>
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                    <i class="fas fa-hourglass text-blue-500"></i> Menunggu persetujuan Kepala Gudang
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanner Banner -->
+        <div class="bg-blue-50/40 border border-blue-100 rounded-xl p-5 mb-6 anim-fade-up">
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                        <div class="w-8 h-8 rounded bg-blue-600 text-white flex items-center justify-center">
+                            <i class="fas fa-qrcode"></i>
                         </div>
-                        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition">
-                            <p class="text-[11px] text-gray-500">Puncak Throughput</p>
-                            <p class="font-bold text-blue-600 mt-0.5">Sabtu (1.480 Unit)</p>
+                        <h2 class="text-[16px] font-extrabold text-slate-900">Hub Pemindaian Barcode & Terminal Handheld</h2>
+                        <span class="badge bg-emerald-500 text-white !text-[9.5px] !py-0.5">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Zebra TC21 Terhubung
+                        </span>
+                    </div>
+                    <p class="text-[12px] text-slate-500 ml-10">Pindai kode GS1-128, QR Code palet, atau masukkan nomor dokumen secara instan untuk verifikasi lokasi rak dan koli.</p>
+                </div>
+                
+                <div class="flex items-center gap-4 text-[11.5px] font-semibold text-slate-600 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                    <span class="flex items-center gap-1.5"><i class="fas fa-battery-three-quarters text-slate-400"></i> Batt: 88%</span>
+                    <span class="w-px h-4 bg-slate-200"></span>
+                    <span class="flex items-center gap-1.5"><i class="fas fa-wifi text-blue-500"></i> WiFi: HubCakung-5G</span>
+                </div>
+            </div>
+
+            <div class="mt-5 bg-white p-2 rounded-xl border border-blue-200 shadow-sm flex flex-col sm:flex-row items-center gap-2">
+                <div class="relative flex-1 w-full">
+                    <i class="fas fa-barcode absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" class="w-full bg-transparent outline-none pl-11 pr-24 py-2.5 text-[14px] text-slate-800 placeholder-slate-400" placeholder="Arahkan scanner handheld atau ketik SKU / Serial / No. DO / Lokasi Rak..." autofocus>
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded">AUTO-SCAN</span>
+                </div>
+                <button class="inline-flex items-center gap-2 w-full sm:w-auto px-6 py-2.5 text-[12.5px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/30">
+                    <i class="fas fa-search"></i> Cari & Validasi
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                <button class="bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md hover:text-blue-600 transition-all rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-slate-600 group">
+                    <i class="fas fa-arrow-down text-blue-600 group-hover:text-blue-600"></i>
+                    <span class="text-[12.5px] font-bold">1. Inbound Cepat</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Check-In PO</span>
+                </button>
+                <button class="bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md hover:text-blue-600 transition-all rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-slate-600 group">
+                    <i class="fas fa-box text-blue-600 group-hover:text-blue-600"></i>
+                    <span class="text-[12.5px] font-bold">2. Outbound Cepat</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Packing List</span>
+                </button>
+                <button class="bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md hover:text-blue-600 transition-all rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-slate-600 group">
+                    <i class="fas fa-search text-blue-600 group-hover:text-blue-600"></i>
+                    <span class="text-[12.5px] font-bold">3. Cek Lokasi Rak</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Bin Locator</span>
+                </button>
+                <button class="bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md hover:text-blue-600 transition-all rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-slate-600 group">
+                    <i class="fas fa-clipboard text-blue-600 group-hover:text-blue-600"></i>
+                    <span class="text-[12.5px] font-bold">4. Hitung Fisik</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Stock Count</span>
+                </button>
+            </div>
+        </div>
+        @endif
+
+        @if(auth()->user()->isAuditor())
+        <!-- Auditor Metrics (4 Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-5 anim-fade-up">
+            <div class="metric-card panel p-4 lg:p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"><i class="fas fa-shield-check text-emerald-600"></i></div>
+                    <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-circle"></i>Selaras</span>
+                </div>
+                <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">TINGKAT INTEGRITAS BUKU</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">99.82%</p>
+                <p class="text-xs text-emerald-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Deviasi 0.18% di bawah toleransi 0.50%</p>
+            </div>
+            <div class="metric-card panel p-4 lg:p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-exclamation-triangle text-red-600"></i></div>
+                    <span class="badge bg-red-50 text-red-600">2 Kritis</span>
+                </div>
+                <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">TEMUAN DISCREPANCY TERBUKA</p>
+                <p class="text-3xl font-extrabold text-red-600 mt-1">4 <span class="text-sm font-semibold text-gray-500">Temuan</span></p>
+                <p class="text-xs text-gray-500 mt-1">2 Selisih opname, 1 mutasi, 1 fisik rusak</p>
+            </div>
+            <div class="metric-card panel p-4 lg:p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-clipboard-check text-blue-600"></i></div>
+                    <span class="badge bg-blue-50 text-blue-700">79.1%</span>
+                </div>
+                <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">SKU TELAH DIAUDIT (Q1)</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">6.840 <span class="text-sm font-semibold text-gray-500">/ 8.650 SKU</span></p>
+                <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                    <div class="bg-blue-600 h-full rounded-full" style="width: 79.1%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Sampling acak mingguan di 6 Zona DC</p>
+            </div>
+            <div class="metric-card panel p-4 lg:p-5">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-coins text-amber-600"></i></div>
+                    <span class="badge bg-gray-50 text-gray-600">Dalam Verifikasi</span>
+                </div>
+                <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">VALUASI POTENSI RISIKO</p>
+                <p class="text-2xl font-extrabold text-gray-900 mt-1">Rp 18.450.000</p>
+                <p class="text-xs text-gray-500 mt-1">0.038% dari total aset Rp 46,2 Miliar</p>
+            </div>
+        </div>
+
+        <!-- Zero Tampering Banner -->
+        <div class="bg-slate-800 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-between text-white mb-5 shadow-lg shadow-slate-900/10 anim-fade-up">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-slate-700 rounded-xl border border-slate-600">
+                    <i class="fas fa-shield-alt text-emerald-400"></i>
+                </div>
+                <div>
+                    <div class="text-[12px] font-bold text-slate-100 flex items-center gap-2">
+                        ZERO TAMPERING DETECTED <span class="text-slate-500">•</span> Blok Audit: #AUDIT-2023-W12
+                    </div>
+                    <div class="text-[10.5px] text-slate-400 mt-1 tracking-wide font-mono">
+                        SHA256: 8f9b4c2c61e87d0c345fb16928ace7c93601dd79815bbd5c317c24d9c0ff5981
+                    </div>
+                </div>
+            </div>
+            <button class="px-4 py-2 bg-slate-700 border border-slate-600 text-white hover:bg-slate-600 text-[11.5px] font-semibold rounded-xl transition-colors flex items-center gap-2">
+                <i class="fas fa-check-circle text-emerald-400"></i> Validasi Hash
+            </button>
+        </div>
+        @endif
+
+        @if(auth()->user()->isAuditor())
+        <!-- Auditor Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 anim-fade-up">
+            <!-- Left 2 Columns -->
+            <div class="xl:col-span-2 space-y-5">
+                <!-- Chart Card -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-3 mb-6">
+                        <div>
+                            <h2 class="text-[16px] font-extrabold text-slate-900">Tren Temuan & Akurasi Rekonsiliasi</h2>
+                            <p class="text-[12px] text-slate-500 mt-1">Korelasi antara volume uji petik harian terhadap stabilitas persediaan</p>
                         </div>
-                        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition">
-                            <p class="text-[11px] text-gray-500">Efisiensi Docking</p>
-                            <p class="font-bold text-emerald-600 mt-0.5">98.4% On-Schedule</p>
+                        <div class="flex gap-1.5 bg-slate-50 border border-slate-200 rounded-xl p-1 flex-none">
+                            <button class="px-3 py-1.5 rounded-md font-semibold bg-blue-600 text-white transition text-[11.5px]">7 Hari</button>
+                            <button class="px-3 py-1.5 rounded-md font-semibold text-slate-600 hover:text-blue-700 transition text-[11.5px]">14 Hari</button>
+                            <button class="px-3 py-1.5 rounded-md font-semibold text-slate-600 hover:text-blue-700 transition text-[11.5px]">30 Hari</button>
                         </div>
+                    </div>
+                    <div class="relative w-full h-[260px] flex items-center justify-center bg-slate-50 rounded-lg">
+                        <p class="text-slate-400 text-sm">Chart placeholder - Tren Temuan & Akurasi</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-6 text-[11.5px] font-semibold text-slate-600 mt-4">
+                        <span class="flex items-center gap-2"><span class="w-3 h-1 rounded-full bg-blue-600"></span> Tingkat Akurasi Buku (Avg 99.8%)</span>
+                        <span class="flex items-center gap-2"><span class="w-3 h-1 rounded-full bg-red-600"></span> Temuan Selisih Fisik (0-3 Qty)</span>
                     </div>
                 </div>
 
-                <!-- Log Aktivitas -->
-                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
+                <!-- Temuan Prioritas Tinggi -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between mb-5 gap-3">
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-clock-rotate-left text-blue-600"></i>
-                            <h3 class="font-bold text-gray-900 text-base">Log Aktivitas Terkini (User & Admin)</h3>
+                            <i class="fas fa-exclamation-circle text-red-600"></i>
+                            <h2 class="text-[15px] md:text-[16.5px] font-extrabold text-slate-900">Temuan Prioritas Tinggi (Butuh Tindak Lanjut Segera)</h2>
                         </div>
-                        <button class="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline">
-                            Lihat Semua Log <i class="fas fa-arrow-right-long"></i>
-                        </button>
+                        <span class="text-[11.5px] font-bold text-slate-500">2 Menunggu Tanggapan</span>
                     </div>
-
-                    <div class="space-y-3">
+                    
+                    <div class="space-y-4">
                         <!-- Item 1 -->
-                        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
-                            <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">BS</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <b class="text-sm text-gray-900">Budi Santoso</b>
-                                    <span class="badge bg-blue-100 text-blue-700 text-[10px]">Super Admin</span>
-                                    <span class="ml-auto text-[11px] text-gray-400">10 menit yang lalu</span>
+                        <div class="border-l-[3px] border-red-600 bg-slate-50 rounded-r-xl p-4 md:p-5 border-y border-r border-slate-100 shadow-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">KRITIS</span>
+                                    <span class="text-[13.5px] font-bold text-slate-800">#AUD-2025-041: Selisih Fisik Barang High-Value</span>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-0.5">
-                                    Memproses persetujuan Mutasi Keluar 150 unit <b>[SKU-CAM-8821]</b> menuju Hub Halim DC-02.
-                                </p>
-                                <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                                    <span class="badge bg-emerald-50 text-emerald-700 text-[10px]"><i class="fas fa-check"></i> Mutasi Sukses Disetujui</span>
-                                    <span class="text-[11px] text-blue-600 font-semibold">Ref #MUT-2023-0941</span>
+                                <span class="text-[11px] font-medium text-slate-500">Ditemukan: 13 Mar 2025, 14:10 WIB</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">SKU & Deskripsi</div>
+                                    <div class="text-[12px] font-medium text-slate-700 mt-1">SD-EXT-1TB (Sandisk Extreme SSD)</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">Lokasi Penyimpanan</div>
+                                    <div class="text-[12px] font-medium text-slate-700 mt-1">Lorong Rak C-02 (Level 3 / Bin 14)</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">Deviasi & Valuasi</div>
+                                    <div class="text-[12px] font-bold text-red-600 mt-1">-3 Unit (Rp 3.750.000)</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                                <div class="flex items-center gap-2 text-[12px] font-medium text-slate-600">
+                                    <i class="fas fa-clock"></i> Status: Menunggu Penjelasan Ka. Gudang (Budi Hartono)
+                                </div>
+                                <div class="flex gap-2 w-full md:w-auto">
+                                    <button class="flex-1 md:flex-none px-3 py-1.5 text-[11.5px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">Investigasi Detail</button>
+                                    <button class="flex-1 md:flex-none px-3 py-1.5 text-[11.5px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">Rekomendasi Penyesuaian</button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Item 2 -->
-                        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
-                            <div class="w-9 h-9 bg-gray-400 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">RH</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <b class="text-sm text-gray-900">Rian Hidayat</b>
-                                    <span class="badge bg-gray-200 text-gray-700 text-[10px]">Admin Keamanan RBAC</span>
-                                    <span class="ml-auto text-[11px] text-gray-400">35 menit yang lalu</span>
+                        <div class="border-l-[3px] border-blue-500 bg-slate-50 rounded-r-xl p-4 md:p-5 border-y border-r border-slate-100 shadow-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">PERINGATAN</span>
+                                    <span class="text-[13.5px] font-bold text-slate-800">#AUD-2025-039: Ketidaksesuaian Segel Kontainer Inbound</span>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-0.5">
-                                    Memperbarui hak akses RBAC peran Staf Gudang Lapangan: penambahan modul cetak label QR & barcode scanner.
-                                </p>
-                                <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                                    <span class="badge bg-slate-100 text-slate-600 text-[10px]">Perubahan Hak Akses</span>
-                                    <span class="text-[11px] text-gray-500">Audit ID <b class="text-gray-700">#SEC-819</b></span>
+                                <span class="text-[11px] font-medium text-slate-500">Ditemukan: 12 Mar 2025, 08:35 WIB</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">Dokumen Acuan</div>
+                                    <div class="text-[12px] font-medium text-slate-700 mt-1">PO-774 / Surat Jalan #SJ-8891</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">Vendor / Pengirim</div>
+                                    <div class="text-[12px] font-medium text-slate-700 mt-1">PT Mitra Logistik Cakrawala</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wide">Status Pemeriksaan</div>
+                                    <div class="text-[12px] font-medium text-slate-700 mt-1">Investigasi Vendor & CCTV Dock 4</div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Item 3 -->
-                        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
-                            <div class="w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">DA</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <b class="text-sm text-gray-900">Dewi Anggraini</b>
-                                    <span class="badge bg-indigo-100 text-indigo-700 text-[10px]">Supervisor Audit</span>
-                                    <span class="ml-auto text-[11px] text-gray-400">1 jam yang lalu</span>
+                            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                                <div class="flex items-center gap-2 text-[12px] font-medium text-slate-600">
+                                    <i class="fas fa-shield-alt text-amber-500"></i> Barang ditahan di Staging Area Karantina (Hold 48 Jam)
                                 </div>
-                                <p class="text-sm text-gray-600 mt-0.5">
-                                    Menyelesaikan Stok Opname terjadwal di Lorong B3 (Rak Elektronik). Ditemukan selisih -3 unit pada SKU Apple Watch.
-                                </p>
-                                <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                                    <span class="badge bg-red-100 text-red-700 text-[10px]">Discrepancy Logged</span>
-                                    <span class="text-[11px] text-gray-500">Opname <b class="text-gray-700">#SO-2023-112</b></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Item 4 -->
-                        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
-                            <div class="w-9 h-9 bg-orange-400 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">FK</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <b class="text-sm text-gray-900">Fajar Kurnia</b>
-                                    <span class="badge bg-orange-100 text-orange-700 text-[10px]">Inbound Staff</span>
-                                    <span class="ml-auto text-[11px] text-gray-400">2 jam yang lalu</span>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-0.5">
-                                    Menerima penerimaan fisik PO-774 dari PT Mitra Logistik Nusantara sejumlah 450 unit perlengkapan optik.
-                                </p>
-                                <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                                    <span class="badge bg-amber-100 text-amber-700 text-[10px]"><i class="fas fa-box"></i> Penerimaan Selesai</span>
-                                    <span class="text-[11px] text-gray-500">Surat Jalan <b class="text-gray-700">#SJ-90928</b></span>
+                                <div class="flex gap-2">
+                                    <button class="text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors">Buka Berita Acara</button>
                                 </div>
                             </div>
                         </div>
@@ -1775,239 +1959,120 @@
 
             <!-- Right Column -->
             <div class="space-y-5">
-                <!-- Stok Kritis -->
-                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                    <div class="flex items-start justify-between gap-2 mb-4">
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-triangle-exclamation text-red-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-base">Stok Kritis & Menipis</h3>
-                                <p class="text-xs text-gray-500">Stok di bawah Reorder Point (ROP)</p>
-                            </div>
-                        </div>
-                        <span class="badge bg-red-600 text-white text-[10px]">3 SKU Kritis</span>
+                <!-- Hub Card -->
+                <div class="bg-white border border-slate-200 rounded-xl p-4 relative overflow-hidden h-[130px] flex flex-col justify-between shadow-sm">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 opacity-90"></div>
+                    <div class="relative z-10 flex justify-between">
+                        <span class="bg-slate-900/70 backdrop-blur-md text-white border border-white/10 text-[10.5px] font-bold px-2 py-1 rounded shadow-sm">Hub Cakung DC-01</span>
                     </div>
-
-                    <div class="space-y-4">
-                        <!-- Item 1 -->
-                        <div>
-                            <div class="flex items-start justify-between mb-1">
-                                <span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-CAM-600D</span>
-                                <span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 4 Unit</span>
-                            </div>
-                            <div class="border border-red-100 bg-red-50/40 rounded-xl p-3.5 hover:border-red-300 transition">
-                                <p class="font-bold text-gray-900 text-sm">Canon 6D DSLR Camera Body</p>
-                                <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-A4</b></p>
-                                <div class="flex items-center justify-between text-[11px] mb-1">
-                                    <span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 25)</span>
-                                    <span class="font-bold text-red-600">16% dari buffer</span>
-                                </div>
-                                <div class="progress-bar bg-gray-200 rounded-full h-1.5 w-full">
-                                    <div class="h-1.5 bg-red-600 rounded-full" style="width: 16%"></div>
-                                </div>
-                                <button class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
-                                    <i class="fas fa-warehouse mr-1"></i>Ajukan Restock
-                                </button>
-                            </div>
+                    <div class="relative z-10 flex items-end justify-between">
+                        <div class="text-white">
+                            <div class="text-[13.5px] font-bold leading-tight">Audit Fisik Lapangan</div>
+                            <div class="text-[11px] text-slate-200 mt-0.5 font-medium">Siklus Verifikasi Q1-2025</div>
                         </div>
-
-                        <!-- Item 2 -->
-                        <div>
-                            <div class="flex items-start justify-between mb-1">
-                                <span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-CAM-NIK8</span>
-                                <span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 7 Unit</span>
-                            </div>
-                            <div class="border border-red-100 bg-red-50/40 rounded-xl p-3.5 hover:border-red-300 transition">
-                                <p class="font-bold text-gray-900 text-sm">Nikon Reel Optical Pro X</p>
-                                <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-B2</b></p>
-                                <div class="flex items-center justify-between text-[11px] mb-1">
-                                    <span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 30)</span>
-                                    <span class="font-bold text-red-600">23% dari buffer</span>
-                                </div>
-                                <div class="progress-bar bg-gray-200 rounded-full h-1.5 w-full">
-                                    <div class="h-1.5 bg-red-600 rounded-full" style="width: 23%"></div>
-                                </div>
-                                <button class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
-                                    <i class="fas fa-warehouse mr-1"></i>Ajukan Restock
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Item 3 -->
-                        <div>
-                            <div class="flex items-start justify-between mb-1">
-                                <span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-WTC-AP46</span>
-                                <span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 12 Unit</span>
-                            </div>
-                            <div class="border border-amber-100 bg-amber-50/40 rounded-xl p-3.5 hover:border-amber-300 transition">
-                                <p class="font-bold text-gray-900 text-sm leading-snug">iWatch 4th Gen Smartwatch 44mm</p>
-                                <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-C1</b></p>
-                                <div class="flex items-center justify-between text-[11px] mb-1">
-                                    <span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 40)</span>
-                                    <span class="font-bold text-amber-600">30% dari buffer</span>
-                                </div>
-                                <div class="progress-bar bg-gray-200 rounded-full h-1.5 w-full">
-                                    <div class="h-1.5 bg-amber-500 rounded-full" style="width: 30%"></div>
-                                </div>
-                                <button class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
-                                    <i class="fas fa-warehouse mr-1"></i>Ajukan Restock
-                                </button>
-                            </div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-slate-900/70 backdrop-blur-md border border-white/10 px-2 py-1 rounded">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Aktif
                         </div>
                     </div>
                 </div>
 
-                <!-- Menunggu Persetujuan -->
-                <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-hourglass-half text-blue-600"></i>
-                            <h3 class="font-bold text-gray-900 text-base">Menunggu Persetujuan</h3>
-                        </div>
-                        <span class="badge bg-blue-600 text-white text-[10px]">2 Permintaan</span>
+                <!-- Jadwal Opname -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-[14.5px] font-extrabold text-slate-900">Jadwal Opname & Uji Petik</h2>
+                        <i class="fas fa-calendar text-slate-400"></i>
                     </div>
-
                     <div class="space-y-3">
-                        <!-- Request 1 -->
-                        <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-4">
-                            <div class="flex items-center justify-between gap-2 mb-1.5">
-                                <p class="font-bold text-gray-900 text-sm">
-                                    <i class="fas fa-right-left text-blue-600 mr-1"></i>Mutasi Antar-Hub
-                                </p>
-                                <span class="badge bg-blue-100 text-blue-700 text-[10px]">150 Unit</span>
+                        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="text-[12px] font-bold text-slate-800">Zona B (Elektronik & High-Value)</div>
+                                <div class="text-[11px] font-bold text-emerald-600">100% Selesai</div>
                             </div>
-                            <p class="text-xs text-gray-600 leading-relaxed">
-                                Permintaan alokasi darurat dari Hub Cakung DC-01 menuju <b class="text-blue-700">Hub Halim DC-02</b> untuk batch elektronik.
-                            </p>
-                            <div class="flex items-center justify-between text-[11px] text-gray-500 mt-2">
-                                <span>Diajukan: <b class="text-gray-700">Tim Logistik Timur</b></span>
-                                <span>Prioritas: <b class="text-red-600">Tinggi</b></span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 mt-3">
-                                <button class="px-3 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold hover:bg-gray-50 transition">Tolak</button>
-                                <button class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">Setujui</button>
-                            </div>
+                            <div class="text-[11px] text-slate-500">Verifikasi rekonsiliasi telah valid & ditandatangani.</div>
                         </div>
-
-                        <!-- Request 2 -->
-                        <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-4">
-                            <div class="flex items-center justify-between gap-2 mb-1.5">
-                                <p class="font-bold text-gray-900 text-sm">
-                                    <i class="fas fa-file-pen text-blue-600 mr-1"></i>Penyesuaian Stok Opname
-                                </p>
-                                <span class="badge bg-red-100 text-red-700 text-[10px]">-3 Unit</span>
+                        <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="text-[12px] font-bold text-slate-800">Zona C (Gadget & Storage)</div>
+                                <div class="text-[11px] font-bold text-blue-600">88% Berjalan</div>
                             </div>
-                            <p class="text-xs text-gray-600 leading-relaxed">
-                                Adjustment write-off selisih fisik pemeriksaan berkala rak B3 pada produk Smartwatch serial SN-880.
-                            </p>
-                            <div class="flex items-center justify-between text-[11px] text-gray-500 mt-2">
-                                <span>Auditor: <b class="text-gray-700">Dewi Anggraini</b></span>
-                                <span>Level: <b class="text-gray-700">Write-Off Minor</b></span>
+                            <div class="text-[11px] text-slate-500">Sampling acak 420 SKU sedang berlangsung oleh Tim B.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="text-[12px] font-bold text-slate-800">Zona D (Perangkat Jaringan)</div>
+                                <div class="text-[11px] font-bold text-slate-500">Terjadwal</div>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 mt-3">
-                                <button class="px-3 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold hover:bg-gray-50 transition">Tolak</button>
-                                <button class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">Setujui</button>
-                            </div>
+                            <div class="text-[11px] text-slate-500">Dijadwalkan Besok, 09:00 WIB (Pemeriksa: Dewi A.)</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        @endif
 
-        @if(auth()->user()->isPegawai())
-        <!-- Pegawai Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-            <div class="min-h-[112px] rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Pengajuan Shift Ini</p>
-                <b class="mt-1.5 block text-[24px] font-bold leading-tight tracking-tight">8 Permintaan</b>
-                <span class="mt-2.5 inline-block rounded bg-blue-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-blue-700">+2 hari ini</span>
-                <small class="ml-1 text-[10.5px] text-slate-500">Shift Aktif Pagi</small>
-            </div>
-            
-            <div class="min-h-[112px] rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Menunggu Otorisasi</p>
-                <b class="mt-1.5 block text-[24px] font-bold leading-tight tracking-tight">2 Tiket</b>
-                <span class="mt-2.5 inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-amber-700">Perlu Review</span>
-            </div>
-            
-            <div class="min-h-[112px] rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Disetujui & Siap Diambil</p>
-                <b class="mt-1.5 block text-[24px] font-bold leading-tight tracking-tight">5 Tiket</b>
-                <span class="mt-2.5 inline-block rounded bg-emerald-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">Siap Dispatch</span>
-            </div>
-            
-            <div class="min-h-[112px] rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Ditolak / Dibatalkan</p>
-                <b class="mt-1.5 block text-[24px] font-bold leading-tight tracking-tight">1 Tiket</b>
-                <span class="mt-2.5 inline-block rounded bg-red-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-red-700">Kuota Habis</span>
-            </div>
-        </div>
-        
-        <!-- Info Banner -->
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50/70 p-4 text-[10.5px]">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-info-circle text-blue-600"></i>
-                <div>
-                    <b class="text-[12px]">Prioritas Pemrosesan Permintaan Darurat Aktif</b>
-                    <p class="mt-0.5 text-slate-600">
-                        Ticket kategori <b class="text-red-600">DARURAT</b> (Hardware/Alat Kerja) akan langsung dikirim ke notifikasi prioritas Kepala Gudang (SLA response time < 30 menit).
-                    </p>
-                </div>
-            </div>
-            <span class="rounded bg-white px-3 py-1.5 text-[10.5px] text-slate-500">Antrean Live: #REQ-2025-1042</span>
-        </div>
-        @endif
-
-        @if(auth()->user()->isAuditor())
-        <!-- Auditor Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="metric-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                <!-- Distribusi Temuan -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                    <h2 class="text-[14.5px] font-extrabold text-slate-900 mb-4">Distribusi Temuan per Kategori</h2>
+                    <div class="flex h-2.5 w-full rounded-full overflow-hidden mb-5">
+                        <div class="bg-blue-600 w-[50%]"></div>
+                        <div class="bg-red-600 w-[25%]"></div>
+                        <div class="bg-slate-400 w-[25%]"></div>
                     </div>
-                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Bulan Ini</span>
-                </div>
-                <h3 class="text-sm font-medium text-gray-600 mb-1">Total Audit</h3>
-                <p class="text-2xl font-bold text-gray-900">18</p>
-                <p class="text-xs text-gray-500 mt-1">5 audit selesai</p>
-            </div>
-
-            <div class="metric-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                    <div class="space-y-2.5">
+                        <div class="flex justify-between items-center text-[11.5px]">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> <span class="font-medium text-slate-700">Selisih Kuantitas Stok</span></div>
+                            <div class="font-semibold text-slate-800">50% <span class="font-medium text-slate-400">(2 Temuan)</span></div>
+                        </div>
+                        <div class="flex justify-between items-center text-[11.5px]">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> <span class="font-medium text-slate-700">Kerusakan Fisik Kemasan</span></div>
+                            <div class="font-semibold text-slate-800">25% <span class="font-medium text-slate-400">(1 Temuan)</span></div>
+                        </div>
+                        <div class="flex justify-between items-center text-[11.5px]">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> <span class="font-medium text-slate-700">Keterlambatan Dokumen Admin</span></div>
+                            <div class="font-semibold text-slate-800">25% <span class="font-medium text-slate-400">(1 Temuan)</span></div>
+                        </div>
                     </div>
-                    <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">Critical</span>
                 </div>
-                <h3 class="text-sm font-medium text-gray-600 mb-1">Temuan Critical</h3>
-                <p class="text-2xl font-bold text-gray-900">3</p>
-                <p class="text-xs text-gray-500 mt-1">Perlu tindakan segera</p>
-            </div>
 
-            <div class="metric-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-clipboard-list text-amber-600 text-xl"></i>
+                <!-- Log Aktivitas -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-[14.5px] font-extrabold text-slate-900">Log Aktivitas Audit Terkini</h2>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Live Feed
+                        </div>
                     </div>
-                    <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Open</span>
-                </div>
-                <h3 class="text-sm font-medium text-gray-600 mb-1">Temuan Terbuka</h3>
-                <p class="text-2xl font-bold text-gray-900">12</p>
-                <p class="text-xs text-gray-500 mt-1">Dalam follow-up</p>
-            </div>
-
-            <div class="metric-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    <div class="space-y-4 relative">
+                        <div class="relative flex items-start gap-3.5 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+                            <div class="w-[24px] h-[24px] rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-none">
+                                <i class="fas fa-file-alt text-[10px]"></i>
+                            </div>
+                            <div>
+                                <div class="text-[12.5px] text-slate-700 leading-tight"><span class="font-bold">Dewi Anggraini</span> menerbitkan Berita Acara Temuan</div>
+                                <div class="text-[11px] text-slate-500 mt-1">Dokumen Berita Acara #AUD-2025-041 terlampir ke Ka. Gudang.</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-medium">15 menit lalu</div>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start gap-3.5 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+                            <div class="w-[24px] h-[24px] rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-none">
+                                <i class="fas fa-exclamation-triangle text-[10px]"></i>
+                            </div>
+                            <div>
+                                <div class="text-[12.5px] text-slate-700 font-bold leading-tight">Deviasi Berat Inbound Terdeteksi</div>
+                                <div class="text-[11px] text-slate-500 mt-1">Timbangan otomatis Dock 2 menandai selisih bobot 4.2 kg pada PO-9081.</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-medium">1 jam lalu</div>
+                            </div>
+                        </div>
+                        <div class="relative flex items-start gap-3.5">
+                            <div class="w-[24px] h-[24px] rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-none">
+                                <i class="fas fa-shield-alt text-[10px]"></i>
+                            </div>
+                            <div>
+                                <div class="text-[12.5px] text-slate-700 font-bold leading-tight">Pengesahan Blok Ledger Mingguan</div>
+                                <div class="text-[11px] text-slate-500 mt-1">Blok #AUDIT-2025-W12 ditandatangani secara kriptografis oleh Kepatuhan.</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-medium">3 jam lalu</div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">Closed</span>
+                    <button class="w-full mt-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[11.5px] font-bold rounded-xl transition-colors border border-slate-200">Lihat Riwayat Lengkap Seluruh Log</button>
                 </div>
-                <h3 class="text-sm font-medium text-gray-600 mb-1">Compliance Rate</h3>
-                <p class="text-2xl font-bold text-gray-900">94.2%</p>
-                <p class="text-xs text-gray-500 mt-1">Target: 95%</p>
             </div>
         </div>
         @endif
