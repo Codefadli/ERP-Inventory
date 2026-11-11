@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temuan Audit & Ketidaksesuaian (LTA) — Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: '#0b49d8', ink: '#17243b', canvas: '#f5f7fc', line: '#e8edf5' }
+    } } };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    /* Sidebar (220px, sama dengan Data Barang) */
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .nav-label { margin-bottom: 6px; padding: 0 8px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+    .nav-link { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #475569; transition: background .15s ease, color .15s ease; }
+    .nav-link svg, .nav-link i { width: 16px; height: 16px; flex: none; }
+    .nav-link.active { background: #0b49d8; color: #fff; font-weight: 500; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    /* Komponen bersama */
+    .card { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+    .ctl { height: 40px; border-radius: 6px; background: #eff6ff; padding: 0 12px; font-size: 12px; color: #334155; outline: none; border: 0; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; line-height: 1.25; text-align: center; transition: background .15s ease; }
+    .btn svg { width: 14px; height: 14px; flex: none; }
+    .btn-p { background: #2563eb; color: #fff; } .btn-p:hover { background: #1d4ed8; }
+    .btn-s { background: #fff; color: #334155; border: 1px solid #e2e8f0; } .btn-s:hover { background: #f8fafc; }
+    .qf { border-radius: 9999px; padding: 4px 12px; font-weight: 600; transition: box-shadow .15s ease; }
+    .qf.on { box-shadow: 0 0 0 2px rgba(11,73,216,.35); }
+    .qf[data-k=""] { background: #f1f5f9; color: #475569; }
+    .qf[data-k=""].on { background: #2563eb; color: #fff; box-shadow: none; }
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .d1 { animation-delay: 50ms; } .d2 { animation-delay: 100ms; } .d3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: none; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar()"></div>
+
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-14 shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4">
+      <section><p class="nav-label">Menu Utama</p>
+        <a href="#" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard Audit</span></a></section>
+      <section><p class="nav-label">Pemeriksaan & Inventaris</p><div class="space-y-0.5">
+        <a href="data-barang.html" class="nav-link"><i data-lucide="package"></i><span>Data Barang</span></a>
+        <a href="data-gudang-lokasi.html" class="nav-link"><i data-lucide="warehouse"></i><span>Data Gudang & Lokasi</span></a>
+        <a href="barang-masuk.html" class="nav-link"><i data-lucide="arrow-down-left"></i><span>Barang Masuk</span></a>
+        <a href="barang-keluar.html" class="nav-link"><i data-lucide="arrow-up-right"></i><span>Barang Keluar</span></a>
+        <a href="mutasi-barang.html" class="nav-link"><i data-lucide="arrow-left-right"></i><span>Mutasi Barang</span></a>
+        <a href="stok-opname.html" class="nav-link"><i data-lucide="clipboard-check"></i><span>Stok Opname</span></a></div></section>
+      <section><p class="nav-label">Investigasi & Kepatuhan</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="history"></i><span>Log Aktivitas</span></a>
+        <a href="temuan-audit.html" class="nav-link active"><i data-lucide="file-search"></i><span>Temuan Audit</span></a>
+        <a href="#" class="nav-link"><i data-lucide="list-checks"></i><span>Tindak Lanjut Temuan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="file-text"></i><span>Laporan Audit</span></a></div></section>
+      <section><p class="nav-label">Pengaturan & Akun</p><div class="space-y-0.5">
+        <a href="#" class="nav-link"><i data-lucide="bell"></i><span>Notifikasi</span></a>
+        <a href="#" class="nav-link"><i data-lucide="settings"></i><span>Pengaturan</span></a>
+        <a href="#" class="nav-link"><i data-lucide="user-circle"></i><span>Profil Saya</span></a></div></section>
+    </nav>
+  </aside>
+
+  <div id="main-area" class="min-h-screen">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-white text-slate-500 hover:bg-[#f1f5fc]" aria-controls="sidebar" aria-label="Buka sidebar"></button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 lg:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-40 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 md:flex xl:w-56"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, resi, transaksi..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="relative">
+          <button id="pf" class="flex items-center gap-2 border-l border-slate-100 pl-3" aria-haspopup="true"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</span><span class="hidden text-left leading-tight md:block"><span class="block text-[10px] font-semibold text-slate-800">Budi Santoso</span><span class="block text-[9px] text-slate-500">Auditor Internal</span></span></button>
+          <div id="pfm" hidden class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border border-line bg-white py-1 text-[11px] text-slate-700 shadow-lg">
+            <div class="border-b border-slate-100 px-3 py-2"><p class="font-semibold text-slate-800">Budi Santoso</p><p class="text-[10px] text-slate-500">Auditor Internal · AU001</p></div>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="user" class="h-3.5 w-3.5"></i>Profil Saya</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="settings" class="h-3.5 w-3.5"></i>Pengaturan</a>
+            <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i>Hak Akses: Read-Only</a>
+            <a href="#" class="flex items-center gap-2 border-t border-slate-100 px-3 py-2 text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="h-3.5 w-3.5"></i>Keluar</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-56px)] p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 max-w-[760px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan & Audit <span class="text-slate-400">&gt;</span> Investigasi & Kepatuhan <span class="text-blue-700">&gt; Temuan Audit</span></p>
+          <h1 class="text-[20px] font-bold leading-tight tracking-tight text-slate-800 sm:text-[24px]">Pusat Temuan Audit & Ketidaksesuaian (Discrepancy Log / LTA)</h1>
+          <p class="mt-1.5 text-[12px] leading-relaxed text-slate-500">Daftar resmi ketidaksesuaian kuantitas fisik, anomali dokumen mutasi, kerusakan logistik, dan potensi penyimpangan SOP gudang di Hub Cakung DC-01.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-indigo-50 px-2.5 text-[10.5px] font-semibold text-indigo-700"><i data-lucide="calendar-days" class="h-3.5 w-3.5"></i>Siklus Q4 (Okt - Des 2025)</span>
+          <span class="inline-flex h-8 items-center gap-1.5 rounded-md bg-amber-50 px-2.5 text-[10.5px] font-semibold text-amber-700"><i data-lucide="timer" class="h-3.5 w-3.5"></i>SLA Klarifikasi &lt; 24 Jam</span>
+          <button onclick="toast('Menyiapkan ekspor Laporan Temuan Audit (LTA)...','success')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="download" class="h-4 w-4"></i>Ekspor Laporan Audit</button>
+        </div>
+      </section>
+
+      <section id="stats" aria-label="Ringkasan temuan audit" class="reveal d1 mb-4 grid grid-cols-2 gap-3 xl:grid-cols-4"></section>
+
+      <section class="reveal d2 card mb-4 p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 lg:max-w-[430px]"><i data-lucide="search" class="h-4 w-4 shrink-0"></i><input id="searchLta" type="search" placeholder="Cari nomor LTA, nama SKU, dokumen referensi, pihak terlapor" class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+          <select id="fRisiko" class="ctl"><option value="">Tingkat Risiko (Semua)</option><option value="kritis">Prioritas Kritis</option><option value="sedang">Prioritas Sedang</option><option value="rendah">Prioritas Rendah</option><option value="selesai">Selesai Terverifikasi</option></select>
+          <select id="fDept" class="ctl"><option value="">Departemen Terkait (Semua)</option><option value="gudang">Ka. Gudang DC Cakung</option><option value="inbound">Inbound Receiving Audit</option><option value="mutasi">Audit Mutasi Antar-Hub</option><option value="outbound">Outbound Dispatch</option></select>
+          <select id="fUrut" class="ctl"><option value="">Urutkan: SLA Terdekat</option></select>
+          <button id="reset" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
+          <span class="mr-1 font-semibold uppercase text-slate-600">Filter Cepat:</span>
+          <button class="qf on" data-k="">Semua Temuan (14)</button>
+          <button class="qf bg-red-50 text-red-600" data-k="kritis">● Kritis / Deviasi Fisik (4)</button>
+          <button class="qf bg-amber-50 text-amber-700" data-k="sedang">Administratif & Dokumen (6)</button>
+          <button class="qf bg-emerald-50 text-emerald-700" data-k="selesai">Selesai & Ditutup (4)</button>
+          <span id="cnt" class="w-full text-slate-500 sm:ml-auto sm:w-auto"></span>
+        </div>
+      </section>
+
+      <section id="lta" class="reveal d3 mb-4 space-y-3"></section>
+      <p id="empty" hidden class="card mb-4 p-6 text-center text-[12px] text-slate-500">Tidak ada temuan yang sesuai. Ubah kata kunci atau reset filter.</p>
+
+      <section id="panels" class="grid grid-cols-1 gap-3 lg:grid-cols-2"></section>
+    </main>
+  </div>
+
+  <div id="modal" hidden class="fixed inset-0 z-[70] items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true">
+    <div class="max-h-[90vh] w-full max-w-[780px] overflow-y-auto rounded-xl bg-white shadow-xl">
+      <div class="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+        <h2 class="flex items-center gap-2 text-[13px] font-bold text-slate-800"><i data-lucide="file-search" class="h-4 w-4 text-blue-600"></i>Detail Lembar Temuan Audit (LTA)</h2>
+        <button onclick="closeModal()" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div id="detailBody" class="p-4"></div>
+    </div>
+  </div>
+  <div id="toasts" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const T = { gray:'bg-slate-100 text-slate-700', red:'bg-red-100 text-red-700', amber:'bg-amber-100 text-amber-700', blue:'bg-blue-50 text-blue-700', green:'bg-emerald-100 text-emerald-800', purple:'bg-indigo-100 text-indigo-800' };
+    const S = { red:{bar:'border-red-500',pill:'bg-red-600',icon:'flame'}, amber:{bar:'border-amber-500',pill:'bg-amber-500',icon:'file-text'}, blue:{bar:'border-blue-500',pill:'bg-blue-600',icon:'info'}, green:{bar:'border-emerald-500',pill:'bg-emerald-600',icon:'circle-check'} };
+
+    /* ===== DATA (isi dari temuan-audit.html asli) ===== */
+    const STATS = [
+      {l:'Total Temuan Audit Berjalan', v:'14', u:'LTA', b:['Aktif','gray'], s:'Siklus Q4 2025 · Urutkan: SLA Terdekat', i:'folder-tree', ic:'bg-blue-50 text-blue-600'},
+      {l:'Kritis / Deviasi Fisik', v:'4', u:'Kasus', b:['Kritis','red'], s:'SLA Klarifikasi < 24 Jam', i:'flame', ic:'bg-red-50 text-red-600', red:1},
+      {l:'Administratif & Dokumen', v:'6', u:'Kasus', b:['Sedang','amber'], s:'Koreksi & Stock Adjustment', i:'file-text', ic:'bg-amber-50 text-amber-600'},
+      {l:'Selesai & Ditutup', v:'4', u:'Kasus', b:['Selesai','green'], s:'Klaim Disetujui & BAP Sah', i:'circle-check', ic:'bg-emerald-50 text-emerald-700'}
+    ];
+    const D = [
+      {id:'LTA-2025-041', k:'kritis', d:'gudang', tone:'red', prio:'PRIORITAS KRITIS', date:'18 Okt 2025 (Pkl 11:24 WIB)', by:['user-round','Auditor: Dewi Anggraini'], sla:['timer','SLA Sisa 4 Jam (Batas: 19 Okt, 08:00)','red'],
+       title:'Selisih Fisik Stok Opname: Defisit -3 Unit', tag:['High Shrinkage Risk','red'],
+       desc:'Pemeriksaan fisik mendadak pada rak penyimpanan elektronik mendapati ketidakcocokan saldo stok SKU <b>#SSD-SD1TB-EVO</b> (Sandisk Extreme Portable SSD 1TB). Fisik tercatat real di bin lokator C-02-B4 hanya berjumlah 82 unit berbanding saldo buku sistem 85 unit. Indikasi kehilangan saat siklus staging shift malam.',
+       info:[['coins','Potensi Kerugian','Rp 3.750.000','gray'],['users','Pihak Terlapor','Budi Santoso (Ka. Gudang DC-01) & Checker Shift Siang','gray'],['map-pin','Lokasi Rak','Zona C / C-02 High Value Secure Cage','purple']],
+       docs:[['folder-open','BUKTI AUDIT & FOTO KONDISI FISIK','2 Berkas','blue'],['hourglass','Status Investigasi','Menunggu Tanggapan Auditee (Ka. Gudang DC Cakung)','amber']],
+       note:'Klarifikasi auditee wajib diterima sebelum batas SLA 19 Okt 08:00.',
+       acts:[['eye','Lihat BAP & Lampiran'],['bell','Kirim Peringatan SLA','Peringatan SLA #LTA-2025-041 dikirim ke Ka. Gudang DC Cakung.','success'],['arrow-up-right','Eskalasi','Eskalasi #LTA-2025-041 ke Compliance Officer.','warn']]},
+      {id:'LTA-2025-039', k:'sedang', d:'inbound', tone:'amber', prio:'PRIORITAS SEDANG', date:'17 Okt 2025 (Pkl 16:40 WIB)', by:['user-round','INBOUND RECEIVING AUDIT'], sla:['timer','SLA 24 Jam','amber'],
+       title:'Pelanggaran Segel & Prosedur Inbound PO Vendor', tag:['SOP Inbound Violation','amber'],
+       desc:'Penerimaan muatan armada truk Kontainer B-8821-UQ atas Purchase Order PO-774 dari mitra ekspedisi PT Mitra Logistik diterima tanpa nomor segel yang sesuai dengan Surat Jalan (SJ: ML-8890). Sebanyak 450 unit barcode scanner dibongkar ke staging dock tanpa verifikasi gembok segel awal oleh Tim Penerimaan.',
+       info:[['building','Vendor','PT Mitra Logistik (Trans)','gray'],['map-pin','Lokasi','Loading Dock Inbound 3','gray'],['file-text','No. Referensi','PO-774 / SJ ML-8890','gray'],['unlink','No. Segel SJ','ML-9921 / Fisik: Tak Bersegel','red']],
+       docs:[['file-text','SURAT JALAN VS SEGEL TRUK','1 Dokumen','blue'],['list-checks','Status Tindak Lanjut','Eskalasi ke Manager Pengadaan & Klarifikasi Tertulis Vendor','amber']],
+       note:'No. Segel SJ: ML-9921 / Fisik: Tak Bersegel. Instruksikan verifikasi ulang.',
+       acts:[['eye','Buka Surat Jalan'],['refresh-cw','Instruksikan Verifikasi Ulang','Instruksi verifikasi ulang segel #LTA-2025-039 tercatat.','success']]},
+      {id:'LTA-2025-035', k:'rendah', d:'mutasi', tone:'blue', prio:'PRIORITAS RENDAH', date:'16 Okt 2025 (Pkl 10:15 WIB)', by:['user-round','AUDIT MUTASI ANTAR-HUB'], sla:['message-square-text','Tanggapan Diterima','green'],
+       title:'Keterlambatan Input Mutasi Antar-Hub (&gt; 6 Jam dari Berita Acara)', tag:['Admin Delay','blue'],
+       desc:'Dokumen transfer antar-hub TRX-MUT-20251016-09 pengiriman dari DC Cakung ke Hub Karawang telah tiba secara fisik pukul 08:00, namun status sistem WMS baru diperbarui pada pukul 15:30 (selisih 7,5 jam). Melanggar ketentuan SOP SLA updating maksimal 2 jam setelah unloading selesai.',
+       info:[['user-pen','Admin Mutasi','Riko Pratama (Dispatcher Cakung)','gray'],['message-square-text','Justifikasi','Gangguan jaringan switch LAN Karawang (Disertai Tiket IT-892)','gray']],
+       docs:[['file-text','SURAT JALAN VS SEGEL TRUK','1 Dokumen','blue']],
+       x:[['Lokasi','DC Cakung > Hub Karawang'],['Status','Tanggapan Diterima - Justifikasi dikonfirmasi']],
+       note:'Justifikasi: Gangguan jaringan switch LAN Karawang (Tiket IT-892).',
+       acts:[['eye','Lihat Justifikasi'],['network','Verifikasi Tiket IT','Verifikasi tiket IT-892 untuk #LTA-2025-035...','success']]},
+      {id:'LTA-2025-028', k:'selesai', d:'outbound', tone:'green', prio:'SELESAI TERVERIFIKASI', date:'14 Okt 2025 (Ditutup 17 Okt 2025)', by:['shield-check','RESOLVED CASE'], sla:['handshake','Claim Settled 100%','green'],
+       title:'Kerusakan Pallet Transit Outbound (#PL-88390)', tag:['Transit Damage Claim','green'],
+       desc:'Pallet kayu roboh saat manuver forklift di ramp Outbound Bay 02 yang mengakibatkan 12 karton peripheral audio mengalami kerusakan kemasan luar. Berita Acara Kerusakan Barang (BAKB-440) diterbitkan, dan pihak asuransi ekspedisi rekanan telah mentransfer kompensasi penggantian senilai Rp 8.420.000 ke rekening perusahaan.',
+       info:[['shield-check','No. Polis Klaim','AS-LOG-2025-9921','gray'],['scale','Rekonsiliasi','Jurnal Penyesuaian Akuntansi Selesai','green']],
+       docs:[['folder','Berkas Arsip','Bukti transfer bank, BAP rusak, & foto limbah scrap','blue']],
+       x:[['Potensi Kerugian','Rp 8.420.000 (Diklaim)'],['Pihak Terlapor','Asuransi Ekspedisi Rekanan'],['Lokasi','Outbound Bay 02 (Ramp)'],['Status','Ditutup - Jurnal Penyesuaian Akuntansi Selesai']],
+       note:'No. Polis Klaim: AS-LOG-2025-9921. Kasus terarsip valid.',
+       acts:[['eye','Lihat Detail Kasus'],['download','Unduh Berkas Kasus (PDF)','Menyiapkan ekspor berkas kasus #LTA-2025-028 (PDF)...','success']]}
+    ];
+    const CAPA = [
+      ['zap','text-red-600','Pengetatan Prosedur High-Value Electronics (Rak C-02)','Wajibkan implementasi verifikasi ganda (dual-key access) & audit rolling CCTV tiap pergantian shift kerja untuk komoditas bernilai di atas Rp 1.000.000/unit.','SEGERA · TENGGAT 25 OKT'],
+      ['door-closed','text-blue-600','Standardisasi Gate Inbound Kontainer & Rekaman Segel','Pemilihan kontrol akses dan rekaman segel yang lebih konsisten antar vendor.'],
+      ['bot','text-emerald-700','Otomatisasi Peringatan SLA Mutasi WMS','Konfigurasi auto-alert ke Telegram grup operasional jika dokumen mutasi antar-hub belum di-entry melebihi threshold 3 jam pasca konfirmasi GPS tiba di gerbang.']
+    ];
+    const FLOW = [
+      ['Pencatatan & Penerbitan LTA','Auditor mendokumentasikan anomali fisik atau selisih data disertai bukti awal.'],
+      ['Klarifikasi Auditee (SLA 24 Jam)','Kepala Gudang / Bagian terkait wajib mengirim penjelasan BAP tertulis resmi.'],
+      ['Koreksi & Stock Adjustment','Koreksi saldo buku WMS setelah otorisasi Finance & Supply Chain Director.'],
+      ['Penutupan Kasus (Sign-off)','Arsip digital berstatus valid & tercatat dalam Laporan Audit Berkala.']
+    ];
+
+    /* ===== RENDER ===== */
+    const ic = (n, c = 'h-3.5 w-3.5') => `<i data-lucide="${n}" class="${c} shrink-0"></i>`;
+    const chip = ([i, l, v, t]) => `<span class="inline-flex max-w-full items-start gap-1.5 rounded-md px-2 py-1 text-[10.5px] leading-snug ${T[t]}">${ic(i, 'mt-px h-3.5 w-3.5')}<span class="min-w-0 break-words"><b class="font-semibold">${l}:</b> ${v}</span></span>`;
+    const pill = (txt, t, i) => `<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-semibold ${T[t]}">${i ? ic(i) : ''}${txt}</span>`;
+    const prioPill = (c) => `<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-semibold text-white ${S[c.tone].pill}">${ic(S[c.tone].icon)}${c.prio}</span>`;
+
+    $('#stats').innerHTML = STATS.map(s => `
+      <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <div class="min-w-0">
+          <p class="text-[9.5px] font-semibold uppercase tracking-wide ${s.red ? 'text-red-600' : 'text-slate-500'}">${s.l}</p>
+          <p class="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[24px] font-bold leading-tight tracking-tight ${s.red ? 'text-red-600' : ''}">${s.v} <span class="text-[10.5px] font-normal text-slate-600">${s.u}</span>${pill(s.b[0], s.b[1]).replace('px-2.5 py-1 text-[10.5px]', 'px-2 py-0.5 text-[9.5px]')}</p>
+          <p class="mt-2.5 text-[10.5px] ${s.red ? 'font-semibold text-red-600' : 'text-slate-500'}">${s.s}</p>
+        </div>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${s.ic}">${ic(s.i, 'h-4 w-4')}</span>
+      </article>`).join('');
+
+    $('#lta').innerHTML = D.map(c => `
+      <article id="card-${c.id}" class="card overflow-hidden">
+        <div class="border-l-4 ${S[c.tone].bar} p-4">
+          <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            ${prioPill(c)}
+            <a href="#" onclick="openDetail('${c.id}');return false" class="text-[12px] font-bold text-blue-700 hover:underline">#${c.id}</a>
+            <span class="inline-flex items-center gap-1 text-[10.5px] text-slate-500">${ic('calendar-days')}${c.date}</span>
+            <span class="inline-flex items-center gap-1 text-[10.5px] text-slate-500">${ic(c.by[0])}${c.by[1]}</span>
+            <span class="sm:ml-auto">${pill(c.sla[1], c.sla[2], c.sla[0])}</span>
+          </div>
+          <div class="flex flex-col gap-4 lg:flex-row">
+            <div class="min-w-0 flex-1">
+              <h3 class="mb-1.5 text-[13px] font-bold leading-snug text-slate-800">${c.title} ${pill(c.tag[0], c.tag[1]).replace('px-2.5 py-1', 'ml-1 px-2 py-0.5 align-middle')}</h3>
+              <p class="mb-3 text-[12px] leading-relaxed text-slate-600">${c.desc}</p>
+              <div class="flex flex-wrap gap-2">${c.info.map(chip).join('')}</div>
+              <div class="mt-2 flex flex-wrap gap-2">${c.docs.map(chip).join('')}</div>
+            </div>
+            <div class="flex shrink-0 flex-wrap gap-2 lg:w-[190px] lg:flex-col lg:flex-nowrap">
+              ${c.acts.map((a, n) => `<button onclick="${n === 0 ? `openDetail('${c.id}')` : `toast('${a[2]}','${a[3]}')`}" class="btn ${n === 0 ? 'btn-p' : 'btn-s'} flex-1 sm:flex-none lg:w-full">${ic(a[0])}${a[1]}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </article>`).join('');
+
+    $('#panels').innerHTML = `
+      <article class="card p-4">
+        <div class="mb-1 flex items-center gap-2">${ic('clipboard-check', 'h-4 w-4 text-blue-600')}<h3 class="text-[13px] font-bold text-slate-800">Matriks Rekomendasi Auditor (CAPA)</h3><span class="ml-auto">${pill('ISO 9001:2015', 'purple')}</span></div>
+        <p class="mb-3 text-[11px] text-slate-500">Panduan tindakan korektif dan preventif (CAPA) untuk manajemen logistik.</p>
+        <div class="space-y-2.5">${CAPA.map((c, n) => `
+          <div class="rounded-lg border border-line p-3 ${n === 0 ? 'bg-red-50' : ''}">
+            <div class="mb-1 flex flex-wrap items-center gap-2">${ic(c[0], 'h-4 w-4 ' + c[1])}<p class="min-w-0 flex-1 text-[12px] font-semibold text-slate-800">${c[2]}</p>${c[4] ? pill(c[4], 'red') : ''}</div>
+            <p class="text-[11px] leading-relaxed text-slate-600">${c[3]}</p>
+          </div>`).join('')}</div>
+      </article>
+      <article class="card flex flex-col p-4">
+        <div class="mb-3 flex items-center gap-2">${ic('workflow', 'h-4 w-4 text-blue-600')}<h3 class="text-[13px] font-bold text-slate-800">Alur Investigasi Temuan</h3><span class="ml-auto">${pill('Standar Siklus LTA', 'gray')}</span></div>
+        <ol class="space-y-3">${FLOW.map((f, n) => `
+          <li class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700">${n + 1}</span><div><p class="text-[12px] font-semibold text-slate-800">${f[0]}</p><p class="text-[11px] leading-relaxed text-slate-600">${f[1]}</p></div></li>`).join('')}</ol>
+        <div class="mt-auto border-t border-slate-100 pt-3"><button onclick="toast('Menghubungkan ke IT Security & CCTV Cakung Helpdesk...','warn')" class="inline-flex items-center gap-1.5 text-left text-[11px] font-semibold text-blue-700 hover:underline">${ic('headset', 'h-3.5 w-3.5')}Hubungi IT Security & CCTV Cakung (Panggil Helpdesk)</button></div>
+      </article>`;
+
+    /* ===== MODAL & TOAST ===== */
+    window.openDetail = (id) => {
+      const c = D.find(x => x.id === id);
+      const rows = [...c.info, ...c.docs].map(r => [r[1], r[2]]).concat(c.x || []);
+      $('#detailBody').innerHTML = `
+        <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">${prioPill(c)}<span class="text-[12px] font-bold text-blue-700">#${c.id}</span><span class="sm:ml-auto">${pill(c.sla[1], c.sla[2], c.sla[0])}</span></div>
+        <p class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10.5px] text-slate-500"><span class="inline-flex items-center gap-1">${ic('calendar-days')}${c.date}</span><span class="inline-flex items-center gap-1">${ic(c.by[0])}${c.by[1]}</span></p>
+        <h3 class="mb-2 text-[13px] font-bold leading-snug text-slate-800">${c.title} (${c.tag[0]})</h3>
+        <p class="mb-3 text-[12px] leading-relaxed text-slate-600">${c.desc}</p>
+        <dl class="grid grid-cols-1 gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2">${rows.map(r => `<div class="min-w-0"><dt class="text-[10.5px] text-slate-500">${r[0]}</dt><dd class="text-[12px] text-slate-800">${r[1]}</dd></div>`).join('')}</dl>
+        <div class="mt-3 flex items-start gap-2 rounded-md bg-slate-50 p-3 text-[11px] text-slate-600">${ic('info', 'mt-px h-3.5 w-3.5')}<span>${c.note}</span></div>
+        <div class="mt-4 flex justify-end gap-2"><button onclick="closeModal()" class="btn btn-s h-9 px-4">Tutup</button><button onclick="closeModal();toast('Ekspor berkas ${c.id} (PDF)...','success')" class="btn btn-p h-9 px-4">${ic('file-down')}Ekspor Berkas PDF</button></div>`;
+      $('#modal').hidden = false; $('#modal').style.display = 'flex';
+      lucide.createIcons();
+    };
+    window.closeModal = () => { $('#modal').hidden = true; $('#modal').style.display = ''; };
+    $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('#pfm').hidden = true; } });
+    window.toast = (msg, type = 'success') => {
+      const el = document.createElement('div');
+      el.className = `max-w-[320px] rounded-md px-3 py-2 text-[11px] font-medium text-white shadow-lg ${type === 'warn' ? 'bg-amber-600' : 'bg-emerald-600'}`;
+      el.textContent = msg; $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3200);
+    };
+
+    /* ===== FILTER ===== */
+    const fr = $('#fRisiko'), fd = $('#fDept'), q = $('#searchLta'), g = $('#global-search');
+    function apply() {
+      const s = `${q.value} ${g.value}`.trim().toLowerCase(); let n = 0;
+      D.forEach(c => {
+        const el = $('#card-' + c.id);
+        const ok = (!s || el.textContent.toLowerCase().includes(s)) && (!fr.value || c.k === fr.value) && (!fd.value || c.d === fd.value);
+        el.hidden = !ok; n += ok ? 1 : 0;
+      });
+      $('#cnt').textContent = `Menampilkan ${n} LTA terpilih dari 14 temuan`;
+      $('#empty').hidden = n > 0;
+      document.querySelectorAll('.qf').forEach(b => b.classList.toggle('on', b.dataset.k === fr.value));
+    }
+    [q, g].forEach(i => i.addEventListener('input', apply));
+    [fr, fd].forEach(i => i.addEventListener('change', apply));
+    document.querySelectorAll('.qf').forEach(b => b.addEventListener('click', () => { fr.value = b.dataset.k; apply(); }));
+    $('#reset').addEventListener('click', () => { q.value = g.value = fr.value = fd.value = ''; apply(); });
+
+    /* ===== SIDEBAR & PROFIL ===== */
+    const sb = $('#sidebar'), bd = $('#sidebar-backdrop'), tg = $('#sidebar-toggle');
+    const mob = () => matchMedia('(max-width:767px)').matches;
+    function sync() {
+      const open = mob() ? sb.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      tg.setAttribute('aria-expanded', open); tg.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+      tg.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="h-5 w-5"></i>`;
+      bd.classList.toggle('show', mob() && open); lucide.createIcons();
+    }
+    window.toggleSidebar = () => { mob() ? sb.classList.toggle('open') : document.body.classList.toggle('sidebar-collapsed'); sync(); };
+    if (!mob() && innerWidth < 1024) document.body.classList.add('sidebar-collapsed'); /* tablet: sidebar tertutup agar konten lega */
+    window.addEventListener('resize', sync);
+    $('#pf').addEventListener('click', e => { e.stopPropagation(); $('#pfm').hidden = !$('#pfm').hidden; });
+    document.addEventListener('click', e => { if (!$('#pfm').contains(e.target)) $('#pfm').hidden = true; });
+
+    apply(); sync(); lucide.createIcons();
+  </script>
+</body>
+</html>
