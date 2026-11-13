@@ -219,6 +219,11 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 });
 
+// Dashboard Sebelum Login (Public)
+Route::get('/dashboard-sebelum-login', function () {
+    return view('dashboard-sebelum-login');
+})->name('dashboard-sebelum-login');
+
 // ============================================================================
 // FALLBACK ROUTE
 // ============================================================================
