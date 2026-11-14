@@ -530,17 +530,14 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
 
-            <!-- Main column -->
             <div class="min-w-0">
 
-                <!-- Breadcrumb -->
                 <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap anim-fade-in">
                     <span>Beranda</span><i class="fas fa-chevron-right text-xs"></i>
                     {{-- <span>Pengaturan &amp; Akun</span><i class="fas fa-chevron-right text-xs"></i> --}}
                     <span class="text-gray-900 font-medium">Notifikasi</span>
                 </div>
 
-                <!-- Page Header -->
                 <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4 anim-fade-up">
                     <div class="flex-1">
                         <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Pusat Notifikasi &amp; Pemberitahuan System</h1>

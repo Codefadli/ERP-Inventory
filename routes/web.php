@@ -38,7 +38,6 @@ Route::middleware('auth')->group(function () {
     // PROFILE ROUTES (All authenticated users)
     // ========================================================================
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show'])->name('show');
         Route::get('/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
         Route::put('/email', [App\Http\Controllers\ProfileController::class, 'updateEmail'])->name('email');
@@ -46,7 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/photo', [App\Http\Controllers\ProfileController::class, 'uploadPhoto'])->name('photo.upload');
         Route::delete('/photo', [App\Http\Controllers\ProfileController::class, 'deletePhoto'])->name('photo.delete');
     });
-    
+
     Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
         
@@ -79,6 +78,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
             ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/users', function () {
@@ -109,6 +114,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
             ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
@@ -137,6 +148,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
             ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
         Route::middleware('permission:issue.approve')->group(function () {
             Route::get('/approvals', function () {
@@ -155,6 +172,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
             ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
         Route::middleware('permission:receipt.create')->group(function () {
             Route::get('/receipts', function () {
@@ -179,6 +202,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
             ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/logs', function () {
@@ -215,6 +244,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
         ->name('notifikasi.index');
+
+    Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+        ->name('pengaturan.index');
+
+    Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+        ->name('profile.index');
 });
 
 Route::get('/documentation', function () {

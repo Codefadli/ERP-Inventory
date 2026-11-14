@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -24,6 +25,12 @@ class UpdateProfileRequest extends FormRequest
         return [
             'nama_lengkap' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore(auth()->id()),
+            ],
         ];
     }
 
@@ -41,6 +48,10 @@ class UpdateProfileRequest extends FormRequest
             'phone.required' => 'Nomor telepon wajib diisi',
             'phone.string' => 'Nomor telepon harus berupa teks',
             'phone.max' => 'Nomor telepon maksimal 20 karakter',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.max' => 'Email maksimal 255 karakter',
+            'email.unique' => 'Email sudah digunakan oleh pengguna lain',
         ];
     }
 }
