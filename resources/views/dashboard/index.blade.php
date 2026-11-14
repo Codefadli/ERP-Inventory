@@ -171,301 +171,14 @@
 </head>
 <body class="bg-gray-50">
 
-<!-- Header -->
-<header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-    <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fas fa-cube text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-base lg:text-lg font-bold text-gray-900">Astro Inventory</h1>
-                <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
-            </div>
-            @if(auth()->user()->selectedHub)
-            <div class="hidden lg:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
-                <i class="fas fa-building"></i>
-                <span>{{ auth()->user()->selectedHub->name }}</span>
-            </div>
-            @endif
-            <span class="hidden lg:inline-flex items-center gap-1 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                <i class="fas fa-circle text-[5px]"></i> Operasional Normal
-            </span>
-        </div>
-        <div class="flex items-center gap-3">
-            <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg">
-                <i class="fas fa-bell text-lg"></i>
-                <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
-            </button>
-            <div class="flex items-center gap-2 pl-3 border-l border-gray-200">
-                <div class="text-right hidden md:block">
-                    <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->nama_lengkap }}</p>
-                    <p class="text-xs text-gray-500">{{ auth()->user()->role->name }}</p>
-                </div>
-                <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    {{ strtoupper(substr(auth()->user()->nama_lengkap, 0, 2)) }}
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}" class="ml-2">
-                @csrf
-                <button type="submit" class="text-sm text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50">
-                    <i class="fas fa-sign-out-alt mr-1"></i> Keluar
-                </button>
-            </form>
-        </div>
-    </div>
-</header>
+@include('components.navbar')
 
 <div class="flex min-h-screen">
-    
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 hidden lg:block overflow-y-auto">
-        <nav class="p-3">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Menu Utama</p>
-            <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.dashboard' : (auth()->user()->isKepalaGudang() ? 'gudang.dashboard' : (auth()->user()->isHR() ? 'hr.dashboard' : (auth()->user()->isPegawai() ? 'pegawai.dashboard' : 'audit.dashboard')))) }}" class="nav-link active flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium mb-1">
-                <i class="fas fa-th-large w-4"></i>
-                <span>Dashboard</span>
-            </a>
-            
-            @if(auth()->user()->isSuperAdmin())
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen Sistem</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-users w-4"></i>
-                <span>Manajemen Pengguna</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-user-shield w-4"></i>
-                <span>Role & Permission</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-file-alt w-4"></i>
-                <span>Log Aktivitas</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-boxes w-4"></i>
-                <span>Data Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-warehouse w-4"></i>
-                <span>Data Gudang & Lokasi</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-building w-4"></i>
-                <span>Data Departemen</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-truck w-4"></i>
-                <span>Data Supplier</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-tags w-4"></i>
-                <span>Kategori Barang</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-down w-4"></i>
-                <span>Barang Masuk</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-up w-4"></i>
-                <span>Barang Keluar</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-exchange-alt w-4"></i>
-                <span>Mutasi Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-clipboard-check w-4"></i>
-                <span>Stok Opname</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Laporan & Analitik</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-chart-bar w-4"></i>
-                <span>Laporan & Analitik</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-history w-4"></i>
-                <span>Laporan & Riwayat</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Persetujuan</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-file-contract w-4"></i>
-                <span>Persetujuan Barang</span>
-            </a>
-            @endif
-            
-            @if(auth()->user()->isKepalaGudang())
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data & Inventaris</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-boxes w-4"></i>
-                <span>Data Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-warehouse w-4"></i>
-                <span>Data Gudang & Lokasi</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional & Transaksi</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-truck-loading w-4"></i>
-                <span>Barang Masuk</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-truck w-4"></i>
-                <span>Barang Keluar</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-exchange-alt w-4"></i>
-                <span>Mutasi Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-clipboard-check w-4"></i>
-                <span>Stok Opname</span>
-            </a>
-            <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-file-contract w-4"></i>
-                    <span>Persetujuan Barang</span>
-                </div>
-                <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-chart-bar w-4"></i>
-                <span>Laporan & Analitik</span>
-            </a>
-            @endif
-            
-            @if(auth()->user()->isHR())
-            <!-- HR Menu -->
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional & Persetujuan</p>
-            <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-clock w-4"></i>
-                    <span>Antrean Persetujuan</span>
-                </div>
-                <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-file-alt w-4"></i>
-                <span>Detail Permintaan</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-history w-4"></i>
-                <span>Riwayat Persetujuan</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen & Laporan</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-chart-line w-4"></i>
-                <span>Laporan Inventaris</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-shield-alt w-4"></i>
-                <span>Log Audit & Otorisasi</span>
-            </a>
-            @endif
-            
-            @if(auth()->user()->isPegawai())
-            <!-- Pegawai Menu -->
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional Gudang</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-down w-4"></i>
-                <span>Barang Masuk</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-up w-4"></i>
-                <span>Barang Keluar</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-clipboard-check w-4"></i>
-                <span>Stok Opname</span>
-            </a>
-            
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Monitoring & Laporan</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-history w-4"></i>
-                <span>Riwayat Transaksi</span>
-            </a>
-            <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-tasks w-4"></i>
-                    <span>Status Permintaan</span>
-                </div>
-                <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">2</span>
-            </a>
-            @endif
-            
-            @if(auth()->user()->isAuditor())
-            <!-- Auditor Menu -->
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Audit & Pemeriksaan</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-down w-4"></i>
-                <span>Barang Masuk</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-arrow-up w-4"></i>
-                <span>Barang Keluar</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-exchange-alt w-4"></i>
-                <span>Mutasi Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-boxes w-4"></i>
-                <span>Data Barang</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-warehouse w-4"></i>
-                <span>Data Gudang & Lokasi</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-clipboard-check w-4"></i>
-                <span>Stok Opname</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-exclamation-triangle w-4"></i>
-                <span>Temuan Audit</span>
-            </a>
-            @endif
-            
-            <!-- Common Menu for All Roles -->
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Pengaturan & Akun</p>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-bell w-4"></i>
-                <span>Notifikasi</span>
-            </a>
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-cog w-4"></i>
-                <span>Pengaturan</span>
-            </a>
-            <a href="{{ route('profile.show') }}" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-user w-4"></i>
-                <span>Profil Saya</span>
-            </a>
-        </nav>
-        
-        <!-- Sidebar Footer Info (for Pegawai & Kepala Gudang) -->
-        @if(auth()->user()->isPegawai() || auth()->user()->isKepalaGudang())
-        <div class="m-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-            <p class="text-[11px] font-bold text-blue-700 mb-1">
-                <i class="fas fa-headset mr-1"></i>Bantuan {{ auth()->user()->selectedHub ? auth()->user()->selectedHub->name : 'DC-01' }}
-            </p>
-            <p class="text-[10px] text-blue-700/70 mb-2">Hotline Logistik & Tim WMS aktif 24/7.</p>
-            <button class="w-full text-[11px] py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                Hubungi
-            </button>
-        </div>
-        @endif
-    </aside>
+    @include('components.sidebar')
 
     <!-- Main Content -->
     <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
-        
+
         @if(auth()->user()->isSuperAdmin())
         <!-- Super Admin Header -->
         <div class="flex items-center gap-2 text-xs text-gray-500 mb-3 anim-fade-in">
@@ -473,7 +186,7 @@
             <i class="fas fa-chevron-right text-[9px]"></i>
             <span class="text-blue-600 font-semibold">Dashboard Admin (Overview)</span>
         </div>
-        
+
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
             <div class="flex-1">
                 <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Dasbor Operasional Hub & Inventaris</h1>
@@ -489,7 +202,7 @@
             </div>
         </div>
         @endif
-        
+
         @if(auth()->user()->isKepalaGudang())
         <!-- Kepala Gudang Breadcrumb -->
         <div class="flex items-center gap-2 text-xs text-gray-500 mb-3 anim-fade-in">
@@ -497,7 +210,7 @@
             <i class="fas fa-chevron-right text-[9px]"></i>
             <span class="text-blue-600 font-semibold">Dashboard Kepala Gudang (Overview)</span>
         </div>
-        
+
         <!-- Kepala Gudang Header -->
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
             <div class="flex-1">
@@ -514,7 +227,7 @@
             </div>
         </div>
         @endif
-        
+
         @if(auth()->user()->isHR())
         <!-- HR Header -->
         <div class="flex items-center space-x-2 text-xs text-gray-500 mb-2 anim-fade-in">
@@ -522,7 +235,7 @@
             <i class="fas fa-chevron-right text-[10px]"></i>
             <span class="text-gray-800 font-medium">Dashboard HR (Overview)</span>
         </div>
-        
+
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 anim-fade-up">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Pusat Otorisasi & Dasbor Operasional HR</h1>
@@ -542,7 +255,7 @@
             </div>
         </div>
         @endif
-        
+
         @if(auth()->user()->isPegawai())
         <!-- Pegawai Breadcrumb -->
         <nav class="flex items-center gap-1.5 text-[11px] tracking-[0.04em] uppercase mb-2 anim-fade-in">
@@ -572,7 +285,7 @@
             </div>
         </div>
         @endif
-        
+
         @if(auth()->user()->isAuditor())
         <!-- Auditor Breadcrumb -->
         <nav class="flex items-center gap-1.5 text-[11px] tracking-[0.04em] uppercase mb-2 anim-fade-in">
@@ -639,7 +352,7 @@
                 <p class="text-xs text-gray-500 mt-1"><i class="fas fa-truck-fast mr-1"></i>94 Batch Pengiriman Siap Dispatch</p>
             </div>
         </div>
-        
+
         <!-- Main Content Grid for Super Admin -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 anim-fade-up delay-2">
             <!-- LEFT 2 Columns -->
@@ -660,7 +373,7 @@
                             <button class="px-3 py-1.5 rounded-md font-semibold text-gray-600 hover:text-blue-700 transition">Bulan Ini</button>
                         </div>
                     </div>
-                    
+
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-4 text-xs">
                             <span class="flex items-center gap-1.5">
@@ -673,7 +386,7 @@
                             </span>
                         </div>
                     </div>
-                    
+
                     <!-- Chart Placeholder -->
                     <div class="bg-gray-50 rounded-lg p-8 text-center h-64 flex items-center justify-center">
                         <div>
@@ -681,7 +394,7 @@
                             <p class="text-sm text-gray-500">Chart Area - Analisis Throughput</p>
                         </div>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                         <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition cursor-default">
                             <p class="text-[11px] text-gray-500">Rata-rata Harian</p>
@@ -709,7 +422,7 @@
                             Lihat Semua Log <i class="fas fa-arrow-right-long"></i>
                         </button>
                     </div>
-                    
+
                     <div class="space-y-3">
                         <!-- Log Item 1 -->
                         <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
@@ -1054,7 +767,7 @@
                 </p>
             </div>
         </div>
-        
+
         <!-- HR Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 anim-fade-up delay-2">
             <!-- Left 2 Columns -->
@@ -1359,7 +1072,7 @@
             </div>
         </div>
         @endif
-        
+
         @if(auth()->user()->isKepalaGudang())
         <!-- Kepala Gudang Main Content Grid -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
@@ -1381,7 +1094,7 @@
                             <button class="px-3 py-1.5 rounded-md font-semibold text-gray-600 hover:text-blue-700 transition">Bulan Ini</button>
                         </div>
                     </div>
-                    
+
                     <div class="flex flex-wrap items-center justify-between gap-2 mt-2 mb-3">
                         <div class="flex items-center gap-4 text-xs">
                             <span class="flex items-center gap-1.5">
@@ -1740,7 +1453,7 @@
                     </div>
                     <p class="text-[12px] text-slate-500 ml-10">Pindai kode GS1-128, QR Code palet, atau masukkan nomor dokumen secara instan untuk verifikasi lokasi rak dan koli.</p>
                 </div>
-                
+
                 <div class="flex items-center gap-4 text-[11.5px] font-semibold text-slate-600 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
                     <span class="flex items-center gap-1.5"><i class="fas fa-battery-three-quarters text-slate-400"></i> Batt: 88%</span>
                     <span class="w-px h-4 bg-slate-200"></span>
@@ -1885,7 +1598,7 @@
                         </div>
                         <span class="text-[11.5px] font-bold text-slate-500">2 Menunggu Tanggapan</span>
                     </div>
-                    
+
                     <div class="space-y-4">
                         <!-- Item 1 -->
                         <div class="border-l-[3px] border-red-600 bg-slate-50 rounded-r-xl p-4 md:p-5 border-y border-r border-slate-100 shadow-sm">
@@ -2144,7 +1857,7 @@
                     </div>
                 </div>
                 @endif
-                
+
                 <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50">
                     <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-sync text-purple-600"></i>
