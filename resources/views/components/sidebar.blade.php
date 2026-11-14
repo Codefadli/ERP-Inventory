@@ -219,11 +219,11 @@
             <i class="fas fa-bell w-4"></i>
             <span>Notifikasi</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.pengaturan' : (auth()->user()->isKepalaGudang() ? 'gudang.pengaturan' : (auth()->user()->isHR() ? 'hr.pengaturan' : (auth()->user()->isPegawai() ? 'pegawai.pengaturan' : 'audit.pengaturan')))) }}" class="nav-link {{ request()->routeIs('*.pengaturan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-cog w-4"></i>
             <span>Pengaturan</span>
         </a>
-        <a href="{{ route('profile.show') }}" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.profile' : (auth()->user()->isKepalaGudang() ? 'gudang.profile' : (auth()->user()->isHR() ? 'hr.profile' : (auth()->user()->isPegawai() ? 'pegawai.profile' : 'audit.profile')))) }}" class="nav-link {{ request()->routeIs('*.profile') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-user w-4"></i>
             <span>Profil Saya</span>
         </a>
