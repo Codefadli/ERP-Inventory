@@ -73,9 +73,9 @@
 
                 <!-- Menu -->
                 <div class="hidden md:flex items-center space-x-8 animate-fade-in-down stagger-1">
-                    <a href="#beranda" class="text-blue-600 font-semibold hover:text-blue-700 transition-colors">Beranda</a>
+                    <a href="{{ route('home') }}" class="text-blue-600 font-semibold hover:text-blue-700 transition-colors">Beranda</a>
                     <a href="#status-server" class="text-gray-700 hover:text-blue-600 transition-colors">Status Server</a>
-                    <a href="#dokumentasi" class="text-gray-700 hover:text-blue-600 transition-colors">Dokumentasi & Bantuan</a>
+                    <a href="{{ route('documentation') }}" class="text-gray-700 hover:text-blue-600 transition-colors">Dokumentasi & Bantuan</a>
                 </div>
 
                 <!-- CTA Button -->
