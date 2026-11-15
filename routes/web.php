@@ -14,9 +14,13 @@ use App\Http\Controllers\Auth\LoginController;
 // ============================================================================
 
 // Root redirect ke login untuk guest
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// })->middleware('guest')->name('home');
+
 Route::get('/', function () {
-    return redirect()->route('login');
-})->middleware('guest')->name('home');
+    return view('dashboard-sebelum-login');
+})->name('dashboard-sebelum-login');
 
 Route::middleware('guest')->group(function () {
     // Login Routes
@@ -220,9 +224,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Dashboard Sebelum Login (Public)
-Route::get('/dashboard-sebelum-login', function () {
-    return view('dashboard-sebelum-login');
-})->name('dashboard-sebelum-login');
+
 
 // ============================================================================
 // FALLBACK ROUTE
