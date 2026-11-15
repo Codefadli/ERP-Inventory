@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Kepala Gudang — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ============================================================
+   ASTRO Inventory — Shared Design System
+   Tailwind CDN + Font Awesome. Component-level styles only.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+}
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar-left {
+  width: 256px; flex-shrink: 0;
+  background: #ffffff; border-right: 1px solid #e5eeff;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.main-area { flex: 1; min-width: 0; }
+@media (max-width: 1024px) { .sidebar-left { display: none; } }
+
+/* ---------- Sidebar items ---------- */
+.sidebar-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem;
+  font-size: .875rem; color: #334155; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background-color: #eff6ff; }
+.sidebar-item.active {
+  background-color: #0044ce; border-left: 3px solid #0033b8;
+  font-weight: 600; color: #ffffff;
+}
+.sidebar-item.active:hover { background-color: #0040d8; }
+/* non-referenced items: visually normal (reference fidelity), behaviorally inactive */
+.sidebar-item.disabled { opacity: 1; cursor: not-allowed; }
+.sidebar-item.disabled:hover { background-color: transparent; }
+.sidebar-section-label {
+  font-size: .6875rem; font-weight: 700; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 0 .75rem; margin: 0.625rem 0 0.375rem;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+
+/* ---------- Cards ---------- */
+.metric-card { transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,.15); }
+.panel { background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+
+/* ---------- Tables ---------- */
+.table-row { transition: background-color .15s ease; }
+.table-row:hover { background-color: #f9fafb; }
+
+/* ---------- Filter chips ---------- */
+.filter-tag { transition: background-color .15s ease; }
+.filter-tag:hover { background-color: #dbeafe; }
+
+/* ---------- Progress ---------- */
+.progress-bar { transition: width .5s ease; }
+
+/* ---------- Tabs ---------- */
+.tab-btn { transition: all .15s ease; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+
+/* ---------- Badges ---------- */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* ---------- Modal ---------- */
+.modal-overlay { position:fixed; inset:0; background:rgba(11,28,48,.55); display:none; align-items:flex-start; justify-content:center; z-index:80; padding: 5vh 1rem 1rem; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:.75rem; width:100%; max-width:640px; box-shadow:0 20px 50px -10px rgba(0,0,0,.35); animation: modalIn .18s ease; }
+@keyframes modalIn { from{opacity:0; transform:translateY(12px) scale(.98);} to{opacity:1; transform:none;} }
+
+/* ---------- Dropdown ---------- */
+.dropdown { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 10px 25px -5px rgba(0,0,0,.18); min-width:260px; z-index:70; display:none; }
+.dropdown.open { display:block; }
+
+/* ---------- Toast ---------- */
+#toast-container { position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.5rem; }
+.toast { background:#fff; border:1px solid #e5eeff; border-left:4px solid #2563eb; border-radius:.5rem; padding:.75rem 1rem; box-shadow:0 8px 20px -6px rgba(0,0,0,.2); font-size:.875rem; color:#0b1c30; animation: toastIn .2s ease; max-width:340px; }
+.toast.success { border-left-color:#16a34a; }
+.toast.warn { border-left-color:#f59e0b; }
+.toast.error { border-left-color:#dc2626; }
+@keyframes toastIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;} }
+
+/* ---------- Mobile sidebar drawer ---------- */
+.drawer-backdrop { position:fixed; inset:0; background:rgba(11,28,48,.45); z-index:60; display:none; }
+.drawer-backdrop.open { display:block; }
+@media (max-width:1024px){
+  .sidebar-left.drawer { display:block; position:fixed; top:0; left:0; height:100vh; z-index:61; transform:translateX(-100%); transition:transform .25s ease; }
+  .sidebar-left.drawer.open { transform:translateX(0); }
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar-left::-webkit-scrollbar { width:6px; }
+.sidebar-left::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ---------- Misc helpers ---------- */
+.anim-fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+</style>
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+      <div class="hidden sm:block">
+        <h1 class="text-base lg:text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+      </div>
+      <div class="hidden xl:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
+        <i class="fas fa-building"></i><span>Jakarta (Pusat DC) &rsaquo;</span>
+        <b>Hub Cakung DC-01 (Utama)</b>
+      </div>
+      <span class="hidden lg:inline-flex badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Operasional Normal</span>
+    </div>
+    <div class="flex items-center gap-2 lg:gap-3">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        <input type="text" data-header-search placeholder="Cari SKU, resi, transaksi..." class="hidden md:block w-64 xl:w-80 pl-9 pr-10 py-2 text-sm bg-gray-100 border border-transparent rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        <kbd class="hidden md:flex absolute right-2.5 top-2 text-[10px] text-gray-400 border border-gray-300 bg-white rounded px-1.5 py-0.5">&#8984;K</kbd>
+      </div>
+      <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition" data-dropdown="notif">
+        <i class="fas fa-bell text-lg"></i><span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+      </button>
+      <div class="dropdown" data-dropdown-menu="notif" style="min-width:320px">
+        <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="text-sm font-bold text-gray-900">Notifikasi</p>
+          <span class="badge bg-blue-100 text-blue-700">3 Baru</span>
+        </div>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exchange-alt text-blue-600 mr-2 w-3"></i>Mutasi Antar-Hub Menunggu Otorisasi</p>
+          <p class="text-xs text-gray-500">Permintaan alokasi darurat 150 unit ke Halim DC-02</p>
+          <p class="text-[11px] text-gray-400 mt-1">10 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exclamation-triangle text-amber-500 mr-2 w-3"></i>Stok di Bawah Batas ROP</p>
+          <p class="text-xs text-gray-500">SKU-CAM-600D tersisa 4 unit dari ambang ROP 25</p>
+          <p class="text-[11px] text-gray-400 mt-1">35 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-check-circle text-green-600 mr-2 w-3"></i>Otorisasi Mutasi Disetujui</p>
+          <p class="text-xs text-gray-500">Surat Jalan SPO-WMS-019 siap cetak</p>
+          <p class="text-[11px] text-gray-400 mt-1">1 jam lalu</p>
+        </a>
+      </div>
+      <div class="relative">
+        <button class="flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-gray-200" data-dropdown="profile">
+          <div class="text-right hidden md:block">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin</p>
+          </div>
+          <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">BS</div>
+        </button>
+        <div class="dropdown" data-dropdown-menu="profile">
+          <div class="p-3 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin &middot; DC-01</p>
+          </div>
+          <a href="#" data-disabled class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+          <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+          <a href="notifikasi.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-bell w-4 mr-2"></i>Notifikasi</a>
+          <div class="border-t border-gray-100"><a href="#" data-disabled class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+<p class="sidebar-section-label">Menu Utama</p>
+<a href="kepalagudang(dashboard).html" class="sidebar-item active"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+<p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+<a href="data-barang.html" class="sidebar-item"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+<a href="data-gudang.html" class="sidebar-item"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+<p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+<a href="barang-masuk.html" class="sidebar-item"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+<a href="barang-keluar.html" class="sidebar-item"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+<a href="mutasi-barang.html" class="sidebar-item"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+<a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+<a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+<a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+<p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+<a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+<a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+<a href="#" class="sidebar-item disabled" data-disabled><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+
+    </nav>
+    <div class="mx-3 my-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+      <p class="text-[11px] font-bold text-blue-700 mb-1"><i class="fas fa-headset mr-1"></i>Bantuan DC-01</p>
+      <p class="text-[10px] text-blue-700/70 mb-2">Hotline Logistik &amp; Tim WMS aktif 24/7.</p>
+      <button class="w-full text-[11px] py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" data-toast="Menghubungi hotline pusat...">Hubungi</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+<!-- Breadcrumb -->
+<div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
+  <span>Beranda</span><i class="fas fa-chevron-right text-[9px]"></i>
+  <span class="text-blue-600 font-semibold">Dashboard Admin (Overview)</span>
+</div>
+
+<!-- Page header -->
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
+  <div class="flex-1">
+    <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Dasbor Operasional Hub &amp; Inventaris</h1>
+    <p class="text-sm text-gray-600">Pemantauan multi-hub terpusat, analitik arus barang, status approval, dan peringatan stok kritis secara real-time.</p>
+  </div>
+  <div class="flex flex-wrap items-start gap-2">
+    <button data-toast="Laporan ringkas harian disiapkan (PDF)..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-download text-blue-600"></i>Unduh Laporan Ringkas</button>
+    <button data-toast="Formulir penambahan barang baru dibuka di modul Data Barang. Laman data-barang.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2 transition shadow-sm"><i class="fas fa-plus"></i>+ Tambah Barang Baru</button>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-users-gear text-blue-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-trend-up"></i>+12% bln lalu</span>
+    </div>
+    <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">TOTAL PENGGUNA &amp; ADMIN</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="1420" data-num="dot"></span></p>
+    <p class="text-xs text-gray-500 mt-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1"></span>18 Admin Hub aktif bertugas</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-box-archive text-blue-600"></i></div>
+      <span class="badge bg-blue-50 text-blue-700"><i class="fas fa-bullseye"></i>99.8% Akurasi</span>
+    </div>
+    <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">SKU AKTIF TERSIMPAN</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="8650" data-num="dot"></span> <span class="text-sm font-semibold text-gray-500">SKU</span></p>
+    <p class="text-xs text-emerald-600 mt-1"><i class="fas fa-circle-check"></i> 99.2% Stok Tersedia Siap Alokasi</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"><i class="fas fa-circle-check text-emerald-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-up"></i>+8.4% target</span>
+    </div>
+    <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">BARANG MASUK HARI INI</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="1240" data-num="dot"></span> <span class="text-sm font-semibold text-gray-500">Unit</span></p>
+    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-file-lines mr-1"></i>12 Surat Jalan (Surat Jalan Selesai)</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-arrow-up-from-bracket text-blue-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-rocket"></i>100% Siap</span>
+    </div>
+    <p class="text-[11px] font-bold text-gray-500 tracking-wide mt-2">BARANG KELUAR HARI INI</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="980" data-num="dot"></span> <span class="text-sm font-semibold text-gray-500">Unit</span></p>
+    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-truck-fast mr-1"></i>94 Batch Pengiriman Siap Dispatch</p>
+  </div>
+</div>
+
+<!-- Main grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+  <!-- LEFT -->
+  <div class="xl:col-span-2 space-y-5">
+    <!-- Chart -->
+    <div class="panel p-4 lg:p-6 anim-fade-up">
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-1">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-chart-line text-blue-600 mt-1"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm lg:text-base">Arus Masuk &amp; Keluar Barang Hub</h3>
+            <p class="text-xs text-gray-500">Analisis throughput pergerakan stok harian dalam satuan unit</p>
+          </div>
+        </div>
+        <div class="flex items-center bg-gray-100 rounded-lg p-0.5 text-xs" id="rangeGroup">
+          <button data-range="7" class="px-3 py-1.5 rounded-md font-semibold bg-blue-600 text-white transition">7 Hari Terakhir</button>
+          <button data-range="30" class="px-3 py-1.5 rounded-md font-semibold text-gray-600 hover:text-blue-700 transition">30 Hari</button>
+          <button data-range="bulan" class="px-3 py-1.5 rounded-md font-semibold text-gray-600 hover:text-blue-700 transition">Bulan Ini</button>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2 mt-2 mb-3">
+        <div class="flex items-center gap-4 text-xs">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span><b>Inbound (Masuk)</b> <span class="text-gray-500" id="legendIn">8.420 unit</span></span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-gray-800 inline-block"></span><b>Outbound (Keluar)</b> <span class="text-gray-500" id="legendOut">6.850 unit</span></span>
+        </div>
+        <button data-toast="Zona DC wildcard: WH01 bisnis satelit &mdash; stub filter dikembangkan berikutnya..." data-toast-type="warn" class="badge bg-slate-100 text-slate-600 border border-slate-200"><i class="fas fa-sliders"></i>Semua Zona DC</button>
+      </div>
+      <div class="relative" id="chartWrap">
+        <svg id="flowChart" viewBox="0 0 760 330" class="w-full" style="height:300px">
+          <defs>
+            <linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.28"></stop>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.02"></stop>
+            </linearGradient>
+            <linearGradient id="areaGray" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#334155" stop-opacity="0.12"></stop>
+              <stop offset="100%" stop-color="#334155" stop-opacity="0.01"></stop>
+            </linearGradient>
+          </defs>
+          <g id="gridLines" stroke="#e5e7eb" stroke-dasharray="3 4"></g>
+          <g id="yLabels" fill="#94a3b8" font-size="11"></g>
+          <path id="outArea" fill="url(#areaGray)"></path>
+          <path id="outLine" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="5 5"></path>
+          <path id="inArea" fill="url(#areaBlue)"></path>
+          <path id="inLine" fill="none" stroke="#2563eb" stroke-width="2.5"></path>
+          <path id="inLineGhost" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-opacity="0"></path>
+          <g id="inDots"></g>
+          <g id="xLabels" fill="#94a3b8" font-size="11"></g>
+          <g id="hoverDot" opacity="0"><circle r="5" fill="#2563eb" stroke="#fff" stroke-width="2"></circle></g>
+        </svg>
+        <div id="chartTooltip" class="absolute pointer-events-none opacity-0 transition-opacity duration-150 bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap" style="transform:translate(-50%,-130%)"></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition cursor-default">
+          <p class="text-[11px] text-gray-500">Rata-rata Harian</p>
+          <p class="font-bold text-gray-900 mt-0.5"><span data-count="1202" data-num="dot"></span> <span class="text-xs font-semibold text-gray-500">Unit/Hari</span></p>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition cursor-default">
+          <p class="text-[11px] text-gray-500">Puncak Throughput</p>
+          <p class="font-bold text-blue-600 mt-0.5">Sabtu (1.480 Unit)</p>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-center hover:bg-blue-50 transition cursor-default">
+          <p class="text-[11px] text-gray-500">Efisiensi Docking</p>
+          <p class="font-bold text-emerald-600 mt-0.5"><span data-count="98.4" data-dec="1"></span>% On-Schedule</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log aktivitas -->
+    <div class="panel p-4 lg:p-6 anim-fade-up">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-clock-rotate-left text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Log Aktivitas Terkini (User &amp; Admin)</h3>
+        </div>
+        <button data-toast="Seluruh log audit 30 hari dibuka di modul Log Aktivitas..." class="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition">Lihat Semua Log <i class="fas fa-arrow-right-long"></i></button>
+      </div>
+      <div class="space-y-3" id="logList">
+        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
+          <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">BS</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <b class="text-sm text-gray-900">Budi Santoso</b>
+              <span class="badge bg-blue-100 text-blue-700 text-[10px]">Super Admin</span>
+              <span class="ml-auto text-[11px] text-gray-400">10 menit yang lalu</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-0.5">Memproses persetujuan Mutasi Keluar 150 unit <b>[SKU-CAM-8821]</b> menuju <a class="text-blue-600 font-semibold hover:underline" href="mutasi-barang.html">Hub Halim DC-02</a>.</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+              <span class="badge bg-emerald-50 text-emerald-700 text-[10px]"><i class="fas fa-check"></i>Mutasi Sukses Disetujui</span>
+              <span class="text-[11px] text-blue-600 font-semibold hover:underline cursor-pointer" data-toast="Detail ref #MUT-2023-0941 dibuka...">Ref #MUT-2023-0941</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
+          <div class="w-9 h-9 bg-gray-400 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">RH</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <b class="text-sm text-gray-900">Rian Hidayat</b>
+              <span class="badge bg-gray-200 text-gray-700 text-[10px]">Admin Keamanan RBAC</span>
+              <span class="ml-auto text-[11px] text-gray-400">35 menit yang lalu</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-0.5">Memperbarui hak akses RBAC peran Staf Gudang Lapangan: penambahan modul cetak label QR &amp; barcode scanner.</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+              <span class="badge bg-slate-100 text-slate-600 text-[10px]">Perubahan Hak Akses</span>
+              <span class="text-[11px] text-gray-500">Audit ID <b class="text-gray-700">#SEC-819</b></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
+          <div class="w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">DA</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <b class="text-sm text-gray-900">Dewi Anggraini</b>
+              <span class="badge bg-indigo-100 text-indigo-700 text-[10px]">Supervisor Audit</span>
+              <span class="ml-auto text-[11px] text-gray-400">1 jam yang lalu</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-0.5">Menyelesaikan Stok Opname terjadwal di Lorong B3 (Rak Elektronik). Ditemukan selisih -3 unit pada SKU Apple Watch.</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+              <span class="badge bg-red-100 text-red-700 text-[10px]">Discrepancy Logged</span>
+              <span class="text-[11px] text-gray-500">Opname <b class="text-gray-700">#SO-2023-112</b></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/40 transition">
+          <div class="w-9 h-9 bg-orange-400 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">FK</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <b class="text-sm text-gray-900">Fajar Kurnia</b>
+              <span class="badge bg-orange-100 text-orange-700 text-[10px]">Inbound Staff</span>
+              <span class="ml-auto text-[11px] text-gray-400">2 jam yang lalu</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-0.5">Menerima penerimaan fisik PO-774 dari PT Mitra Logistik Nusantara sejumlah 450 unit perlengkapan optik.</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+              <span class="badge bg-amber-100 text-amber-700 text-[10px]"><i class="fas fa-box"></i>Penerimaan Selesai</span>
+              <span class="text-[11px] text-gray-500">Surat Jalan <b class="text-gray-700">#SJ-90928</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="space-y-5">
+    <!-- Stok kritis -->
+    <div class="panel p-4 lg:p-5 anim-fade-up">
+      <div class="flex items-start justify-between gap-2 mb-4">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-triangle-exclamation text-red-500 mt-1"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm lg:text-base">Stok Kritis &amp; Menipis</h3>
+            <p class="text-xs text-gray-500">Stok di bawah Reorder Point (ROP)</p>
+          </div>
+        </div>
+        <span class="badge bg-red-600 text-white text-[10px]">3 SKU Kritis</span>
+      </div>
+      <div class="space-y-2" id="kritisList">
+        <div class="flex items-start justify-between mb-1"><span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-CAM-600D</span><span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 4 Unit</span></div>
+        <div class="border border-red-100 bg-red-50/40 rounded-xl p-3.5 hover:border-red-300 transition">
+          <p class="font-bold text-gray-900 text-sm">Canon 6D DSLR Camera Body</p>
+          <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-A4</b></p>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 25)</span><span class="font-bold text-red-600">16% dari buffer</span></div>
+          <div class="progress-bar bg-gray-200 rounded-full h-1.5" style="width:100%" data-w="16"><div class="h-1.5 bg-red-600 rounded-full" style="width:0%"></div></div>
+          <button data-toast="Permintaan restock SKU-CAM-600D (ROP 25) masuk antrean PO untuk supplier Canon Inc." class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"><i class="fas fa-warehouse mr-1"></i>Ajukan Restock</button>
+        </div>
+        <div class="flex items-start justify-between mb-1 mt-4"><span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-CAM-NIK8</span><span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 7 Unit</span></div>
+        <div class="border border-red-100 bg-red-50/40 rounded-xl p-3.5 hover:border-red-300 transition">
+          <p class="font-bold text-gray-900 text-sm">Nikon Reel Optical Pro X</p>
+          <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-B2</b></p>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 30)</span><span class="font-bold text-red-600">23% dari buffer</span></div>
+          <div class="progress-bar bg-gray-200 rounded-full h-1.5" style="width:100%" data-w="23"><div class="h-1.5 bg-red-600 rounded-full" style="width:0%"></div></div>
+          <button data-toast="Permintaan restock SKU-CAM-NIK8 (ROP 30) masuk antrean PO untuk supplier Nikon Corp." class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"><i class="fas fa-warehouse mr-1"></i>Ajukan Restock</button>
+        </div>
+        <div class="flex items-start justify-between mb-1 mt-4"><span class="text-[11px] font-bold text-gray-500 tracking-wide">SKU-WTC-AP46</span><span class="badge bg-red-100 text-red-700 text-[10px]">Sisa 12 Unit</span></div>
+        <div class="border border-amber-100 bg-amber-50/40 rounded-xl p-3.5 hover:border-amber-300 transition">
+          <p class="font-bold text-gray-900 text-sm leading-snug">iWatch 4th Gen Smartwatch 44mm</p>
+          <p class="text-xs text-gray-500 mb-2">Bin: <b class="text-gray-700">WH01-RACK-C1</b></p>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-gray-600 font-semibold">Kapasitas Buffer (ROP: 40)</span><span class="font-bold text-amber-600">30% dari buffer</span></div>
+          <div class="progress-bar bg-gray-200 rounded-full h-1.5" style="width:100%" data-w="30"><div class="h-1.5 bg-amber-500 rounded-full" style="width:0%"></div></div>
+          <button data-toast="Permintaan restock SKU-WTC-AP46 (ROP 40) masuk antrean PO untuk supplier Titan Gear." class="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"><i class="fas fa-warehouse mr-1"></i>Ajukan Restock</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menunggu persetujuan -->
+    <div class="panel p-4 lg:p-5 anim-fade-up">
+      <div class="flex items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-hourglass-half text-blue-600"></i>
+          <h3 class="font-bold text-gray-900 text-sm lg:text-base">Menunggu Persetujuan</h3>
+        </div>
+        <span class="badge bg-blue-600 text-white text-[10px]">2 Permintaan</span>
+      </div>
+      <div class="space-y-3" id="persetujuanList">
+        <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-4" data-req="1">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <p class="font-bold text-gray-900 text-sm"><i class="fas fa-right-left text-blue-600 mr-1"></i>Mutasi Antar-Hub</p>
+            <span class="badge bg-blue-100 text-blue-700 text-[10px]">150 Unit</span>
+          </div>
+          <p class="text-xs text-gray-600 leading-relaxed">Permintaan alokasi darurat dari Hub Cakung DC-01 menuju <b class="text-blue-700">Hub Halim DC-02</b> untuk batch elektronik.</p>
+          <div class="flex items-center justify-between text-[11px] text-gray-500 mt-2">
+            <span>Diajukan: <b class="text-gray-700">Tim Logistik Timur</b></span><span>Prioritas: <b class="text-red-600">Tinggi</b></span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button data-decide="ditolak" class="px-3 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold hover:bg-gray-50 transition">Tolak</button>
+            <button data-decide="disetujui" class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">Setujui</button>
+          </div>
+        </div>
+        <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-4" data-req="2">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <p class="font-bold text-gray-900 text-sm"><i class="fas fa-file-pen text-blue-600 mr-1"></i>Penyesuaian Stok Opname</p>
+            <span class="badge bg-red-100 text-red-700 text-[10px]">-3 Unit</span>
+          </div>
+          <p class="text-xs text-gray-600 leading-relaxed">Adjustment write-off selisih fisik pemeriksaan berkala rak B3 pada produk Smartwatch serial SN-880.</p>
+          <div class="flex items-center justify-between text-[11px] text-gray-500 mt-2">
+            <span>Auditor: <b class="text-gray-700">Dewi Anggraini</b></span><span>Level: <b class="text-gray-700">Write-Off Minor</b></span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button data-decide="ditolak" class="px-3 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold hover:bg-gray-50 transition">Tolak</button>
+            <button data-decide="disetujui" class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">Setujui</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   ASTRO Inventory — Shared interaction layer
+   Vanilla JS, no deps. Tailwind handles layout/visuals.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Toast ---------- */
+  function toast(msg, type) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+  }
+  window.toast = toast;
+
+  /* ---------- Mobile sidebar drawer ---------- */
+  function initDrawer() {
+    const trig = document.querySelector('[data-drawer-trigger]');
+    const sb = document.querySelector('.sidebar-left');
+    const back = document.querySelector('.drawer-backdrop');
+    if (!trig || !sb) return;
+    function open() { sb.classList.add('drawer','open'); if(back) back.classList.add('open'); }
+    function close() { sb.classList.remove('open'); if(back) back.classList.remove('open'); }
+    trig.addEventListener('click', function(){ sb.classList.contains('open') ? close() : open(); });
+    if (back) back.addEventListener('click', close);
+  }
+
+  /* ---------- Dropdowns (notification / profile) ---------- */
+  function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach(function (btn) {
+      const target = btn.getAttribute('data-dropdown');
+      const menu = document.querySelector('[data-dropdown-menu="' + target + '"]');
+      if (!menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown.open').forEach(function (m){ if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.dropdown.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+    document.querySelectorAll('.dropdown').forEach(function (m){ m.addEventListener('click', function(e){ e.stopPropagation(); }); });
+  }
+
+  /* ---------- Disabled sidebar items ---------- */
+  function initDisabledNav() {
+    document.querySelectorAll('.sidebar-item.disabled').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        toast('Halaman belum tersedia (tidak memiliki referensi PNG).', 'warn');
+      });
+    });
+  }
+
+  /* ---------- Modals ---------- */
+  window.openModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('open');
+  };
+  window.closeModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  };
+  function initModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) {
+      m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const m = b.closest('.modal-overlay'); if (m) m.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+  }
+
+  /* ---------- Tabs ---------- */
+  window.initTabs = function (container) {
+    const root = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!root) return;
+    const btns = root.querySelectorAll('[data-tab]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const name = b.getAttribute('data-tab');
+        btns.forEach(function (x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        panels.forEach(function (p){
+          p.style.display = (p.getAttribute('data-tab-panel') === name) ? '' : 'none';
+        });
+      });
+    });
+  };
+
+  /* ---------- Table filtering / search ---------- */
+  /* Rows carry data attributes; selects/search filter them. */
+  window.initTableFilter = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    const search = opts.searchId ? document.getElementById(opts.searchId) : null;
+    const selects = (opts.selects || []).map(function (s) {
+      return { el: document.getElementById(s.id), attr: s.attr };
+    });
+
+    function visible(r) {
+      if (search) {
+        const q = (search.value || '').toLowerCase().trim();
+        if (q && r.textContent.toLowerCase().indexOf(q) === -1) return false;
+      }
+      for (let i = 0; i < selects.length; i++) {
+        const v = selects[i].el ? selects[i].el.value : '';
+        if (v && (r.getAttribute('data-' + selects[i].attr) || '').toLowerCase() !== String(v).toLowerCase()) return false;
+      }
+      if (opts.checkboxId) {
+        const cb = document.getElementById(opts.checkboxId);
+        if (cb && cb.checked) {
+          const flag = r.getAttribute('data-flag') || '';
+          if (flag.indexOf('anomali') === -1) return false;
+        }
+      }
+      return true;
+    }
+    function apply() {
+      let count = 0;
+      rows.forEach(function (r) {
+        const ok = visible(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      const info = document.getElementById(opts.countId);
+      if (info) info.textContent = count;
+    }
+    if (search) search.addEventListener('input', apply);
+    selects.forEach(function (s){ if (s.el) s.el.addEventListener('change', apply); });
+    if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.addEventListener('change', apply); }
+    const reset = opts.resetId ? document.getElementById(opts.resetId) : null;
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      selects.forEach(function (s){ if (s.el) s.el.value = ''; });
+      if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.checked = false; }
+      apply();
+    });
+    apply();
+    return { reapply: apply };
+  };
+
+  /* ---------- Client-side pagination (simple) ---------- */
+  window.initPagination = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    let perPage = opts.perPage || 10;
+    let page = 1;
+    const wrap = document.getElementById(opts.controlsId);
+    function filteredRows() {
+      return allRows.filter(function (r){ return r.style.display !== 'none'; });
+    }
+    function render() {
+      const fr = filteredRows();
+      const pages = Math.max(1, Math.ceil(fr.length / perPage));
+      if (page > pages) page = pages;
+      fr.forEach(function (r, idx) {
+        const start = (page - 1) * perPage;
+        r.style.display = (idx >= start && idx < start + perPage) ? '' : 'none';
+      });
+      if (wrap) {
+        const info = opts.infoId ? document.getElementById(opts.infoId) : null;
+        if (info) {
+          const from = fr.length ? (page - 1) * perPage + 1 : 0;
+          const to = Math.min(page * perPage, fr.length);
+          info.textContent = 'Menampilkan ' + from + ' - ' + to + ' dari ' + fr.length + ' ' + (opts.unit || 'data');
+        }
+        let html = '';
+        const prev = page <= 1;
+        html += '<button ' + (prev ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (prev ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50') + ' data-pg="' + (page - 1) + '">Sebelumnya</button>';
+        for (let p = 1; p <= pages; p++) {
+          html += '<button class="px-3 py-1 rounded text-xs lg:text-sm ' + (p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '" data-pg="' + p + '">' + p + '</button>';
+        }
+        const next = page >= pages;
+        html += '<button ' + (next ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (next ? 'text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200') + ' data-pg="' + (page + 1) + '">Berikutnya</button>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('[data-pg]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = parseInt(b.getAttribute('data-pg'), 10); if (!isNaN(v)) { page = v; render(); }
+          });
+        });
+      }
+    }
+    return { render: render, setPage: function (p) { page = p; render(); } };
+  };
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    initDrawer();
+    initDropdowns();
+    initDisabledNav();
+    initModals();
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Shared page interactions (inline ke semua halaman baru)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Animated counters ---------- */
+  function fmtNum(v, style) {
+    if (style === 'dot') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return String(Math.round(v));
+  }
+  window.animCount = function (el) {
+    var raw = el.getAttribute('data-count');
+    var target = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+    var styleDot = el.getAttribute('data-num') === 'dot';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var dec = parseFloat(el.getAttribute('data-dec') || '0');
+    var dur = 1100, t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var v = (dec ? target * eased : target * eased);
+      el.innerHTML = (dec ? v.toFixed(dec).replace('.', ',') : fmtNum(v, styleDot)) + (p > .55 ? suffix : '');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  };
+  function startCounters() {
+    document.querySelectorAll('[data-count]').forEach(function (el) { animCount(el); });
+  }
+
+  /* ---------- Animated progress bars ---------- */
+  function startBars() {
+    document.querySelectorAll('.progress-bar[data-w]').forEach(function (b, i) {
+      setTimeout(function () { b.style.width = b.getAttribute('data-w') + '%'; }, 120 + i * 45);
+    });
+  }
+
+  /* ---------- Modal helper buttons ---------- */
+  function initModalButtons() {
+    document.querySelectorAll('[data-open-modal]').forEach(function (b) {
+      b.addEventListener('click', function () { openModal(b.getAttribute('data-open-modal')); });
+    });
+    document.querySelectorAll('[data-saved-toast]').forEach(function (b) {
+      b.addEventListener('click', function () { toast(b.getAttribute('data-saved-toast'), 'success'); });
+    });
+  }
+
+  /* ---------- Toast-bound buttons ---------- */
+  function initToastButtons() {
+    document.querySelectorAll('[data-toast]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var msg = b.getAttribute('data-toast');
+        var type = b.getAttribute('data-toast-type') || 'success';
+        toast(msg, type);
+      });
+    });
+  }
+
+  /* ---------- Refresh spin ---------- */
+  function initRefresh() {
+    document.querySelectorAll('[data-refresh]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var icon = b.querySelector('i');
+        if (icon) { icon.style.transition = 'transform .6s'; icon.style.transform = 'rotate(360deg)'; }
+        b.classList.add('pointer-events-none');
+        setTimeout(function () {
+          if (icon) { icon.style.transition = 'none'; icon.style.transform = 'none'; }
+          b.classList.remove('pointer-events-none');
+        }, 620);
+        toast(b.getAttribute('data-toast') || 'Data berhasil disegarkan.', 'success');
+        if (window.__applyFilters) setTimeout(function () { window.__applyFilters(); }, 300);
+      });
+    });
+  }
+
+  /* ---------- Chip active toggling ---------- */
+  window.setChip = function (groupEl, btn) {
+    groupEl.querySelectorAll('[data-chip]').forEach(function (x) {
+      x.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+    });
+    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+  };
+
+  window.initChipGroup = function (groupId, onStart) {
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('[data-chip]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setChip(group, b);
+        window.__activeChip = b.getAttribute('data-chip');
+        if (window.__applyFilters) window.__applyFilters();
+        if (b.getAttribute('data-toast')) toast(b.getAttribute('data-toast'), 'info');
+      });
+    });
+    var first = group.querySelector('[data-chip]');
+    if (first) { setChip(group, first); window.__activeChip = first.getAttribute('data-chip'); }
+    if (onStart) onStart();
+  };
+
+  /* ---------- Kbd focus helper ---------- */
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      var s = document.querySelector('[data-header-search]');
+      if (s) { e.preventDefault(); s.focus(); }
+    }
+  });
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    startCounters();
+    startBars();
+    initToastButtons();
+    initModalButtons();
+    initRefresh();
+    var hs = document.querySelector('[data-header-search]');
+    if (hs) hs.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') toast('Pencarian "' + hs.value.trim() + '" — menampilkan hasil di halaman terkait.', 'info');
+    });
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Interaksi khusus: Dashboard Kepala Gudang
+   — grafik arus SVG interaktif, tooltip, range switch,
+     aksi persetujuan (Setujui / Tolak)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ============ DATA GRAFIK ============ */
+  function gen30() {
+    var labels = [], tin = [], tout = [];
+    for (var i = 1; i <= 30; i++) {
+      labels.push(String(i));
+      var base = 950 + ((i * 73) % 280);
+      if (i % 7 === 5) base += 180; /* puncak tiap Sabtu */
+      tin.push(base);
+      tout.push(780 + ((i * 57) % 230));
+    }
+    return { labels: labels, tin: tin, tout: tout, step: 5 };
+  }
+  var DATA = {
+    '7': { labels: ['Sen 4', 'Sel 5', 'Rab 6', 'Kam 7', 'Jum 8', 'Sab 9', 'Min 10'],
+           tin:  [1050, 990, 1180, 1105, 1240, 1480, 1375],
+           tout: [830, 790, 950, 880, 1020, 1240, 1140], step: 0 },
+    '30': gen30(),
+    'bulan': { labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+               tin:  [1180, 1235, 1090, 1320, 1265, 1440, 1150, 1310, 1240, 1480],
+               tout: [940, 1010, 880, 1120, 1060, 1230, 970, 1090, 1150, 1240], step: 0 }
+  };
+
+  function fmt(v) {
+    return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s; }
+
+  /* ============ RENDER GRAFIK ============ */
+  var svg = document.getElementById('flowChart');
+  var wrap = document.getElementById('chartWrap');
+  var tooltip = document.getElementById('chartTooltip');
+  var legendIn = document.getElementById('legendIn');
+  var legendOut = document.getElementById('legendOut');
+  if (!svg) return;
+
+  var PADL = 44, PADR = 14, PADT = 18, PADB = 34;
+  var W = 760, H = 330, PW = W - PADL - PADR, PH = H - PADT - PADB;
+  var MAXY = 1600;
+  var cur = null; /* data aktif */
+
+  function px(i, n) { return PADL + (n === 1 ? PW / 2 : (i * PW) / (n - 1)); }
+  function py(v) { return PADT + PH * (1 - v / MAXY); }
+
+  /* kurva halus (Catmull-Rom -> Bezier) */
+  function smooth(pts) {
+    var d = 'M' + pts[0][0] + ' ' + pts[0][1];
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ' C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ',' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ',' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+
+  function render(key, animate) {
+    cur = DATA[key];
+    var n = cur.labels.length, max = 0;
+    for (var i = 0; i < n; i++) max = Math.max(max, cur.tin[i], cur.tout[i]);
+    MAXY = Math.ceil(max / 400) * 400;
+
+    /* grid + label Y */
+    var grid = '', ylab = '';
+    for (var g = 0; g <= 4; g++) {
+      var gy = (PADT + PH * (1 - g / 4)).toFixed(1);
+      grid += '<line x1="' + PADL + '" y1="' + gy + '" x2="' + (W - PADR) + '" y2="' + gy + '"></line>';
+      ylab += '<text x="' + (PADL - 8) + '" y="' + (+gy + 4) + '" text-anchor="end">' + fmt((MAXY * g) / 4) + '</text>';
+    }
+    document.getElementById('gridLines').innerHTML = grid;
+    document.getElementById('yLabels').innerHTML = ylab;
+
+    /* label X */
+    var xl = '', every = cur.step || (n > 14 ? Math.ceil(n / 8) : 1);
+    for (var x = 0; x < n; x++) {
+      if (every > 1 && x % every !== 0 && x !== n - 1) continue;
+      xl += '<text x="' + px(x, n).toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle">' + cur.labels[x] + '</text>';
+    }
+    document.getElementById('xLabels').innerHTML = xl;
+
+    /* titik & path */
+    var pin = [], pout = [];
+    for (var j = 0; j < n; j++) { pin.push([px(j, n), py(cur.tin[j])]); pout.push([px(j, n), py(cur.tout[j])]); }
+
+    var lineIn = smooth(pin), lineOut = smooth(pout);
+    document.getElementById('inLine').setAttribute('d', lineIn);
+    document.getElementById('inLineGhost').setAttribute('d', lineIn);
+    document.getElementById('outLine').setAttribute('d', lineOut);
+    document.getElementById('inArea').setAttribute('d', lineIn + ' L' + pin[n - 1][0].toFixed(1) + ' ' + (PADT + PH) + ' L' + pin[0][0].toFixed(1) + ' ' + (PADT + PH) + ' Z');
+    document.getElementById('outArea').setAttribute('d', lineOut + ' L' + pout[n - 1][0].toFixed(1) + ' ' + (PADT + PH) + ' L' + pout[0][0].toFixed(1) + ' ' + (PADT + PH) + ' Z');
+
+    /* dots inbound */
+    var dots = '';
+    for (var k = 0; k < n; k++) {
+      if (n > 14) continue;
+      dots += '<circle cx="' + pin[k][0].toFixed(1) + '" cy="' + pin[k][1].toFixed(1) + '" r="3.5" fill="#fff" stroke="#2563eb" stroke-width="2"></circle>';
+    }
+    document.getElementById('inDots').innerHTML = dots;
+
+    /* legend */
+    if (legendIn) legendIn.textContent = fmt(sum(cur.tin)) + ' unit';
+    if (legendOut) legendOut.textContent = fmt(sum(cur.tout)) + ' unit';
+
+    /* animasi gambar garis */
+    if (animate) {
+      var L = document.getElementById('inLine').getTotalLength();
+      var il = document.getElementById('inLine');
+      var ghost = document.getElementById('inLineGhost');
+      il.setAttribute('stroke-dasharray', L + ' ' + L);
+      il.setAttribute('stroke-dashoffset', L);
+      ghost.setAttribute('stroke-opacity', '0.35');
+      ghost.setAttribute('stroke-dasharray', L + ' ' + L);
+      ghost.setAttribute('stroke-dashoffset', L);
+      requestAnimationFrame(function () {
+        il.style.transition = 'stroke-dashoffset 1s ease';
+        ghost.style.transition = 'stroke-dashoffset 1s ease';
+        il.setAttribute('stroke-dashoffset', 0);
+        ghost.setAttribute('stroke-dashoffset', 0);
+        setTimeout(function () {
+          il.style.transition = '';
+          il.removeAttribute('stroke-dasharray'); il.removeAttribute('stroke-dashoffset');
+          ghost.setAttribute('stroke-opacity', '0');
+          ghost.removeAttribute('stroke-dasharray'); ghost.removeAttribute('stroke-dashoffset');
+        }, 1050);
+      });
+    }
+    hideHover();
+  }
+
+  /* ============ RANGE SWITCH ============ */
+  var rg = document.getElementById('rangeGroup');
+  if (rg) {
+    rg.querySelectorAll('[data-range]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        rg.querySelectorAll('[data-range]').forEach(function (o) {
+          o.classList.remove('bg-blue-600', 'text-white');
+          o.classList.add('text-gray-600');
+        });
+        b.classList.add('bg-blue-600', 'text-white');
+        b.classList.remove('text-gray-600');
+        render(b.getAttribute('data-range'), true);
+      });
+    });
+  }
+
+  /* ============ HOVER TOOLTIP ============ */
+  var hoverDot = document.getElementById('hoverDot');
+  var hiddenX = -9999;
+
+  function hideHover() {
+    if (hoverDot) hoverDot.setAttribute('opacity', '0');
+    if (tooltip) tooltip.classList.add('opacity-0');
+  }
+
+  function showHover(idx, evt) {
+    if (!cur) return;
+    var n = cur.tin.length, i = Math.max(0, Math.min(n - 1, idx));
+    var cx = px(i, n), cy = py(cur.tin[i]);
+    hoverDot.setAttribute('cx', cx.toFixed(1));
+    hoverDot.setAttribute('cy', cy.toFixed(1));
+    hoverDot.setAttribute('opacity', '1');
+    tooltip.innerHTML =
+      '<div class="text-[10px] text-gray-300 font-medium mb-0.5">' + cur.labels[i] + (n <= 7 ? ' (7 hari terakhir)' : '') + '</div>' +
+      '<div><span class="inline-block w-2 h-2 rounded-full" style="background:#3b82f6"></span> Masuk <b>' + fmt(cur.tin[i]) + ' U</b></div>' +
+      '<div class="mt-0.5"><span class="inline-block w-2 h-2 rounded-full" style="background:#64748b"></span> Keluar <b>' + fmt(cur.tout[i]) + ' U</b></div>';
+    tooltip.classList.remove('opacity-0');
+    /* posisi tooltip relatif thd wrap, via transform SVG -> client */
+    var pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy;
+    var p = pt.matrixTransform(svg.getScreenCTM());
+    var wr = wrap.getBoundingClientRect();
+    var left = Math.min(Math.max(p.x - wr.left, 60), wr.width - 60);
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = (p.y - wr.top) + 'px';
+  }
+
+  svg.addEventListener('mousemove', function (e) {
+    var r = svg.getBoundingClientRect();
+    /* konversi client -> koordinat viewBox via CTM agar akurat */
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var n = cur.tin.length;
+    var idx = Math.round(((p.x - PADL) / PW) * (n - 1));
+    showHover(idx, e);
+  });
+  svg.addEventListener('mouseleave', hideHover);
+
+  /* sentuh / klik juga menampilkan tooltip */
+  svg.addEventListener('click', function (e) {
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var n = cur.tin.length;
+    showHover(Math.round(((p.x - PADL) / PW) * (n - 1)), e);
+  });
+
+  render('7', true);
+
+  /* ============ PERSETUJUAN (Setujui / Tolak) ============ */
+  var list = document.getElementById('persetujuanList');
+  if (list) {
+    function updBadge() {
+      var panel = list.closest('.panel');
+      if (!panel) return;
+      var badge = panel.querySelector('.badge');
+      var left = list.querySelectorAll('[data-pending]').length;
+      if (badge) badge.textContent = left === 0 ? '0 Permintaan' : left + ' Permintaan';
+      if (left === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center text-xs font-semibold text-emerald-700';
+        empty.innerHTML = '<i class="fas fa-circle-check mr-1"></i>Semua permintaan telah diproses. Riwayat persetujuan tercatat pada modul Persetujuan Barang.';
+        list.appendChild(empty);
+      }
+    }
+
+    function decide(card, verdict) {
+      var title = card.querySelector('p.font-bold');
+      var name = title ? title.textContent.trim() : 'Permintaan';
+      card.removeAttribute('data-pending');
+      var grid = card.querySelector('.grid.grid-cols-2');
+      var ok = verdict === 'disetujui';
+      if (ok) {
+        card.classList.remove('border-blue-100', 'bg-blue-50/30');
+        card.classList.add('border-emerald-200', 'bg-emerald-50/60');
+      } else {
+        card.classList.remove('border-blue-100', 'bg-blue-50/30');
+        card.classList.add('border-gray-200', 'bg-gray-50');
+      }
+      if (grid) {
+        var banner = document.createElement('div');
+        banner.className = 'mt-3 p-2 rounded-lg text-xs font-bold text-center border ' +
+          (ok ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200');
+        banner.innerHTML = ok
+          ? '<i class="fas fa-check-circle mr-1"></i>Disetujui — diteruskan ke WMS &amp; pembuat surat jalan'
+          : '<i class="fas fa-ban mr-1"></i>Ditolak — pengaju menerima notifikasi penolakan';
+        var okBtn = grid.querySelector('[data-decide="disetujui"]');
+        var noBtn = grid.querySelector('[data-decide="ditolak"]');
+        okBtn.disabled = true; noBtn.disabled = true;
+        grid.style.opacity = '.55';
+        grid.appendChild(banner);
+      }
+      card.setAttribute('data-req', ok ? 'disetujui' : 'ditolak');
+      updBadge();
+    }
+
+    list.querySelectorAll('[data-req]').forEach(function (card) {
+      card.setAttribute('data-pending', '');
+      card.querySelectorAll('[data-decide]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var v = btn.getAttribute('data-decide');
+          if (v === 'disetujui') {
+            toast('Permintaan disetujui — alokasi stok diproses oleh WMS DC-01.', 'success');
+          } else {
+            toast('Permintaan ditolak — notifikasi informasi dikirim ke pengaju.', 'warn');
+          }
+          decide(card, v);
+        });
+      });
+    });
+  }
+})();
+
+</script>
+</body>
+</html>
