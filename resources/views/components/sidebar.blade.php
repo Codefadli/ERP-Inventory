@@ -9,7 +9,7 @@
         
         @if(auth()->user()->isSuperAdmin())
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen Sistem</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.pengguna') }}" class="nav-link {{ request()->routeIs('admin.pengguna') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-users w-4"></i>
             <span>Manajemen Pengguna</span>
         </a>
@@ -17,13 +17,13 @@
             <i class="fas fa-user-shield w-4"></i>
             <span>Role & Permission</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.log-aktivitas') }}" class="nav-link {{ request()->routeIs('admin.log-aktivitas') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-alt w-4"></i>
             <span>Log Aktivitas</span>
         </a>
         
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-barang') }}" class="nav-link {{ request()->routeIs('admin.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
@@ -31,15 +31,15 @@
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang & Lokasi</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-departemen') }}" class="nav-link {{ request()->routeIs('admin.data-departemen') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-building w-4"></i>
             <span>Data Departemen</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-supplier') }}" class="nav-link {{ request()->routeIs('admin.data-supplier') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck w-4"></i>
             <span>Data Supplier</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.kategori-barang') }}" class="nav-link {{ request()->routeIs('admin.kategori-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-tags w-4"></i>
             <span>Kategori Barang</span>
         </a>
@@ -63,11 +63,11 @@
         </a>
         
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Laporan & Analitik</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.laporan-analitik') }}" class="nav-link {{ request()->routeIs('admin.laporan-analitik') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.laporan-riwayat') }}" class="nav-link {{ request()->routeIs('admin.laporan-riwayat') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
             <span>Laporan & Riwayat</span>
         </a>
@@ -114,7 +114,7 @@
             </div>
             <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('gudang.laporan') }}" class="nav-link {{ request()->routeIs('gudang.laporan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>

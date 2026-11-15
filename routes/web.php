@@ -85,7 +85,45 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
         
+        Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/log-aktivitas', function () {
+                return view('dashboard.superadmin.logAktivitas');
+            })->name('log-aktivitas');
+        });
+
+        Route::middleware('permission:master.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.superadmin.dataBarang');
+            })->name('data-barang');
+
+            Route::get('/data-departemen', function () {
+                return view('dashboard.superadmin.dataDepartemen');
+            })->name('data-departemen');
+
+            Route::get('/data-supplier', function () {
+                return view('dashboard.superadmin.dataSuplier');
+            })->name('data-supplier');
+
+            Route::get('/kategori-barang', function () {
+                return view('dashboard.superadmin.kategoriBarang');
+            })->name('kategori-barang');
+        });
+
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan-analitik', function () {
+                return view('dashboard.superadmin.laporanAnalitik');
+            })->name('laporan-analitik');
+
+            Route::get('/laporan-riwayat', function () {
+                return view('dashboard.superadmin.laporanRiwayat');
+            })->name('laporan-riwayat');
+        });
+
         Route::middleware('permission:user.manage')->group(function () {
+            Route::get('/pengguna', function () {
+                return view('dashboard.superadmin.manajemenPengguna');
+            })->name('pengguna');
+
             Route::get('/users', function () {
                 return view('admin.users.index');
             })->name('users.index');
@@ -120,6 +158,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
+
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan', function () {
+                return view('dashboard.kepalagudang.laporan');
+            })->name('laporan');
+        });
         
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
