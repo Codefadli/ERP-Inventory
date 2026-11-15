@@ -155,6 +155,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
         
+        Route::get('/riwayat-persetujuan', function () {
+            return view('dashboard.hr.riwayat-persetujuan');
+        })->name('riwayat-persetujuan');
+        
         Route::middleware('permission:issue.approve')->group(function () {
             Route::get('/approvals', function () {
                 return view('hr.approvals.index');
@@ -210,6 +214,10 @@ Route::middleware('auth')->group(function () {
             ->name('profile');
         
         Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/temuan-audit', function () {
+                return view('dashboard.audit.temuan-audit');
+            })->name('temuan-audit');
+
             Route::get('/logs', function () {
                 return view('audit.logs.index');
             })->name('logs.index');

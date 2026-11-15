@@ -134,7 +134,7 @@
             <i class="fas fa-file-alt w-4"></i>
             <span>Detail Permintaan</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('hr.riwayat-persetujuan') }}" class="nav-link {{ request()->routeIs('hr.riwayat-persetujuan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
             <span>Riwayat Persetujuan</span>
         </a>
@@ -207,7 +207,7 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('audit.temuan-audit') }}" class="nav-link {{ request()->routeIs('audit.temuan-audit') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-exclamation-triangle w-4"></i>
             <span>Temuan Audit</span>
         </a>
