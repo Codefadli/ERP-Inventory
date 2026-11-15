@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barang Masuk — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ============================================================
+   ASTRO Inventory — Shared Design System
+   Tailwind CDN + Font Awesome. Component-level styles only.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+}
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar-left {
+  width: 256px; flex-shrink: 0;
+  background: #ffffff; border-right: 1px solid #e5eeff;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.main-area { flex: 1; min-width: 0; }
+@media (max-width: 1024px) { .sidebar-left { display: none; } }
+
+/* ---------- Sidebar items ---------- */
+.sidebar-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem;
+  font-size: .875rem; color: #334155; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background-color: #eff6ff; }
+.sidebar-item.active {
+  background-color: #0044ce; border-left: 3px solid #0033b8;
+  font-weight: 600; color: #ffffff;
+}
+.sidebar-item.active:hover { background-color: #0040d8; }
+/* non-referenced items: visually normal (reference fidelity), behaviorally inactive */
+.sidebar-item.disabled { opacity: 1; cursor: not-allowed; }
+.sidebar-item.disabled:hover { background-color: transparent; }
+.sidebar-section-label {
+  font-size: .6875rem; font-weight: 700; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 0 .75rem; margin: 0.625rem 0 0.375rem;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+
+/* ---------- Cards ---------- */
+.metric-card { transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,.15); }
+.panel { background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+
+/* ---------- Tables ---------- */
+.table-row { transition: background-color .15s ease; }
+.table-row:hover { background-color: #f9fafb; }
+
+/* ---------- Filter chips ---------- */
+.filter-tag { transition: background-color .15s ease; }
+.filter-tag:hover { background-color: #dbeafe; }
+
+/* ---------- Progress ---------- */
+.progress-bar { transition: width .5s ease; }
+
+/* ---------- Tabs ---------- */
+.tab-btn { transition: all .15s ease; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+
+/* ---------- Badges ---------- */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* ---------- Modal ---------- */
+.modal-overlay { position:fixed; inset:0; background:rgba(11,28,48,.55); display:none; align-items:flex-start; justify-content:center; z-index:80; padding: 5vh 1rem 1rem; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:.75rem; width:100%; max-width:640px; box-shadow:0 20px 50px -10px rgba(0,0,0,.35); animation: modalIn .18s ease; }
+@keyframes modalIn { from{opacity:0; transform:translateY(12px) scale(.98);} to{opacity:1; transform:none;} }
+
+/* ---------- Dropdown ---------- */
+.dropdown { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 10px 25px -5px rgba(0,0,0,.18); min-width:260px; z-index:70; display:none; }
+.dropdown.open { display:block; }
+
+/* ---------- Toast ---------- */
+#toast-container { position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.5rem; }
+.toast { background:#fff; border:1px solid #e5eeff; border-left:4px solid #2563eb; border-radius:.5rem; padding:.75rem 1rem; box-shadow:0 8px 20px -6px rgba(0,0,0,.2); font-size:.875rem; color:#0b1c30; animation: toastIn .2s ease; max-width:340px; }
+.toast.success { border-left-color:#16a34a; }
+.toast.warn { border-left-color:#f59e0b; }
+.toast.error { border-left-color:#dc2626; }
+@keyframes toastIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;} }
+
+/* ---------- Mobile sidebar drawer ---------- */
+.drawer-backdrop { position:fixed; inset:0; background:rgba(11,28,48,.45); z-index:60; display:none; }
+.drawer-backdrop.open { display:block; }
+@media (max-width:1024px){
+  .sidebar-left.drawer { display:block; position:fixed; top:0; left:0; height:100vh; z-index:61; transform:translateX(-100%); transition:transform .25s ease; }
+  .sidebar-left.drawer.open { transform:translateX(0); }
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar-left::-webkit-scrollbar { width:6px; }
+.sidebar-left::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ---------- Misc helpers ---------- */
+.anim-fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+</style>
+</head>
+<body class="bg-[#f8f9ff]">
+
+<!-- ============ HEADER ============ -->
+<header class="bg-white border-b border-[#e5eeff] sticky top-0 z-50 shadow-sm">
+  <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" data-drawer-trigger><i class="fas fa-bars text-lg"></i></button>
+      <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-cube text-white text-lg"></i></div>
+      <div class="hidden sm:block">
+        <h1 class="text-base lg:text-lg font-bold text-gray-900 leading-tight">Astro Inventory</h1>
+        <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
+      </div>
+      <div class="hidden xl:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
+        <i class="fas fa-building"></i><span>Jakarta (Pusat DC) &rsaquo;</span>
+        <b>Hub Cakung DC-01 (Utama)</b>
+      </div>
+      <span class="hidden lg:inline-flex badge bg-green-100 text-green-700"><i class="fas fa-circle" style="font-size:5px"></i>Operasional Normal</span>
+    </div>
+    <div class="flex items-center gap-2 lg:gap-3">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        <input type="text" data-header-search placeholder="Cari SKU, resi, transaksi..." class="hidden md:block w-64 xl:w-80 pl-9 pr-10 py-2 text-sm bg-gray-100 border border-transparent rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        <kbd class="hidden md:flex absolute right-2.5 top-2 text-[10px] text-gray-400 border border-gray-300 bg-white rounded px-1.5 py-0.5">&#8984;K</kbd>
+      </div>
+      <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition" data-dropdown="notif">
+        <i class="fas fa-bell text-lg"></i><span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+      </button>
+      <div class="dropdown" data-dropdown-menu="notif" style="min-width:320px">
+        <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="text-sm font-bold text-gray-900">Notifikasi</p>
+          <span class="badge bg-blue-100 text-blue-700">3 Baru</span>
+        </div>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exchange-alt text-blue-600 mr-2 w-3"></i>Mutasi Antar-Hub Menunggu Otorisasi</p>
+          <p class="text-xs text-gray-500">Permintaan alokasi darurat 150 unit ke Halim DC-02</p>
+          <p class="text-[11px] text-gray-400 mt-1">10 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50 border-b border-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-exclamation-triangle text-amber-500 mr-2 w-3"></i>Stok di Bawah Batas ROP</p>
+          <p class="text-xs text-gray-500">SKU-CAM-600D tersisa 4 unit dari ambang ROP 25</p>
+          <p class="text-[11px] text-gray-400 mt-1">35 menit lalu</p>
+        </a>
+        <a href="notifikasi.html" class="block px-3 py-2.5 hover:bg-gray-50">
+          <p class="text-sm font-semibold text-gray-800"><i class="fas fa-check-circle text-green-600 mr-2 w-3"></i>Otorisasi Mutasi Disetujui</p>
+          <p class="text-xs text-gray-500">Surat Jalan SPO-WMS-019 siap cetak</p>
+          <p class="text-[11px] text-gray-400 mt-1">1 jam lalu</p>
+        </a>
+      </div>
+      <div class="relative">
+        <button class="flex items-center gap-2 pl-2 lg:pl-3 lg:border-l border-gray-200" data-dropdown="profile">
+          <div class="text-right hidden md:block">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin</p>
+          </div>
+          <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">BS</div>
+        </button>
+        <div class="dropdown" data-dropdown-menu="profile">
+          <div class="p-3 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
+            <p class="text-xs text-gray-500">Admin Utama / Super Admin &middot; DC-01</p>
+          </div>
+          <a href="#" data-disabled class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 mr-2"></i>Profil Saya</a>
+          <a href="pengaturan.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-cog w-4 mr-2"></i>Pengaturan</a>
+          <a href="notifikasi.html" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-bell w-4 mr-2"></i>Notifikasi</a>
+          <div class="border-t border-gray-100"><a href="#" data-disabled class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 mr-2"></i>Keluar</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar-left">
+    <nav class="p-3">
+<p class="sidebar-section-label">Menu Utama</p>
+<a href="kepalagudang(dashboard).html" class="sidebar-item"><i class="fas fa-th-large w-4"></i><span>Dashboard Kepala Gudang</span></a>
+<p class="sidebar-section-label">Master Data &amp; Inventaris</p>
+<a href="data-barang.html" class="sidebar-item"><i class="fas fa-boxes w-4"></i><span>Data Barang</span></a>
+<a href="data-gudang.html" class="sidebar-item"><i class="fas fa-warehouse w-4"></i><span>Data Gudang &amp; Lokasi</span></a>
+<p class="sidebar-section-label">Operasional &amp; Transaksi</p>
+<a href="barang-masuk.html" class="sidebar-item active"><i class="fas fa-truck-loading w-4"></i><span>Barang Masuk</span></a>
+<a href="barang-keluar.html" class="sidebar-item"><i class="fas fa-truck w-4"></i><span>Barang Keluar</span></a>
+<a href="mutasi-barang.html" class="sidebar-item"><i class="fas fa-exchange-alt w-4"></i><span>Mutasi Barang</span></a>
+<a href="stok-opname.html" class="sidebar-item"><i class="fas fa-clipboard-check w-4"></i><span>Stok Opname</span></a>
+<a href="persetujuan-barang.html" class="sidebar-item"><i class="fas fa-file-contract w-4"></i><span>Persetujuan Barang</span><span class="ml-auto badge bg-red-500 text-white" style="padding:0 .4rem">5</span></a>
+<a href="laporan-analitik.html" class="sidebar-item"><i class="fas fa-chart-bar w-4"></i><span>Laporan &amp; Analitik</span></a>
+<p class="sidebar-section-label">Pengaturan &amp; Akun</p>
+<a href="notifikasi.html" class="sidebar-item"><i class="fas fa-bell w-4"></i><span>Notifikasi</span></a>
+<a href="pengaturan.html" class="sidebar-item"><i class="fas fa-cog w-4"></i><span>Pengaturan</span></a>
+<a href="#" class="sidebar-item disabled" data-disabled><i class="fas fa-user w-4"></i><span>Profil Saya</span></a>
+
+    </nav>
+    <div class="mx-3 my-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+      <p class="text-[11px] font-bold text-blue-700 mb-1"><i class="fas fa-headset mr-1"></i>Bantuan DC-01</p>
+      <p class="text-[10px] text-blue-700/70 mb-2">Hotline Logistik &amp; Tim WMS aktif 24/7.</p>
+      <button class="w-full text-[11px] py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" data-toast="Menghubungi hotline pusat...">Hubungi</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+<!-- Top status -->
+<div class="flex flex-wrap items-center gap-2 text-xs mb-3">
+  <span class="font-semibold tracking-wide text-gray-500">OPERASIONAL &amp; TRANSAKSI</span><i class="fas fa-chevron-right text-[9px] text-gray-400"></i>
+  <span class="text-blue-600 font-semibold">TRANSAKSI BARANG MASUK (INBOUND DC)</span>
+</div>
+
+<!-- Page header -->
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 anim-fade-up">
+  <div class="flex-1">
+    <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Transaksi Barang Masuk (Inbound DC)</h1>
+    <p class="text-sm text-gray-600 max-w-2xl">Monitoring penerimaan logistik dari mitra pemasok/supplier, validasi Purchase Order (PO), inspeksi Quality Control (QC), penbitan Berita Acara Serah Terima, dan alokasi rak putaway Hub Cakung DC-01.</p>
+  </div>
+  <div class="flex flex-wrap items-start gap-2">
+    <button data-toast="Data Inbound 90 hari diekspor ke XLSX..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-download text-blue-600"></i><b>Ekspor Data Inbound</b></button>
+    <button data-toast="Jadwal kedatangan dock mingguan dibuka..." class="px-3.5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2 transition"><i class="fas fa-calendar-check text-blue-600"></i><b>Jadwal Kedatangan Dock</b></button>
+    <button data-open-modal="modalCatat" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2 transition shadow-sm"><i class="fas fa-plus-circle"></i><b>+ Catat Penerimaan Barang Masuk</b></button>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 anim-fade-up">
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-download text-blue-600"></i></div>
+      <span class="badge bg-emerald-50 text-emerald-700"><i class="fas fa-arrow-trend-up"></i>+12% vs Kemarin</span>
+    </div>
+    <p class="text-xs font-bold text-gray-500 tracking-wide mt-2">TOTAL MASUK HARI INI</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="1420" data-num="dot"></span> <span class="text-sm font-semibold text-gray-500">Unit</span></p>
+    <p class="text-xs text-emerald-700 mt-1"><i class="fas fa-circle-check text-blue-600 mr-1"></i>18 SKU Terverifikasi Lengkap</p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-lines text-blue-600"></i></div>
+      <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>98,2% Sesuai Jadwal</span>
+    </div>
+    <p class="text-xs font-bold text-gray-500 tracking-wide mt-2">PO DALAM PROSES INBOUND</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="14"></span> <span class="text-sm font-semibold text-gray-500">Berkas PO</span></p>
+    <p class="text-xs text-gray-500 mt-1"><span class="text-green-600 font-semibold">&#9679; 8 Selesai</span> &bull; <span class="text-blue-600 font-semibold">&#9679; 6 Sedang Bongkar</span></p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-circle-check text-blue-600"></i></div>
+      <span class="badge bg-indigo-50 text-indigo-700">QC Pass Optimal</span>
+    </div>
+    <p class="text-xs font-bold text-gray-500 tracking-wide mt-2">LOLOS UJI QUALITY CONTROL</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="99.4" data-dec="1"></span>% <span class="text-xs font-bold text-blue-600">AQL 1.5</span></p>
+    <p class="text-xs text-gray-500 mt-1"><b class="text-emerald-700">1.412 Diterima</b> &nbsp;/&nbsp; <span class="text-red-600 font-semibold">8 Karantina Defect</span></p>
+  </div>
+  <div class="metric-card panel p-4 lg:p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-boxes-stacked text-amber-500"></i></div>
+      <span class="badge bg-amber-100 text-amber-700">Perlu Alokasi Rak</span>
+    </div>
+    <p class="text-xs font-bold text-gray-500 tracking-wide mt-2">MENUNGGU PUTAWAY / STAGING</p>
+    <p class="text-3xl font-extrabold text-gray-900 mt-1"><span data-count="320" data-num="dot"></span> <span class="text-sm font-semibold text-gray-500">Unit Terjadwal</span></p>
+    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-timeline text-amber-500 mr-1"></i>Area Transit Inbound Dock 01-03</p>
+  </div>
+</div>
+
+<!-- Dock status -->
+<div class="panel p-4 lg:p-6 mb-6 anim-fade-up">
+  <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-truck-ramp-box text-blue-600"></i></div>
+      <div>
+        <h3 class="font-bold text-gray-900">Status Slot Loading Dock &amp; Antrean Truk Pemasok</h3>
+        <p class="text-xs text-gray-500">Hub Cakung DC-01 &bull; 4 Loading Bays Terpadu dengan Sistem Sensor Pallet</p>
+      </div>
+    </div>
+    <button data-toast="Monitoring CCTV Gate 01-04 &amp; jadwal dock lengkap dimuat..." class="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition">Lihat Kamera CCTV &amp; Jadwal Dock Lengkap <i class="fas fa-arrow-right-long ml-1"></i></button>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+    <div class="border border-blue-100 bg-blue-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-blue-700 bg-white border border-blue-200 rounded px-1.5 py-1">DOCK 01</span><span class="badge bg-blue-600 text-white text-[10px]"><i class="fas fa-circle" style="font-size:4px"></i>Proses Bongkar</span></div>
+      <p class="font-bold text-gray-900 text-sm">PT Surya Elektronik</p>
+      <p class="text-[11px] text-gray-500">PO-2025-0891 &bull; Box Kamera &amp; Lensa</p>
+      <p class="text-[11px] text-gray-500">Volume: 450 Box (Palletized)</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">Bongkar Muat</span><span class="font-bold text-blue-600">75%</span></div>
+      <div class="progress-bar bg-blue-100 rounded-full h-2" style="width:100%" data-w="75"><div class="h-2 bg-blue-600 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-emerald-100 bg-emerald-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-emerald-700 bg-white border border-emerald-200 rounded px-1.5 py-1">DOCK 02</span><span class="badge bg-emerald-600 text-white text-[10px]"><i class="fas fa-microscope mr-1"></i>Inspeksi QC</span></div>
+      <p class="font-bold text-gray-900 text-sm">CV Digital Mandiri</p>
+      <p class="text-[11px] text-gray-500">PO-2025-0894 &bull; Laptop &amp; PC Stn</p>
+      <p class="text-[11px] text-gray-500">Volume: 200 Unit High-Value</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">QC Sampling</span><span class="font-bold text-emerald-600">90%</span></div>
+      <div class="progress-bar bg-emerald-100 rounded-full h-2" style="width:100%" data-w="90"><div class="h-2 bg-emerald-600 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-slate-100 bg-slate-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-slate-600 bg-white border border-slate-200 rounded px-1.5 py-1">DOCK 03</span><span class="badge bg-slate-200 text-slate-700 text-[10px]"><i class="fas fa-circle" style="font-size:4px"></i>Masuk Rak</span></div>
+      <p class="font-bold text-gray-900 text-sm">PT Logistik Pack</p>
+      <p class="text-[11px] text-gray-500">PO-2025-0899 &bull; Dus &amp; Bubble Wrap</p>
+      <p class="text-[11px] text-gray-500">Volume: 1.200 Kg Material</p>
+      <div class="flex items-center justify-between text-[11px] mt-3 mb-1"><span class="text-gray-600 font-semibold">Putaway Rak Transit</span><span class="font-bold text-slate-600">40%</span></div>
+      <div class="progress-bar bg-slate-200 rounded-full h-2" style="width:100%" data-w="40"><div class="h-2 bg-slate-500 rounded-full" style="width:0%"></div></div>
+    </div>
+    <div class="border border-blue-100 bg-blue-50/40 rounded-xl p-4 transition hover:shadow-md hover:-translate-y-0.5">
+      <div class="flex items-center justify-between mb-2"><span class="w-12 text-[10px] font-bold text-center text-blue-700 bg-white border border-blue-200 rounded px-1.5 py-1">DOCK 04</span><span class="badge bg-white border border-blue-200 text-blue-600 text-[10px]"><i class="fas fa-hourglass-half mr-1"></i>Menunggu Giliran</span></div>
+      <p class="font-bold text-gray-900 text-sm">PT Bintang Audio</p>
+      <p class="text-[11px] text-gray-500">PO-2025-0902 &bull; Audio &amp; Headset</p>
+      <p class="text-[11px] text-gray-500">Volume: 180 Unit Master Pack</p>
+      <div class="flex items-center justify-between bg-white border border-blue-100 rounded-lg px-3 py-2 mt-3 text-[11px]"><span class="text-gray-500">Tiba di Gerbang:</span><b class="text-blue-700">10:15 WIB</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search & filter -->
+<div class="panel p-4 lg:p-5 mb-4 anim-fade-up">
+  <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+    <div class="flex-1 relative">
+      <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-400"></i>
+      <input id="searchReq" type="text" placeholder="Cari nomor PO, surat jalan, nama supplier, atau SKU barang..." class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-transparent rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <select id="fSupplier" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Semua Supplier (Semua DC)</option><option value="se">PT Surya Elektronik</option><option value="dm">CV Digital Mandiri</option><option value="ba">PT Bintang Audio Prima</option><option value="gs">PT Global Storage Solusindo</option><option value="jo">CV Jaya Optik Instruments</option><option value="mp">PT Mega Periferal Indonesia</option><option value="lp">CV Logistik Pack Sentosa</option>
+      </select>
+      <select id="fStatus" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Status Penerimaan (Semua)</option><option value="selesai">Selesai Putaway</option><option value="qc">QC Sampling</option><option value="bongkar">Proses Bongkar</option><option value="putaway">Menunggu Putaway</option>
+      </select>
+      <select id="fQc" class="px-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Metode QC: Semua (AQL/Full)</option><option value="aql">Sampling AQL</option><option value="full">Full Inspection</option>
+      </select>
+      <button data-toast="Panel filter lanjutan inbound dibuka..." class="px-3.5 py-2.5 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm font-semibold text-blue-700 transition"><i class="fas fa-sliders mr-1"></i><b>Filter Lanjutan</b></button>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-2 mt-4" id="chipGroup">
+    <button data-chip="all" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Semua Inbound (14)</button>
+    <button data-chip="selesai" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Selesai &amp; Diterima (8)</button>
+    <button data-chip="bongkar" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Sedang Proses Bongkar (4)</button>
+    <button data-chip="qc" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Inspeksi Karantina / QC (2)</button>
+    <button data-chip="retur" class="chip px-3.5 py-1.5 rounded-full text-xs font-semibold border transition">Retur / Masalah (0)</button>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="panel mb-6 anim-fade-up" style="background:linear-gradient(180deg,#f8faff 0%,#ffffff 90px)">
+  <div class="px-4 lg:px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <h3 class="font-bold text-gray-900 text-sm lg:text-base">Daftar Transaksi Inbound Terjadwal Hari Ini</h3>
+      <span class="badge bg-blue-100 text-blue-700 text-[10px]">14 TRANSAKSI</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button data-refresh data-toast="Daftar inbound terjadwal disegarkan." class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Segarkan"><i class="fas fa-rotate"></i></button>
+      <button data-toast="Susunan kolom tabel tersimpan ke preferensi." class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Kustom kolom"><i class="fas fa-table-columns"></i></button>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[1200px]" id="tblReq">
+      <thead>
+        <tr class="border-b border-gray-200 text-[11px] uppercase tracking-wide text-gray-500">
+          <th class="px-4 py-3 w-10"><input type="checkbox" id="cbPilihSemua" class="rounded border-gray-300"></th>
+          <th class="px-4 py-3 text-left font-bold">No. PO &amp; Surat Jalan</th>
+          <th class="px-4 py-3 text-left font-bold">Supplier &amp; PIC Ekspedisi</th>
+          <th class="px-4 py-3 text-left font-bold">Detail Komoditas / Barang</th>
+          <th class="px-4 py-3 text-left font-bold">Total Qty &amp; Kemasan</th>
+          <th class="px-4 py-3 text-left font-bold">Lokasi Staging / Rak Tujuan</th>
+          <th class="px-4 py-3 text-left font-bold">Hasil QC &amp; Status Inbound</th>
+          <th class="px-4 py-3 text-right font-bold">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <!-- PO-0891 -->
+        <tr data-status="selesai" data-qc="full" data-supplier="se" data-kode="PO-2025-0891" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0891</p><p class="text-xs text-gray-500">SJ-88219/SE-JKT</p><p class="text-xs text-gray-400">Tiba: 07:45 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center text-[11px] font-bold">SE</span><div><p class="font-semibold text-gray-900">PT Surya Elektronik</p><p class="text-xs text-gray-500">Slamet R. (JNE Cargo Truk)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Canon 60D Body &amp; Nikon Optical</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Kamera &amp; Optik</span><span class="text-[10px] text-gray-500">&#9642; 4 Sub-SKU</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">350 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">25 Master Carton</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH01-ZA-RA01</b></span></p><p class="text-xs text-gray-500 mt-1">Pallet Tier 2 &amp; Tier 3</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Putaway</span>
+            <p class="text-xs text-green-700 mt-1.5">Lolos QC (100% &bull; Segel Baik)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0891" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0891 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0891 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0892 -->
+        <tr data-status="selesai" data-qc="full" data-supplier="dm" data-kode="PO-2025-0892" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0892</p><p class="text-xs text-gray-500">SJ-00412/DM-LOG</p><p class="text-xs text-gray-400">Tiba: 08:10 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[11px] font-bold">DM</span><div><p class="font-semibold text-gray-900">CV Digital Mandiri</p><p class="text-xs text-gray-500">Bambang H. (Armada Vendor)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Macbook Pro M1 &amp; Workstation</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Komputer &amp; Laptop</span><span class="text-[10px] text-gray-500">&#9642; SN Terdata</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">120 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">10 Box Anti-Static</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH01-ZA-RA02</b></span></p><p class="text-xs text-gray-500 mt-1">High Security Cage Sec-01</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Putaway</span>
+            <p class="text-xs text-green-700 mt-1.5">Lolos QC 100% (High Value)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0892" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0892 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0892 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0893 -->
+        <tr data-status="qc" data-qc="aql" data-supplier="ba" data-kode="PO-2025-0893" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0893</p><p class="text-xs text-gray-500">SJ-55102/BAP</p><p class="text-xs text-gray-400">Tiba: 08:50 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-amber-500 text-white rounded-full flex items-center justify-center text-[11px] font-bold">BA</span><div><p class="font-semibold text-gray-900">PT Bintang Audio Prima</p><p class="text-xs text-gray-500">Hendra K. (SICepat Cargo)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Sony WH-1000XM4 &amp; Studio Mic</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Audio &amp; Sound</span><span class="text-[10px] text-gray-500">&#9642; Segel Pabrik</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">280 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">14 Dus Karton</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH01-ZB-RB02</b></span></p><p class="text-xs text-gray-500 mt-1">Staging Area QC Bay 2</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-flask"></i>Sedang QC Sampling</span>
+            <p class="text-xs text-blue-700 mt-1.5">Sampling 28/280 Unit (AQL 1.5)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0893" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0893 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0893 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0894 -->
+        <tr data-status="bongkar" data-qc="aql" data-supplier="gs" data-kode="PO-2025-0894" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0894</p><p class="text-xs text-gray-500">SJ-33907/GSS</p><p class="text-xs text-gray-400">Tiba: 09:25 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-sky-500 text-white rounded-full flex items-center justify-center text-[11px] font-bold">GS</span><div><p class="font-semibold text-gray-900">PT Global Storage Solusindo</p><p class="text-xs text-gray-500">Dedi Sutisna (Lalamove Box)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Sandisk SSD NVMe 1TB &amp; HDD 4TB</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Storage &amp; Drive</span><span class="text-[10px] text-gray-500">&#9642; Serial Number Barcode</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">500 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">20 Master Carton</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH02-ZC-RC01</b></span></p><p class="text-xs text-gray-500 mt-1">Alokasi Gudang Sirkuit Terkontrol</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-circle" style="font-size:5px"></i>Proses Bongkar</span>
+            <p class="text-xs text-blue-700 mt-1.5">Dock 01 (Unloading 75%)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0894" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0894 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0894 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0895 -->
+        <tr data-status="putaway" data-qc="full" data-supplier="jo" data-kode="PO-2025-0895" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0895</p><p class="text-xs text-gray-500">SJ-11084/JOI</p><p class="text-xs text-gray-400">Tiba: 09:30 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-indigo-500 text-white rounded-full flex items-center justify-center text-[11px] font-bold">JO</span><div><p class="font-semibold text-gray-900">CV Jaya Optik Instruments</p><p class="text-xs text-gray-500">Ahmad Fauzi (Kurir Khusus)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Tripod Studio &amp; Lighting Kit</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Aksesoris Studio</span><span class="text-[10px] text-red-500 font-semibold">&#9642; Fragile</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">95 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">12 Dus Palet</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH01-ZA-RA01</b></span></p><p class="text-xs text-gray-500 mt-1">Area Transit Staging Bay 3</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-hourglass-half"></i>Menunggu Putaway</span>
+            <p class="text-xs text-indigo-700 mt-1.5">QC Lolos (Siap Pindah Rak)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0895" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0895 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0895 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0896 -->
+        <tr data-status="selesai" data-qc="aql" data-supplier="mp" data-kode="PO-2025-0896" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0896</p><p class="text-xs text-gray-500">SJ-77209/MPI</p><p class="text-xs text-gray-400">Tiba: 09:40 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-rose-500 text-white rounded-full flex items-center justify-center text-[11px] font-bold">MP</span><div><p class="font-semibold text-gray-900">PT Mega Periferal Indonesia</p><p class="text-xs text-gray-500">Kusnadi (Anteraja Cargo)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Mechanical Keyboard RGB Switch</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Periferal Komputer</span><span class="text-[10px] text-gray-500">&#9642; 5 Varian Switch</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">410 <span class="text-xs font-semibold text-gray-500">Unit</span></p><p class="text-xs text-gray-500">22 Box Karton</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">WH01-ZB-RB01</b></span></p><p class="text-xs text-gray-500 mt-1">Bin Level Tier 1-2</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Putaway</span>
+            <p class="text-xs text-green-700 mt-1.5">Lolos QC 100% (Batch Pass)</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0896" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0896 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0896 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+        <!-- PO-0897 -->
+        <tr data-status="selesai" data-qc="full" data-supplier="lp" data-kode="PO-2025-0897" class="table-row border-b border-gray-100">
+          <td class="px-4 py-3"><input type="checkbox" class="row-cb rounded border-gray-300"></td>
+          <td class="px-4 py-3"><p class="font-bold text-blue-700">PO-2025-0897</p><p class="text-xs text-gray-500">SJ-99310/LPS</p><p class="text-xs text-gray-400">Tiba: 10:00 WIB</p></td>
+          <td class="px-4 py-3"><div class="flex items-center gap-2.5"><span class="w-9 h-9 bg-teal-600 text-white rounded-full flex items-center justify-center text-[11px] font-bold">LP</span><div><p class="font-semibold text-gray-900">CV Logistik Pack Sentosa</p><p class="text-xs text-gray-500">Eko Prasetyo (Truk Colt Diesel)</p></div></div></td>
+          <td class="px-4 py-3"><p class="font-semibold text-gray-900 max-w-[170px]">Bubble Wrap Roll &amp; Dus Karton A3</p><div class="flex items-center gap-1.5 mt-1 flex-wrap"><span class="badge bg-blue-50 text-blue-700">Material Packing</span><span class="text-[10px] text-gray-500">&#9642; Non-SKU Inventaris</span></div></td>
+          <td class="px-4 py-3"><p class="font-bold text-gray-900">800 <span class="text-xs font-semibold text-gray-500">Roll</span></p><p class="text-xs text-gray-500">Bulk Packing Material</p></td>
+          <td class="px-4 py-3"><p class="font-semibold text-sm"><span class="inline-flex items-center gap-1"><span class="w-5 h-5 bg-blue-100 text-blue-700 rounded flex items-center justify-center text-[9px]"><i class="fas fa-pallet"></i></span><b class="text-gray-800 text-xs">Area Transit Staging Dock</b></span></p><p class="text-xs text-gray-500 mt-1">Gudang Bahan Pengemasan G-03</p></td>
+          <td class="px-4 py-3">
+            <span class="badge bg-green-100 text-green-700"><i class="fas fa-check-circle"></i>Selesai Putaway</span>
+            <p class="text-xs text-green-700 mt-1.5">Fisik Sesuai PO &amp; Timbangan</p>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button data-detail="PO-2025-0897" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Detail"><i class="fas fa-eye"></i></button>
+            <button data-toast="Surat jalan intern PO-2025-0897 dikirim ke printer." class="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition" title="Cetak"><i class="fas fa-print"></i></button>
+            <button data-toast="Dokumen berita acara (BAP) PO-2025-0897 dibuka." class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition" title="Berita acara"><i class="fas fa-file-lines"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 lg:px-5 py-3 border-t border-gray-100 text-xs text-gray-500 bg-white">
+    <p>Menampilkan <b class="text-gray-800">1 - 7</b> dari <b class="text-gray-800">14</b> transaksi inbound hari ini</p>
+    <div class="flex items-center gap-1">
+      <button data-toast="Anda sudah berada di halaman pertama." data-toast-type="warn" class="px-2.5 py-1 border border-gray-300 rounded text-gray-400">‹</button>
+      <button class="px-3 py-1 bg-blue-600 text-white rounded font-semibold">1</button>
+      <button data-toast="Menampilkan halaman 2 daftar inbound..." class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
+      <button data-toast="Menampilkan halaman berikutnya daftar inbound..." class="px-2.5 py-1 border border-gray-300 rounded hover:bg-gray-50 text-blue-600">›</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3 kartu utilitas bawah -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-2 anim-fade-up">
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-qrcode text-blue-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Pindai Barcode Surat Jalan <span class="text-blue-600">(ASN)</span></h4>
+    <p class="text-xs text-gray-500 mb-3">Pemindaian QR Code dokumen jalan dari supplier secara instan dengan scanner nirkabel smartphone Zebra DC &amp; kamera terminal handheld.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <p class="text-xs text-emerald-700 font-bold"><i class="fas fa-circle" style="font-size:5px"></i>Scanner Nirkabel Terhubung</p>
+      <button data-toast="Aplikasi scanner ASN dibuka (mode kamera aktif)..." class="text-xs font-bold text-blue-600 hover:text-blue-800">Buka Scanner <i class="fas fa-arrow-right-long"></i></button>
+    </div>
+  </div>
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-shield-halved text-emerald-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Standar Prosedur QC Inbound</h4>
+    <p class="text-xs text-gray-500 mb-3">Protokol uji sampling fisik (AQL Level 1.5), verifikasi barcode SN palletkan, dan uji kelayakan segel garansi sebelum alokasi putaway.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <span class="badge bg-slate-100 text-slate-600 font-mono">SOP Rev v4.2 (2025)</span>
+      <button data-toast="Checklist QC Inbound (PDF) diunduh..." class="text-xs font-bold text-blue-600 hover:text-blue-800">Unduh Checklist QC <i class="fas fa-download"></i></button>
+    </div>
+  </div>
+  <div class="metric-card panel p-5">
+    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-envelope-open-text text-indigo-600"></i></div>
+    <h4 class="font-bold text-gray-900 mb-1">Integrasi Surat Jalan Elektronik <span class="text-indigo-600">(e-DO)</span></h4>
+    <p class="text-xs text-gray-500 mb-3">Otomatisasi penerimaan Surat Jalan Berita Acara (BAP) digital dan tanda tangan bersertifikasi ke portal vendor supplier.</p>
+    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+      <p class="text-xs text-emerald-700 font-bold"><i class="fas fa-circle" style="font-size:5px"></i>Sync API Vendor Aktif</p>
+      <button data-toast="Log integrasi e-DO vendor dibuka..." class="text-xs font-bold text-indigo-600 hover:text-indigo-800">Log Integrasi e-DO <i class="fas fa-arrow-right-long"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: catat penerimaan ============ -->
+<div class="modal-overlay" id="modalCatat">
+  <div class="modal-box" style="max-width:560px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-blue-600"></i>Catat Penerimaan Barang Masuk</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><label class="text-xs font-semibold text-gray-600">Nomor PO</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="PO-2025-09XY"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Nomor Surat Jalan</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="SJ-XXXX/XX-JKT"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Supplier</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>PT Surya Elektronik</option><option>CV Digital Mandiri</option><option>PT Bintang Audio Prima</option><option>PT Global Storage Solusindo</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Dock</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Dock 01</option><option>Dock 02</option><option>Dock 03</option><option>Dock 04</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-600">Total Qty</label><input class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0"></div>
+        <div><label class="text-xs font-semibold text-gray-600">Metode QC</label><select class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"><option>Sampling AQL 1.5</option><option>Full Inspection 100%</option></select></div>
+      </div>
+      <div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700"><i class="fas fa-digital-tachograph mr-1"></i>Scan barcode surat jalan ASN otomatis mengisi field di atas.</div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Batal</button>
+      <button data-close-modal data-saved-toast="Penerimaan barang masuk dicatat & memasuki antrean QC." class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-check mr-1"></i>Simpan Penerimaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: detail PO ============ -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-box" style="max-width:680px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-truck-loading mr-2 text-blue-600"></i>Detail Transaksi Inbound</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5" id="detailBody"><p class="text-sm text-gray-500">Memuat detail...</p></div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   ASTRO Inventory — Shared interaction layer
+   Vanilla JS, no deps. Tailwind handles layout/visuals.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Toast ---------- */
+  function toast(msg, type) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+  }
+  window.toast = toast;
+
+  /* ---------- Mobile sidebar drawer ---------- */
+  function initDrawer() {
+    const trig = document.querySelector('[data-drawer-trigger]');
+    const sb = document.querySelector('.sidebar-left');
+    const back = document.querySelector('.drawer-backdrop');
+    if (!trig || !sb) return;
+    function open() { sb.classList.add('drawer','open'); if(back) back.classList.add('open'); }
+    function close() { sb.classList.remove('open'); if(back) back.classList.remove('open'); }
+    trig.addEventListener('click', function(){ sb.classList.contains('open') ? close() : open(); });
+    if (back) back.addEventListener('click', close);
+  }
+
+  /* ---------- Dropdowns (notification / profile) ---------- */
+  function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach(function (btn) {
+      const target = btn.getAttribute('data-dropdown');
+      const menu = document.querySelector('[data-dropdown-menu="' + target + '"]');
+      if (!menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown.open').forEach(function (m){ if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.dropdown.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+    document.querySelectorAll('.dropdown').forEach(function (m){ m.addEventListener('click', function(e){ e.stopPropagation(); }); });
+  }
+
+  /* ---------- Disabled sidebar items ---------- */
+  function initDisabledNav() {
+    document.querySelectorAll('.sidebar-item.disabled').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        toast('Halaman belum tersedia (tidak memiliki referensi PNG).', 'warn');
+      });
+    });
+  }
+
+  /* ---------- Modals ---------- */
+  window.openModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('open');
+  };
+  window.closeModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  };
+  function initModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) {
+      m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const m = b.closest('.modal-overlay'); if (m) m.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+  }
+
+  /* ---------- Tabs ---------- */
+  window.initTabs = function (container) {
+    const root = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!root) return;
+    const btns = root.querySelectorAll('[data-tab]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const name = b.getAttribute('data-tab');
+        btns.forEach(function (x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        panels.forEach(function (p){
+          p.style.display = (p.getAttribute('data-tab-panel') === name) ? '' : 'none';
+        });
+      });
+    });
+  };
+
+  /* ---------- Table filtering / search ---------- */
+  /* Rows carry data attributes; selects/search filter them. */
+  window.initTableFilter = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    const search = opts.searchId ? document.getElementById(opts.searchId) : null;
+    const selects = (opts.selects || []).map(function (s) {
+      return { el: document.getElementById(s.id), attr: s.attr };
+    });
+
+    function visible(r) {
+      if (search) {
+        const q = (search.value || '').toLowerCase().trim();
+        if (q && r.textContent.toLowerCase().indexOf(q) === -1) return false;
+      }
+      for (let i = 0; i < selects.length; i++) {
+        const v = selects[i].el ? selects[i].el.value : '';
+        if (v && (r.getAttribute('data-' + selects[i].attr) || '').toLowerCase() !== String(v).toLowerCase()) return false;
+      }
+      if (opts.checkboxId) {
+        const cb = document.getElementById(opts.checkboxId);
+        if (cb && cb.checked) {
+          const flag = r.getAttribute('data-flag') || '';
+          if (flag.indexOf('anomali') === -1) return false;
+        }
+      }
+      return true;
+    }
+    function apply() {
+      let count = 0;
+      rows.forEach(function (r) {
+        const ok = visible(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      const info = document.getElementById(opts.countId);
+      if (info) info.textContent = count;
+    }
+    if (search) search.addEventListener('input', apply);
+    selects.forEach(function (s){ if (s.el) s.el.addEventListener('change', apply); });
+    if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.addEventListener('change', apply); }
+    const reset = opts.resetId ? document.getElementById(opts.resetId) : null;
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      selects.forEach(function (s){ if (s.el) s.el.value = ''; });
+      if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.checked = false; }
+      apply();
+    });
+    apply();
+    return { reapply: apply };
+  };
+
+  /* ---------- Client-side pagination (simple) ---------- */
+  window.initPagination = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    let perPage = opts.perPage || 10;
+    let page = 1;
+    const wrap = document.getElementById(opts.controlsId);
+    function filteredRows() {
+      return allRows.filter(function (r){ return r.style.display !== 'none'; });
+    }
+    function render() {
+      const fr = filteredRows();
+      const pages = Math.max(1, Math.ceil(fr.length / perPage));
+      if (page > pages) page = pages;
+      fr.forEach(function (r, idx) {
+        const start = (page - 1) * perPage;
+        r.style.display = (idx >= start && idx < start + perPage) ? '' : 'none';
+      });
+      if (wrap) {
+        const info = opts.infoId ? document.getElementById(opts.infoId) : null;
+        if (info) {
+          const from = fr.length ? (page - 1) * perPage + 1 : 0;
+          const to = Math.min(page * perPage, fr.length);
+          info.textContent = 'Menampilkan ' + from + ' - ' + to + ' dari ' + fr.length + ' ' + (opts.unit || 'data');
+        }
+        let html = '';
+        const prev = page <= 1;
+        html += '<button ' + (prev ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (prev ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50') + ' data-pg="' + (page - 1) + '">Sebelumnya</button>';
+        for (let p = 1; p <= pages; p++) {
+          html += '<button class="px-3 py-1 rounded text-xs lg:text-sm ' + (p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '" data-pg="' + p + '">' + p + '</button>';
+        }
+        const next = page >= pages;
+        html += '<button ' + (next ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (next ? 'text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200') + ' data-pg="' + (page + 1) + '">Berikutnya</button>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('[data-pg]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = parseInt(b.getAttribute('data-pg'), 10); if (!isNaN(v)) { page = v; render(); }
+          });
+        });
+      }
+    }
+    return { render: render, setPage: function (p) { page = p; render(); } };
+  };
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    initDrawer();
+    initDropdowns();
+    initDisabledNav();
+    initModals();
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Shared page interactions (inline ke semua halaman baru)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Animated counters ---------- */
+  function fmtNum(v, style) {
+    if (style === 'dot') return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return String(Math.round(v));
+  }
+  window.animCount = function (el) {
+    var raw = el.getAttribute('data-count');
+    var target = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+    var styleDot = el.getAttribute('data-num') === 'dot';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var dec = parseFloat(el.getAttribute('data-dec') || '0');
+    var dur = 1100, t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var v = (dec ? target * eased : target * eased);
+      el.innerHTML = (dec ? v.toFixed(dec).replace('.', ',') : fmtNum(v, styleDot)) + (p > .55 ? suffix : '');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  };
+  function startCounters() {
+    document.querySelectorAll('[data-count]').forEach(function (el) { animCount(el); });
+  }
+
+  /* ---------- Animated progress bars ---------- */
+  function startBars() {
+    document.querySelectorAll('.progress-bar[data-w]').forEach(function (b, i) {
+      setTimeout(function () { b.style.width = b.getAttribute('data-w') + '%'; }, 120 + i * 45);
+    });
+  }
+
+  /* ---------- Modal helper buttons ---------- */
+  function initModalButtons() {
+    document.querySelectorAll('[data-open-modal]').forEach(function (b) {
+      b.addEventListener('click', function () { openModal(b.getAttribute('data-open-modal')); });
+    });
+    document.querySelectorAll('[data-saved-toast]').forEach(function (b) {
+      b.addEventListener('click', function () { toast(b.getAttribute('data-saved-toast'), 'success'); });
+    });
+  }
+
+  /* ---------- Toast-bound buttons ---------- */
+  function initToastButtons() {
+    document.querySelectorAll('[data-toast]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var msg = b.getAttribute('data-toast');
+        var type = b.getAttribute('data-toast-type') || 'success';
+        toast(msg, type);
+      });
+    });
+  }
+
+  /* ---------- Refresh spin ---------- */
+  function initRefresh() {
+    document.querySelectorAll('[data-refresh]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var icon = b.querySelector('i');
+        if (icon) { icon.style.transition = 'transform .6s'; icon.style.transform = 'rotate(360deg)'; }
+        b.classList.add('pointer-events-none');
+        setTimeout(function () {
+          if (icon) { icon.style.transition = 'none'; icon.style.transform = 'none'; }
+          b.classList.remove('pointer-events-none');
+        }, 620);
+        toast(b.getAttribute('data-toast') || 'Data berhasil disegarkan.', 'success');
+        if (window.__applyFilters) setTimeout(function () { window.__applyFilters(); }, 300);
+      });
+    });
+  }
+
+  /* ---------- Chip active toggling ---------- */
+  window.setChip = function (groupEl, btn) {
+    groupEl.querySelectorAll('[data-chip]').forEach(function (x) {
+      x.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+    });
+    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+  };
+
+  window.initChipGroup = function (groupId, onStart) {
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('[data-chip]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setChip(group, b);
+        window.__activeChip = b.getAttribute('data-chip');
+        if (window.__applyFilters) window.__applyFilters();
+        if (b.getAttribute('data-toast')) toast(b.getAttribute('data-toast'), 'info');
+      });
+    });
+    var first = group.querySelector('[data-chip]');
+    if (first) { setChip(group, first); window.__activeChip = first.getAttribute('data-chip'); }
+    if (onStart) onStart();
+  };
+
+  /* ---------- Kbd focus helper ---------- */
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      var s = document.querySelector('[data-header-search]');
+      if (s) { e.preventDefault(); s.focus(); }
+    }
+  });
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    startCounters();
+    startBars();
+    initToastButtons();
+    initModalButtons();
+    initRefresh();
+    var hs = document.querySelector('[data-header-search]');
+    if (hs) hs.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') toast('Pencarian "' + hs.value.trim() + '" — menampilkan hasil di halaman terkait.', 'info');
+    });
+  });
+})();
+
+</script>
+<script>
+/* ============================================================
+   Interaksi khusus: Transaksi Barang Masuk (Inbound DC)
+   ============================================================ */
+(function () {
+  'use strict';
+  var search = document.getElementById('searchReq');
+  var fSupplier = document.getElementById('fSupplier');
+  var fStatus = document.getElementById('fStatus');
+  var fQc = document.getElementById('fQc');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#tblReq tbody tr'));
+
+  function apply() {
+    var q = (search.value || '').toLowerCase().trim();
+    var sup = fSupplier.value.toLowerCase();
+    var stat = fStatus.value.toLowerCase();
+    var qc = fQc.value.toLowerCase();
+    var chip = window.__activeChip || 'all';
+    rows.forEach(function (r) {
+      var st = r.getAttribute('data-status');
+      var ok = true;
+      if (chip === 'selesai') ok = st === 'selesai';
+      else if (chip === 'bongkar') ok = st === 'bongkar';
+      else if (chip === 'qc') ok = st === 'qc';
+      else if (chip === 'retur') ok = false;
+      if (ok && sup && r.getAttribute('data-supplier') !== sup) ok = false;
+      if (ok && stat && st !== stat) ok = false;
+      if (ok && qc && r.getAttribute('data-qc') !== qc) ok = false;
+      if (ok && q) {
+        if (r.textContent.toLowerCase().indexOf(q) === -1) ok = false;
+      }
+      r.style.display = ok ? '' : 'none';
+    });
+  }
+  window.__applyFilters = apply;
+
+  [search, fSupplier, fStatus, fQc].forEach(function (el) {
+    el.addEventListener('input', apply);
+    el.addEventListener('change', apply);
+  });
+
+  window.initChipGroup('chipGroup', apply);
+
+  var cbAll = document.getElementById('cbPilihSemua');
+  cbAll.addEventListener('change', function () {
+    document.querySelectorAll('.row-cb').forEach(function (cb) {
+      cb.checked = cbAll.checked;
+      cb.closest('tr').classList.toggle('bg-blue-50/60', cbAll.checked);
+    });
+    if (cbAll.checked) toast('Anda memilih semua transaksi inbound — bisa dilakukan cetak BAP massal.', 'info');
+  });
+  document.querySelectorAll('.row-cb').forEach(function (cb) {
+    cb.addEventListener('change', function () { cb.closest('tr').classList.toggle('bg-blue-50/60', cb.checked); });
+  });
+
+  /* ============ Modal detail inbound ============ */
+  var META = {
+    'PO-2025-0891': { sup: 'PT Surya Elektronik', sj: 'SJ-88219/SE-JKT', tiba: '07:45 WIB', barang: 'Canon 60D Body & Nikon Optical', qty: '350 Unit (25 Master Carton)', staging: 'WH01-ZA-RA01 — Pallet Tier 2 & Tier 3', qc: 'Lolos QC 100% (Segel Baik)', status: 'Selesai Putaway' },
+    'PO-2025-0892': { sup: 'CV Digital Mandiri', sj: 'SJ-00412/DM-LOG', tiba: '08:10 WIB', barang: 'Macbook Pro M1 & Workstation', qty: '120 Unit (10 Box Anti-Static)', staging: 'WH01-ZA-RA02 — High Security Cage Sec-01', qc: 'Lolos QC 100% (High Value)', status: 'Selesai Putaway' },
+    'PO-2025-0893': { sup: 'PT Bintang Audio Prima', sj: 'SJ-55102/BAP', tiba: '08:50 WIB', barang: 'Sony WH-1000XM4 & Studio Mic', qty: '280 Unit (14 Dus Karton)', staging: 'WH01-ZB-RB02 — Staging Area QC Bay 2', qc: 'Sampling 28/280 Unit (AQL 1.5)', status: 'Sedang QC Sampling' },
+    'PO-2025-0894': { sup: 'PT Global Storage Solusindo', sj: 'SJ-33907/GSS', tiba: '09:25 WIB', barang: 'Sandisk SSD NVMe 1TB & HDD 4TB', qty: '500 Unit (20 Master Carton)', staging: 'WH02-ZC-RC01 — Alokasi Gudang Terkontrol', qc: 'Bongkar jalur — inspeksi menyusul', status: 'Proses Bongkar · Dock 01 (75%)' },
+    'PO-2025-0895': { sup: 'CV Jaya Optik Instruments', sj: 'SJ-11084/JOI', tiba: '09:30 WIB', barang: 'Tripod Studio & Lighting Kit', qty: '95 Unit (12 Dus Palet)', staging: 'WH01-ZA-RA01 — Area Transit Staging Bay 3', qc: 'QC Lolos — siap pindah rak', status: 'Menunggu Putaway' },
+    'PO-2025-0896': { sup: 'PT Mega Periferal Indonesia', sj: 'SJ-77209/MPI', tiba: '09:40 WIB', barang: 'Mechanical Keyboard RGB Switch', qty: '410 Unit (22 Box Karton)', staging: 'WH01-ZB-RB01 — Bin Level Tier 1-2', qc: 'Lolos QC 100% (Batch Pass)', status: 'Selesai Putaway' },
+    'PO-2025-0897': { sup: 'CV Logistik Pack Sentosa', sj: 'SJ-99310/LPS', tiba: '10:00 WIB', barang: 'Bubble Wrap Roll & Dus Karton A3', qty: '800 Roll (Bulk Packing Material)', staging: 'Area Transit Staging Dock — Gudang Bahan G-03', qc: 'Fisik sesuai PO & timbangan', status: 'Selesai Putaway' }
+  };
+  window.openDetail = function (kode) {
+    var m = META[kode];
+    if (!m) return;
+    document.getElementById('detailBody').innerHTML =
+      '<div class="grid grid-cols-2 gap-3 text-sm">' +
+      '<div><p class="text-xs text-gray-500">Nomor PO</p><p class="font-bold text-blue-700">' + kode + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Surat Jalan &amp; Tiba</p><p class="text-gray-900 font-semibold">' + m.sj + ' · ' + m.tiba + '</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Supplier</p><p class="text-gray-900 font-semibold">' + m.sup + '</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Komoditas</p><p class="text-gray-900">' + m.barang + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Total Qty &amp; Kemasan</p><p class="text-gray-900 font-semibold">' + m.qty + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Staging / Rak Tujuan</p><p class="text-gray-900">' + m.staging + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Hasil QC</p><p class="text-gray-900">' + m.qc + '</p></div>' +
+      '<div><p class="text-xs text-gray-500">Status Inbound</p><p class="text-gray-900 font-semibold">' + m.status + '</p></div>' +
+      '</div>' +
+      '<div class="mt-4 flex justify-end gap-2"><button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Tutup</button><button data-close-modal onclick="toast(\'Dokumen BAP \' + \'' + kode + '\' dibuka di modul berita acara.\',\'info\')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-file-lines mr-1"></i>Lihat BAP</button></div>';
+    openModal('modalDetail');
+  };
+  document.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () { openDetail(b.getAttribute('data-detail')); });
+  });
+
+  apply();
+})();
+
+</script>
+</body>
+</html>

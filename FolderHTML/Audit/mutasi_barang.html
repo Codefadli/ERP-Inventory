@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Mutasi Antar-Hub — Astro Inventory</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: '#0b49d8',
+            ink: '#17243b',
+            canvas: '#f5f7fc',
+            line: '#e8edf5'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: Inter, sans-serif; overflow-x: hidden; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 2px solid #0b49d8; outline-offset: 2px; }
+
+    /* ---------- Sidebar ---------- */
+    .nav-link { transition: background .15s ease, color .15s ease; }
+    .nav-link.active { background: #0b49d8; color: #fff; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    #sidebar-backdrop.show { display: block !important; }
+    #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #sidebar-toggle:hover { background: #f1f5fc; }
+    #sidebar-toggle[aria-expanded="true"] .i-menu,
+    #sidebar-toggle[aria-expanded="false"] .i-close { display: none; }
+
+    /* Mobile & tablet: sidebar menjadi drawer */
+    @media (max-width: 1023px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      body.drawer-open { overflow: hidden; }
+    }
+    /* Desktop: sidebar tetap tampil, bisa di-collapse */
+    @media (min-width: 1024px) {
+      body { zoom: 1.15; }
+      #main-area { margin-left: 220px; min-height: calc(100vh / 1.15); transition: margin-left .22s ease; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%); }
+      body.sidebar-collapsed #main-area { margin-left: 0; }
+    }
+    @media (max-width: 1023px) { #main-area { min-height: 100vh; } }
+
+    /* ---------- Animasi ---------- */
+    .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+    .reveal-delay-1 { animation-delay: 50ms; }
+    .reveal-delay-2 { animation-delay: 100ms; }
+    .reveal-delay-3 { animation-delay: 150ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
+    /* ---------- Skala tipografi tetap (stabil di semua ukuran layar) ----------
+       24 judul/angka KPI · 13 judul panel · 12 isi · 10.5 teks sekunder · 9.5 label */
+    .pri  { font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.35; }
+    .txt  { font-size: 12px; color: #334155; line-height: 1.35; }
+    .sub  { margin-top: 4px; font-size: 10.5px; line-height: 1.4; color: #64748b; }
+    .sub-red { color: #dc2626; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 9999px; padding: 4px 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+    .tag  { display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600; line-height: 1.35; }
+    .c-green  { background: #d1fae5; color: #065f46; }
+    .c-red    { background: #fee2e2; color: #b91c1c; }
+    .c-amber  { background: #fef3c7; color: #92400e; }
+    .c-indigo { background: #e0e7ff; color: #3730a3; }
+    .c-slate  { background: #f1f5f9; color: #334155; }
+    .c-blue   { background: #0b49d8; color: #fff; }
+    .c-gray   { background: #94a3b8; color: #fff; }
+    .panel-title { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+
+    /* ---------- Tabel: kartu bertumpuk di layar kecil ---------- */
+    @media (max-width: 767px) {
+      .rtable { min-width: 0 !important; table-layout: auto !important; }
+      .rtable thead { display: none; }
+      .rtable, .rtable tbody, .rtable tr { display: block; width: 100%; }
+      .rtable tbody tr { padding: 12px 14px; }
+      .rtable td { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; width: auto !important; padding: 6px 0 !important; text-align: left !important; }
+      .rtable td::before { content: attr(data-label); padding-top: 2px; font-size: 9.5px; font-weight: 600; letter-spacing: .025em; text-transform: uppercase; color: #64748b; }
+    }
+    .sub-green { color: #059669; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 lg:hidden"></div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white">
+    <a href="#" class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></span>
+      <span class="min-w-0 leading-tight"><span class="block truncate text-[12px] font-bold tracking-tight text-slate-800">Astro Inventory</span><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></span>
+    </a>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p>
+        <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard Admin</span></a>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Master Data & Inventaris</p>
+        <div class="space-y-0.5">
+          <a href="data_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="package" class="h-4 w-4"></i><span>Data Barang</span></a>
+          <a href="kategori_barang.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="tags" class="h-4 w-4"></i><span>Kategori Barang</span></a>
+          <a href="data_gudang_lokasi.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="warehouse" class="h-4 w-4"></i><span>Data Gudang & Lokasi</span></a>
+          <a href="data_supplier.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="truck" class="h-4 w-4"></i><span>Data Supplier</span></a>
+          <a href="data_departemen.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="building-2" class="h-4 w-4"></i><span>Departemen</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional & Transaksi</p>
+        <div class="space-y-0.5">
+          <a href="barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a>
+          <a href="barang_keluar.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a>
+          <a href="mutasi_barang.html" aria-current="page" class="nav-link active flex h-8 items-center gap-2 rounded-md px-2 font-medium"><i data-lucide="arrow-left-right" class="h-4 w-4"></i><span>Mutasi Barang</span></a>
+          <a href="stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-list" class="h-4 w-4"></i><span>Persetujuan Barang</span><span class="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">5</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Manajemen Sistem</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="users" class="h-4 w-4"></i><span>Manajemen Pengguna</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Laporan & Analitik</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="file-clock" class="h-4 w-4"></i><span>Laporan & Riwayat</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4"></i><span>Log Aktivitas</span></a>
+        </div>
+      </section>
+      <section>
+        <p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p>
+        <div class="space-y-0.5">
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a>
+          <a href="#" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-circle" class="h-4 w-4"></i><span>Profil Saya</span></a>
+        </div>
+      </section>
+    </nav>
+  </aside>
+
+  <div id="main-area">
+    <!-- ============ TOPBAR ============ -->
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Tutup sidebar" class="flex h-8 w-8 shrink-0 items-center justify-center text-slate-500">
+          <i data-lucide="menu" class="i-menu h-5 w-5"></i><i data-lucide="x" class="i-close h-5 w-5"></i>
+        </button>
+        <div class="hidden min-w-0 items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 md:flex"><i data-lucide="network" class="h-3.5 w-3.5 shrink-0"></i><span class="truncate">Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 xl:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <label class="hidden h-8 w-56 items-center gap-2 rounded-md border border-slate-100 bg-slate-50 px-2.5 text-slate-400 min-[1360px]:flex"><i data-lucide="search" class="h-3.5 w-3.5"></i><input id="global-search" type="search" placeholder="Cari SKU, transaksi, lokasi gudang..." class="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"></label>
+        <button type="button" class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Notifikasi"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button>
+        <div class="flex items-center gap-2 border-l border-slate-100 pl-3"><div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-700 text-[10px] font-semibold text-white">BS</div><div class="hidden leading-tight md:block"><p class="whitespace-nowrap text-[10px] font-semibold text-slate-800">Budi Santoso</p><p class="whitespace-nowrap text-[9px] text-slate-500">Admin Utama / Super Admin</p></div></div>
+      </div>
+    </header>
+
+    <!-- ============ KONTEN ============ -->
+    <main class="bg-canvas p-4 lg:p-5">
+      <!-- Judul halaman -->
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div class="min-w-0 flex-1 basis-[300px]">
+          <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional & Transaksi <span class="text-blue-700">&gt; Audit Mutasi</span></p>
+          <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Pemeriksaan & Audit Mutasi Antar-Hub (Inter-Hub Transfer)</h1>
+          <p class="mt-1.5 max-w-[720px] text-[12px] leading-relaxed text-slate-500">Audit kepatuhan alur transfer stok antar-gudang, rekonsiliasi kuantitas dispatch vs kuantitas penerimaan di tujuan, deteksi selisih transit, dan validasi Berita Acara Serah Terima (BAST).</p>
+          <div class="mt-2.5 flex flex-wrap items-center gap-2">
+            <span class="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700"><i data-lucide="circle-dashed" class="h-3.5 w-3.5 shrink-0"></i>Siklus Audit: 04-2025 Aktif</span>
+            <span class="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600"><i data-lucide="refresh-cw" class="h-3.5 w-3.5 shrink-0"></i>Sync: 18 Okt 2025, 14:32 WIB</span>
+          </div>
+        </div>
+        <div class="flex w-full items-center gap-2 sm:w-auto">
+          <button type="button" data-toast="Menyiapkan ekspor Rekonsiliasi Mutasi (XLS/PDF)..." class="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700 sm:w-auto"><i data-lucide="file-down" class="h-4 w-4"></i>Ekspor Rekonsiliasi Mutasi</button>
+        </div>
+      </section>
+
+      <!-- Ringkasan -->
+      <section aria-label="Ringkasan audit mutasi" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Mutasi Bulan Ini</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">142 <span class="text-[10.5px] font-normal text-slate-600">Transfer</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-blue-600">● &nbsp;Antar-DC</span> &nbsp;Valuasi Stok: Rp 8,6 Miliar</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="arrow-left-right" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan Rekonsiliasi</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight">98,6%</p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-emerald-700">● &nbsp;Compliant</span> &nbsp;Tanpa Selisih: 138 dari 142 Transfer</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="check-check" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-red-600">Selisih Dalam Perjalanan</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">1 <span class="text-[10.5px] font-normal text-slate-600">Kasus</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-red-600"><span class="font-semibold">! &nbsp;Anomali</span> &nbsp;Defisit Terkonfirmasi: -2 Unit (Rute Medan)</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-600"><i data-lucide="triangle-alert" class="h-4 w-4"></i></span>
+        </article>
+        <article class="flex min-h-[112px] items-start justify-between gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+          <div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Rata-rata Update BAST</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">1,2 <span class="text-[10.5px] font-normal text-slate-600">Jam</span></p><p class="mt-2.5 text-[10.5px] leading-snug text-slate-500"><span class="font-semibold text-emerald-700">↗ +40% Cepat</span> &nbsp;SOP Batas SLA: 2,0 Jam</p></div>
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600"><i data-lucide="file-signature" class="h-4 w-4"></i></span>
+        </article>
+      </section>
+
+      <!-- Filter -->
+      <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="flex h-10 min-w-0 basis-full items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 sm:flex-1 sm:basis-[260px] lg:max-w-[430px]">
+            <i data-lucide="search" class="h-4 w-4 shrink-0"></i>
+            <input id="searchMut" type="search" placeholder="Cari nomor tiket (#TRX-MUT-...), SKU, pengemudi, atau hub" class="w-full min-w-0 bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400" />
+          </label>
+          <select id="fRekon" aria-label="Filter status rekonsiliasi" class="h-10 min-w-0 basis-[calc(50%-4px)] rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:basis-auto">
+            <option value="">Status Rekonsiliasi: Semua</option>
+            <option value="match">Rekonsiliasi Klop (Match)</option>
+            <option value="anomali">Anomali / Selisih Fisik</option>
+            <option value="transit">Dalam Perjalanan</option>
+            <option value="pelanggaran">Pelanggaran SOP (BAST Delay)</option>
+          </select>
+          <select id="fKirim" aria-label="Filter hub pengirim" class="h-10 min-w-0 basis-[calc(50%-4px)] rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:basis-auto">
+            <option value="">Hub Pengirim: Cakung DC-01 (Utama)</option>
+          </select>
+          <select id="fTujuanMut" aria-label="Filter hub tujuan" class="h-10 min-w-0 basis-[calc(50%-4px)] rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:basis-auto">
+            <option value="">Hub Tujuan: Semua Tujuan</option>
+            <option value="surabaya">Surabaya DC-02</option>
+            <option value="medan">Medan DC-04</option>
+            <option value="bandung">Bandung DC-03</option>
+            <option value="halim">Halim DC-02</option>
+          </select>
+          <select id="fRentang" aria-label="Filter rentang waktu" class="h-10 min-w-0 flex-1 basis-0 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none sm:flex-none sm:basis-auto">
+            <option value="">Rentang: 7 Hari Terakhir</option>
+          </select>
+          <button id="btnReset" type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
+        </div>
+        <div class="mt-3 flex flex-col gap-2 text-[12px] text-slate-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5">
+          <label class="flex cursor-pointer items-start gap-2"><input id="cbSelisih" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0 accent-blue-600"><span>Tampilkan hanya transfer berstatus Selisih / Deviasi Fisik</span></label>
+          <label class="flex cursor-pointer items-start gap-2"><input id="cbSegera" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0 accent-blue-600"><span>Perlu Tindakan Segera</span></label>
+        </div>
+      </section>
+
+      <!-- Tabel -->
+      <section class="reveal reveal-delay-3 mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table id="tblMut" class="rtable w-full min-w-[1270px] table-fixed border-collapse text-left">
+            <thead class="h-11 bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="w-[150px] whitespace-nowrap px-2">No. Tiket & Tanggal</th>
+                <th class="w-[190px] whitespace-nowrap px-2">Rute Transfer</th>
+                <th class="w-[190px] whitespace-nowrap px-2">SKU & Deskripsi Barang</th>
+                <th class="w-[130px] whitespace-nowrap px-2">Kirim vs Terima</th>
+                <th class="w-[190px] whitespace-nowrap px-2">Status Rekonsiliasi Fisik</th>
+                <th class="w-[150px] whitespace-nowrap px-2">Waktu Transit vs SLA</th>
+                <th class="w-[190px] whitespace-nowrap px-2">Integritas BAST & Otorisasi</th>
+                <th class="w-[80px] whitespace-nowrap px-2 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="mut-rows" class="divide-y divide-slate-100">
+              <tr data-rekon="match" data-tujuan="surabaya" class="hover:bg-slate-50/70">
+                <td data-label="No. Tiket" class="px-2 py-3 align-top"><div><a href="#" data-detail="TRX-MUT-20251016-00" class="text-[12px] font-bold text-blue-700 hover:underline">#TRX-MUT-20251016-00</a><p class="sub">16 Okt 2025, 08:15 WIB</p></div></td>
+                <td data-label="Rute" class="px-2 py-3 align-top"><div><p class="txt">Cakung DC-01 &gt; Surabaya DC-02</p><p class="sub">Armada: Hino Wingbox #B-9182-UEK</p></div></td>
+                <td data-label="SKU & Barang" class="px-2 py-3 align-top"><div><p class="pri">Titan Smart Watch v3</p><p class="sub">SKU-TTN-W3-BLK (150 Unit)</p></div></td>
+                <td data-label="Kirim / Terima" class="px-2 py-3 align-top"><div><p class="txt"><b>150 / 150</b></p><p class="sub sub-green">Selisih: 0 Unit</p></div></td>
+                <td data-label="Rekonsiliasi" class="px-2 py-3 align-top"><div><span class="tag c-green">Rekonsiliasi Klop (100%)</span></div></td>
+                <td data-label="Transit vs SLA" class="px-2 py-3 align-top"><div><p class="txt">14 Jam (Sesuai SLA)</p><p class="sub">Target Max: 18 Jam</p></div></td>
+                <td data-label="BAST & Otorisasi" class="px-2 py-3 align-top"><div><span class="tag c-green">BAST Sah Ganda (QR Sign)</span><p class="sub">PIC Dispatcher &amp; Receiver Valid</p></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="TRX-MUT-20251016-00" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail TRX-MUT-20251016-00"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="TRX-MUT-20251016-00" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor TRX-MUT-20251016-00"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-rekon="anomali" data-tujuan="medan" data-flag="anomali" class="hover:bg-slate-50/70">
+                <td data-label="No. Tiket" class="px-2 py-3 align-top"><div><a href="#" data-detail="TRX-MUT-20251014-64" class="text-[12px] font-bold text-blue-700 hover:underline">#TRX-MUT-20251014-64</a><p class="sub">14 Okt 2025, 11:20 WIB</p></div></td>
+                <td data-label="Rute" class="px-2 py-3 align-top"><div><p class="txt">Cakung DC-01 &gt; Medan DC-04</p><p class="sub">Ekspedisi: MultiLogistics Cargo Pelni</p></div></td>
+                <td data-label="SKU & Barang" class="px-2 py-3 align-top"><div><p class="pri">Sandisk Portable SSD Extreme 1TB</p><p class="sub">SKU-SSDX-1TB-R (50 Unit)</p></div></td>
+                <td data-label="Kirim / Terima" class="px-2 py-3 align-top"><div><p class="txt"><b>50 / 48</b></p><p class="sub sub-red">Defisit: -2 Unit</p></div></td>
+                <td data-label="Rekonsiliasi" class="px-2 py-3 align-top"><div><span class="tag c-red">Anomali Selisih Fisik</span></div></td>
+                <td data-label="Transit vs SLA" class="px-2 py-3 align-top"><div><p class="txt">48 Jam (Intra-Pulau)</p><p class="sub">SLA Target: 72 Jam</p></div></td>
+                <td data-label="BAST & Otorisasi" class="px-2 py-3 align-top"><div><span class="tag c-red">BAST Ditahan (LTA Diterbitkan)</span><p class="sub">Ref LTA: #LTA-2025-045</p></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="TRX-MUT-20251014-64" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail TRX-MUT-20251014-64"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="TRX-MUT-20251014-64" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor TRX-MUT-20251014-64"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-rekon="pelanggaran" data-tujuan="bandung" class="hover:bg-slate-50/70">
+                <td data-label="No. Tiket" class="px-2 py-3 align-top"><div><a href="#" data-detail="TRX-MUT-20251015-11" class="text-[12px] font-bold text-blue-700 hover:underline">#TRX-MUT-20251015-11</a><p class="sub">15 Okt 2025, 14:05 WIB</p></div></td>
+                <td data-label="Rute" class="px-2 py-3 align-top"><div><p class="txt">Cakung DC-01 &gt; Bandung DC-03</p><p class="sub">Armada: Isuzu Box #D-8821-AA</p></div></td>
+                <td data-label="SKU & Barang" class="px-2 py-3 align-top"><div><p class="pri">iWatch Gen 4th Space Gray</p><p class="sub">SKU-TW-G4-GRY (80 Unit)</p></div></td>
+                <td data-label="Kirim / Terima" class="px-2 py-3 align-top"><div><p class="txt"><b>80 / 80</b></p><p class="sub">Selisih: 0 Unit</p></div></td>
+                <td data-label="Rekonsiliasi" class="px-2 py-3 align-top"><div><span class="tag c-amber">Keterlambatan Input BAST (+75 menit)</span></div></td>
+                <td data-label="Transit vs SLA" class="px-2 py-3 align-top"><div><p class="txt">Transit Tepat Waktu</p><p class="sub">Input Delay di WMS</p></div></td>
+                <td data-label="BAST & Otorisasi" class="px-2 py-3 align-top"><div><span class="tag c-red">Pelanggaran SOP WMS Hub-03</span><p class="sub">Klarifikasi PIC Supervisor</p></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="TRX-MUT-20251015-11" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail TRX-MUT-20251015-11"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="TRX-MUT-20251015-11" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor TRX-MUT-20251015-11"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-rekon="match" data-tujuan="surabaya" class="hover:bg-slate-50/70">
+                <td data-label="No. Tiket" class="px-2 py-3 align-top"><div><a href="#" data-detail="TRX-MUT-20251017-02" class="text-[12px] font-bold text-blue-700 hover:underline">#TRX-MUT-20251017-02</a><p class="sub">17 Okt 2025, 09:30 WIB</p></div></td>
+                <td data-label="Rute" class="px-2 py-3 align-top"><div><p class="txt">Surabaya DC-02 &gt; Cakung DC-01</p><p class="sub">Retur Konsolidasi (Balik)</p></div></td>
+                <td data-label="SKU & Barang" class="px-2 py-3 align-top"><div><p class="pri">Canon EOS 6D Mark II Body</p><p class="sub">SKU-CAM-C6D-BDY (38 Unit)</p></div></td>
+                <td data-label="Kirim / Terima" class="px-2 py-3 align-top"><div><p class="txt"><b>38 / 38</b></p><p class="sub sub-green">Selisih: 0 Unit</p></div></td>
+                <td data-label="Rekonsiliasi" class="px-2 py-3 align-top"><div><span class="tag c-green">Rekonsiliasi Lengkap (0 Selisih)</span></div></td>
+                <td data-label="Transit vs SLA" class="px-2 py-3 align-top"><div><p class="txt">16 Jam (Optimal)</p><p class="sub">Target SLA: 18 Jam</p></div></td>
+                <td data-label="BAST & Otorisasi" class="px-2 py-3 align-top"><div><span class="tag c-green">BAST Lengkap &amp; Terarsip</span><p class="sub">Disetujui Spv DC Cakung</p></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="TRX-MUT-20251017-02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail TRX-MUT-20251017-02"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="TRX-MUT-20251017-02" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor TRX-MUT-20251017-02"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+              <tr data-rekon="transit" data-tujuan="halim" class="hover:bg-slate-50/70">
+                <td data-label="No. Tiket" class="px-2 py-3 align-top"><div><a href="#" data-detail="TRX-MUT-20251010-01" class="text-[12px] font-bold text-blue-700 hover:underline">#TRX-MUT-20251010-01</a><p class="sub">18 Okt 2025, 12:40 WIB</p></div></td>
+                <td data-label="Rute" class="px-2 py-3 align-top"><div><p class="txt">Cakung DC-01 &gt; Halim DC-02</p><p class="sub">Blind Van ASTRO Express #B-1002-PXZ</p></div></td>
+                <td data-label="SKU & Barang" class="px-2 py-3 align-top"><div><p class="pri">Sony Alpha A7 IV Body Only</p><p class="sub">SKU-CAM-SNY-A7V (45 Unit)</p></div></td>
+                <td data-label="Kirim / Terima" class="px-2 py-3 align-top"><div><p class="txt"><b>45 / 45</b></p><p class="sub">Seger · Dalam Perjalanan</p></div></td>
+                <td data-label="Rekonsiliasi" class="px-2 py-3 align-top"><div><span class="tag c-indigo">Dalam Perjalanan</span><p class="sub">Tol Cikampek · Est. Tiba: 2 Jam Lagi</p></div></td>
+                <td data-label="Transit vs SLA" class="px-2 py-3 align-top"><div><p class="txt">Dalam Jendela Waktu SOP</p><p class="sub">SLA: 3 Jam</p></div></td>
+                <td data-label="BAST & Otorisasi" class="px-2 py-3 align-top"><div><span class="tag c-amber">Surat Jalan Dispatch Sah</span><p class="sub">BAST Menunggu Unloading</p></div></td>
+                <td data-label="Aksi" class="px-2 py-3 align-top"><div class="flex items-center justify-center gap-1 text-slate-600 max-md:justify-start"><button type="button" data-detail="TRX-MUT-20251010-01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat detail TRX-MUT-20251010-01"><i data-lucide="eye" class="h-4 w-4"></i></button><button type="button" data-export="TRX-MUT-20251010-01" class="rounded p-1.5 hover:bg-slate-100" aria-label="Ekspor TRX-MUT-20251010-01"><i data-lucide="download" class="h-4 w-4"></i></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="empty-state" hidden class="px-4 py-8 text-center text-[12px] text-slate-500">Tidak ada transfer yang sesuai dengan filter. Ubah atau reset filter untuk melihat data.</p>
+        <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+          <div class="flex flex-wrap items-center gap-2"><span id="rowCount">Menampilkan 1 - 5 dari 142 transfer</span><span>Baris:</span><select aria-label="Jumlah baris" class="h-8 rounded bg-blue-50 px-2 text-[12px]"><option>5</option><option>10</option><option>25</option></select></div>
+          <div class="flex flex-wrap items-center gap-1">
+            <button type="button" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">‹ Sebelumnya</button>
+            <button type="button" class="h-8 min-w-8 rounded bg-blue-600 px-2 text-[12px] font-semibold text-white">1</button><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">2</button><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">3</button><span class="px-1">…</span><button type="button" class="h-8 min-w-8 rounded px-2 text-[12px]">29</button>
+            <button type="button" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Selanjutnya ›</button>
+          </div>
+        </footer>
+      </section>
+
+      <!-- SOP + matriks rute -->
+      <section class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="mb-1 flex flex-wrap items-center gap-2"><i data-lucide="search-check" class="h-4 w-4 shrink-0 text-blue-600"></i><h2 class="panel-title">Prosedur Investigasi Selisih Stok In-Transit</h2><span class="pill c-indigo ml-auto">SOP-WMS-MUT-04</span></div>
+          <p class="sub mb-3" style="margin-top:0">Pedoman tindak lanjut auditor saat terjadi varians kuantitas terima vs kirim pada transfer antar-hub.</p>
+          <div class="space-y-3">
+            <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700">1</span><div class="min-w-0"><p class="pri">Hold BAST di Sistem WMS</p><p class="sub">Segera kunci status penerimaan di terminal hub penerima. Jangan izinkan posting otomatis ke ledger inventory lokal sebelum investigasi dimulai.</p></div></div>
+            <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700">2</span><div class="min-w-0"><p class="pri">Dokumentasi Segel & Timbangan</p><p class="sub">Ambil 4 sisi foto nomor segel pintu kontainer, kondisi lakban palet karton, & hasil re-weighing timbangan bruto muatan vs surat jalan.</p></div></div>
+            <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700">3</span><div class="min-w-0"><p class="pri">Penerbitan LTA & Berita Acara Selisih Fisik</p><p class="sub">Auditor menerbitkan Laporan Temuan Audit (LTA) & lembar Berita Acara Selisih Fisik bermaterai bersama supir transporter & spv penerima.</p></div></div>
+            <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700">4</span><div class="min-w-0"><p class="pri">Eskalasi & Klaim Vendor / Asuransi Kargo</p><p class="sub">Eskalasi ke pihak vendor ekspedisi untuk deduksi tagihan ongkos kirim atau klaim polis kargo in-transit tanpa merugikan balance sheet.</p></div></div>
+          </div>
+          <div class="mt-4 border-t border-slate-100 pt-3"><button type="button" data-toast="Membuka berkas kasus #LTA-2025-045..." class="flex items-start gap-1.5 text-left text-[10.5px] font-semibold text-blue-700 hover:underline"><i data-lucide="folder-open" class="mt-px h-3.5 w-3.5 shrink-0"></i><span>Perlu review investigasi kasus terkini? Buka Berkas Kasus #LTA-2025-045 &gt;</span></button></div>
+        </article>
+
+        <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="mb-1 flex flex-wrap items-center gap-2"><i data-lucide="route" class="h-4 w-4 shrink-0 text-blue-600"></i><h2 class="panel-title">Matriks Deviasi & Integritas Rute</h2><span class="pill c-slate ml-auto">ISO 9001:2015</span></div>
+          <p class="sub mb-3" style="margin-top:0">Kepatuhan rute distribusi dari Cakung DC-01 ke setiap hub tujuan.</p>
+          <div class="space-y-2">
+            <div class="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"><div class="min-w-0"><p class="pri">Cakung DC-01 &gt; Surabaya DC-02</p><p class="sub">42 Pengiriman Selesai · Avg Transit 4,8 Jam (Intra-Pulau, Kargo Darat Truk)</p></div><span class="pill c-green w-fit shrink-0">● 100% Sesuai (0 Deviasi)</span></div>
+            <div class="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"><div class="min-w-0"><p class="pri">Cakung DC-01 &gt; Bandung DC-03</p><p class="sub">18 Pengiriman · Intra-Pulau</p></div><span class="pill c-green w-fit shrink-0">● 100% Sesuai (0 Deviasi Fisik)</span></div>
+            <div class="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 bg-red-50"><div class="min-w-0"><p class="pri">Cakung DC-01 &gt; Medan DC-04</p><p class="sub">18 Pengiriman Antar-Pulau · Kargo Kapal Laut MultiLogistics</p></div><span class="pill c-red w-fit shrink-0">● 0,6% Deviasi (1 Selisih)</span></div>
+            <div class="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"><div class="min-w-0"><p class="pri">Cakung DC-01 &gt; Halim DC-02</p><p class="sub">18 Pengiriman Intra-City · Avg Transit 1,5 Jam</p></div><span class="pill c-green w-fit shrink-0">● 100% Sesuai (0 Deviasi)</span></div>
+          </div>
+          <p class="sub mt-3 flex items-start gap-1.5"><i data-lucide="shield-check" class="mt-px h-3.5 w-3.5 shrink-0"></i><span>Semua pengiriman antar-pulau terlindungi segel tamper evident barcode & asuransi marine cargo Tugu.</span></p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ MODAL DETAIL ============ -->
+  <div id="modalDetail" hidden class="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="flex max-h-[calc(100vh-32px)] w-full max-w-[760px] flex-col overflow-hidden rounded-xl bg-white shadow-xl">
+      <div class="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <h3 id="modalTitle" class="panel-title flex items-center gap-2"><i data-lucide="arrow-left-right" class="h-4 w-4 shrink-0 text-blue-600"></i>Detail Audit Mutasi Antar-Hub</h3>
+        <button type="button" data-close-modal class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+      </div>
+      <div id="detailBody" class="overflow-y-auto p-4"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite" hidden class="fixed bottom-4 right-4 z-[90] flex max-w-[calc(100vw-32px)] items-center gap-2 rounded-lg bg-slate-800 px-3.5 py-2.5 text-[12px] font-medium text-white shadow-lg"><i data-lucide="circle-check" class="h-4 w-4 shrink-0 text-emerald-400"></i><span id="toast-text"></span></div>
+
+  <script>
+    /* ---------- Sidebar: drawer (<1024px) / collapse (>=1024px) ---------- */
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const toggle = document.getElementById('sidebar-toggle');
+      const isMobile = () => window.matchMedia('(max-width: 1023px)').matches;
+      const isOpen = () => isMobile() ? sidebar.classList.contains('open') : !document.body.classList.contains('sidebar-collapsed');
+      const sync = () => {
+        const open = isOpen();
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Tutup sidebar' : 'Buka sidebar');
+        toggle.setAttribute('title', open ? 'Tutup sidebar' : 'Buka sidebar');
+        backdrop.classList.toggle('show', isMobile() && open);
+        document.body.classList.toggle('drawer-open', isMobile() && open);
+      };
+      const setOpen = (open) => {
+        if (isMobile()) sidebar.classList.toggle('open', open);
+        else document.body.classList.toggle('sidebar-collapsed', !open);
+        sync();
+      };
+      toggle.addEventListener('click', () => setOpen(!isOpen()));
+      backdrop.addEventListener('click', () => setOpen(false));
+      sidebar.addEventListener('click', (e) => { if (isMobile() && e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMobile() && isOpen()) setOpen(false); });
+      window.addEventListener('resize', () => { if (!isMobile()) sidebar.classList.remove('open'); sync(); });
+      // di layar kecil drawer tertutup saat awal; di desktop terbuka
+      sync();
+    })();
+
+    /* ---------- Toast ---------- */
+    let toastTimer;
+    function toast(message) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = message;
+      el.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+    }
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-toast]');
+      if (t) toast(t.dataset.toast);
+      const x = e.target.closest('[data-export]');
+      if (x) toast('Ekspor baris ' + x.dataset.export + '...');
+    });
+    
+    /* ---------- Filter tabel ---------- */
+    const rows = [...document.querySelectorAll('#mut-rows tr')];
+    const searchMut = document.getElementById('searchMut');
+    const globalSearch = document.getElementById('global-search');
+    const fRekon = document.getElementById('fRekon');
+    const fTujuan = document.getElementById('fTujuanMut');
+    const cbSelisih = document.getElementById('cbSelisih');
+    const cbSegera = document.getElementById('cbSegera');
+    const rowCount = document.getElementById('rowCount');
+    const emptyState = document.getElementById('empty-state');
+    const defaultCount = rowCount.textContent;
+
+    function applyFilters() {
+      const query = `${searchMut.value} ${globalSearch ? globalSearch.value : ''}`.trim().toLowerCase();
+      let visible = 0;
+      rows.forEach((row) => {
+        const d = row.dataset;
+        const ok =
+          (!query || row.textContent.toLowerCase().includes(query)) &&
+          (!fRekon.value || d.rekon === fRekon.value) &&
+          (!fTujuan.value || d.tujuan === fTujuan.value) &&
+          (!cbSelisih.checked || d.flag === 'anomali');
+        row.hidden = !ok;
+        if (ok) visible++;
+      });
+      const filtered = query || fRekon.value || fTujuan.value || cbSelisih.checked;
+      rowCount.textContent = filtered ? `${visible} transfer sesuai filter` : defaultCount;
+      emptyState.hidden = visible > 0;
+    }
+    [searchMut, globalSearch].forEach((el) => el && el.addEventListener('input', applyFilters));
+    [fRekon, fTujuan].forEach((el) => el.addEventListener('change', applyFilters));
+    cbSelisih.addEventListener('change', applyFilters);
+    cbSegera.addEventListener('change', () => toast(cbSegera.checked ? 'Filter Perlu Tindakan Segera aktif.' : 'Filter dinonaktifkan.'));
+    document.getElementById('btnReset').addEventListener('click', () => {
+      searchMut.value = '';
+      if (globalSearch) globalSearch.value = '';
+      fRekon.value = fTujuan.value = '';
+      cbSelisih.checked = false;
+      cbSegera.checked = false;
+      applyFilters();
+    });
+
+    /* ---------- Modal detail ---------- */
+    const MUT = {
+      'TRX-MUT-20251016-00': { rute: 'Cakung DC-01 > Surabaya DC-02', armada: 'Hino Wingbox #B-9182-UEK', tgl: '16 Okt 2025, 08:15 WIB', sku: 'Titan Smart Watch v3 (SKU-TTN-W3-BLK, 150 Unit)', kirim: '150', terima: '150', selisih: '0 Unit', rekon: 'Rekonsiliasi Klop (100%)', transit: '14 Jam (Sesuai SLA, Target Max 18 Jam)', bast: 'BAST Sah Ganda (QR Sign)', otor: 'PIC Dispatcher & Receiver Valid', status: 'Selesai / Match', tone: 'green', note: 'Transfer intra-pulau reguler, rekonsiliasi sempurna.' },
+      'TRX-MUT-20251014-64': { rute: 'Cakung DC-01 > Medan DC-04', armada: 'MultiLogistics Cargo Pelni (Kapal Laut)', tgl: '14 Okt 2025, 11:20 WIB', sku: 'Sandisk Portable SSD Extreme 1TB (SKU-SSDX-1TB-R, 50 Unit)', kirim: '50', terima: '48', selisih: '-2 Unit (Defisit)', rekon: 'Anomali Selisih Fisik', transit: '48 Jam (Intra-Pulau, SLA Target 72 Jam)', bast: 'BAST Ditahan (LTA Diterbitkan, Ref #LTA-2025-045)', otor: 'Eskalasi Vendor / Asuransi Marine Cargo', status: 'Anomali / Perlu Tindakan', tone: 'red', note: 'Defisit terkonfirmasi -2 unit. Investigasi in-transit aktif, BAST di-hold.' },
+      'TRX-MUT-20251015-11': { rute: 'Cakung DC-01 > Bandung DC-03', armada: 'Isuzu Box #D-8821-AA', tgl: '15 Okt 2025, 14:05 WIB', sku: 'iWatch Gen 4th Space Gray (SKU-TW-G4-GRY, 80 Unit)', kirim: '80', terima: '80', selisih: '0 Unit', rekon: 'Keterlambatan Input BAST (+75 menit)', transit: 'Transit Tepat Waktu (Input Delay di WMS)', bast: 'Pelanggaran SOP WMS Hub-03', otor: 'Klarifikasi PIC Supervisor', status: 'Pelanggaran SOP (BAST Delay)', tone: 'amber', note: 'Fisik match, namun update BAST di WMS terlambat 75 menit melebihi SLA 2 jam.' },
+      'TRX-MUT-20251017-02': { rute: 'Surabaya DC-02 > Cakung DC-01 (Retur Konsolidasi)', armada: 'Balik Retur', tgl: '17 Okt 2025, 09:30 WIB', sku: 'Canon EOS 6D Mark II Body (SKU-CAM-C6D-BDY, 38 Unit)', kirim: '38', terima: '38', selisih: '0 Unit', rekon: 'Rekonsiliasi Lengkap (0 Selisih)', transit: '16 Jam (Optimal, Target SLA 18 Jam)', bast: 'BAST Lengkap & Terarsip', otor: 'Disetujui Spv DC Cakung', status: 'Selesai', tone: 'green', note: 'Retur konsolidasi tervalidasi penuh.' },
+      'TRX-MUT-20251010-01': { rute: 'Cakung DC-01 > Halim DC-02', armada: 'Blind Van ASTRO Express #B-1002-PXZ', tgl: '18 Okt 2025, 12:40 WIB', sku: 'Sony Alpha A7 IV Body Only (SKU-CAM-SNY-A7V, 45 Unit)', kirim: '45', terima: '-', selisih: 'Dalam Perjalanan', rekon: 'Dalam Perjalanan (Tol Cikampek, Est. Tiba 2 Jam Lagi)', transit: 'Dalam Jendela Waktu SOP (SLA 3 Jam)', bast: 'Surat Jalan Dispatch Sah - BAST Menunggu Unloading', otor: 'PIC Halim DC-02', status: 'Dalam Transit', tone: 'indigo', note: 'Transfer intra-city berjalan, GPS terkonfirmasi di Tol Cikampek.' }
+    };
+
+    const modal = document.getElementById('modalDetail');
+    let lastFocus = null;
+    function field(label, value) {
+      return `<div class="min-w-0"><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">${label}</p><p class="mt-1 text-[12px] leading-snug text-slate-800">${value}</p></div>`;
+    }
+    function openDetail(code) {
+      const d = MUT[code];
+      if (!d) return;
+      document.getElementById('detailBody').innerHTML =
+        '<div class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">' +
+          field('No. Tiket', `<b>${code}</b>`) +
+          field('Tanggal', d.tgl) +
+          field('Rute Transfer', d.rute) +
+          field('Armada', d.armada) +
+          field('SKU & Deskripsi', d.sku) +
+          field('Kirim vs Terima', `<b>${d.kirim} / ${d.terima}</b><br><span class="text-[10.5px] text-slate-500">Selisih: ${d.selisih}</span>`) +
+          field('Status Rekonsiliasi', d.rekon) +
+          field('Waktu Transit vs SLA', d.transit) +
+          field('Integritas BAST', d.bast) +
+          field('Otorisasi', d.otor) +
+          field('Status', `<span class="pill c-${d.tone}">● ${d.status}</span>`) +
+        '</div>' +
+        `<div class="mt-4 flex items-start gap-2 rounded-md bg-blue-50/80 p-3 text-[10.5px] leading-relaxed text-slate-600"><i data-lucide="info" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600"></i><span>${d.note}</span></div>` +
+        '<div class="mt-4 flex flex-col-reverse justify-end gap-2 sm:flex-row">' +
+          '<button type="button" data-close-modal class="h-10 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 hover:bg-slate-50">Tutup</button>' +
+          `<button type="button" data-close-modal data-toast="Ekspor detail ${code} (PDF)..." class="flex h-10 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700"><i data-lucide="file-down" class="h-4 w-4"></i>Ekspor PDF</button>` +
+        '</div>';
+      lucide.createIcons();
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      modal.querySelector('[data-close-modal]').focus();
+    }
+    function closeModal() {
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      if (lastFocus) lastFocus.focus();
+    }
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-detail]');
+      if (trigger) { e.preventDefault(); openDetail(trigger.dataset.detail); return; }
+      if (e.target === modal || e.target.closest('[data-close-modal]')) closeModal();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>

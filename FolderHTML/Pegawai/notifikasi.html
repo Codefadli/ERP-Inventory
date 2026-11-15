@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifikasi — Portal Pegawai Astro Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{brand:'#0b49d8',ink:'#17243b',canvas:'#f5f7fc',line:'#e8edf5'}}}};</script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; }
+    .nav-link { transition: background .18s ease, color .18s ease; }
+    .nav-link.active { background: #0b49d8; color: white; }
+    .nav-link:not(.active):hover { background: #f1f5fc; color: #123c9a; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #dce3ef; border-radius: 10px; }
+    .soft-button { transition: transform .16s ease, box-shadow .16s ease; }
+    .soft-button:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15, 23, 42, .08); }
+    .reveal { animation: rise .35s ease both; }
+    .delay-1 { animation-delay: 50ms; }
+    .delay-2 { animation-delay: 100ms; }
+    .delay-3 { animation-delay: 150ms; }
+    .notice-in { animation: rise .3s ease both; }
+    .row-in { animation: rise .25s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    #sidebar { width: 220px; transition: transform .22s ease; }
+    #sidebar-toggle { border: 1px solid #e8edf5; border-radius: 7px; background: #fff; }
+    #sidebar-toggle:hover { background: #f1f5fc; }
+    @media (min-width: 768px) {
+      body { zoom: 1.15; }
+      #sidebar { transform: translateX(0) !important; }
+      #main-area { margin-left: 220px !important; }
+      body.sidebar-collapsed #sidebar { transform: translateX(-105%) !important; }
+      body.sidebar-collapsed #main-area { margin-left: 0 !important; }
+      #main-area > header { z-index: 60 !important; }
+      #sidebar-toggle { display: flex !important; }
+      .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    }
+    @media (max-width: 767px) {
+      #sidebar { transform: translateX(-100%) !important; }
+      #sidebar.open { transform: translateX(0) !important; }
+      #sidebar-backdrop.show { display: block; }
+    }
+    @media (min-width: 640px) {
+      #main-area main section.reveal.delay-3 > div.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1280px) {
+      #main-area main section.reveal.delay-3 > div.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-canvas text-ink antialiased">
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/30 md:hidden" onclick="toggleSidebar(true)"></div>
+  <aside id="sidebar" class="sidebar-scroll fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r border-line bg-white md:translate-x-0">
+    <div class="flex h-[56px] shrink-0 items-center gap-2 border-b border-line px-3"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm"><i class="fas fa-cube text-white text-lg"></i></i></span><div class="min-w-0 leading-tight"><b class="block truncate text-[12px] tracking-tight text-slate-800">Astro Inventory</b><span class="block truncate text-[9px] font-medium text-slate-500">Sistem Inventaris Terpadu</span></div></div>
+    <nav class="flex-1 space-y-4 px-2 py-4 text-[11px]">
+      <section><p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Menu Utama</p><a href="status_permintaan.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="layout-dashboard" class="h-4 w-4"></i><span>Dashboard</span></a></section>
+      <section><p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Operasional Gudang</p><div class="space-y-0.5"><a href="../superadmin/barang_masuk.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-down-left" class="h-4 w-4"></i><span>Barang Masuk</span></a><a href="../superadmin/barang_keluar.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="arrow-up-right" class="h-4 w-4"></i><span>Barang Keluar</span></a><a href="../superadmin/stok_opname.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Stok Opname</span></a></div></section>
+       <section><p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Monitoring & Laporan</p><div class="space-y-0.5"><a href="#" class="nav-link flex h-8 items-center gap-2 whitespace-nowrap rounded-md px-2 text-slate-600"><i data-lucide="history" class="h-4 w-4 shrink-0"></i>Riwayat Transaksi</a><a href="status_permintaan.html" class="nav-link flex h-8 items-center gap-2 whitespace-nowrap rounded-md px-2 text-slate-600"><i data-lucide="circle-check-big" class="h-4 w-4 shrink-0"></i><span class="min-w-0 truncate">Status Permintaan</span> <span class="ml-auto shrink-0 whitespace-nowrap rounded-full bg-red-50 px-1.5 py-0.5 text-[9px] font-semibold text-red-700">2 Menunggu</span></a></div></section>
+      <section><p class="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[.08em] text-slate-400">Pengaturan & Akun</p><div class="space-y-0.5"><a href="notifikasi.html" aria-current="page" class="nav-link active font-medium flex h-8 items-center gap-2 rounded-md px-2"><i data-lucide="bell" class="h-4 w-4"></i><span>Notifikasi</span><span id="nav-unread" class="ml-auto rounded-full bg-white/20 px-1.5 py-0.5 text-[9.5px]">3</span></a><a href="pengaturan.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="settings" class="h-4 w-4"></i><span>Pengaturan</span></a><a href="profil_saya.html" class="nav-link flex h-8 items-center gap-2 rounded-md px-2 text-slate-600"><i data-lucide="user-round" class="h-4 w-4"></i><span>Profil Saya</span></a></div></section></nav>
+    <div class="m-2 rounded-lg bg-blue-50 p-3 text-[10.5px]"><div class="flex items-center justify-between font-semibold"><span class="flex items-center gap-1"><i data-lucide="circle" class="h-2 w-2 fill-emerald-500 text-emerald-500"></i>Shift Pagi</span><span class="text-slate-500">08:00 - 17:00</span></div><b class="mt-1 block text-[11px] text-blue-800">Hub Cakung DC-01 Online</b><span class="text-slate-500">Zona A & Staging Inbound</span></div>
+  </aside>
+  <div id="main-area" class="min-h-screen md:ml-[220px]">
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4 shadow-[0_1px_2px_rgba(15,23,42,.025)]">
+      <div class="flex min-w-0 items-center gap-3"><button id="sidebar-toggle" onclick="toggleSidebar()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><i data-lucide="menu" class="h-5 w-5"></i></button>
+        <div class="hidden items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700 sm:flex"><i data-lucide="network" class="h-3.5 w-3.5"></i><span>Jakarta (Pusat DC) &gt; Hub Cabang DC-01 (Utama)</span></div>
+        <div class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Operasional Normal</div></div><div class="flex items-center gap-3"><label class="hidden h-8 w-56 items-center gap-1.5 rounded-md border border-line bg-slate-50 px-2.5 text-slate-400 md:flex"><i data-lucide="search" class="h-4 w-4"></i><input placeholder="Cari tiket atau notifikasi..." class="w-full bg-transparent text-[10px] outline-none"></label><button aria-label="Bantuan" class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><i data-lucide="circle-help" class="h-4 w-4"></i></button><button aria-label="Notifikasi" class="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" onclick="location.href='notifikasi.html'"><i data-lucide="bell" class="h-4 w-4"></i><span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span></button><div class="flex items-center gap-2 border-l border-line pl-3"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-700 text-[10px] font-bold text-white">AP</span><span class="hidden text-[10px] leading-tight sm:block"><b class="block">Agus Prasetyo</b><span class="text-slate-500">Staf Operasional</span></span></div></div></header>
+    <main class="min-h-[calc(100vh-56px)] bg-canvas p-4 lg:p-5">
+      <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Portal Operasional Pegawai / Akun & Sistem / <span class="text-blue-700">Pusat Notifikasi & Pemberitahuan Shift</span></p>
+          <h1 class="mt-1 text-[24px] font-bold leading-tight tracking-tight">Pusat Notifikasi & Informasi Shift</h1>
+          <p class="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">Pemberitahuan real-time terkait persetujuan tiket, penugasan picking & inbound baru, peringatan stok opname, serta instruksi supervisor.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="mark-all" class="soft-button inline-flex h-10 items-center rounded-md border bg-white px-4 text-[12px] font-semibold">✓ Tandai Semua Sudah Dibaca</button>
+          <button data-toast="Filter tanggal dan shift dapat dipilih." class="soft-button inline-flex h-10 items-center rounded-md border bg-white px-4 text-[12px] font-semibold">Filter Tanggal & Shift</button>
+          <button data-toast="Form pengumuman cepat dibuka." class="soft-button inline-flex h-10 items-center rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white">+ Buat Pengumuman Internal / Laporan Cepat</button>
+        </div>
+      </section>
+      <section class="metrics-grid reveal delay-1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="min-h-[112px] rounded-xl border bg-white p-4 shadow-sm"><p class="text-[9.5px] font-semibold uppercase text-slate-500">Total Notifikasi Shift Ini</p><b class="mt-1 block text-[24px] leading-tight">14 Notifikasi</b><span class="text-[10.5px] text-slate-500">Shift Pagi: DC Cakung · 82% terselesaikan</span></article>
+        <article class="min-h-[112px] rounded-xl border bg-white p-4 shadow-sm"><p class="text-[9.5px] font-semibold uppercase text-red-600">Belum Dibaca (Unread)</p><b class="mt-1 block text-[24px] leading-tight text-red-600"><span id="unread-count">3</span> Pesan</b><span class="text-[10.5px] text-slate-500">Perlu konfirmasi segera</span></article>
+        <article class="min-h-[112px] rounded-xl border bg-white p-4 shadow-sm"><p class="text-[9.5px] font-semibold uppercase text-emerald-700">Tugas Operasional</p><b class="mt-1 block text-[24px] leading-tight">7 Tugas</b><span class="text-[10.5px] text-slate-500">3 Disetujui & Tugas Baru · Inbound & Titik Tujuan</span></article>
+        <article class="min-h-[112px] rounded-xl border bg-white p-4 shadow-sm"><p class="text-[9.5px] font-semibold uppercase text-slate-500">Peringatan & Sinyal</p><b class="mt-1 block text-[24px] leading-tight">2 Insiden</b><span class="text-[10.5px] text-slate-500">Peringatan Stok & Sinyal (Alerts)</span></article>
+      </section>
+      <section class="reveal delay-2 mb-4 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b bg-blue-50/50 p-3">
+          <div class="flex flex-wrap gap-2">
+            <button data-kind="Semua" class="notice-tab h-9 whitespace-nowrap rounded-md bg-blue-600 px-3 text-[10.5px] font-semibold text-white">Semua Notifikasi <span class="ml-1 rounded bg-white/20 px-1">14</span></button>
+            <button data-kind="Belum Dibaca" class="notice-tab h-9 whitespace-nowrap rounded-md px-3 text-[10.5px]">Belum Dibaca <span class="ml-1">3</span></button>
+            <button data-kind="Tugas Operasional" class="notice-tab h-9 whitespace-nowrap rounded-md px-3 text-[10.5px]">Tugas Operasional</button>
+            <button data-kind="Persetujuan Tiket" class="notice-tab h-9 whitespace-nowrap rounded-md px-3 text-[10.5px]">Persetujuan Tiket</button>
+            <button data-kind="Peringatan Stok" class="notice-tab h-9 whitespace-nowrap rounded-md px-3 text-[10.5px]">Peringatan Stok</button>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 border-b p-3">
+          <label class="flex h-10 min-w-48 flex-1 items-center gap-2 rounded-md bg-blue-50 px-3 text-slate-400"><i data-lucide="search" class="h-4 w-4 shrink-0"></i><input id="notice-search" placeholder="Cari nomor tiket, nama barang, atau nama pengirim notifikasi" class="w-full bg-transparent text-[12px] outline-none"></label>
+          <select id="priority" class="h-10 rounded-md bg-blue-50 px-3 text-[12px]"><option value="">Prioritas: Semua Tingkat</option><option>Darurat</option><option>Tinggi</option><option>Normal</option></select>
+          <select id="module" class="h-10 rounded-md bg-blue-50 px-3 text-[12px]"><option value="">Kategori: Semua Modul</option><option>Permintaan Tiket</option><option>Tugas Inbound</option><option>Audit Stok</option><option>Pengeluaran Barang</option><option>Status Permintaan</option></select>
+          <button id="clear-notifications" title="Bersihkan notifikasi yang dibaca" class="inline-flex h-10 items-center justify-center rounded-md bg-blue-50 px-3 text-[12px]">♲</button>
+          <button data-toast="Notifikasi diperbarui." class="inline-flex h-10 items-center justify-center rounded-md bg-blue-50 px-3 text-[12px]">↻</button>
+        </div>
+        <div id="notice-list" class="space-y-2 p-4"></div>
+        <footer class="flex items-center justify-between gap-3 border-t bg-blue-50/50 px-4 py-3 text-[12px]"><span id="notice-count" aria-live="polite"></span><button id="load-more" class="h-8 rounded-md bg-white px-3 text-[12px] font-semibold text-blue-700">Muat Notifikasi Lainnya</button></footer>
+      </section>
+      <section class="reveal delay-3 mt-4">
+        <h2 class="mb-2 text-[12px] font-bold">Pengaturan Notifikasi & Kanal Komunikasi Shift</h2>
+        <p class="mb-3 text-[10.5px] text-slate-500">Konfigurasi preferensi ke kanal komunikasi dan eskalasi alert darurat operasional gudang.</p>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <article class="min-h-[60px] rounded-lg border bg-white px-4 py-3 shadow-sm"><div class="flex items-center justify-between"><i data-lucide="volume-2" class="h-4 w-4 shrink-0 text-blue-600"></i><span class="rounded-full bg-emerald-50 px-2 py-1 text-[10.5px] text-emerald-700">● AKTIF</span></div><h3 class="mt-2 text-[12px] font-bold">Notifikasi Suara & Getar Scanner</h3><p class="mt-1 text-[10.5px] text-slate-500">Terminal Zebra TC21 dikonfigurasi pada mode Vibrate On + Beeper Volume Maksimal (100%) untuk alert staging berisik.</p><button data-toast="Pengaturan suara terminal dibuka." class="mt-2 h-10 w-full rounded-md bg-blue-50 px-4 text-[12px] font-semibold">Atur Nada Dering</button></article>
+          <article class="min-h-[60px] rounded-lg border bg-white px-4 py-3 shadow-sm"><div class="flex items-center justify-between"><i data-lucide="radio" class="h-4 w-4 shrink-0 text-blue-600"></i><span class="rounded-full bg-blue-50 px-2 py-1 text-[10.5px] text-blue-700">Kanal 04 Terhubung</span></div><h3 class="mt-2 text-[12px] font-bold">Pengumuman Darurat Supervisor</h3><p class="mt-1 text-[10.5px] text-slate-500">Sinkronisasi pesan suara darurat dengan radio HT Saluran 04 Hub DC Cakung dan peringatan lampu strobo dock.</p><button data-toast="Status radio HT: terhubung di Channel 04." class="mt-2 h-10 w-full rounded-md bg-blue-50 px-4 text-[12px] font-semibold">Cek Saluran Radio</button></article>
+          <article class="min-h-[60px] rounded-lg border bg-white px-4 py-3 shadow-sm"><div class="flex items-center justify-between"><i data-lucide="timer" class="h-4 w-4 shrink-0 text-blue-600"></i><span class="rounded-full bg-slate-100 px-2 py-1 text-[10.5px] text-slate-500">Otomatis 30 Hari</span></div><h3 class="mt-2 text-[12px] font-bold">Retensi Pemberitahuan Staf</h3><p class="mt-1 text-[10.5px] text-slate-500">Log notifikasi workflow, audit slip, dan approval tiket tersimpan aman dalam server lokal DC Cakung selama 30 hari terakhir.</p><button data-toast="Pengaturan arsip notifikasi dibuka." class="mt-2 h-10 w-full rounded-md bg-blue-50 px-4 text-[12px] font-semibold">Unduh Arsip Log Notifikasi</button></article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" role="status" class="fixed bottom-4 right-4 z-[80] hidden rounded-lg bg-slate-900 px-4 py-3 text-[12px] text-white shadow-lg"></div>
+  <script>
+    lucide.createIcons();let all=[{id:'TIKET REQ-2025-1042',time:'5 menit yang lalu (13:55 WIB)',sender:'Hendra Wijaya (Kepala Gudang Cakung)',kind:'Persetujuan Tiket',module:'Permintaan Tiket',priority:'Darurat',title:'Penggantian Scanner Zebra TC21 Rusak Telah Disetujui',body:'Permintaan handheld pengganti siap diambil di Locker Tools Room L-02 dengan menunjukkan barcode pinjam. Segera serahkan unit yang rusak ke Tim IT Support DC.',actions:['Ambil Barcode Slip','Lihat Detail Tiket'],icon:'package-check',unread:true},{id:'TUGAS INBOUND BARU · DOCK 02',time:'22 menit yang lalu (13:38 WIB)',sender:'Sistem Otomasi Gerbang DC',kind:'Tugas Operasional',module:'Tugas Inbound',priority:'Tinggi',title:'Armada Masuk Truk Box Schneider (B-9421-KDC) Tiba di Dock Receiving',body:'Surat Jalan SJ-CHB-1827 (PO-2025-0894) membutuhkan 1 checker untuk verifikasi fisik 1.420 unit. Anda dialokasikan sebagai checker shift berjalan.',actions:['Buka Form Input Inbound','Lihat Manifest Truk'],icon:'truck',unread:true},{id:'AUDIT STOK OPNAME · INVESTIGASI SELISIH',time:'45 menit yang lalu (13:15 WIB)',sender:'Supervisor Shift (Bambang H.)',kind:'Peringatan Stok',module:'Audit Stok',priority:'Normal',title:'Klarifikasi Selisih -3 Unit Barcode Scanner Zebra di Bin Locator Rak B-12',body:'Ditemukan selisih pada sesi opname SO-2025-0872. Harap lakukan blind second count bersama staf checker sebelum pukul 15:30 WIB.',actions:['Masuk Sesi Audit Rak B-12','Unggah Bukti Fisik'],icon:'clipboard-check',unread:true},{id:'PENGELUARAN BARANG · OUTBOUND',time:'1 jam yang lalu (12:00 WIB)',sender:'Dispatch Controller Hub',kind:'Tugas Operasional',module:'Pengeluaran Barang',priority:'Normal',title:'Surat Jalan DO-2025-0447 Tujuan Regional Bandung Berhasil Diverifikasi',body:'Truk Box B-9921-UTN telah keluar dari Gate 04 dengan segel pintu nomor 981-772931. Transaksi telah tercatat di sistem.',actions:['Lihat Bukti Surat Jalan'],icon:'truck',unread:false},{id:'STATUS PERMINTAAN · PERLENGKAPAN SHIFT',time:'3 jam yang lalu (10:15 WIB)',sender:'Siti Rahma (Admin Inventory DC)',kind:'Persetujuan Tiket',module:'Status Permintaan',priority:'Normal',title:'Pengajuan 5 Roll Bubble Wrap Heavy Duty Telah Divalidasi',body:'Konsumsi normal telah dicatat dalam kuota staging packing area lama A.',actions:['Rincian Tiket'],icon:'clipboard-list',unread:false}];let mode='Semua',limit=5,timer;const list=document.getElementById('notice-list'),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(timer);timer=setTimeout(()=>t.classList.add('hidden'),2400)}function render(){const q=document.getElementById('notice-search').value.toLowerCase(),p=document.getElementById('priority').value,m=document.getElementById('module').value,filtered=all.filter(n=>(mode==='Semua'||(mode==='Belum Dibaca'?n.unread:n.kind===mode))&&(!q||Object.values(n).join(' ').toLowerCase().includes(q))&&(!p||n.priority===p)&&(!m||n.module===m));list.innerHTML=filtered.slice(0,limit).map((n,i)=>`<article class="notice-in flex gap-3 rounded-lg border-l-[3px] ${n.priority==='Darurat'?'border-red-500':n.kind==='Tugas Operasional'?'border-blue-500':'border-slate-300'} ${n.unread?'bg-white':'bg-slate-50/70'} p-4" style="animation-delay:${i*25}ms"><span class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${n.priority==='Darurat'?'bg-red-50 text-red-600':n.kind==='Tugas Operasional'?'bg-blue-50 text-blue-600':'bg-slate-100 text-slate-600'}"><i data-lucide="${n.icon}" class="h-4 w-4 shrink-0"></i></span><div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2 text-[10.5px]"><b class="${n.priority==='Darurat'?'text-red-600':'text-blue-700'}">${esc(n.id)}</b><span>· ${esc(n.time)}</span><span>· ${esc(n.sender)}</span><button data-read="${esc(n.id)}" class="ml-auto whitespace-nowrap rounded-md bg-slate-50 px-2.5 py-1 text-[10.5px]">${n.unread?'✓ Tandai Dibaca':'✓ Dibaca'}</button>${n.unread?'<i class="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600"></i>':''}</div><b class="mt-1 block text-[12px]">${esc(n.title)}</b><p class="mt-0.5 text-[10.5px] leading-relaxed text-slate-500">${esc(n.body)}</p><div class="mt-2 flex flex-wrap gap-2">${n.actions.map(a=>`<button data-action="${esc(a)}" class="whitespace-nowrap rounded-md bg-blue-50 px-3 py-1.5 text-[10.5px] font-semibold text-blue-700">${esc(a)}</button>`).join('')}</div></div></article>`).join('')||'<p class="p-6 text-center text-[10.5px] text-slate-500">Tidak ada notifikasi yang cocok.</p>';document.getElementById('notice-count').textContent=`Menampilkan ${Math.min(limit,filtered.length)} dari ${filtered.length} notifikasi`;const unread=all.filter(n=>n.unread).length;document.getElementById('unread-count').textContent=unread;document.getElementById('nav-unread').textContent=unread;document.getElementById('load-more').disabled=limit>=filtered.length;document.getElementById('load-more').classList.toggle('opacity-50',limit>=filtered.length);lucide.createIcons()}document.querySelectorAll('.notice-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.kind;document.querySelectorAll('.notice-tab').forEach(x=>x.className=x===b?'notice-tab h-9 whitespace-nowrap rounded-md bg-blue-600 px-3 text-[10.5px] font-semibold text-white':'notice-tab h-9 whitespace-nowrap rounded-md px-3 text-[10.5px]');render()});['notice-search','priority','module'].forEach(id=>document.getElementById(id).addEventListener(id==='notice-search'?'input':'change',render));document.getElementById('mark-all').onclick=()=>{all.forEach(n=>n.unread=false);render();toast('Semua notifikasi ditandai sudah dibaca.')};document.getElementById('load-more').onclick=()=>{limit+=5;render()};document.getElementById('clear-notifications').onclick=()=>{all=all.filter(n=>n.unread);render();toast('Notifikasi yang sudah dibaca dihapus dari tampilan.')};list.addEventListener('click',e=>{const b=e.target.closest('[data-read],[data-action]');if(!b)return;if(b.dataset.read){const n=all.find(x=>x.id===b.dataset.read);n.unread=false;render()}else toast(`${b.dataset.action}: instruksi tersedia untuk shift aktif.`)});document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));render();
+  </script>
+  <script>
+    all.push(
+      {id:'TUGAS PICKING · ZONA A',time:'4 jam yang lalu (09:20 WIB)',sender:'Supervisor Shift Pagi',kind:'Tugas Operasional',module:'Tugas Inbound',priority:'Normal',title:'Penugasan Picking SKU Elektronik Selesai Dialokasikan',body:'Batch PK-2025-2218 untuk Zona A tersedia pada terminal Anda.',actions:['Lihat Detail Tugas'],icon:'package-check',unread:false},
+      {id:'PERSETUJUAN TIKET · REQ-2025-0962',time:'5 jam yang lalu (08:45 WIB)',sender:'Bambang H. (Supervisor Shift)',kind:'Persetujuan Tiket',module:'Permintaan Tiket',priority:'Normal',title:'Permintaan Label Barcode Thermal Telah Disetujui',body:'Empat box label thermal dapat diambil di Tool Crib sebelum mulai proses inbound.',actions:['Rincian Tiket'],icon:'clipboard-check',unread:false},
+      {id:'PERINGATAN STOK · ZONA C',time:'Kemarin (16:40 WIB)',sender:'Sistem Monitoring Persediaan',kind:'Peringatan Stok',module:'Audit Stok',priority:'Tinggi',title:'Stok Buffer Kabel Jaringan Mendekati Batas Minimum',body:'Pemeriksaan ulang kuantitas fisik dijadwalkan pada cycle count berikutnya.',actions:['Lihat Detail Stok'],icon:'triangle-alert',unread:false},
+      {id:'TUGAS INBOUND · PO-2025-0887',time:'Kemarin (15:10 WIB)',sender:'Sistem Otomasi Gerbang DC',kind:'Tugas Operasional',module:'Tugas Inbound',priority:'Normal',title:'Dokumen Penerimaan PO-2025-0887 Telah Lengkap',body:'Berkas penerimaan tervalidasi. Silakan lanjutkan pemeriksaan kualitas barang.',actions:['Buka Form Inbound'],icon:'truck',unread:false},
+      {id:'STATUS PERMINTAAN · REQ-2025-0955',time:'Kemarin (14:25 WIB)',sender:'Siti Rahma (Admin Inventory DC)',kind:'Persetujuan Tiket',module:'Status Permintaan',priority:'Normal',title:'Permintaan Perlengkapan Staging Siap Diambil',body:'Permintaan sarung tangan kerja sudah diproses sesuai kuota shift.',actions:['Lihat Status'],icon:'clipboard-list',unread:false},
+      {id:'AUDIT STOK OPNAME · SO-2025-0861',time:'Kemarin (13:50 WIB)',sender:'Supervisor Shift (Bambang H.)',kind:'Peringatan Stok',module:'Audit Stok',priority:'Normal',title:'Jadwal Cycle Count Zona B Diperbarui',body:'Sesi hitung fisik dimulai pukul 16:00 WIB pada rak B-12.',actions:['Lihat Jadwal Audit'],icon:'clipboard-check',unread:false},
+      {id:'PENGELUARAN BARANG · DO-2025-0439',time:'Kemarin (12:35 WIB)',sender:'Dispatch Controller Hub',kind:'Tugas Operasional',module:'Pengeluaran Barang',priority:'Normal',title:'Verifikasi Barang Keluar Regional Bekasi Selesai',body:'Dokumen serah terima sudah dicatat pada log shift.',actions:['Lihat Bukti Surat Jalan'],icon:'truck',unread:false},
+      {id:'PENGUMUMAN SHIFT · DC-01',time:'Kemarin (11:10 WIB)',sender:'Kepala Gudang Cakung',kind:'Tugas Operasional',module:'Status Permintaan',priority:'Normal',title:'Briefing Keselamatan Kerja Sebelum Pergantian Shift',body:'Seluruh staf zona receiving diminta hadir di area briefing pada pukul 16:30 WIB.',actions:['Baca Pengumuman'],icon:'megaphone',unread:false},
+      {id:'SISTEM · TERMINAL ZBR-TC21-042',time:'Kemarin (08:05 WIB)',sender:'Sistem Astro Inventory',kind:'Tugas Operasional',module:'Tugas Inbound',priority:'Normal',title:'Sinkronisasi Data Terminal Berhasil',body:'Seluruh transaksi offline dari sesi sebelumnya sudah tersinkron ke server gudang.',actions:['Lihat Status Perangkat'],icon:'refresh-cw',unread:false}
+    );
+    render();
+  </script>
+  <script>(()=>{const s=document.getElementById('sidebar'),b=document.getElementById('sidebar-backdrop'),t=document.getElementById('sidebar-toggle'),mobile=()=>matchMedia('(max-width:767px)').matches;window.toggleSidebar=(close=false)=>{if(mobile())s.classList.toggle('open',close?false:!s.classList.contains('open'));else document.body.classList.toggle('sidebar-collapsed',close?true:!document.body.classList.contains('sidebar-collapsed'));sync()};function sync(){const open=mobile()?s.classList.contains('open'):!document.body.classList.contains('sidebar-collapsed');t.setAttribute('aria-label',open?'Tutup sidebar':'Buka sidebar');t.setAttribute('aria-expanded',String(open));const icon=t.querySelector('svg');if(icon&&icon.getAttribute('data-lucide')!==(open?'x':'menu')){icon.setAttribute('data-lucide',open?'x':'menu');lucide.createIcons()}b.classList.toggle('show',mobile()&&open)}window.addEventListener('resize',sync);sync()})();</script>
+</body>
+</html>

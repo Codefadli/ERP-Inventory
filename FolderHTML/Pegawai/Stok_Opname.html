@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Stok Opname Fisik | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root { --ai-primary: #1d4ed8; }
+  html { scroll-behavior: smooth; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; }
+
+  /* ============ DESIGN SYSTEM ============ */
+  .ai-card { background:#ffffff; border:1px solid #e2e8f0; border-radius:1rem; box-shadow:0 1px 2px rgba(15,23,42,.06); }
+  .ai-card-hover { transition: transform .22s ease, box-shadow .22s ease; }
+  .ai-card-hover:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -10px rgba(29,78,216,.18); }
+
+  .ai-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:600; font-size:.85rem;
+            border-radius:.65rem; padding:.6rem 1.1rem; line-height:1; cursor:pointer; border:1px solid transparent;
+            transition: all .18s ease; white-space:nowrap; }
+  .ai-btn:active { transform: scale(.97); }
+  .ai-btn-primary { background:var(--ai-primary); color:#fff; }
+  .ai-btn-primary:hover { background:#1e40af; }
+  .ai-btn-secondary { background:#fff; color:#334155; border-color:#e2e8f0; }
+  .ai-btn-secondary:hover { background:#f8fafc; border-color:#cbd5e1; }
+  .ai-btn-soft { background:#eff6ff; color:var(--ai-primary); }
+  .ai-btn-soft:hover { background:#dbeafe; }
+  .ai-btn-danger { background:#dc2626; color:#fff; }
+  .ai-btn-danger:hover { background:#b91c1c; }
+
+  .ai-badge { display:inline-flex; align-items:center; gap:.35rem; font-size:.68rem; font-weight:700;
+              padding:.28rem .65rem; border-radius:999px; line-height:1.1; white-space:nowrap; }
+  .ai-badge-xs { font-size:.55rem; padding:.14rem .4rem; }
+
+  .ai-input { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:.65rem;
+              padding:.62rem .9rem; font-size:.875rem; color:#0f172a; outline:none; transition:border-color .15s, box-shadow .15s; }
+  .ai-input:focus { border-color:var(--ai-primary); box-shadow:0 0 0 3px rgba(29,78,216,.14); }
+
+  .ai-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  .ai-table thead th { background:#f1f5f9; text-transform:uppercase; letter-spacing:.05em; font-size:.66rem;
+                       color:#64748b; font-weight:700; text-align:left; padding:.8rem 1rem; white-space:nowrap; }
+  .ai-table tbody td { padding:.85rem 1rem; border-top:1px solid #f1f5f9; vertical-align:middle; }
+  .ai-table tbody tr { transition: background .2s; }
+  .po-row-discrepancy { background:#fff1f2 !important; }
+
+  .ai-pill { display:inline-flex; align-items:center; gap:.4rem; font-size:.78rem; font-weight:600; color:#475569;
+             background:#fff; border:1px solid #e2e8f0; border-radius:999px; padding:.45rem 1rem; cursor:pointer; transition:all .18s; }
+  .ai-pill:hover { border-color:#94a3b8; }
+  .ai-pill-active { background:var(--ai-primary); border-color:var(--ai-primary); color:#fff; }
+
+  .ai-bar { background:#e2e8f0; border-radius:999px; height:.6rem; overflow:hidden; }
+  .ai-bar > span { display:block; height:100%; border-radius:999px; width:0; transition:width 1.4s cubic-bezier(.22,1,.36,1); }
+
+  .ai-switch { position:relative; display:inline-block; width:42px; height:23px; flex:none; }
+  .ai-switch input { display:none; }
+  .ai-switch em { position:absolute; inset:0; background:#cbd5e1; border-radius:999px; cursor:pointer; transition:background .2s; font-style:normal; }
+  .ai-switch em::after { content:""; position:absolute; top:3px; left:3px; width:17px; height:17px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .ai-switch input:checked + em { background:var(--ai-primary); }
+  .ai-switch input:checked + em::after { transform: translateX(19px); }
+
+  .ai-reveal { opacity:0; transform: translateY(16px); transition: opacity .65s ease, transform .65s ease; }
+  .ai-reveal.ai-revealed { opacity:1; transform:none; }
+
+  .ai-modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:90; padding:1rem; }
+  .ai-modal { background:#fff; border-radius:1rem; width:100%; max-width:520px; padding:1.5rem; box-shadow:0 24px 60px rgba(0,0,0,.25); }
+
+  /* ============ SHELL: SIDEBAR & TOPBAR ============ */
+  .ai-sidebar { position:fixed; top:0; bottom:0; left:0; width:264px; background:#fff; border-right:1px solid #e2e8f0;
+                z-index:60; display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .25s ease; }
+  .ai-sidebar.ai-sidebar-open { transform:none; box-shadow:0 0 60px rgba(15,23,42,.25); }
+  @media (min-width:1024px){ .ai-sidebar { transform:none; } }
+  .ai-nav-label { font-size:.62rem; font-weight:800; letter-spacing:.12em; color:#94a3b8; padding:1rem 1rem .4rem; }
+  .ai-nav-item { display:flex; align-items:center; gap:.7rem; margin:.1rem .65rem; padding:.58rem .85rem; border-radius:.6rem;
+                 font-size:.85rem; font-weight:600; color:#475569; cursor:pointer; transition:background .15s, color .15s; text-decoration:none; }
+  .ai-nav-item:hover { background:#f1f5f9; color:#0f172a; }
+  .ai-nav-item.ai-nav-active, .ai-nav-item.ai-nav-active:hover { background:var(--ai-primary); color:#fff; }
+  .ai-nav-badge { margin-left:auto; font-size:.58rem; font-weight:700; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:999px; padding:.15rem .5rem; }
+  .ai-toast { display:flex; align-items:center; gap:.6rem; background:#0f172a; color:#f8fafc; font-size:.82rem; font-weight:600;
+              border-radius:.75rem; padding:.75rem 1rem; box-shadow:0 12px 30px rgba(0,0,0,.3); opacity:0; transform:translateY(10px);
+              transition:all .3s ease; max-width:340px; }
+  .ai-toast.ai-toast-show { opacity:1; transform:none; }
+</style>
+<script>
+  /* ============ SHELL SCRIPT (sidebar / topbar / interaksi global) ============ */
+  (function () {
+    function ready(fn) { document.readyState !== "loading" ? fn() : document.addEventListener("DOMContentLoaded", fn); }
+
+    /* ---------- Toast ---------- */
+    window.aiToast = function (msg, type) {
+      var wrap = document.getElementById("aiToastWrap");
+      if (!wrap) { wrap = document.createElement("div"); wrap.id = "aiToastWrap";
+        wrap.style.cssText = "position:fixed;right:1.25rem;bottom:1.25rem;z-index:999;display:flex;flex-direction:column;gap:.5rem;";
+        document.body.appendChild(wrap); }
+      var t = document.createElement("div");
+      t.className = "ai-toast";
+      var icon = type === "success" ? "check-circle-2" : type === "error" ? "alert-triangle" : "info";
+      var color = type === "success" ? "#4ade80" : type === "error" ? "#f87171" : "#60a5fa";
+      t.innerHTML = '<i data-lucide="' + icon + '" style="width:16px;height:16px;color:' + color + ';flex:none"></i><span>' + msg + "</span>";
+      wrap.appendChild(t);
+      if (window.lucide) lucide.createIcons();
+      requestAnimationFrame(function () { t.classList.add("ai-toast-show"); });
+      setTimeout(function () { t.classList.remove("ai-toast-show"); setTimeout(function () { t.remove(); }, 320); }, 3200);
+    };
+
+    /* ---------- Delegasi klik global: toast, tab, modal ---------- */
+    document.addEventListener("click", function (e) {
+      var el;
+      if ((el = e.target.closest("[data-toast]"))) {
+        e.preventDefault();
+        window.aiToast(el.getAttribute("data-toast"), el.getAttribute("data-toast-type") || "info");
+        return;
+      }
+      if ((el = e.target.closest("[data-tab]"))) {
+        var group = el.closest("[data-tabs]"); if (!group) return;
+        group.querySelectorAll("[data-tab]").forEach(function (t) { t.classList.remove("ai-pill-active"); });
+        el.classList.add("ai-pill-active");
+        var name = el.getAttribute("data-tab");
+        document.querySelectorAll("[data-tabpanel]").forEach(function (p) {
+          p.style.display = p.getAttribute("data-tabpanel") === name ? "" : "none";
+        });
+        return;
+      }
+      if ((el = e.target.closest("[data-modal-open]"))) {
+        var m = document.getElementById(el.getAttribute("data-modal-open"));
+        if (m) m.style.display = "flex";
+        return;
+      }
+      if ((el = e.target.closest("[data-modal-close]"))) {
+        var ov = el.closest(".ai-modal-overlay");
+        if (ov) ov.style.display = "none";
+      }
+    });
+
+    /* ---------- Reveal / count-up / bar ---------- */
+    var revealObserver = null;
+    function animateCount(el) {
+      if (el.dataset.countDone) return;
+      el.dataset.countDone = "1";
+      var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+      var suffix = el.getAttribute("data-count-suffix") || "";
+      var dur = 1300, start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        p = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * p).toLocaleString("id-ID") + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    function initObservers() {
+      if (!revealObserver) {
+        revealObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            var el = en.target;
+            el.classList.add("ai-revealed");
+            el.querySelectorAll("[data-count]").forEach(animateCount);
+            if (el.hasAttribute("data-count")) animateCount(el);
+            el.querySelectorAll(".ai-bar").forEach(function (bar) {
+              var span = bar.querySelector("span");
+              if (span) span.style.width = bar.getAttribute("data-w") || "0%";
+            });
+            revealObserver.unobserve(el);
+          });
+        }, { threshold: 0.12 });
+      }
+      document.querySelectorAll(".ai-reveal:not(.ai-revealed)").forEach(function (el) {
+        var d = el.getAttribute("data-delay");
+        if (d) el.style.transitionDelay = d + "ms";
+        revealObserver.observe(el);
+      });
+    }
+
+    /* ---------- Refresh global (panggil setelah render dinamis) ---------- */
+    window.aiRefresh = function () {
+      if (window.lucide) lucide.createIcons();
+      initObservers();
+    };
+
+    /* ---------- Init shell ---------- */
+    ready(function () {
+      var body = document.body;
+      /* search placeholder dari data-search */
+      var q = body.getAttribute("data-search");
+      if (q) { var inp = document.getElementById("globalSearch"); if (inp) inp.placeholder = q; }
+      /* sidebar aktif dari data-active */
+      var act = body.getAttribute("data-active");
+      if (act) {
+        document.querySelectorAll(".ai-nav-item").forEach(function (a) {
+          a.classList.toggle("ai-nav-active", a.getAttribute("data-nav") === act);
+        });
+      }
+      /* toggle sidebar mobile */
+      var burger = document.getElementById("btnSidebar");
+      if (burger) burger.addEventListener("click", function () {
+        document.getElementById("aiSidebar").classList.toggle("ai-sidebar-open");
+      });
+      window.aiRefresh();
+    });
+  })();
+</script>
+</head>
+<body data-role="pegawai" data-active="stok-opname" data-search="Cari SKU, No. DO, Surat Jalan, Rak, Picking List... (⌘K)" class="bg-slate-100 text-slate-800 antialiased">
+
+<!-- ================= SIDEBAR ================= -->
+<aside id="aiSidebar" class="ai-sidebar">
+  <div class="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
+    <div class="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-700/30">
+      <i data-lucide="boxes" class="w-5 h-5"></i>
+    </div>
+    <div>
+      <p class="font-extrabold text-slate-900 leading-tight">Astro Inventory</p>
+      <p class="text-[10px] text-slate-400 font-semibold">Sistem Inventaris Terpadu</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto pb-4">
+    <p class="ai-nav-label">MENU UTAMA</p>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="dashboard"><i data-lucide="layout-grid" class="w-4 h-4"></i> Dashboard</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="data-barang"><i data-lucide="package" class="w-4 h-4"></i> Data Barang</a>
+
+    <p class="ai-nav-label">OPERASIONAL GUDANG</p>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="barang-masuk"><i data-lucide="download" class="w-4 h-4"></i> Barang Masuk</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="barang-keluar"><i data-lucide="upload" class="w-4 h-4"></i> Barang Keluar</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="stok-opname"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Stok Opname</a>
+
+    <p class="ai-nav-label">MONITORING &amp; LAPORAN</p>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="riwayat-transaksi"><i data-lucide="history" class="w-4 h-4"></i> Riwayat Transaksi</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="status-permintaan"><i data-lucide="clipboard-check" class="w-4 h-4"></i> Status Permintaan <span class="ai-nav-badge">2 Menunggu</span></a>
+
+    <p class="ai-nav-label">PENGATURAN &amp; AKUN</p>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="notifikasi"><i data-lucide="bell" class="w-4 h-4"></i> Notifikasi</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="pengaturan"><i data-lucide="settings" class="w-4 h-4"></i> Pengaturan</a>
+    <a class="ai-nav-item" href="javascript:void(0)" data-nav="profil"><i data-lucide="user" class="w-4 h-4"></i> Profil Saya</a>
+  </nav>
+
+  <div class="m-4 rounded-xl bg-slate-50 border border-slate-100 p-4">
+    <div class="flex items-center justify-between">
+      <p class="flex items-center gap-1.5 text-xs font-bold text-slate-700"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Shift Pagi</p>
+      <span class="text-[10px] text-slate-400 font-semibold">08:00 - 17:00</span>
+    </div>
+    <p class="text-[11px] font-bold text-blue-700 mt-2">Hub Cakung DC-01 Online</p>
+    <p class="text-[10px] text-slate-400">Zona A &amp; Staging Inbound</p>
+  </div>
+</aside>
+
+<!-- ================= WRAPPER ================= -->
+<div class="lg:ml-[264px] min-h-screen flex flex-col">
+
+  <!-- ================= TOPBAR ================= -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 px-4 lg:px-6 py-3 flex items-center gap-3">
+    <button id="btnSidebar" class="lg:hidden w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500">
+      <i data-lucide="menu" class="w-4 h-4"></i>
+    </button>
+    <button class="hidden md:inline-flex items-center gap-2 text-xs font-bold text-slate-600 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50" data-toast="Pemilih lokasi gudang dibuka." data-toast-type="info">
+      <i data-lucide="building-2" class="w-4 h-4 text-blue-600"></i>
+      Jakarta (Pusat DC) &gt; Hub Cakung DC-01 (Utama)
+      <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+    </button>
+    <div class="relative flex-1 max-w-xl">
+      <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      <input id="globalSearch" type="text" class="ai-input pl-9 bg-slate-50" placeholder="Cari SKU, No. DO, Surat Jalan, Rak, Picking List... (⌘K)">
+    </div>
+    <div class="flex items-center gap-3 ml-auto">
+      <button class="hidden sm:flex w-9 h-9 rounded-full border border-slate-200 items-center justify-center text-slate-500 hover:bg-slate-50" data-toast="Pusat bantuan &amp; panduan terminal dibuka." data-toast-type="info">
+        <i data-lucide="help-circle" class="w-4 h-4"></i>
+      </button>
+      <button class="relative w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50" data-toast="3 notifikasi belum dibaca: 2 hasil recount, 1 persetujuan BAS." data-toast-type="info">
+        <i data-lucide="bell" class="w-4 h-4"></i>
+        <span class="absolute -top-1 -right-1 w-4.5 h-4.5 min-w-[18px] rounded-full bg-red-600 text-white text-[9px] font-bold flex items-center justify-center px-1">3</span>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <div class="text-right hidden sm:block">
+          <p class="text-xs font-bold text-slate-800 leading-tight">Agus Prasetyo</p>
+          <p class="text-[10px] text-slate-400 font-semibold">Staf Operasional</p>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-extrabold text-sm">AP</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN ================= -->
+  <main class="flex-1 p-4 lg:p-6 space-y-6 max-w-[1500px] w-full mx-auto">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <nav class="text-[10.5px] font-bold tracking-wider text-slate-400 flex items-center gap-1.5 flex-wrap">
+        <span>PORTAL OPERASIONAL PEGAWAI</span><span>/</span>
+        <span>OPERASIONAL GUDANG</span><span>/</span>
+        <span class="text-blue-700">AUDIT STOK OPNAME FISIK RAK (CYCLE COUNT)</span>
+      </nav>
+      <span class="ai-badge bg-blue-100 text-blue-700"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Live Audit Shift Berjalan</span>
+    </div>
+
+    <!-- 1. HEADER -->
+    <div class="flex items-start justify-between flex-wrap gap-4 ai-reveal">
+      <div class="max-w-md">
+        <h1 class="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Audit Stok Opname Fisik</h1>
+        <p class="text-xs lg:text-sm text-slate-500 mt-2 leading-relaxed">Pencocokan jumlah fisik barang di lokasi rak/bin locador dengan data sistem secara berkala oleh staff operasional untuk mencegah selisih stok (discrepancy).</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button class="ai-btn ai-btn-secondary" data-toast="Riwayat audit selesai (12 sesi terakhir) dibuka." data-toast-type="info"><i data-lucide="history" class="w-4 h-4"></i> Riwayat Audit Selesai</button>
+        <button class="ai-btn ai-btn-secondary" data-toast="Dokumen Panduan SOP Stock Count v3.2 dibuka." data-toast-type="info"><i data-lucide="book-open" class="w-4 h-4"></i> Panduan SOP Stock Count</button>
+        <button class="ai-btn ai-btn-primary" data-toast="Sesi audit rak baru dibuat. Scan barcode bin untuk memulai." data-toast-type="success"><i data-lucide="plus" class="w-4 h-4"></i> Mulai Sesi Audit Rak Baru</button>
+      </div>
+    </div>
+
+    <!-- 2. STAT CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div class="ai-card ai-card-hover ai-reveal p-5">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">JADWAL AUDIT HARI INI</p>
+            <p class="text-[26px] leading-tight font-extrabold text-slate-900 mt-2">5 Rak / Bin</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="archive" class="w-5 h-5"></i></div>
+        </div>
+        <div class="mt-4 bg-slate-50 rounded-lg px-3 py-2 flex items-center gap-1.5">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-green-500 shrink-0"></i>
+          <span class="text-[11px] font-semibold text-slate-600">3 Selesai Dihitung, 2 Sedang Berjalan</span>
+        </div>
+      </div>
+
+      <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="80">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">ITEM SKU DIVERIFIKASI</p>
+            <p class="text-[26px] leading-tight font-extrabold text-slate-900 mt-2"><span data-count="480">0</span> SKU</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-green-100 text-green-600 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></div>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-[11px] font-semibold text-slate-600">92% Target Shift Terpenuhi</span>
+          <span class="ai-badge bg-green-100 text-green-700">Akurasi 99.4%</span>
+        </div>
+      </div>
+
+      <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="160">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">SELISIH STOK (DISCREPANCY)</p>
+            <p id="statSelisih" class="text-[26px] leading-tight font-extrabold text-red-600 mt-2">2 Item</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5"></i></div>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-[11px] font-semibold text-slate-600">1 Kurang (-3 pcs), 1 Lebih (+1 pcs)</span>
+          <span class="ai-badge bg-red-100 text-red-600">Investigasi</span>
+        </div>
+      </div>
+
+      <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="240">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">BATAS WAKTU SHIFT (TENGGAT)</p>
+            <p class="text-[26px] leading-tight font-extrabold text-slate-900 mt-2">15:30 WIB</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="hourglass" class="w-5 h-5"></i></div>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-[11px] font-semibold text-slate-600">Shift Pagi Berakhir 17:00</span>
+          <span class="ai-badge bg-blue-100 text-blue-700">Sisa 1 Jam 45 Menit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SESI AKTIF + SCANNER -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div class="ai-card ai-card-hover ai-reveal p-6 xl:col-span-2">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="ai-badge bg-blue-700 text-white">SOP-2025-B12</span>
+            <span class="ai-badge bg-slate-100 text-slate-600">Audit Harian Shift Pagi</span>
+          </div>
+          <span class="ai-badge bg-green-100 text-green-700"><span class="w-2 h-2 rounded-full bg-green-500"></span> SESI AKTIF BERJALAN</span>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-6 mt-5">
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">LOKASI TARGET RAK</p>
+            <p class="flex items-center gap-2 font-bold text-slate-800 mt-1.5"><i data-lucide="warehouse" class="w-4 h-4 text-blue-600 shrink-0"></i> Zona B - Rak 12 (Level 1 s/d 4)</p>
+            <p class="text-xs text-slate-500 mt-1">Hub Cakung DC-01 • Staging Inbound B</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-extrabold tracking-wider text-slate-400">PETUGAS &amp; TERMINAL</p>
+            <p class="flex items-center gap-2 font-bold text-slate-800 mt-1.5"><i data-lucide="user-check" class="w-4 h-4 text-blue-600 shrink-0"></i> Agus Prasetyo (NIK: STF-90214)</p>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5"><i data-lucide="smartphone" class="w-3 h-3 text-slate-400"></i> Zebra TC21 (Online, 85%)</p>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-4 mt-5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <p class="flex items-center gap-2 text-sm font-bold text-slate-800"><i data-lucide="settings" class="w-4 h-4 text-blue-600"></i> Progres Verifikasi Bin Rak B-12</p>
+            <p class="text-xs font-bold text-blue-700">75% (18 dari 24 Bin Locator Selesai)</p>
+          </div>
+          <div class="ai-bar mt-3" data-w="75%"><span class="bg-blue-600"></span></div>
+          <div class="flex items-center justify-between mt-2 text-[11px] text-slate-500 font-medium">
+            <span>Bin 01 - Bin 18: Lulus Verifikasi</span>
+            <span>Bin 19 - Bin 24: Siap Dihitung</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 ai-reveal ai-card-hover" data-delay="120">
+        <div class="flex items-center justify-between">
+          <p class="text-[10px] font-extrabold tracking-wider text-slate-500">TERMINAL SCANNER INPUT</p>
+          <i data-lucide="scan-barcode" class="w-5 h-5 text-blue-600"></i>
+        </div>
+        <p class="text-sm font-bold text-slate-700 mt-4">Scan Barcode Bin Locator / SKU Barang:</p>
+        <div class="relative mt-2">
+          <input id="scanInput" type="text" class="ai-input pr-10 font-semibold" value="Rak B-12-L03-A" autocomplete="off">
+          <i data-lucide="radio" class="w-4 h-4 text-blue-500 absolute right-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="btnBlind" class="ai-btn ai-btn-secondary"><i data-lucide="eye-off" class="w-4 h-4"></i> Blind Count</button>
+          <button id="btnStandar" class="ai-btn ai-btn-primary"><i data-lucide="list-checks" class="w-4 h-4"></i> Mode Standar</button>
+        </div>
+        <div class="bg-green-100 rounded-xl p-3.5 mt-4">
+          <p class="flex items-center gap-1.5 text-xs font-extrabold text-green-700"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Barcode Bin Terbaca Aktif</p>
+          <p id="scanCode" class="text-sm font-extrabold text-slate-800 mt-1.5">Rak B-12-L03-A</p>
+          <p id="scanItem" class="text-xs text-slate-600 mt-0.5">Kabel UTP Cat6 Patch Cord Belden 3M</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. BANNER DISCREPANCY -->
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-center gap-4 flex-wrap ai-reveal">
+      <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5"></i></div>
+      <div class="flex-1 min-w-[260px]">
+        <p class="font-extrabold text-red-700 text-sm lg:text-base">Terdeteksi <span id="bannerCount">2</span> Item Mengalami Selisih Fisik pada Rak B-12</p>
+        <p class="text-xs text-slate-600 mt-0.5">SOP mewajibkan penghitungan ulang kedua (Blind Second Count) oleh staf independen sebelum laporan difinalisasi.</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button class="ai-btn ai-btn-secondary" data-toast="Permintaan Blind Second Count dikirim ke checker independen Shift Sore." data-toast-type="info"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Minta Penghitungan Ulang (Recount)</button>
+        <button class="ai-btn ai-btn-danger" data-toast="Berita Acara Selisih (BAS) dieskalasi ke Kepala Gudang untuk persetujuan." data-toast-type="error"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Eskalasi BAS ke Kepala Gudang</button>
+      </div>
+    </div>
+
+    <!-- 5. TABEL ITEM SKU -->
+    <div class="ai-card ai-card-hover ai-reveal overflow-hidden">
+      <div class="p-5 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-600"></i>
+          <h2 class="font-extrabold text-slate-900">Daftar Item SKU Rak B-12</h2>
+          <span id="chipSelected" class="ai-badge bg-blue-100 text-blue-700">5 Baris Terpilih</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <label for="filterStatus" class="text-xs font-bold text-slate-500">Filter Status:</label>
+          <select id="filterStatus" class="ai-input !w-auto text-sm">
+            <option value="all">Semua Status</option>
+            <option value="selesai">Selesai Diverifikasi</option>
+            <option value="discrepancy">Discrepancy</option>
+            <option value="investigasi">Investigasi</option>
+          </select>
+          <button class="ai-btn ai-btn-secondary" data-toast="Data SKU Rak B-12 berhasil diexport ke CSV." data-toast-type="success"><i data-lucide="download" class="w-4 h-4"></i> Export CSV</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="ai-table">
+          <thead>
+            <tr>
+              <th class="w-10"><input id="checkAll" type="checkbox" class="w-4 h-4 rounded accent-blue-600" checked></th>
+              <th>NO</th>
+              <th>SKU &amp; NAMA BARANG</th>
+              <th>LOKASI BIN</th>
+              <th>QTY SISTEM</th>
+              <th>QTY FISIK AKTUAL</th>
+              <th>SELISIH</th>
+              <th>STATUS VERIFIKASI</th>
+              <th class="text-right">AKSI</th>
+            </tr>
+          </thead>
+          <tbody id="tblBody">
+            <tr class="po-row" data-system="140" data-status="selesai">
+              <td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>
+              <td class="text-slate-400 font-semibold text-xs">01</td>
+              <td>
+                <p class="font-extrabold text-blue-700 text-xs">SKU-NET-4022</p>
+                <p class="font-bold text-slate-800">Kabel UTP Cat6 Patch Cord Belden 3M</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Networking • Box Roll Standard</p>
+              </td>
+              <td><span class="ai-badge bg-slate-100 text-slate-600">Rak B-12-L01</span></td>
+              <td class="font-bold text-slate-700 whitespace-nowrap">140 Unit</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>
+                  <input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="140">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>
+                </div>
+              </td>
+              <td class="po-selisih"><span class="text-green-600 font-extrabold text-xs">0 (Cocok)</span></td>
+              <td class="po-status"><span class="ai-badge bg-green-100 text-green-700"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Selesai Diverifikasi</span></td>
+              <td class="text-right"><button class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition" data-toast="Menu verifikasi detail SKU-NET-4022 dibuka." data-toast-type="info"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+
+            <tr class="po-row" data-system="18" data-status="selesai">
+              <td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>
+              <td class="text-slate-400 font-semibold text-xs">02</td>
+              <td>
+                <p class="font-extrabold text-blue-700 text-xs">SKU-IT-0921</p>
+                <p class="font-bold text-slate-800">Server Rack Unit 42U APC Schneider</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Hardware • Heavy Pallet</p>
+              </td>
+              <td><span class="ai-badge bg-slate-100 text-slate-600">Rak B-12-L02</span></td>
+              <td class="font-bold text-slate-700 whitespace-nowrap">18 Unit</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>
+                  <input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="18">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>
+                </div>
+              </td>
+              <td class="po-selisih"><span class="text-green-600 font-extrabold text-xs">0 (Cocok)</span></td>
+              <td class="po-status"><span class="ai-badge bg-green-100 text-green-700"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Selesai Diverifikasi</span></td>
+              <td class="text-right"><button class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition" data-toast="Menu verifikasi detail SKU-IT-0921 dibuka." data-toast-type="info"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+
+            <tr class="po-row po-row-discrepancy" data-system="25" data-status="discrepancy">
+              <td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>
+              <td class="text-slate-400 font-semibold text-xs">03</td>
+              <td>
+                <p class="flex items-center gap-1.5"><span class="font-extrabold text-blue-700 text-xs">SKU-SCN-2041</span> <span class="ai-badge ai-badge-xs bg-red-600 text-white">SELISIH</span></p>
+                <p class="font-bold text-slate-800">Barcode Scanner Zebra TC21 Handheld</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Asset Operasional • High Value Item</p>
+              </td>
+              <td><span class="ai-badge bg-slate-100 text-slate-600">Rak B-12-L03</span></td>
+              <td class="font-bold text-slate-700 whitespace-nowrap">25 Unit</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>
+                  <input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="22">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>
+                </div>
+              </td>
+              <td class="po-selisih"><span class="text-red-600 font-extrabold text-xs">-3 Unit</span></td>
+              <td class="po-status"><span class="ai-badge bg-red-100 text-red-700"><i data-lucide="alert-triangle" class="w-3 h-3"></i> Discrepancy (Kurang)</span></td>
+              <td class="text-right"><button class="w-8 h-8 rounded-lg text-red-500 hover:bg-red-100 transition" data-toast="Permintaan recount SKU-SCN-2041 dikirim ke checker independen." data-toast-type="info"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button></td>
+            </tr>
+
+            <tr class="po-row" data-system="320" data-status="investigasi">
+              <td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>
+              <td class="text-slate-400 font-semibold text-xs">04</td>
+              <td>
+                <p class="flex items-center gap-1.5"><span class="font-extrabold text-blue-700 text-xs">SKU-PKG-0447</span> <span class="ai-badge ai-badge-xs bg-blue-600 text-white">+1 FISIK</span></p>
+                <p class="font-bold text-slate-800">Pallet Kardus Corrugated Box L (50×40×35)</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Packaging Material • Heavy Stack</p>
+              </td>
+              <td><span class="ai-badge bg-slate-100 text-slate-600">Rak B-12-L04</span></td>
+              <td class="font-bold text-slate-700 whitespace-nowrap">320 Unit</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>
+                  <input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="321">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>
+                </div>
+              </td>
+              <td class="po-selisih"><span class="ai-badge bg-blue-100 text-blue-700">+1 Unit</span></td>
+              <td class="po-status"><span class="ai-badge bg-slate-100 text-slate-600"><i data-lucide="search" class="w-3 h-3"></i> Investigasi Fisik</span></td>
+              <td class="text-right"><button class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition" data-toast="Menu verifikasi detail SKU-PKG-0447 dibuka." data-toast-type="info"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+
+            <tr class="po-row" data-system="85" data-status="selesai">
+              <td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>
+              <td class="text-slate-400 font-semibold text-xs">05</td>
+              <td>
+                <p class="font-extrabold text-blue-700 text-xs">SKU-ACC-1090</p>
+                <p class="font-bold text-slate-800">Lakban Industri Heavy Duty 2 Inch Daimaru</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Consumable Outbound • Box 72 Roll</p>
+              </td>
+              <td><span class="ai-badge bg-slate-100 text-slate-600">Rak B-12-L05</span></td>
+              <td class="font-bold text-slate-700 whitespace-nowrap">85 Roll</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>
+                  <input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="85">
+                  <button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>
+                </div>
+              </td>
+              <td class="po-selisih"><span class="text-green-600 font-extrabold text-xs">0 (Cocok)</span></td>
+              <td class="po-status"><span class="ai-badge bg-green-100 text-green-700"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Selesai Diverifikasi</span></td>
+              <td class="text-right"><button class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition" data-toast="Menu verifikasi detail SKU-ACC-1090 dibuka." data-toast-type="info"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
+        <p class="flex items-center gap-2 text-xs text-slate-500">
+          <i data-lucide="info" class="w-4 h-4 text-blue-500 shrink-0"></i>
+          <span id="tblFootText">Menampilkan 5 dari total 24 SKU di Rak B-12. Gunakan barcode scanner untuk memanggil nomor SKU selanjutnya secara instan.</span>
+        </p>
+        <button id="btnLoadMore" class="ai-btn ai-btn-secondary">Muat Lebih Banyak</button>
+      </div>
+    </div>
+
+    <!-- 6. CATATAN + LAMPIRAN -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="ai-card ai-card-hover ai-reveal p-6">
+        <div class="flex items-start justify-between flex-wrap gap-2">
+          <h3 class="flex items-center gap-2 font-extrabold text-slate-900"><i data-lucide="file-text" class="w-5 h-5 text-blue-600"></i> Catatan Investigasi Lapangan</h3>
+          <span class="text-xs font-semibold text-slate-400">Shift Pagi • Agus P.</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5">Catat temuan kondisi barang, segel kemasan rusak, penempatan salah bin, atau dugaan penyebab selisih.</p>
+        <textarea id="catatanField" class="ai-input mt-4 bg-slate-50 h-28 resize-none leading-relaxed">Kondisi fisik rak B-12 bersih dan teratur. Ditemukan 3 unit scanner belum di-putaway dari dock receiving kemarin, sedang diverifikasi bersama checker inbound Bp. Joko. Segel aman tanpa tanda kerusakan fisik kardus.</textarea>
+        <div class="flex items-center justify-between flex-wrap gap-2 mt-3">
+          <p class="text-[11px] text-slate-400 flex items-center gap-1.5"><i data-lucide="save" class="w-3 h-3"></i> Tersimpan otomatis: <span id="autosaveTime" class="font-bold text-slate-500">14:18</span> WIB</p>
+          <button class="text-xs font-extrabold text-blue-600 hover:underline" data-toast="Template Catatan SOP No. 14 dimuat ke editor catatan." data-toast-type="info">Muat Template Catatan SOP</button>
+        </div>
+      </div>
+
+      <div class="ai-card ai-card-hover ai-reveal p-6" data-delay="100">
+        <div class="flex items-start justify-between flex-wrap gap-2">
+          <h3 class="flex items-center gap-2 font-extrabold text-slate-900"><i data-lucide="camera" class="w-5 h-5 text-blue-600"></i> Lampiran Foto Fisik Rak &amp; Segel Bin</h3>
+          <span class="ai-badge bg-blue-100 text-blue-700">2 Foto Terlampir</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5">Wajib lampirkan minimal 1 foto keseluruhan rak dan 1 foto label barcode untuk validasi auditor pusat.</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+          <button class="relative h-24 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500 to-blue-800 group text-left" data-toast="Membuka pratinjau Foto_Rak_B12_Depan.jpg" data-toast-type="info">
+            <i data-lucide="warehouse" class="w-7 h-7 text-white/80 absolute inset-0 m-auto group-hover:scale-110 transition"></i>
+            <span class="absolute bottom-1.5 left-2 text-[9px] font-bold text-white/90 bg-black/30 rounded px-1.5 py-0.5">Foto_Rak_B12_Depan.jpg</span>
+          </button>
+          <button class="relative h-24 rounded-xl overflow-hidden bg-gradient-to-br from-slate-600 to-slate-900 group text-left" data-toast="Membuka pratinjau Label_Barcode_Rak.jpg" data-toast-type="info">
+            <i data-lucide="barcode" class="w-7 h-7 text-white/80 absolute inset-0 m-auto group-hover:scale-110 transition"></i>
+            <span class="absolute bottom-1.5 left-2 text-[9px] font-bold text-white/90 bg-black/30 rounded px-1.5 py-0.5">Label_Barcode_Rak.jpg</span>
+          </button>
+          <button class="h-24 rounded-xl border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition flex flex-col items-center justify-center gap-1.5 sm:col-span-1 col-span-2" data-toast="Kamera Zebra TC21 diaktifkan. Arahkan ke fisik rak lalu jepret." data-toast-type="success">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+            <span class="text-[11px] font-bold">Ambil Foto (Zebra)</span>
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-4 flex items-center gap-1.5"><i data-lucide="cloud" class="w-3.5 h-3.5 text-blue-400"></i> Foto otomatis disinkronisasi ke server DC-01</p>
+      </div>
+    </div>
+
+    <!-- 7. ACTION BAR -->
+    <div class="ai-card ai-card-hover ai-reveal p-5 flex items-center gap-4 flex-wrap">
+      <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="lock" class="w-5 h-5"></i></div>
+      <div class="flex-1 min-w-[240px]">
+        <p class="font-extrabold text-slate-900">Status Draft: 75% Data Diverifikasi</p>
+        <p class="text-xs text-slate-500 mt-0.5">Pastikan semua selisih telah dikomunikasikan ke checker sebelum konfirmasi final.</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button class="ai-btn ai-btn-secondary" data-toast="Draf sesi audit Rak B-12 berhasil disimpan sementara." data-toast-type="success">Simpan Draf Sementara</button>
+        <button class="ai-btn ai-btn-secondary" data-toast="Sesi audit dijeda (pause). Timer tenggat shift tetap berjalan." data-toast-type="info">Tahan Sesi (Pause Audit)</button>
+        <button class="ai-btn ai-btn-primary" data-toast="Laporan Audit Stok Opname Rak B-12 berhasil dikirim ke Auditor Pusat." data-toast-type="success"><i data-lucide="send" class="w-4 h-4"></i> Selesaikan Sesi Audit &amp; Kirim Laporan</button>
+      </div>
+    </div>
+
+    <!-- 8. KARTU SOP -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="ai-card ai-card-hover ai-reveal p-6">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></div>
+        <h3 class="font-extrabold text-blue-900 mt-4">SOP Blind Stock Count</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mt-2">Aturan penghitungan fisik mandiri tanpa melihat nominal angka sistem terlebih dahulu untuk menjamin independensi dan akurasi mutlak petugas penghitung di rak.</p>
+        <a href="javascript:void(0)" class="inline-block text-xs font-extrabold text-blue-600 hover:underline mt-4" data-toast="Dokumen Lampiran SOP No. 14 dibuka." data-toast-type="info">Baca Lampiran SOP No. 14 →</a>
+      </div>
+      <div class="ai-card ai-card-hover ai-reveal p-6" data-delay="80">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="percent" class="w-5 h-5"></i></div>
+        <h3 class="font-extrabold text-blue-900 mt-4">Toleransi Selisih &amp; BAS</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mt-2">Ambang batas toleransi selisih kuantitas &lt;0.5%. Selisih di atas ketentuan wajib melampirkan formulir Berita Acara Selisih (BAS) yang disetujui Kepala Gudang.</p>
+        <a href="javascript:void(0)" class="inline-block text-xs font-extrabold text-blue-600 hover:underline mt-4" data-toast="Format Formulir BAS 2025 dibuka." data-toast-type="info">Format Formulir BAS 2025 →</a>
+      </div>
+      <div class="ai-card ai-card-hover ai-reveal p-6" data-delay="160">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="headset" class="w-5 h-5"></i></div>
+        <h3 class="font-extrabold text-blue-900 mt-4">Eskalasi Darurat Tim Audit</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mt-2">Hubungi Supervisor Audit Lapangan via Radio HT Frekuensi Channel 04 atau sambungkan interkom terminal Zebra ke ekstensi 204 (Helpdesk Logistik DC-01).</p>
+        <a href="javascript:void(0)" class="inline-block text-xs font-extrabold text-blue-600 hover:underline mt-4" data-toast="Daftar kontak shift gudang DC-01 dibuka." data-toast-type="info">Daftar Kontak Shift DC-01 →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ================= SCRIPT HALAMAN ================= -->
+<script>
+(function () {
+  var tblBody = document.getElementById("tblBody");
+  var statSelisih = document.getElementById("statSelisih");
+  var bannerCount = document.getElementById("bannerCount");
+  var chipSelected = document.getElementById("chipSelected");
+  var filterStatus = document.getElementById("filterStatus");
+
+  /* ---------- Stepper QTY FISIK & update selisih otomatis ---------- */
+  function badgeHTML(cls, icon, text) {
+    return '<span class="ai-badge ' + cls + '"><i data-lucide="' + icon + '" class="w-3 h-3"></i> ' + text + "</span>";
+  }
+  function updateRow(row) {
+    var sistem = parseInt(row.getAttribute("data-system"), 10) || 0;
+    var fisik = parseInt(row.querySelector(".po-qty").value, 10) || 0;
+    var diff = fisik - sistem;
+    var selCell = row.querySelector(".po-selisih");
+    var stCell = row.querySelector(".po-status");
+    if (diff === 0) {
+      selCell.innerHTML = '<span class="text-green-600 font-extrabold text-xs">0 (Cocok)</span>';
+      stCell.innerHTML = badgeHTML("bg-green-100 text-green-700", "check-circle-2", "Selesai Diverifikasi");
+      row.setAttribute("data-status", "selesai");
+    } else if (diff < 0) {
+      selCell.innerHTML = '<span class="text-red-600 font-extrabold text-xs">' + diff + " Unit</span>";
+      stCell.innerHTML = badgeHTML("bg-red-100 text-red-700", "alert-triangle", "Discrepancy (Kurang)");
+      row.setAttribute("data-status", "discrepancy");
+    } else {
+      selCell.innerHTML = '<span class="ai-badge bg-blue-100 text-blue-700">+' + diff + " Unit</span>";
+      stCell.innerHTML = badgeHTML("bg-slate-100 text-slate-600", "search", "Investigasi Fisik");
+      row.setAttribute("data-status", "investigasi");
+    }
+    row.classList.toggle("po-row-discrepancy", diff !== 0);
+    updateSelisihCount();
+    applyFilter();
+    window.aiRefresh();
+  }
+  function updateSelisihCount() {
+    var n = 0;
+    tblBody.querySelectorAll(".po-row").forEach(function (row) {
+      var sistem = parseInt(row.getAttribute("data-system"), 10) || 0;
+      var fisik = parseInt(row.querySelector(".po-qty").value, 10) || 0;
+      if (fisik - sistem !== 0) n++;
+    });
+    statSelisih.textContent = n + " Item";
+    bannerCount.textContent = n;
+  }
+  tblBody.addEventListener("click", function (e) {
+    var btn = e.target.closest(".po-step");
+    if (!btn) return;
+    var row = btn.closest("tr");
+    var input = row.querySelector(".po-qty");
+    var val = (parseInt(input.value, 10) || 0) + parseInt(btn.getAttribute("data-dir"), 10);
+    if (val < 0) val = 0;
+    input.value = val;
+    updateRow(row);
+  });
+  tblBody.addEventListener("change", function (e) {
+    if (e.target.classList.contains("po-qty")) updateRow(e.target.closest("tr"));
+    if (e.target.classList.contains("po-check")) updateSelected();
+  });
+  tblBody.addEventListener("keyup", function (e) {
+    if (e.target.classList.contains("po-qty") && e.key === "Enter") updateRow(e.target.closest("tr"));
+  });
+
+  /* ---------- Checkbox & chip terpilih ---------- */
+  function updateSelected() {
+    var n = tblBody.querySelectorAll(".po-check:checked").length;
+    chipSelected.textContent = n + " Baris Terpilih";
+    var all = tblBody.querySelectorAll(".po-check");
+    document.getElementById("checkAll").checked = all.length > 0 && n === all.length;
+  }
+  document.getElementById("checkAll").addEventListener("change", function () {
+    tblBody.querySelectorAll(".po-check").forEach(function (c) { c.checked = this.checked; }, this);
+    updateSelected();
+  });
+
+  /* ---------- Filter status ---------- */
+  function applyFilter() {
+    var f = filterStatus.value;
+    tblBody.querySelectorAll(".po-row").forEach(function (row) {
+      row.style.display = (f === "all" || row.getAttribute("data-status") === f) ? "" : "none";
+    });
+  }
+  filterStatus.addEventListener("change", function () {
+    applyFilter();
+    window.aiToast(filterStatus.options[filterStatus.selectedIndex].text + " diterapkan pada daftar SKU.", "info");
+  });
+
+  /* ---------- Scanner input ---------- */
+  var scanMap = {
+    "Rak B-12-L03-A": "Kabel UTP Cat6 Patch Cord Belden 3M",
+    "SKU-NET-4022": "Kabel UTP Cat6 Patch Cord Belden 3M",
+    "SKU-IT-0921": "Server Rack Unit 42U APC Schneider",
+    "SKU-SCN-2041": "Barcode Scanner Zebra TC21 Handheld",
+    "SKU-PKG-0447": "Pallet Kardus Corrugated Box L (50×40×35)",
+    "SKU-ACC-1090": "Lakban Industri Heavy Duty 2 Inch Daimaru",
+    "Rak B-12-L01": "Zona B - Rak 12 Level 1",
+    "Rak B-12-L02": "Zona B - Rak 12 Level 2",
+    "Rak B-12-L04": "Zona B - Rak 12 Level 4",
+    "Rak B-12-L05": "Zona B - Rak 12 Level 5"
+  };
+  document.getElementById("scanInput").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var v = this.value.trim();
+    if (!v) return;
+    document.getElementById("scanCode").textContent = v;
+    document.getElementById("scanItem").textContent = scanMap[v] || "Item terverifikasi pada Rak B-12 (menunggu konfirmasi checker)";
+    window.aiToast("Bin/SKU terbaca: " + v, "success");
+  });
+
+  /* ---------- Toggle mode scanner ---------- */
+  var btnBlind = document.getElementById("btnBlind");
+  var btnStandar = document.getElementById("btnStandar");
+  function setMode(active) {
+    var a = active === "blind" ? btnBlind : btnStandar;
+    var b = active === "blind" ? btnStandar : btnBlind;
+    a.classList.remove("ai-btn-secondary"); a.classList.add("ai-btn-primary");
+    b.classList.remove("ai-btn-primary"); b.classList.add("ai-btn-secondary");
+  }
+  btnBlind.addEventListener("click", function () { setMode("blind"); window.aiToast("Mode Blind Count aktif: angka QTY sistem disembunyikan.", "info"); });
+  btnStandar.addEventListener("click", function () { setMode("standar"); window.aiToast("Mode Standar aktif: QTY sistem ditampilkan untuk pencocokan.", "info"); });
+
+  /* ---------- Muat lebih banyak ---------- */
+  var loaded = false;
+  function rowHTML(r) {
+    return '<tr class="po-row" data-system="' + r.system + '" data-status="selesai">' +
+      '<td><input type="checkbox" class="po-check w-4 h-4 rounded accent-blue-600" checked></td>' +
+      '<td class="text-slate-400 font-semibold text-xs">' + r.no + "</td>" +
+      "<td><p class=\"font-extrabold text-blue-700 text-xs\">" + r.sku + "</p>" +
+      '<p class="font-bold text-slate-800">' + r.nama + "</p>" +
+      '<p class="text-[11px] text-slate-400 mt-0.5">' + r.kategori + "</p></td>" +
+      '<td><span class="ai-badge bg-slate-100 text-slate-600">' + r.bin + "</span></td>" +
+      '<td class="font-bold text-slate-700 whitespace-nowrap">' + r.system + " " + r.satuan + "</td>" +
+      '<td><div class="flex items-center gap-1">' +
+      '<button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="-1">−</button>' +
+      '<input type="text" class="po-qty w-14 text-center border border-slate-200 rounded-lg py-1.5 text-sm font-extrabold text-slate-800 focus:border-blue-500 outline-none" value="' + r.system + '">' +
+      '<button class="po-step w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition" data-dir="1">+</button>' +
+      '</div></td>' +
+      '<td class="po-selisih"><span class="text-green-600 font-extrabold text-xs">0 (Cocok)</span></td>' +
+      '<td class="po-status">' + badgeHTML("bg-green-100 text-green-700", "check-circle-2", "Selesai Diverifikasi") + "</td>" +
+      '<td class="text-right"><button class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition" data-toast="Menu verifikasi detail ' + r.sku + ' dibuka." data-toast-type="info"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button></td></tr>';
+  }
+  document.getElementById("btnLoadMore").addEventListener("click", function () {
+    if (loaded) return;
+    loaded = true;
+    var extra = [
+      { no: "06", sku: "SKU-HLM-0773", nama: "Headset Industri Noise Cancelling 3M Peltor", kategori: "Safety Equipment • Box 10 Unit", bin: "Rak B-12-L06", system: 40, satuan: "Unit" },
+      { no: "07", sku: "SKU-CTL-0312", nama: "Kabel Terminal Lug Assorted Kit 150 Pcs", kategori: "Electrical • Tray Bin", bin: "Rak B-12-L07", system: 150, satuan: "Pcs" },
+      { no: "08", sku: "SKU-GLV-0088", nama: "Sarung Tangan Safety Nitrile Green (Box 100)", kategori: "PPE Consumable • Box 100 Pcs", bin: "Rak B-12-L08", system: 120, satuan: "Box" }
+    ];
+    var self = this;
+    extra.forEach(function (r) { tblBody.insertAdjacentHTML("beforeend", rowHTML(r)); });
+    document.getElementById("tblFootText").textContent = "Menampilkan 8 dari total 24 SKU di Rak B-12. Gunakan barcode scanner untuk memanggil nomor SKU selanjutnya secara instan.";
+    self.disabled = true;
+    self.textContent = "Semua SKU Halaman Ini Dimuat";
+    self.classList.add("opacity-50", "cursor-not-allowed");
+    updateSelected();
+    window.aiToast("3 SKU tambahan berhasil dimuat dari server DC-01.", "success");
+    window.aiRefresh();
+  });
+
+  /* ---------- Autosave catatan ---------- */
+  var catatan = document.getElementById("catatanField");
+  catatan.addEventListener("input", function () {
+    var d = new Date();
+    document.getElementById("autosaveTime").textContent =
+      String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  });
+
+  updateSelisihCount();
+  updateSelected();
+  window.aiRefresh();
+})();
+</script>
+</body>
+</html>

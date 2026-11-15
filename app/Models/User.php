@@ -25,6 +25,7 @@ class User extends Authenticatable
         'nama_lengkap',
         'nip',
         'phone',
+        'profile_photo',
         'role_id',
         'selected_city_id',
         'selected_hub_id',
