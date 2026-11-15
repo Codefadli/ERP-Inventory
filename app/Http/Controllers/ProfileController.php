@@ -14,35 +14,31 @@ use App\Http\Requests\UpdateProfilePhotoRequest;
 class ProfileController extends Controller
 {
     /**
-     * Tampilkan halaman profil user
+     * Tampilkan halaman profil user (halaman baru dashboard.profile per-role)
      */
     public function show()
     {
-        $user = Auth::user()->load('role', 'selectedCity', 'selectedHub');
-        
-        return view('profile.show', compact('user'));
+        return view('dashboard.profile');
     }
 
     /**
-     * Tampilkan form edit profil
+     * Tampilkan form edit profil (diarahkan ke halaman profil tunggal)
      */
     public function edit()
     {
-        $user = Auth::user()->load('role', 'selectedCity', 'selectedHub');
-        
-        return view('profile.edit', compact('user'));
+        return view('dashboard.profile');
     }
 
     /**
-     * Update informasi profil (nama lengkap, phone)
+     * Update informasi profil (nama lengkap, phone, email)
      */
     public function update(UpdateProfileRequest $request)
     {
         $user = Auth::user();
-        
+
         $user->update($request->validated());
-        
-        return redirect()->route('profile.show')
+
+        return redirect()->back()
             ->with('success', 'Profil berhasil diperbarui');
     }
 
@@ -52,13 +48,13 @@ class ProfileController extends Controller
     public function updateEmail(UpdateEmailRequest $request)
     {
         $user = Auth::user();
-        
+
         $user->update([
             'email' => $request->email,
             'email_verified_at' => null, // Reset verifikasi email
         ]);
-        
-        return redirect()->route('profile.show')
+
+        return redirect()->back()
             ->with('success', 'Email berhasil diperbarui. Silakan verifikasi email baru Anda.');
     }
 
@@ -68,12 +64,12 @@ class ProfileController extends Controller
     public function updatePassword(UpdatePasswordRequest $request)
     {
         $user = Auth::user();
-        
+
         $user->update([
             'password' => Hash::make($request->password),
         ]);
-        
-        return redirect()->route('profile.show')
+
+        return redirect()->back()
             ->with('success', 'Password berhasil diubah. Gunakan password baru untuk login berikutnya.');
     }
 
@@ -83,18 +79,18 @@ class ProfileController extends Controller
     public function uploadPhoto(UpdateProfilePhotoRequest $request)
     {
         $user = Auth::user();
-        
+
         // Hapus foto lama jika ada
         if ($user->profile_photo) {
             Storage::disk('public')->delete($user->profile_photo);
         }
-        
+
         // Simpan foto baru
         $path = $request->file('photo')->store('profiles', 'public');
-        
+
         $user->update(['profile_photo' => $path]);
-        
-        return redirect()->route('profile.show')
+
+        return redirect()->back()
             ->with('success', 'Foto profil berhasil diupload');
     }
 
@@ -104,16 +100,16 @@ class ProfileController extends Controller
     public function deletePhoto()
     {
         $user = Auth::user();
-        
+
         if ($user->profile_photo) {
             Storage::disk('public')->delete($user->profile_photo);
             $user->update(['profile_photo' => null]);
-            
-            return redirect()->route('profile.show')
+
+            return redirect()->back()
                 ->with('success', 'Foto profil berhasil dihapus');
         }
-        
-        return redirect()->route('profile.show')
+
+        return redirect()->back()
             ->with('info', 'Tidak ada foto profil untuk dihapus');
     }
 }

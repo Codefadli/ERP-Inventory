@@ -3,27 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes - ASTRO Inventory System
-|--------------------------------------------------------------------------
-*/
-
 // ============================================================================
 // PUBLIC ROUTES (Guest only)
 // ============================================================================
 
-// Root redirect ke login untuk guest
-// Route::get('/', function () {
-//     return redirect()->route('login');
-// })->middleware('guest')->name('home');
+// Route::get('/homepage', function () {
+//     return view('dashboard-sebelum-login');
+// })->name('dashboard-sebelum-login');
 
 Route::get('/', function () {
     return view('dashboard-sebelum-login');
-})->name('dashboard-sebelum-login');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
-    // Login Routes
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 });
@@ -34,10 +26,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     
-    // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
-    // Hub Selection (untuk admin, hr, audit)
     Route::prefix('hub-selection')->name('hub.selection.')->group(function () {
         Route::get('/', [App\Http\Controllers\HubSelectionController::class, 'show'])->name('show');
         Route::post('/', [App\Http\Controllers\HubSelectionController::class, 'store'])->name('store');
@@ -48,7 +38,6 @@ Route::middleware('auth')->group(function () {
     // PROFILE ROUTES (All authenticated users)
     // ========================================================================
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show'])->name('show');
         Route::get('/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
         Route::put('/email', [App\Http\Controllers\ProfileController::class, 'updateEmail'])->name('email');
@@ -56,8 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/photo', [App\Http\Controllers\ProfileController::class, 'uploadPhoto'])->name('photo.upload');
         Route::delete('/photo', [App\Http\Controllers\ProfileController::class, 'deletePhoto'])->name('photo.delete');
     });
-    
-    // Default Dashboard (redirect based on role) - untuk authenticated user
+
     Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
         
@@ -77,8 +65,8 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('audit.dashboard');
         }
         
-        return view('dashboard.default');
-    })->name('home');
+        return view('homepage.documentation');
+    })->name('homepage');
     
     // ========================================================================
     // SUPER ADMIN ROUTES
@@ -87,22 +75,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard.index');
         })->name('dashboard');
+
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+            ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
-        // User Management (permission: user.manage)
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/users', function () {
                 return view('admin.users.index');
             })->name('users.index');
         });
         
-        // Role Management (permission: role.manage)
         Route::middleware('permission:role.manage')->group(function () {
             Route::get('/roles', function () {
                 return view('admin.roles.index');
             })->name('roles.index');
         });
         
-        // System Settings (permission: settings.manage)
         Route::middleware('permission:settings.manage')->group(function () {
             Route::get('/settings', function () {
                 return view('admin.settings.index');
@@ -117,8 +111,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard.index');
         })->name('dashboard');
+
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+            ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
-        // Master Data (permission: master.manage)
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
                 return view('gudang.master.categories');
@@ -129,7 +131,6 @@ Route::middleware('auth')->group(function () {
             })->name('master.locations');
         });
         
-        // Products (permission: product.manage)
         Route::middleware('permission:product.manage')->group(function () {
             Route::get('/products', function () {
                 return view('gudang.products.index');
@@ -144,8 +145,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard.index');
         })->name('dashboard');
+
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+            ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
-        // Approval Queue (permission: issue.approve)
+        Route::get('/riwayat-persetujuan', function () {
+            return view('dashboard.hr.riwayat-persetujuan');
+        })->name('riwayat-persetujuan');
+        
         Route::middleware('permission:issue.approve')->group(function () {
             Route::get('/approvals', function () {
                 return view('hr.approvals.index');
@@ -160,15 +173,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard.index');
         })->name('dashboard');
+
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+            ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
-        // Barang Masuk (permission: receipt.create)
         Route::middleware('permission:receipt.create')->group(function () {
             Route::get('/receipts', function () {
                 return view('pegawai.receipts.index');
             })->name('receipts.index');
         });
         
-        // Barang Keluar (permission: issue.create)
         Route::middleware('permission:issue.create')->group(function () {
             Route::get('/issues', function () {
                 return view('pegawai.issues.index');
@@ -183,9 +203,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard.index');
         })->name('dashboard');
+
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+            ->name('notifikasi');
+
+        Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+            ->name('pengaturan');
+
+        Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+            ->name('profile');
         
-        // Audit Logs (permission: audit.view)
         Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/temuan-audit', function () {
+                return view('dashboard.audit.temuan-audit');
+            })->name('temuan-audit');
+
             Route::get('/logs', function () {
                 return view('audit.logs.index');
             })->name('logs.index');
@@ -196,35 +228,41 @@ Route::middleware('auth')->group(function () {
     // SHARED ROUTES (All authenticated users)
     // ========================================================================
     
-    // View Catalog (permission: catalog.view)
     Route::middleware('permission:catalog.view')->group(function () {
         Route::get('/catalog', function () {
             return view('catalog.index');
         })->name('catalog.index');
     });
     
-    // View Reports (permission: report.view)
     Route::middleware('permission:report.view')->group(function () {
         Route::get('/reports', function () {
             return view('reports.index');
         })->name('reports.index');
     });
     
-    // View Transactions (permission: transaction.view)
     Route::middleware('permission:transaction.view')->group(function () {
         Route::get('/transactions', function () {
             return view('transactions.index');
         })->name('transactions.index');
     });
     
-    // Default Dashboard (fallback)
     Route::get('/dashboard', function () {
         return view('dashboard.index');
     })->name('dashboard');
+
+    Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])
+        ->name('notifikasi.index');
+
+    Route::get('/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])
+        ->name('pengaturan.index');
+
+    Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
+        ->name('profile.index');
 });
 
-// Dashboard Sebelum Login (Public)
-
+Route::get('/documentation', function () {
+    return view('homepage.documentation');
+})->name('documentation');
 
 // ============================================================================
 // FALLBACK ROUTE
@@ -232,3 +270,8 @@ Route::middleware('auth')->group(function () {
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
+
+Route::fallback(function () {
+    return response()->view('errors.403', [], 403);
+});
+
