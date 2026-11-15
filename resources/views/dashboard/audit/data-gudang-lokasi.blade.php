@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persetujuan Barang — Kepala Gudang | Astro Inventory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ============================================================
+   ASTRO Inventory — Shared Design System
+   Tailwind CDN + Font Awesome. Component-level styles only.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+}
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar-left {
+  width: 256px; flex-shrink: 0;
+  background: #ffffff; border-right: 1px solid #e5eeff;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.main-area { flex: 1; min-width: 0; }
+@media (max-width: 1024px) { .sidebar-left { display: none; } }
+
+/* ---------- Sidebar items ---------- */
+.sidebar-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem;
+  font-size: .875rem; color: #334155; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background-color: #eff6ff; }
+.sidebar-item.active {
+  background-color: #0044ce; border-left: 3px solid #0033b8;
+  font-weight: 600; color: #ffffff;
+}
+.sidebar-item.active:hover { background-color: #0040d8; }
+/* non-referenced items: visually normal (reference fidelity), behaviorally inactive */
+.sidebar-item.disabled { opacity: 1; cursor: not-allowed; }
+.sidebar-item.disabled:hover { background-color: transparent; }
+.sidebar-section-label {
+  font-size: .6875rem; font-weight: 700; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 0 .75rem; margin: 0.625rem 0 0.375rem;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+
+/* ---------- Cards ---------- */
+.metric-card { transition: transform .2s ease, box-shadow .2s ease; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,.15); }
+.panel { background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+
+/* ---------- Tables ---------- */
+.table-row { transition: background-color .15s ease; }
+.table-row:hover { background-color: #f9fafb; }
+
+/* ---------- Filter chips ---------- */
+.filter-tag { transition: background-color .15s ease; }
+.filter-tag:hover { background-color: #dbeafe; }
+
+/* ---------- Progress ---------- */
+.progress-bar { transition: width .5s ease; }
+
+/* ---------- Tabs ---------- */
+.tab-btn { transition: all .15s ease; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+
+/* ---------- Badges ---------- */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .625rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* ---------- Modal ---------- */
+.modal-overlay { position:fixed; inset:0; background:rgba(11,28,48,.55); display:none; align-items:flex-start; justify-content:center; z-index:80; padding: 5vh 1rem 1rem; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:.75rem; width:100%; max-width:640px; box-shadow:0 20px 50px -10px rgba(0,0,0,.35); animation: modalIn .18s ease; }
+@keyframes modalIn { from{opacity:0; transform:translateY(12px) scale(.98);} to{opacity:1; transform:none;} }
+
+/* ---------- Dropdown ---------- */
+.dropdown { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid #e5eeff; border-radius:.5rem; box-shadow:0 10px 25px -5px rgba(0,0,0,.18); min-width:260px; z-index:70; display:none; }
+.dropdown.open { display:block; }
+
+/* ---------- Toast ---------- */
+#toast-container { position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.5rem; }
+.toast { background:#fff; border:1px solid #e5eeff; border-left:4px solid #2563eb; border-radius:.5rem; padding:.75rem 1rem; box-shadow:0 8px 20px -6px rgba(0,0,0,.2); font-size:.875rem; color:#0b1c30; animation: toastIn .2s ease; max-width:340px; }
+.toast.success { border-left-color:#16a34a; }
+.toast.warn { border-left-color:#f59e0b; }
+.toast.error { border-left-color:#dc2626; }
+@keyframes toastIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;} }
+
+/* ---------- Mobile sidebar drawer ---------- */
+.drawer-backdrop { position:fixed; inset:0; background:rgba(11,28,48,.45); z-index:60; display:none; }
+.drawer-backdrop.open { display:block; }
+@media (max-width:1024px){
+  .sidebar-left.drawer { display:block; position:fixed; top:0; left:0; height:100vh; z-index:61; transform:translateX(-100%); transition:transform .25s ease; }
+  .sidebar-left.drawer.open { transform:translateX(0); }
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar-left::-webkit-scrollbar { width:6px; }
+.sidebar-left::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ---------- Misc helpers ---------- */
+.anim-fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+/* ---------- Sidebar nav-link (menu aktif berwarna biru) ---------- */
+.nav-link { transition: all 0.16s ease; }
+.nav-link:hover { background: #f1f5f9; color: #172033; transform: translateX(3px); }
+.nav-link.active { background: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55); }
+.nav-link.active:hover { transform: none; background: #2563eb; }
+</style>
+</head>
+<body class="bg-[#f8f9ff]">
+
+@include('components.navbar')
+
+<div class="drawer-backdrop"></div>
+
+<div class="app-shell">
+    @include('components.sidebar')
+
+    <!-- Main Content -->
+    <main class="main-area p-4 lg:p-6 overflow-x-hidden">
+
+        {{-- ================= KEPALA GUDANG ================= --}}
+        @if(auth()->user()->isKepalaGudang())
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
+      <span>Operasional &amp; Transaksi</span><i class="fas fa-chevron-right text-xs"></i>
+      <span>Persetujuan &amp; Otorisasi Barang</span><i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-gray-900 font-medium">Persetujuan Barang</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 mb-6">
+      <div class="flex-1 min-w-0">
+        <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Persetujuan Barang (Approval &amp; Otorisasi Pengeluaran)</h1>
+        <p class="text-sm lg:text-base text-gray-600">Tinjau dan setujui permohonan pengeluaran barang keluar (outbound), adjustment hasil stok opname, serta mutasi darurat bernilai tinggi dari berbagai divisi operasional Hub Cakung DC-01.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 xl:max-w-[50%] xl:justify-end">
+        <span class="badge bg-red-100 text-red-700"><i class="fas fa-hourglass-half"></i>5 Permintaan Menunggu Otorisasi</span>
+        <span class="badge bg-amber-100 text-amber-700"><i class="fas fa-stopwatch"></i>SLA Review &lt; 2 Jam</span>
+        <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-layer-group"></i>Otorisasi Multi-Level Aktif</span>
+        <button onclick="toast('Menyiapkan ekspor Riwayat Otorisasi (XLSX)...','success')" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-history"></i>Riwayat Otorisasi</button>
+        <button onclick="openModal('modalMatrix')" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm flex items-center gap-2"><i class="fas fa-project-diagram"></i>Aturan Matriks</button>
+        <button onclick="toast('Menyiapkan ekspor Antrean Persetujuan (CSV)...','success')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"><i class="fas fa-file-csv"></i><span>Ekspor</span></button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-inbox text-blue-600"></i></div>
+          <span class="badge bg-red-100 text-red-700"><i class="fas fa-circle" style="font-size:5px"></i>Aktif</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">5 <span class="text-sm font-normal text-gray-500">Berkas</span></h3>
+        <p class="text-sm text-gray-600 mb-2">Menunggu Otorisasi</p>
+        <p class="text-xs text-gray-500">3 Outbound Divisi, 1 Opname, 1 Mutasi DC</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-coins text-green-600"></i></div>
+          <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>Validasi</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">Rp 148,5 <span class="text-sm font-normal text-gray-500">Juta</span></h3>
+        <p class="text-sm text-gray-600 mb-2">Total Nilai Pending</p>
+        <p class="text-xs text-gray-500">Validasi Anggaran &amp; Pagu Divisi</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-stopwatch text-amber-600"></i></div>
+          <span class="badge bg-green-100 text-green-700"><i class="fas fa-arrow-down"></i>SLA</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">42 <span class="text-sm font-normal text-gray-500">Menit</span></h3>
+        <p class="text-sm text-gray-600 mb-2">Rata-rata Respon</p>
+        <p class="text-xs text-gray-500">Performa Shift Pagi DC-01</p>
+      </div>
+      <div class="metric-card panel p-4 lg:p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center"><i class="fas fa-thumbs-up text-indigo-600"></i></div>
+          <span class="badge bg-green-100 text-green-700">Bulan Ini</span>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">94,2%</h3>
+        <p class="text-sm text-gray-600 mb-2">Tingkat Persetujuan</p>
+        <p class="text-xs text-gray-500">128 Disetujui + 8 Ditolak/Revisi</p>
+      </div>
+    </div>
+
+    <!-- Approval Matrix flow -->
+    <div class="panel p-4 lg:p-6 mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="fas fa-sitemap text-blue-600"></i>
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base">Alur Otorisasi Bertingkat (Approval Matrix DC-01)</h3>
+        <span class="badge bg-blue-100 text-blue-700 ml-auto">SOP-LOC-LEVEA-01</span>
+      </div>
+      <p class="text-xs lg:text-sm text-gray-600 mb-4">Sistem validasi hierarkis menjamin kontrol anggaran serta kepatuhan fisik inventaris Hub Pusat.</p>
+      <div class="flex flex-col lg:flex-row items-stretch gap-3">
+        <!-- Level 1 -->
+        <div class="flex-1 border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-7 h-7 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-xs font-bold">L1</span>
+            <span class="badge bg-gray-100 text-gray-700">SOP-Lengkap</span>
+          </div>
+          <p class="font-semibold text-gray-900 text-sm">Supervisor Gudang</p>
+          <p class="text-xs text-gray-500 mt-1">Verifikasi fisik &amp; kelengkapan dokumen pengajuan outbound.</p>
+          <p class="text-xs text-green-600 mt-2"><i class="fas fa-check-circle"></i> 100% Verified</p>
+        </div>
+        <div class="hidden lg:flex items-center justify-center text-gray-300"><i class="fas fa-chevron-right text-xl"></i></div>
+        <div class="flex lg:hidden items-center justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
+        <!-- Level 2 (YOU) -->
+        <div class="flex-1 border-2 border-blue-600 rounded-lg p-4 bg-blue-50">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-7 h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">L2</span>
+            <span class="badge bg-blue-600 text-white"><i class="fas fa-user-shield"></i>Wewenang Anda</span>
+          </div>
+          <p class="font-semibold text-gray-900 text-sm">Kepala Hub DC Cakung</p>
+          <p class="text-xs text-gray-600 mt-1">Budi Santoso — otorisasi pengeluaran &amp; mutasi operasional DC.</p>
+          <p class="text-xs text-blue-700 mt-2"><i class="fas fa-eye"></i> Meninjau (Budi S.)</p>
+        </div>
+        <div class="hidden lg:flex items-center justify-center text-gray-300"><i class="fas fa-chevron-right text-xl"></i></div>
+        <div class="flex lg:hidden items-center justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
+        <!-- Level 3 -->
+        <div class="flex-1 border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-7 h-7 bg-indigo-200 text-indigo-700 rounded-full flex items-center justify-center text-xs font-bold">L3</span>
+            <span class="badge bg-indigo-100 text-indigo-700">Finance Escrow</span>
+          </div>
+          <p class="font-semibold text-gray-900 text-sm">Finance &amp; Asset Mgr</p>
+          <p class="text-xs text-gray-500 mt-1">Eskalasi otomatis untuk pengajuan bernilai &gt; Rp 50 Juta.</p>
+          <p class="text-xs text-gray-500 mt-2"><i class="fas fa-lock"></i> Nilai &gt; Rp 50 Juta</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="panel p-4 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-3">
+        <div class="relative flex-1 min-w-[220px]">
+          <input id="searchReq" type="text" placeholder="Cari No. Pengajuan, Divisi Pemohon, Nama Barang." class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+        </div>
+        <select id="fTipe" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Tipe: Semua</option>
+          <option value="outbound">Outbound Divisi</option>
+          <option value="opname">Adjustment Stok Opname</option>
+          <option value="mutasi">Mutasi Khusus Inter-DC</option>
+        </select>
+        <select id="fKategori" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Kategori: Semua</option>
+          <option value="elektronik it">Elektronik &amp; IT</option>
+          <option value="alat kerja">Alat Kerja &amp; Hardware</option>
+          <option value="packaging">Packaging &amp; Material</option>
+          <option value="k3">K3 &amp; Keselamatan</option>
+        </select>
+        <select id="fUrgensi" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Urgensi: Semua</option>
+          <option value="urgent">Urgent (Kritis)</option>
+          <option value="high">High Priority</option>
+          <option value="normal">Normal Rutin</option>
+        </select>
+        <select id="fNilai" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="">Nilai: Semua</option>
+          <option value="high">&gt; Rp 50 Juta</option>
+          <option value="mid">Rp 5–50 Juta</option>
+          <option value="low">&lt; Rp 5 Juta</option>
+        </select>
+      </div>
+      <!-- Filter chips -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white" data-chip="all">Semua <span class="ml-1 opacity-80">(5)</span></button>
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 hover:bg-gray-50" data-chip="pending">Menunggu <span class="ml-1 text-gray-500">(4)</span></button>
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 hover:bg-gray-50" data-chip="urgent">Mendesak / Prioritas Tinggi <span class="ml-1 text-red-500">(2)</span></button>
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 hover:bg-gray-50" data-chip="outbound">Outbound Divisi <span class="ml-1 text-gray-500">(3)</span></button>
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 hover:bg-gray-50" data-chip="opname">Adjustment Stok Opname <span class="ml-1 text-gray-500">(1)</span></button>
+        <button class="filter-tag px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 hover:bg-gray-50" data-chip="mutasi">Mutasi Khusus Inter-DC <span class="ml-1 text-gray-500">(1)</span></button>
+        <span class="ml-auto text-xs text-gray-500"><i class="fas fa-user-shield text-blue-600 mr-1"></i>Level 2: Kepala DC (Wewenang Anda) <span class="mx-1">·</span> <i class="fas fa-lock text-indigo-600 mr-1"></i>Level 3: Finance Escrow</span>
+      </div>
+    </div>
+
+    <!-- Bulk select bar -->
+    <div class="panel p-3 mb-4 flex flex-wrap items-center gap-3 bg-[#eff4ff]">
+      <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer font-medium">
+        <input type="checkbox" id="cbPilihSemua" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+        Pilih Semua (5 Permohonan Terpilih)
+      </label>
+      <button onclick="toast('Bulk approve 5 permohonan: menunggu input 2FA token...','warn')" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700 flex items-center gap-1.5"><i class="fas fa-check-double"></i>Setujui Massal</button>
+      <button onclick="toast('Bulk reject dialihkan ke catatan revisi...','error')" class="px-3 py-1.5 border border-red-300 text-red-600 rounded-lg text-xs hover:bg-red-50 flex items-center gap-1.5"><i class="fas fa-times-circle"></i>Tolak Massal</button>
+      <span class="ml-auto text-xs text-gray-500">Audit Trail: SHA-256 aktif pada setiap aksi otorisasi.</span>
+    </div>
+
+    <!-- Table -->
+    <div class="panel p-4 lg:p-6 mb-6">
+      <div class="overflow-x-auto -mx-4 lg:mx-0">
+        <table id="tblReq" class="w-full min-w-[1180px]">
+          <thead>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap w-8"></th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Pengajuan &amp; Divisi</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Pemohon &amp; PIC</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Detail Barang &amp; Qty</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Nilai &amp; Pagu</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Prioritas &amp; Alasan</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Progres Approval</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1 -->
+            <tr class="table-row border-b border-gray-100" data-tipe="outbound" data-kategori="elektronik it" data-urgensi="urgent" data-nilai="high" data-chip="urgent">
+              <td class="px-3 py-4 align-top"><input type="checkbox" class="row-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-blue-600 font-bold text-sm">REQ-2025-0381</p>
+                <p class="text-xs text-gray-500 mt-1">12 Mar 2025, 08:30</p>
+                <span class="badge bg-blue-100 text-blue-700 mt-1"><i class="fas fa-building"></i>Divisi IT &amp; Digital Infra</span>
+                <p class="text-xs text-gray-400 mt-1">Outbound Divisi</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-medium text-gray-900">Adrian Pratama, S.Kom</p>
+                <p class="text-xs text-gray-500 mt-1">PIC: IT Operations Lead</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-gray-900">5 Unit MacBook Pro 14" M1 Pro</p>
+                <p class="text-xs text-gray-500 mt-1">SKU-LAP-0821</p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gray-400"></i> Rak E-04 / B-02</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-sm font-bold text-gray-900">Rp 105.000.000</p>
+                <div class="mt-1 w-28 bg-gray-200 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width:62%"></div></div>
+                <p class="text-xs text-gray-500 mt-1">62% Pagu Divisi Aman</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <span class="badge bg-red-100 text-red-700"><i class="fas fa-bolt"></i>Urgent (Kritis)</span>
+                <p class="text-xs text-gray-600 mt-2">Penggantian laptop darurat server crash &amp; monitoring DC.</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>L1</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-clock"></i>L2</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-indigo-100 text-indigo-700"><i class="fas fa-lock"></i>L3</span>
+                </div>
+                <p class="text-xs text-gray-600">Menunggu TTD Budi Santoso</p>
+                <p class="text-xs text-gray-400 mt-1">Finance Mgr (+50 Jt)</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="openDetail('REQ-2025-0381')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
+                  <button onclick="confirmAction('REQ-2025-0381','approve')" class="text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs border border-green-200"><i class="fas fa-check"></i> Setujui</button>
+                  <button onclick="confirmAction('REQ-2025-0381','reject')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-times"></i> Tolak</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 2 -->
+            <tr class="table-row border-b border-gray-100" data-tipe="outbound" data-kategori="alat kerja" data-urgensi="high" data-nilai="mid" data-chip="urgent">
+              <td class="px-3 py-4 align-top"><input type="checkbox" class="row-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-blue-600 font-bold text-sm">REQ-2025-0382</p>
+                <p class="text-xs text-gray-500 mt-1">12 Mar 2025, 09:10</p>
+                <span class="badge bg-blue-100 text-blue-700 mt-1"><i class="fas fa-building"></i>Divisi Operasional &amp; Logistik</span>
+                <p class="text-xs text-gray-400 mt-1">Outbound Divisi</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-medium text-gray-900">Ir. Bambang Sugiarto</p>
+                <p class="text-xs text-gray-500 mt-1">PIC: Sorting Line Supervisor</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-gray-900">20 Unit Zebra TC21 Barcode Scanner</p>
+                <p class="text-xs text-gray-500 mt-1">SKU-SCN-0055</p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gray-400"></i> Loker Elektronik D-01</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-sm font-bold text-gray-900">Rp 28.000.000</p>
+                <div class="mt-1 w-28 bg-gray-200 rounded-full h-1.5"><div class="bg-amber-500 h-1.5 rounded-full" style="width:88%"></div></div>
+                <p class="text-xs text-amber-600 mt-1">88% Pagu Mendekati Limit</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <span class="badge bg-amber-100 text-amber-700"><i class="fas fa-exclamation"></i>High Priority</span>
+                <p class="text-xs text-gray-600 mt-2">Penambahan perangkat tim sorting shift sore menjelang lonjakan peak season.</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>L1</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-clock"></i>L2</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-gray-100 text-gray-500">L3</span>
+                </div>
+                <p class="text-xs text-gray-600">Menunggu TTD Budi Santoso</p>
+                <p class="text-xs text-gray-400 mt-1">Otorisasi Tunggal Cukup</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="openDetail('REQ-2025-0382')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
+                  <button onclick="confirmAction('REQ-2025-0382','approve')" class="text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs border border-green-200"><i class="fas fa-check"></i> Setujui</button>
+                  <button onclick="confirmAction('REQ-2025-0382','reject')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-times"></i> Tolak</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 3 -->
+            <tr class="table-row border-b border-gray-100" data-tipe="opname" data-kategori="elektronik it" data-urgensi="normal" data-nilai="high" data-chip="opname">
+              <td class="px-3 py-4 align-top"><input type="checkbox" class="row-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-blue-600 font-bold text-sm">REQ-2025-0383</p>
+                <p class="text-xs text-gray-500 mt-1">12 Mar 2025, 09:45</p>
+                <span class="badge bg-purple-100 text-purple-700 mt-1"><i class="fas fa-clipboard-check"></i>Internal Audit &amp; Logistik</span>
+                <p class="text-xs text-gray-400 mt-1">Adjustment Stok Opname</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-medium text-gray-900">Maya Anggraini, S.E.</p>
+                <p class="text-xs text-gray-500 mt-1">PIC: Auditor Lead</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-gray-900">Koreksi: -2 Unit MacBook Pro 14"</p>
+                <p class="text-xs text-gray-500 mt-1">SKU-LAP-0821 · BERITA-ACARA-Q1</p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gray-400"></i> Bin B-14 / Tier-3</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-sm font-bold text-gray-900">- Rp 42.000.000</p>
+                <p class="text-xs text-gray-500 mt-1">Adjustment Negatif (Write-off)</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <span class="badge bg-gray-100 text-gray-700"><i class="fas fa-balance-scale"></i>Normal Audit</span>
+                <p class="text-xs text-gray-600 mt-2">Penyelarasan catatan temuan audit fisik dan mutasi repair vendor TIO.</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>L1</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-clock"></i>L2</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-gray-100 text-gray-500">L3</span>
+                </div>
+                <p class="text-xs text-gray-600">Validasi Kepala Hub</p>
+                <p class="text-xs text-gray-400 mt-1">Discrepancy Audit Fisik</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="openDetail('REQ-2025-0383')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
+                  <button onclick="confirmAction('REQ-2025-0383','approve')" class="text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs border border-green-200"><i class="fas fa-check"></i> Setujui</button>
+                  <button onclick="confirmAction('REQ-2025-0383','reject')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-times"></i> Tolak</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 4 -->
+            <tr class="table-row border-b border-gray-100" data-tipe="outbound" data-kategori="packaging" data-urgensi="normal" data-nilai="low" data-chip="outbound">
+              <td class="px-3 py-4 align-top"><input type="checkbox" class="row-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-blue-600 font-bold text-sm">REQ-2025-0384</p>
+                <p class="text-xs text-gray-500 mt-1">12 Mar 2025, 10:15</p>
+                <span class="badge bg-blue-100 text-blue-700 mt-1"><i class="fas fa-building"></i>Divisi Maintenance &amp; Fasilitas</span>
+                <p class="text-xs text-gray-400 mt-1">Outbound Divisi</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-medium text-gray-900">Dedi Kurniawan</p>
+                <p class="text-xs text-gray-500 mt-1">PIC: Maintenance Staf</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-gray-900">10 Roll Bubble Wrap &amp; Packing Tape</p>
+                <p class="text-xs text-gray-500 mt-1">SKU-PKG-0712</p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gray-400"></i> Gudang Bahan A-01</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-sm font-bold text-gray-900">Rp 4.500.000</p>
+                <div class="mt-1 w-28 bg-gray-200 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width:11%"></div></div>
+                <p class="text-xs text-gray-500 mt-1">11% Pagu Divisi Aman</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <span class="badge bg-gray-100 text-gray-700"><i class="fas fa-clipboard-list"></i>Normal Rutin</span>
+                <p class="text-xs text-gray-600 mt-2">Restock bahan packing harian packing line 3 zone outbound ekspres.</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>L1</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-clock"></i>L2</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-gray-100 text-gray-500">L3</span>
+                </div>
+                <p class="text-xs text-gray-600">Menunggu TTD Budi Santoso</p>
+                <p class="text-xs text-gray-400 mt-1">Otorisasi Tunggal Cukup</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="openDetail('REQ-2025-0384')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
+                  <button onclick="confirmAction('REQ-2025-0384','approve')" class="text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs border border-green-200"><i class="fas fa-check"></i> Setujui</button>
+                  <button onclick="confirmAction('REQ-2025-0384','reject')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-times"></i> Tolak</button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 5 -->
+            <tr class="table-row" data-tipe="outbound" data-kategori="k3" data-urgensi="normal" data-nilai="low" data-chip="outbound">
+              <td class="px-3 py-4 align-top"><input type="checkbox" class="row-cb rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-blue-600 font-bold text-sm">REQ-2025-0385</p>
+                <p class="text-xs text-gray-500 mt-1">12 Mar 2025, 10:40</p>
+                <span class="badge bg-orange-100 text-orange-700 mt-1"><i class="fas fa-hard-hat"></i>Divisi Safety &amp; Env (HSE)</span>
+                <p class="text-xs text-gray-400 mt-1">Outbound Divisi</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-medium text-gray-900">Hendra Kusuma</p>
+                <p class="text-xs text-gray-500 mt-1">PIC: HSE Officer</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-gray-900">15 Box Perlengkapan K3 &amp; Sarung Tangan Antistatik</p>
+                <p class="text-xs text-gray-500 mt-1">SKU-HSE-4421</p>
+                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gray-400"></i> Loker K3 Gudang 3</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <p class="text-sm font-bold text-gray-900">Rp 6.200.000</p>
+                <div class="mt-1 w-28 bg-gray-200 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width:37%"></div></div>
+                <p class="text-xs text-gray-500 mt-1">37% Pagu Divisi Aman</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <span class="badge bg-gray-100 text-gray-700"><i class="fas fa-clipboard-list"></i>Normal Rutin</span>
+                <p class="text-xs text-gray-600 mt-2">Restock perlengkapan APD shift kerja alam &amp; protokol sertifikasi ISO.</p>
+              </td>
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="badge bg-green-100 text-green-700"><i class="fas fa-check"></i>L1</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-blue-100 text-blue-700"><i class="fas fa-clock"></i>L2</span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+                  <span class="badge bg-gray-100 text-gray-500">L3</span>
+                </div>
+                <p class="text-xs text-gray-600">Menunggu TTD Budi Santoso</p>
+                <p class="text-xs text-gray-400 mt-1">Otorisasi Tunggal Cukup</p>
+              </td>
+              <td class="px-4 py-4 align-top whitespace-nowrap">
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="openDetail('REQ-2025-0385')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
+                  <button onclick="confirmAction('REQ-2025-0385','approve')" class="text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs border border-green-200"><i class="fas fa-check"></i> Setujui</button>
+                  <button onclick="confirmAction('REQ-2025-0385','reject')" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><i class="fas fa-times"></i> Tolak</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3 feature cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-signature text-blue-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Digital Signature &amp; Audit Trail</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Setiap persetujuan dienkripsi dengan SHA-256 dan secara permanen mengikat identitas digital Anda ke Log Audit Forensik Sistem. Penolakan disertai catatan evaluasi revisi.</p>
+        <button onclick="toast('Membuka Protokol Enkripsi dokumen...','success')" class="text-blue-600 text-xs font-medium hover:underline">Pelajari Protokol Enkripsi <i class="fas fa-arrow-right ml-1"></i></button>
+      </div>
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-bolt text-red-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Kebijakan Emergency Dispatch</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Otorisasi darurat dapat dilakukan untuk barang berstatus kritis logistik dengan wajib verifikasi token 2FA kepala gudang. Rekonsiliasi dokumen administrasi wajib dilengkapi dalam 1x24 jam kerja.</p>
+        <button onclick="toast('Menyiapkan unduhan SOP Emergency (PDF)...','success')" class="text-blue-600 text-xs font-medium hover:underline">Unduh SOP Emergency (PDF) <i class="fas fa-arrow-right ml-1"></i></button>
+      </div>
+      <div class="panel p-4 lg:p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-file-alt text-green-600"></i></div>
+          <h3 class="font-bold text-gray-900 text-sm">Notifikasi &amp; Surat Jalan (e-SJ)</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Setelah seluruh jenjang otorisasi berstatus disetujui, e-Surat Jalan dan barcode serah terima secara otomatis diterbitkan ke aplikasi staf picker serta dikirim ke pemohon via email notifikasi.</p>
+        <a href="pengaturan.html" class="text-blue-600 text-xs font-medium hover:underline">Lihat Pengaturan e-SJ <i class="fas fa-arrow-right ml-1"></i></a>
+      </div>
+    </div>
+
+    <!-- Compliance footer -->
+    <div class="panel p-4 lg:p-5 mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="fas fa-balance-scale text-blue-600"></i>
+        <h3 class="font-bold text-gray-900 text-sm lg:text-base">Kebijakan Otorisasi Operasional Hub Cakung DC-01</h3>
+        <span class="badge bg-blue-100 text-blue-700 ml-auto">AST-SPO-2024 · Klausa Otorisasi</span>
+      </div>
+      <p class="text-xs lg:text-sm text-gray-600 mb-3">Persetujuan pengeluaran barang keluar, mutasi antar-DC, dan adjustment stok opname bernilai tinggi wajib melalui alur otorisasi bertingkat sesuai matriks wewenang. Kepala Gudang (Level 2) memiliki kewenangan mandiri hingga Rp 50 Juta; di atas nilai tersebut wajib eskalasi ke Finance &amp; Asset Manager (Level 3). Setiap aksi tercatat dalam Audit Trail Forensik terenkripsi SHA-256.</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="badge bg-green-100 text-green-700"><i class="fas fa-shield-alt"></i>Digital Signature Terverifikasi</span>
+        <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>SLA Review Otomatis: &lt; 2 Jam per Tiket</span>
+      </div>
+    </div>
+
+        @endif
+
+        {{-- ================= ROLE LAIN (placeholder) ================= --}}
+        @if(!auth()->user()->isKepalaGudang())
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-10 text-center">
+            <i class="fas fa-lock text-4xl text-gray-300 mb-3"></i>
+            <h2 class="text-lg font-bold text-gray-900">Persetujuan Barang (Approval &amp; Otorisasi Pengeluaran)</h2>
+            <p class="text-sm text-gray-500 mt-1 max-w-md mx-auto">Halaman ini hanya tersedia untuk role Kepala Gudang.</p>
+        </div>
+        @endif
+
+    </main>
+</div>
+
+{{-- ================= MODAL, TOAST & SCRIPT (Kepala Gudang) ================= --}}
+@if(auth()->user()->isKepalaGudang())
+<!-- ============ MODAL: approval matrix ============ -->
+<div class="modal-overlay" id="modalMatrix">
+  <div class="modal-box" style="max-width:720px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-project-diagram mr-2 text-blue-600"></i>Aturan Matriks Otorisasi</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4 space-y-3 text-sm">
+      <div class="p-3 border border-gray-200 rounded-lg">
+        <p class="font-semibold text-gray-900"><span class="badge bg-gray-200 text-gray-700 mr-2">L1</span>Supervisor Gudang</p>
+        <p class="text-xs text-gray-600 mt-1">Verifikasi fisik barang, kelengkapan dokumen pengajuan, dan kepatuhan zona rak.</p>
+      </div>
+      <div class="p-3 border-2 border-blue-600 rounded-lg bg-blue-50">
+        <p class="font-semibold text-gray-900"><span class="badge bg-blue-600 text-white mr-2">L2</span>Kepala Hub DC Cakung (Anda)</p>
+        <p class="text-xs text-gray-600 mt-1">Wewenang mandiri pengeluaran &amp; mutasi hingga Rp 50 Juta. Eskalasi Level 3 untuk nilai di atasnya.</p>
+      </div>
+      <div class="p-3 border border-gray-200 rounded-lg">
+        <p class="font-semibold text-gray-900"><span class="badge bg-indigo-200 text-indigo-700 mr-2">L3</span>Finance &amp; Asset Manager</p>
+        <p class="text-xs text-gray-600 mt-1">Eskalasi otomatis untuk pengajuan bernilai &gt; Rp 50 Juta dan write-off inventaris.</p>
+      </div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: confirm approve/reject ============ -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal-box" style="max-width:520px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900" id="confirmTitle"><i class="fas fa-check-circle mr-2 text-green-600"></i>Konfirmasi Persetujuan</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4">
+      <p class="text-sm text-gray-600 mb-3" id="confirmBody">Anda akan menyetujui permohonan ini sebagai Kepala Hub DC Cakung (Level 2). Tindakan ini terikat secara digital (SHA-256).</p>
+      <div class="p-3 bg-[#eff4ff] rounded-lg mb-3">
+        <p class="text-xs text-gray-500">Permohonan</p>
+        <p class="text-sm font-bold text-gray-900" id="confirmReq">REQ-2025-0381</p>
+      </div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" id="labelNote">Catatan / Alasan (opsional untuk approve)</label>
+      <textarea id="confirmNote" rows="3" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tambahkan catatan evaluasi..."></textarea>
+      <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+        <i class="fas fa-shield-alt mr-1"></i>Persetujuan kritis memerlukan verifikasi token 2FA kepala gudang.
+      </div>
+    </div>
+    <div class="p-4 border-t border-gray-100 flex justify-end gap-2">
+      <button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Batal</button>
+      <button data-close-modal id="confirmBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"><i class="fas fa-check mr-1"></i>Konfirmasi &amp; TTD Digital</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: detail ============ -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-box" style="max-width:760px">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-file-contract mr-2 text-blue-600"></i>Detail Permohonan Persetujuan</h3>
+      <button data-close-modal class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4" id="detailBody"><p class="text-sm text-gray-500">Memuat detail...</p></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ASTRO Inventory — Shared interaction layer
+   Vanilla JS, no deps. Tailwind handles layout/visuals.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- Toast ---------- */
+  function toast(msg, type) {
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+  }
+  window.toast = toast;
+
+  /* ---------- Mobile sidebar drawer ---------- */
+  function initDrawer() {
+    const trig = document.querySelector('[data-drawer-trigger]');
+    const sb = document.querySelector('.sidebar-left');
+    const back = document.querySelector('.drawer-backdrop');
+    if (!trig || !sb) return;
+    function open() { sb.classList.add('drawer','open'); if(back) back.classList.add('open'); }
+    function close() { sb.classList.remove('open'); if(back) back.classList.remove('open'); }
+    trig.addEventListener('click', function(){ sb.classList.contains('open') ? close() : open(); });
+    if (back) back.addEventListener('click', close);
+  }
+
+  /* ---------- Dropdowns (notification / profile) ---------- */
+  function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach(function (btn) {
+      const target = btn.getAttribute('data-dropdown');
+      const menu = document.querySelector('[data-dropdown-menu="' + target + '"]');
+      if (!menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown.open').forEach(function (m){ if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.dropdown.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+    document.querySelectorAll('.dropdown').forEach(function (m){ m.addEventListener('click', function(e){ e.stopPropagation(); }); });
+  }
+
+  /* ---------- Disabled sidebar items ---------- */
+  function initDisabledNav() {
+    document.querySelectorAll('.sidebar-item.disabled').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        toast('Halaman belum tersedia (tidak memiliki referensi PNG).', 'warn');
+      });
+    });
+  }
+
+  /* ---------- Modals ---------- */
+  window.openModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.add('open');
+  };
+  window.closeModal = function (id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  };
+  function initModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) {
+      m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const m = b.closest('.modal-overlay'); if (m) m.classList.remove('open');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(function (m){ m.classList.remove('open'); });
+    });
+  }
+
+  /* ---------- Tabs ---------- */
+  window.initTabs = function (container) {
+    const root = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!root) return;
+    const btns = root.querySelectorAll('[data-tab]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const name = b.getAttribute('data-tab');
+        btns.forEach(function (x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        panels.forEach(function (p){
+          p.style.display = (p.getAttribute('data-tab-panel') === name) ? '' : 'none';
+        });
+      });
+    });
+  };
+
+  /* ---------- Table filtering / search ---------- */
+  /* Rows carry data attributes; selects/search filter them. */
+  window.initTableFilter = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    const search = opts.searchId ? document.getElementById(opts.searchId) : null;
+    const selects = (opts.selects || []).map(function (s) {
+      return { el: document.getElementById(s.id), attr: s.attr };
+    });
+
+    function visible(r) {
+      if (search) {
+        const q = (search.value || '').toLowerCase().trim();
+        if (q && r.textContent.toLowerCase().indexOf(q) === -1) return false;
+      }
+      for (let i = 0; i < selects.length; i++) {
+        const v = selects[i].el ? selects[i].el.value : '';
+        if (v && (r.getAttribute('data-' + selects[i].attr) || '').toLowerCase() !== String(v).toLowerCase()) return false;
+      }
+      if (opts.checkboxId) {
+        const cb = document.getElementById(opts.checkboxId);
+        if (cb && cb.checked) {
+          const flag = r.getAttribute('data-flag') || '';
+          if (flag.indexOf('anomali') === -1) return false;
+        }
+      }
+      return true;
+    }
+    function apply() {
+      let count = 0;
+      rows.forEach(function (r) {
+        const ok = visible(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      const info = document.getElementById(opts.countId);
+      if (info) info.textContent = count;
+    }
+    if (search) search.addEventListener('input', apply);
+    selects.forEach(function (s){ if (s.el) s.el.addEventListener('change', apply); });
+    if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.addEventListener('change', apply); }
+    const reset = opts.resetId ? document.getElementById(opts.resetId) : null;
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      selects.forEach(function (s){ if (s.el) s.el.value = ''; });
+      if (opts.checkboxId) { const cb = document.getElementById(opts.checkboxId); if (cb) cb.checked = false; }
+      apply();
+    });
+    apply();
+    return { reapply: apply };
+  };
+
+  /* ---------- Client-side pagination (simple) ---------- */
+  window.initPagination = function (opts) {
+    const table = document.getElementById(opts.tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    let perPage = opts.perPage || 10;
+    let page = 1;
+    const wrap = document.getElementById(opts.controlsId);
+    function filteredRows() {
+      return allRows.filter(function (r){ return r.style.display !== 'none'; });
+    }
+    function render() {
+      const fr = filteredRows();
+      const pages = Math.max(1, Math.ceil(fr.length / perPage));
+      if (page > pages) page = pages;
+      fr.forEach(function (r, idx) {
+        const start = (page - 1) * perPage;
+        r.style.display = (idx >= start && idx < start + perPage) ? '' : 'none';
+      });
+      if (wrap) {
+        const info = opts.infoId ? document.getElementById(opts.infoId) : null;
+        if (info) {
+          const from = fr.length ? (page - 1) * perPage + 1 : 0;
+          const to = Math.min(page * perPage, fr.length);
+          info.textContent = 'Menampilkan ' + from + ' - ' + to + ' dari ' + fr.length + ' ' + (opts.unit || 'data');
+        }
+        let html = '';
+        const prev = page <= 1;
+        html += '<button ' + (prev ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (prev ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-50') + ' data-pg="' + (page - 1) + '">Sebelumnya</button>';
+        for (let p = 1; p <= pages; p++) {
+          html += '<button class="px-3 py-1 rounded text-xs lg:text-sm ' + (p === page ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50') + '" data-pg="' + p + '">' + p + '</button>';
+        }
+        const next = page >= pages;
+        html += '<button ' + (next ? 'disabled' : '') + ' class="px-3 py-1 border border-gray-300 rounded text-xs lg:text-sm ' + (next ? 'text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200') + ' data-pg="' + (page + 1) + '">Berikutnya</button>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('[data-pg]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = parseInt(b.getAttribute('data-pg'), 10); if (!isNaN(v)) { page = v; render(); }
+          });
+        });
+      }
+    }
+    return { render: render, setPage: function (p) { page = p; render(); } };
+  };
+
+  /* ---------- Boot ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    initDrawer();
+    initDropdowns();
+    initDisabledNav();
+    initModals();
+  });
+})();
+
+</script>
+<script>
+  var REQ = {
+    'REQ-2025-0381': {pemohon:'Adrian Pratama, S.Kom', divisi:'Divisi IT & Digital Infra', pic:'IT Operations Lead', barang:'5 Unit MacBook Pro 14" M1 Pro', sku:'SKU-LAP-0821', lokasi:'Rak E-04 / B-02', nilai:'Rp 105.000.000', pagu:'62% Pagu Divisi Aman', urgensi:'Urgent (Kritis)', alasan:'Penggantian laptop darurat server crash & monitoring DC.', tipe:'Outbound Divisi', tgl:'12 Mar 2025, 08:30', level:'L2 Menunggu + L3 Finance (>50 Jt)'},
+    'REQ-2025-0382': {pemohon:'Ir. Bambang Sugiarto', divisi:'Divisi Operasional & Logistik', pic:'Sorting Line Supervisor', barang:'20 Unit Zebra TC21 Barcode Scanner', sku:'SKU-SCN-0055', lokasi:'Loker Elektronik D-01', nilai:'Rp 28.000.000', pagu:'88% Pagu Mendekati Limit', urgensi:'High Priority', alasan:'Penambahan perangkat tim sorting shift sore menjelang lonjakan peak season.', tipe:'Outbound Divisi', tgl:'12 Mar 2025, 09:10', level:'L2 Otorisasi Tunggal Cukup'},
+    'REQ-2025-0383': {pemohon:'Maya Anggraini, S.E.', divisi:'Internal Audit & Logistik', pic:'Auditor Lead', barang:'Koreksi: -2 Unit MacBook Pro 14"', sku:'SKU-LAP-0821 · BERITA-ACARA-Q1', lokasi:'Bin B-14 / Tier-3', nilai:'- Rp 42.000.000', pagu:'Adjustment Negatif (Write-off)', urgensi:'Normal Audit', alasan:'Penyelarasan catatan temuan audit fisik dan mutasi repair vendor TIO.', tipe:'Adjustment Stok Opname', tgl:'12 Mar 2025, 09:45', level:'L2 Validasi Kepala Hub (Discrepancy)'},
+    'REQ-2025-0384': {pemohon:'Dedi Kurniawan', divisi:'Divisi Maintenance & Fasilitas', pic:'Maintenance Staf', barang:'10 Roll Bubble Wrap & Packing Tape', sku:'SKU-PKG-0712', lokasi:'Gudang Bahan A-01', nilai:'Rp 4.500.000', pagu:'11% Pagu Divisi Aman', urgensi:'Normal Rutin', alasan:'Restock bahan packing harian packing line 3 zone outbound ekspres.', tipe:'Outbound Divisi', tgl:'12 Mar 2025, 10:15', level:'L2 Otorisasi Tunggal Cukup'},
+    'REQ-2025-0385': {pemohon:'Hendra Kusuma', divisi:'Divisi Safety & Env (HSE)', pic:'HSE Officer', barang:'15 Box Perlengkapan K3 & Sarung Tangan Antistatik', sku:'SKU-HSE-4421', lokasi:'Loker K3 Gudang 3', nilai:'Rp 6.200.000', pagu:'37% Pagu Divisi Aman', urgensi:'Normal Rutin', alasan:'Restock perlengkapan APD shift kerja alam & protokol sertifikasi ISO.', tipe:'Outbound Divisi', tgl:'12 Mar 2025, 10:40', level:'L2 Otorisasi Tunggal Cukup'}
+  };
+  window.openDetail = function (code) {
+    var d = REQ[code]; if (!d) return;
+    document.getElementById('detailBody').innerHTML =
+      '<div class="grid grid-cols-2 gap-3 text-sm">' +
+      '<div><p class="text-xs text-gray-500">No. Pengajuan</p><p class="font-bold text-gray-900">'+code+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Tipe</p><p class="text-gray-900">'+d.tipe+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Pemohon</p><p class="text-gray-900">'+d.pemohon+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Divisi</p><p class="text-gray-900">'+d.divisi+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">PIC</p><p class="text-gray-900">'+d.pic+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Waktu Pengajuan</p><p class="text-gray-900">'+d.tgl+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Barang & Qty</p><p class="text-gray-900">'+d.barang+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">SKU / Referensi</p><p class="text-gray-900">'+d.sku+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Lokasi Rak / Bin</p><p class="text-gray-900">'+d.lokasi+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Nilai</p><p class="text-gray-900 font-semibold">'+d.nilai+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Status Pagu</p><p class="text-gray-900">'+d.pagu+'</p></div>' +
+      '<div><p class="text-xs text-gray-500">Prioritas</p><p class="text-gray-900">'+d.urgensi+'</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Alasan Pengajuan</p><p class="text-gray-900">'+d.alasan+'</p></div>' +
+      '<div class="col-span-2"><p class="text-xs text-gray-500">Progres Approval</p><p class="text-gray-900">'+d.level+'</p></div>' +
+      '</div><div class="mt-4 flex justify-end gap-2"><button data-close-modal class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Tutup</button><button data-close-modal onclick="confirmAction(\''+code+'\',\'approve\')" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"><i class="fas fa-check mr-1"></i>Setujui dari Detail</button></div>';
+    openModal('modalDetail');
+  };
+  window.confirmAction = function (code, action) {
+    var d = REQ[code]; if (!d) return;
+    var approve = action === 'approve';
+    document.getElementById('confirmTitle').innerHTML = approve
+      ? '<i class="fas fa-check-circle mr-2 text-green-600"></i>Konfirmasi Persetujuan'
+      : '<i class="fas fa-times-circle mr-2 text-red-600"></i>Konfirmasi Penolakan';
+    document.getElementById('confirmBody').textContent = approve
+      ? 'Anda akan menyetujui permohonan ini sebagai Kepala Hub DC Cakung (Level 2). Tindakan ini terikat secara digital (SHA-256).'
+      : 'Anda akan menolak permohonan ini. Penolakan wajib disertai catatan evaluasi revisi untuk pemohon.';
+    document.getElementById('confirmReq').textContent = code + ' — ' + d.barang;
+    document.getElementById('labelNote').textContent = approve ? 'Catatan (opsional)' : 'Alasan Penolakan (wajib)';
+    document.getElementById('confirmNote').value = '';
+    var btn = document.getElementById('confirmBtn');
+    btn.className = approve ? 'px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700' : 'px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700';
+    btn.innerHTML = approve ? '<i class="fas fa-check mr-1"></i>Konfirmasi & TTD Digital' : '<i class="fas fa-times mr-1"></i>Tolak & Kirim Revisi';
+    btn.onclick = function () {
+      var note = document.getElementById('confirmNote').value.trim();
+      if (approve) {
+        toast('Persetujuan ' + code + ' berhasil. TTD digital SHA-256 tercatat. e-SJ diterbitkan.', 'success');
+      } else {
+        if (!note) { toast('Penolakan wajib disertai alasan revisi.', 'error'); return; }
+        toast('Penolakan ' + code + ' terkirim ke pemohon dengan catatan revisi.', 'warn');
+      }
+    };
+    openModal('modalConfirm');
+  };
+  // wire up table filter
+  initTableFilter({ tableId:'tblReq', searchId:'searchReq', countId:null,
+    selects:[{id:'fTipe',attr:'tipe'},{id:'fKategori',attr:'kategori'},{id:'fUrgensi',attr:'urgensi'},{id:'fNilai',attr:'nilai'}] });
+  // chip filters
+  document.querySelectorAll('[data-chip]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-chip]').forEach(function (x) { x.classList.remove('bg-blue-600','text-white'); x.classList.add('border','border-gray-300','hover:bg-gray-50'); });
+      b.classList.add('bg-blue-600','text-white'); b.classList.remove('border','border-gray-300','hover:bg-gray-50');
+      var chip = b.getAttribute('data-chip');
+      var rows = document.querySelectorAll('#tblReq tbody tr');
+      rows.forEach(function (r) {
+        if (chip === 'all') { r.style.display = ''; return; }
+        var rc = (r.getAttribute('data-chip') || '');
+        var match = false;
+        if (chip === 'pending') { match = r.querySelector('.badge.bg-blue-100') !== null; }
+        else if (chip === 'urgent') { match = (r.getAttribute('data-urgensi') === 'urgent' || r.getAttribute('data-urgensi') === 'high'); }
+        else { match = rc.indexOf(chip) !== -1 || r.getAttribute('data-tipe') === chip; }
+        r.style.display = match ? '' : 'none';
+      });
+    });
+  });
+  // select all
+  document.getElementById('cbPilihSemua').addEventListener('change', function () {
+    document.querySelectorAll('.row-cb').forEach(function (cb) { cb.checked = document.getElementById('cbPilihSemua').checked; });
+  });
+</script>
+@endif
+
+</body>
+</html>
