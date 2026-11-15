@@ -82,21 +82,60 @@
     <!-- Main Content -->
     <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
 
-        {{-- ================= SUPER ADMIN ================= --}}
-        @if(auth()->user()->isSuperAdmin())
+        {{-- ============ KATALOG SKU (super_admin, kepala_gudang, auditor) ============
+             View ini dipakai bersama oleh route admin.data-barang, gudang.data-barang,
+             dan audit.data-barang. HR dan Pegawai tidak diberi route ke halaman ini. --}}
+        @php
+            $user = auth()->user();
+            $isSuperAdmin = $user->isSuperAdmin();
+            $isKepalaGudang = $user->isKepalaGudang();
+            $isAuditor = $user->isAuditor();
+
+            // Hak lihat katalog (semua role yang punya route ke halaman ini)
+            $canView = $isSuperAdmin || $isKepalaGudang || $isAuditor || $user->hasPermission('master.view');
+            // Hak ubah master barang (tambah/edit) - auditor read-only
+            $canManage = $isSuperAdmin || $user->hasPermission('product.manage') || $user->hasPermission('master.manage');
+            // Hak import batch (master.manage saja)
+            $canImport = $isSuperAdmin || $user->hasPermission('master.manage');
+
+            $roleLabel = $user->role->name ?? ucfirst($user->role->code ?? 'Pengguna');
+            $scopeLabel = $isSuperAdmin ? 'Manajemen Sistem' : ($isKepalaGudang ? 'Operasional Gudang' : 'Pengendalian Audit');
+            $scopeDesc = $isSuperAdmin
+                ? 'Katalog terpusat seluruh SKU produk, klasifikasi kategori, status stok multi-gudang, harga acuan, dan unit penyimpanan fisik Hub DC-01.'
+                : ($isKepalaGudang
+                    ? 'Katalog SKU untuk pengelolaan stok harian hub Anda: status stok, lokasi rak/bin, reorder point (ROP), dan harga acuan.'
+                    : 'Katalog referensi pemeriksaan: bandingkan stok fisik, lokasi rak, dan nilai aset tanpa hak mengubah data.');
+            $roleRoute = $isSuperAdmin ? 'admin.data-barang' : ($isKepalaGudang ? 'gudang.data-barang' : 'audit.data-barang');
+        @endphp
+
+        @if($canView)
 
         <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Katalog SKU Terpadu</span></p>
-            <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Data Master Barang & Inventaris</h1>
-            <p class="mt-1.5 max-w-[600px] text-[12px] leading-relaxed text-slate-500">Katalog terpusat seluruh SKU produk, klasifikasi kategori, status stok multi-gudang, harga acuan, dan unit penyimpanan fisik Hub DC-01.</p>
+            <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">{{ $scopeLabel }} <span class="text-blue-700">&gt; Katalog SKU Terpadu</span></p>
+            <h1 class="flex flex-wrap items-center gap-2 text-[24px] font-bold leading-tight tracking-tight text-slate-800">
+              Data Master Barang &amp; Inventaris
+              <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wide text-blue-700">{{ $roleLabel }}</span>
+            </h1>
+            <p class="mt-1.5 max-w-[600px] text-[12px] leading-relaxed text-slate-500">{{ $scopeDesc }}</p>
           </div>
           <div class="flex items-center gap-2">
             <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Data</button>
+            @if($canImport)
             <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="upload" class="h-4 w-4 text-blue-600"></i>Import Batch</button>
+            @endif
+            @if($canManage)
             <button class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="square-plus" class="h-4 w-4"></i>Tambah Barang Baru</button>
+            @endif
           </div>
         </section>
+
+        @unless($canManage)
+        <section class="reveal reveal-delay-1 mb-4 flex items-start gap-2.5 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
+          <i data-lucide="eye" class="mt-0.5 h-4 w-4 shrink-0"></i>
+          <p><b>Mode baca ({{ $roleLabel }})</b> &mdash; Anda dapat menelusuri katalog, memakai filter, dan mengekspor data, tetapi tidak dapat menambah atau mengubah barang.</p>
+        </section>
+        @endunless
 
         <section aria-label="Ringkasan inventaris" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
@@ -167,7 +206,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-red-600">4 Unit</b><span class="text-slate-500">ROP: 25</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[14%] rounded bg-red-600"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 8.500.000</td>
                   <td class="px-2"><span class="rounded-full bg-red-100 px-2.5 py-1 text-[10.5px] font-semibold text-red-700">● Menipis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Canon 60D"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Canon 60D"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Canon 60D"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Canon 60D"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Canon 60D"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Canon 60D"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Kamera & Optik" data-status="Menipis" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Nikon Coolpix Pro X" class="h-4 w-4 accent-blue-600"></td>
@@ -178,7 +217,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-red-600">7 Unit</b><span class="text-slate-500">ROP: 20</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[25%] rounded bg-red-600"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 12.450.000</td>
                   <td class="px-2"><span class="rounded-full bg-red-100 px-2.5 py-1 text-[10.5px] font-semibold text-red-700">● Menipis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Nikon Coolpix"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Nikon Coolpix"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Nikon Coolpix"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Nikon Coolpix"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Nikon Coolpix"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Nikon Coolpix"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Wearable Gadget" data-status="Stok Aman" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Titan Smart Watch" class="h-4 w-4 accent-blue-600"></td>
@@ -189,7 +228,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">180 Pcs</b><span class="text-slate-500">ROP: 40</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[75%] rounded bg-emerald-700"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Pcs</td><td class="px-2 text-right font-semibold text-slate-800">Rp 1.850.000</td>
                   <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Titan Smart Watch"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Titan Smart Watch"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Titan Smart Watch"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Titan Smart Watch"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Titan Smart Watch"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Titan Smart Watch"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Laptop & Komputer" data-status="Stok Aman" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Macbook Pro M1" class="h-4 w-4 accent-blue-600"></td>
@@ -200,7 +239,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">100 Unit</b><span class="text-slate-500">ROP: 15</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[68%] rounded bg-emerald-700"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 16.200.000</td>
                   <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Macbook Pro"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Macbook Pro"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Macbook Pro"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Macbook Pro"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Macbook Pro"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Macbook Pro"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Aksesoris Komputer" data-status="Stok Aman" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Mechanical Keyboard" class="h-4 w-4 accent-blue-600"></td>
@@ -211,7 +250,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">210 Unit</b><span class="text-slate-500">ROP: 50</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[80%] rounded bg-emerald-700"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 1.450.000</td>
                   <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Keyboard"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Keyboard"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Keyboard"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Keyboard"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Keyboard"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Keyboard"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Audio & Sound" data-status="Stok Aman" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Sony Headphone" class="h-4 w-4 accent-blue-600"></td>
@@ -222,7 +261,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">120 Unit</b><span class="text-slate-500">ROP: 25</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[70%] rounded bg-emerald-700"></div></div></td>
                   <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 3.899.000</td>
                   <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Headphone"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Headphone"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Headphone"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Headphone"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Headphone"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Headphone"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
                 <tr data-category="Storage Drive" data-status="Habis" class="hover:bg-slate-50/70">
                   <td class="px-2"><input type="checkbox" aria-label="Pilih Sandisk SSD" class="h-4 w-4 accent-blue-600"></td>
@@ -233,7 +272,7 @@
                   <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-slate-600">0 Unit</b><span class="text-slate-500">ROP: 30</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"></div></td>
                   <td class="px-2 text-center text-slate-600">Box</td><td class="px-2 text-right font-semibold text-slate-800">Rp 2.100.000</td>
                   <td class="px-2"><span class="rounded-full bg-indigo-100 px-2.5 py-1 text-[10.5px] font-semibold text-indigo-800">● Habis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Sandisk SSD"><i data-lucide="eye" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Sandisk SSD"><i data-lucide="pencil" class="h-4 w-4"></i></button><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Sandisk SSD"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Sandisk SSD"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Sandisk SSD"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Sandisk SSD"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
               </tbody>
             </table>
@@ -248,6 +287,11 @@
           </footer>
         </section>
 
+        @else
+        <section class="reveal rounded-xl border border-red-100 bg-white p-6 shadow-sm">
+          <h1 class="text-[18px] font-bold text-slate-800">Akses ditolak</h1>
+          <p class="mt-1 text-[12.5px] text-slate-500">Modul Data Barang hanya tersedia untuk Super Admin, Kepala Gudang, dan Auditor.</p>
+        </section>
         @endif
 
     </main>

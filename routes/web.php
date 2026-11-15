@@ -86,43 +86,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-<<<<<<< HEAD
-        
-        Route::middleware('permission:audit.view')->group(function () {
-            Route::get('/log-aktivitas', function () {
-                return view('dashboard.superadmin.logAktivitas');
-            })->name('log-aktivitas');
-        });
-
-        Route::middleware('permission:master.view')->group(function () {
-            Route::get('/data-barang', function () {
-                return view('dashboard.superadmin.dataBarang');
-            })->name('data-barang');
-
-            Route::get('/data-departemen', function () {
-                return view('dashboard.superadmin.dataDepartemen');
-            })->name('data-departemen');
-
-            Route::get('/data-supplier', function () {
-                return view('dashboard.superadmin.dataSuplier');
-            })->name('data-supplier');
-
-            Route::get('/kategori-barang', function () {
-                return view('dashboard.superadmin.kategoriBarang');
-            })->name('kategori-barang');
-        });
-
-        Route::middleware('permission:report.view')->group(function () {
-            Route::get('/laporan-analitik', function () {
-                return view('dashboard.superadmin.laporanAnalitik');
-            })->name('laporan-analitik');
-
-            Route::get('/laporan-riwayat', function () {
-                return view('dashboard.superadmin.laporanRiwayat');
-            })->name('laporan-riwayat');
-        });
-=======
->>>>>>> 9f11fd49c875f87f8781953800bc3e8f65ee231b
 
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/pengguna', function () {
@@ -153,6 +116,40 @@ Route::middleware('auth')->group(function () {
         Route::get('/data-gudang-lokasi', function () {
             return view('admin.data-gudang-lokasi');
         })->name('data-gudang-lokasi');
+
+        Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/log-aktivitas', function () {
+                return view('dashboard.superadmin.logAktivitas');
+            })->name('log-aktivitas');
+        });
+
+        Route::middleware('permission:master.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+
+            Route::get('/data-departemen', function () {
+                return view('dashboard.superadmin.dataDepartemen');
+            })->name('data-departemen');
+
+            Route::get('/data-supplier', function () {
+                return view('dashboard.superadmin.dataSuplier');
+            })->name('data-supplier');
+
+            Route::get('/kategori-barang', function () {
+                return view('dashboard.superadmin.kategoriBarang');
+            })->name('kategori-barang');
+        });
+
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan-analitik', function () {
+                return view('dashboard.superadmin.laporanAnalitik');
+            })->name('laporan-analitik');
+
+            Route::get('/laporan-riwayat', function () {
+                return view('dashboard.superadmin.laporanRiwayat');
+            })->name('laporan-riwayat');
+        });
     });
 
     // ========================================================================
@@ -172,14 +169,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
-<<<<<<< HEAD
-        Route::middleware('permission:report.view')->group(function () {
-            Route::get('/laporan', function () {
-                return view('dashboard.kepalagudang.laporan');
-            })->name('laporan');
-        });
-        
-=======
         Route::get('/data-gudang-lokasi', function () {
             return view('gudang.data-gudang-lokasi');
         })->name('data-gudang-lokasi');
@@ -188,7 +177,18 @@ Route::middleware('auth')->group(function () {
             return view('gudang.persetujuan-barang');
         })->name('persetujuan-barang');
 
->>>>>>> 9f11fd49c875f87f8781953800bc3e8f65ee231b
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan', function () {
+                return view('dashboard.kepalagudang.laporan');
+            })->name('laporan');
+        });
+
+        Route::middleware('permission:master.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+        });
+
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
                 return view('gudang.master.categories');
@@ -286,6 +286,10 @@ Route::middleware('auth')->group(function () {
             ->name('profile');
 
         Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+
             Route::get('/temuan-audit', function () {
                 return view('dashboard.audit.temuan-audit');
             })->name('temuan-audit');

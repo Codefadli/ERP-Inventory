@@ -8,6 +8,19 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Ikon sidebar & topbar: komponen Blade (sidebar/navbar) memakai Font Awesome 6.
+         Sebelumnya stylesheet ini belum dimuat sehingga semua ikon menu tidak tampil. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Font Inter untuk teks antarmuka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide dimuat langsung (bukan lazy) supaya ikon konten tidak hilang saat CDN lambat -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>document.documentElement.classList.add('ai-js');</script>
+
     <style>
 /* ==== Astro Inventory design system (inlined) ==== */
 /* ============================================================
@@ -138,11 +151,16 @@ body {
 }
 
 /* ---------- Entrance animations ---------- */
+/* Animasi masuk hanya aktif bila JS berjalan (html.ai-js).
+   Tanpa JS / jika skrip gagal, konten tetap terlihat (tidak blank). */
 .ai-reveal {
+  opacity: 1;
+}
+.ai-js .ai-reveal {
   opacity: 0;
   transform: translateY(14px);
 }
-.ai-reveal.ai-revealed {
+.ai-js .ai-reveal.ai-revealed {
   animation: ai-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @keyframes ai-fade-up {
@@ -474,6 +492,78 @@ body {
 .ai-clickable:hover {
   background: #f8fafc;
 }
+    /* ---------- Sidebar (komponen Blade: components/sidebar.blade.php) ---------- */
+    .nav-link {
+        transition: all 0.16s ease;
+    }
+    .nav-link:hover {
+        background: #f1f5f9;
+        color: #172033;
+        transform: translateX(3px);
+    }
+    .nav-link.active {
+        background: var(--brand);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55);
+    }
+    .nav-link.active:hover {
+        transform: none;
+        background: var(--brand);
+    }
+
+    /* ---------- Fokus keyboard yang jelas ---------- */
+    a:focus-visible,
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+    }
+
+    /* ---------- Empty state panel tab ---------- */
+    .ai-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 42px 24px;
+        text-align: center;
+    }
+    .ai-empty-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eff6ff;
+        color: var(--brand);
+        margin-bottom: 4px;
+    }
+
+    /* .ai-empty memakai display:flex; pastikan kelas .hidden tetap menang */
+    .ai-empty.hidden {
+        display: none !important;
+    }
+
+    /* ---------- Hormati preferensi "kurangi animasi" ---------- */
+    @media (prefers-reduced-motion: reduce) {
+        .ai-js .ai-reveal,
+        .ai-js .ai-reveal.ai-revealed {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        .ai-card,
+        .ai-card-hover:hover,
+        .nav-link:hover,
+        .ai-pill:hover {
+            transition: none;
+            transform: none;
+        }
+    }
     </style>
 
     <script>
@@ -516,6 +606,13 @@ body {
     var s = document.createElement("script");
     s.src = "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js";
     s.onload = cb;
+    /* fallback: coba CDN alternatif bila unpkg diblokir/lambat */
+    s.onerror = function () {
+      var alt = document.createElement("script");
+      alt.src = "https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js";
+      alt.onload = cb;
+      document.head.appendChild(alt);
+    };
     document.head.appendChild(s);
   }
 
@@ -629,9 +726,25 @@ body {
       pills.forEach(function (pill) {
         if (pill.__aiTab) return;
         pill.__aiTab = true;
+        /* Navigasi tab via keyboard (panah kiri/kanan) */
+        pill.addEventListener("keydown", function (e) {
+          if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+          e.preventDefault();
+          var list = Array.prototype.slice.call(pills);
+          var idx = list.indexOf(pill);
+          var next = e.key === "ArrowRight"
+            ? list[(idx + 1) % list.length]
+            : list[(idx - 1 + list.length) % list.length];
+          next.focus();
+          next.click();
+        });
         pill.addEventListener("click", function () {
-          pills.forEach(function (p) { p.classList.remove("ai-pill-active"); });
+          pills.forEach(function (p) {
+            p.classList.remove("ai-pill-active");
+            p.setAttribute("aria-selected", "false");
+          });
           pill.classList.add("ai-pill-active");
+          pill.setAttribute("aria-selected", "true");
           var name = pill.getAttribute("data-tab");
           document.querySelectorAll('[data-tabpanel="' + group.getAttribute("data-tabs") + '"]').forEach(function (panel) {
             var match = panel.getAttribute("data-panel-name") === name;
@@ -639,6 +752,17 @@ body {
             if (match) { panel.classList.remove("ai-revealed"); panel.classList.add("ai-revealed"); }
           });
           group.dispatchEvent(new CustomEvent("ai:tabchange", { detail: { tab: name }, bubbles: true }));
+        });
+      });
+
+      /* Tombol "Kembali ke Overview" di dalam panel empty state */
+      document.querySelectorAll("[data-tab-target]").forEach(function (btn) {
+        if (btn.__aiTabTarget) return;
+        btn.__aiTabTarget = true;
+        btn.addEventListener("click", function () {
+          var target = btn.getAttribute("data-tab-target");
+          var pill = group.querySelector('[data-tab="' + target + '"]');
+          if (pill) pill.click();
         });
       });
     });
@@ -729,6 +853,15 @@ body {
     initReveal();
     loadLucide(function () { window.aiIcons(); });
   }
+
+  /* Jaring aman: bila ada error JS/CDN, konten .ai-reveal jangan sampai tetap tersembunyi */
+  function safeRevealAll() {
+    document.querySelectorAll(".ai-reveal:not(.ai-revealed)").forEach(function (e) {
+      e.classList.add("ai-revealed");
+    });
+  }
+  window.addEventListener("error", safeRevealAll);
+  window.addEventListener("unhandledrejection", safeRevealAll);
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
@@ -834,26 +967,29 @@ body {
 
         <!-- ===== Pill filter ===== -->
         <section class="ai-card ai-reveal p-4" data-delay="100">
-          <div data-tabs="riwayat" class="flex gap-2 overflow-x-auto pb-1">
-            <button class="ai-pill ai-pill-active" data-tab="semua">Semua Riwayat (2.418)</button>
-            <button class="ai-pill" data-tab="masuk">Barang Masuk / Inbound (1.140)</button>
-            <button class="ai-pill" data-tab="keluar">Barang Keluar / Outbound (1.278)</button>
-            <button class="ai-pill" data-tab="adj">Penyesuaian Opname (48)</button>
-            <button class="ai-pill" data-tab="mutasi">Mutasi Antar Hub / Rak (112)</button>
+          <div class="flex flex-wrap items-center gap-2">
+            <div data-tabs="riwayat" class="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Kategori riwayat dokumen">
+              <button type="button" role="tab" aria-selected="true" class="ai-pill ai-pill-active" data-tab="semua">Semua Riwayat (2.418)</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="masuk">Barang Masuk / Inbound (1.140)</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="keluar">Barang Keluar / Outbound (1.278)</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="adj">Penyesuaian Opname (48)</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="mutasi">Mutasi Antar Hub / Rak (112)</button>
+            </div>
+            <button type="button" id="resetFilters" class="ai-btn ai-btn-soft flex-none" aria-label="Reset semua filter"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>Reset</button>
           </div>
           <div class="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
             <div class="lg:col-span-4 relative">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input id="riwSearch" class="ai-input pl-10" placeholder="Cari No. Dokumen, No. Surat Jalan, SKU, PIC..." />
+              <input id="riwSearch" type="search" aria-label="Cari nomor dokumen, surat jalan, SKU, atau PIC" class="ai-input pl-10" placeholder="Cari No. Dokumen, No. Surat Jalan, SKU, PIC..." />
             </div>
-            <select id="fTipe" class="ai-input lg:col-span-2 text-slate-600">
+            <select id="fTipe" aria-label="Filter tipe dokumen" class="ai-input lg:col-span-2 text-slate-600">
               <option value="semua">Semua Tipe Dokumen</option>
               <option value="keluar">Outbound</option>
               <option value="masuk">Inbound</option>
               <option value="adj">Stock Opname Adj</option>
               <option value="mutasi">Mutasi</option>
             </select>
-            <select id="fDivisi" class="ai-input lg:col-span-2 text-slate-600">
+            <select id="fDivisi" aria-label="Filter divisi atau mitra" class="ai-input lg:col-span-2 text-slate-600">
               <option value="semua">Semua Divisi / Mitra</option>
               <option value="it">Divisi IT &amp; Digital Infra</option>
               <option value="mitra">Supplier / Mitra Eksternal</option>
@@ -861,14 +997,14 @@ body {
               <option value="maintenance">Divisi Maintenance</option>
               <option value="internal">Internal Gudang</option>
             </select>
-            <select id="fStatus" class="ai-input lg:col-span-2 text-slate-600">
+            <select id="fStatus" aria-label="Filter status dokumen" class="ai-input lg:col-span-2 text-slate-600">
               <option value="semua">Semua Status</option>
               <option value="archived">Selesai (Archived)</option>
               <option value="qc">Tervalidasi QC</option>
               <option value="disetujui">Disetujui Kepala Hub</option>
             </select>
             <div class="lg:col-span-2">
-              <button id="btnUnduh" class="ai-btn ai-btn-secondary w-full"><i data-lucide="download" class="w-4 h-4"></i>Unduh Terpilih</button>
+              <button type="button" id="btnUnduh" class="ai-btn ai-btn-secondary w-full"><i data-lucide="download" class="w-4 h-4"></i><span id="unduhLabel" aria-live="polite">Unduh Terpilih</span></button>
             </div>
           </div>
         </section>
@@ -879,16 +1015,16 @@ body {
             <table class="w-full ai-table min-w-[1180px]">
               <thead>
                 <tr>
-                  <th class="w-10"><input type="checkbox" id="checkAll" class="w-4 h-4 accent-blue-600 cursor-pointer" /></th>
-                  <th>No. Dokumen<br />&amp; Waktu</th>
-                  <th>Jenis Transaksi</th>
-                  <th>Ref Surat Jalan / PO</th>
-                  <th>Divisi / Pihak Terkait</th>
-                  <th>Ringkasan Barang &amp; QTY</th>
-                  <th class="text-right">Valuasi (IDR)</th>
-                  <th>PIC / Otorisator</th>
-                  <th>Status Dokumen</th>
-                  <th class="text-right">Aksi</th>
+                  <th scope="col" class="w-10"><input type="checkbox" id="checkAll" aria-label="Pilih semua dokumen yang tampil" class="w-4 h-4 accent-blue-600 cursor-pointer" /></th>
+                  <th scope="col">No. Dokumen<br />&amp; Waktu</th>
+                  <th scope="col">Jenis Transaksi</th>
+                  <th scope="col">Ref Surat Jalan / PO</th>
+                  <th scope="col">Divisi / Pihak Terkait</th>
+                  <th scope="col">Ringkasan Barang &amp; QTY</th>
+                  <th scope="col" class="text-right">Valuasi (IDR)</th>
+                  <th scope="col">PIC / Otorisator</th>
+                  <th scope="col">Status Dokumen</th>
+                  <th scope="col" class="text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody id="riwBody">
@@ -923,9 +1059,9 @@ body {
                   <td><span class="ai-badge bg-emerald-400/90 text-emerald-950"><i data-lucide="archive" class="w-3 h-3"></i>Selesai (Archived)</span></td>
                   <td class="text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-OUT-2025-0941" data-toast-type="info" title="Lihat"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-OUT-2025-0941" data-toast-type="info" title="Cetak"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-OUT-2025-0941 diunduh" title="Unduh"><i data-lucide="download" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-OUT-2025-0941" data-toast-type="info" title="Lihat" aria-label="Lihat dokumen"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-OUT-2025-0941" data-toast-type="info" title="Cetak" aria-label="Cetak dokumen"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-OUT-2025-0941 diunduh" title="Unduh" aria-label="Unduh dokumen"><i data-lucide="download" class="w-4 h-4"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -961,9 +1097,9 @@ body {
                   <td><span class="ai-badge bg-emerald-400/90 text-emerald-950"><i data-lucide="clipboard-check" class="w-3 h-3"></i>Tervalidasi QC</span></td>
                   <td class="text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-IN-2025-0892" data-toast-type="info" title="Lihat"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-IN-2025-0892" data-toast-type="info" title="Cetak"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-IN-2025-0892 diunduh" title="Unduh"><i data-lucide="download" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-IN-2025-0892" data-toast-type="info" title="Lihat" aria-label="Lihat dokumen"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-IN-2025-0892" data-toast-type="info" title="Cetak" aria-label="Cetak dokumen"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-IN-2025-0892 diunduh" title="Unduh" aria-label="Unduh dokumen"><i data-lucide="download" class="w-4 h-4"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -999,9 +1135,9 @@ body {
                   <td><span class="ai-badge bg-blue-50 text-blue-700"><i data-lucide="user-check" class="w-3 h-3"></i>Disetujui Kepala Hub</span></td>
                   <td class="text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-ADJ-2025-0104" data-toast-type="info" title="Lihat"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-ADJ-2025-0104" data-toast-type="info" title="Cetak"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-ADJ-2025-0104 diunduh" title="Unduh"><i data-lucide="download" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-ADJ-2025-0104" data-toast-type="info" title="Lihat" aria-label="Lihat dokumen"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-ADJ-2025-0104" data-toast-type="info" title="Cetak" aria-label="Cetak dokumen"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-ADJ-2025-0104 diunduh" title="Unduh" aria-label="Unduh dokumen"><i data-lucide="download" class="w-4 h-4"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -1037,9 +1173,9 @@ body {
                   <td><span class="ai-badge bg-emerald-400/90 text-emerald-950"><i data-lucide="archive" class="w-3 h-3"></i>Selesai (Archived)</span></td>
                   <td class="text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-OUT-2025-0938" data-toast-type="info" title="Lihat"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-OUT-2025-0938" data-toast-type="info" title="Cetak"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-OUT-2025-0938 diunduh" title="Unduh"><i data-lucide="download" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-OUT-2025-0938" data-toast-type="info" title="Lihat" aria-label="Lihat dokumen"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-OUT-2025-0938" data-toast-type="info" title="Cetak" aria-label="Cetak dokumen"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-OUT-2025-0938 diunduh" title="Unduh" aria-label="Unduh dokumen"><i data-lucide="download" class="w-4 h-4"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -1075,9 +1211,9 @@ body {
                   <td><span class="ai-badge bg-emerald-400/90 text-emerald-950"><i data-lucide="archive" class="w-3 h-3"></i>Selesai (Archived)</span></td>
                   <td class="text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-TRF-2025-0215" data-toast-type="info" title="Lihat"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-TRF-2025-0215" data-toast-type="info" title="Cetak"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-TRF-2025-0215 diunduh" title="Unduh"><i data-lucide="download" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Melihat dokumen DOC-TRF-2025-0215" data-toast-type="info" title="Lihat" aria-label="Lihat dokumen"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Mencetak dokumen DOC-TRF-2025-0215" data-toast-type="info" title="Cetak" aria-label="Cetak dokumen"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                      <button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Dokumen DOC-TRF-2025-0215 diunduh" title="Unduh" aria-label="Unduh dokumen"><i data-lucide="download" class="w-4 h-4"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -1085,14 +1221,16 @@ body {
             </table>
           </div>
 
-          <div id="riwEmpty" class="hidden py-10 text-center">
-            <i data-lucide="search-x" class="w-8 h-8 text-slate-300 mx-auto"></i>
-            <div class="mt-2 text-[13px] font-semibold text-slate-500">Tidak ada dokumen yang cocok dengan filter.</div>
+          <div id="riwEmpty" class="hidden ai-empty">
+            <div class="ai-empty-icon"><i data-lucide="search-x" class="w-6 h-6"></i></div>
+            <div class="text-[13.5px] font-semibold text-slate-600">Tidak ada dokumen yang cocok</div>
+            <p class="max-w-md text-[12.5px] text-slate-500">Coba ubah kata kunci, tipe dokumen, divisi, atau status — atau kembalikan semua filter ke kondisi awal.</p>
+            <button type="button" id="emptyReset" class="ai-btn ai-btn-secondary mt-3"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>Reset Filter</button>
           </div>
 
           <!-- Pagination -->
           <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
-            <div class="text-[12px] text-slate-500 font-medium">Menampilkan 1 - 5 dari 2.418 Riwayat Dokumen &bull; Halaman 1 dari 484</div>
+            <div class="text-[12px] text-slate-500 font-medium"><span id="riwCountInfo">Menampilkan 5 dari 2.418 Riwayat Dokumen</span> &bull; Halaman 1 dari 484</div>
             <div class="flex items-center gap-1.5">
               <button class="ai-btn ai-btn-secondary opacity-50 cursor-not-allowed" disabled><i data-lucide="chevron-left" class="w-4 h-4"></i>Sebelumnya</button>
               <button class="w-9 h-9 rounded-lg bg-blue-600 text-white text-[12.5px] font-bold shadow-md shadow-blue-600/30">1</button>
@@ -1142,6 +1280,32 @@ body {
       var fStatus = document.getElementById("fStatus");
       var empty = document.getElementById("riwEmpty");
       var activeCat = "semua";
+      var countInfo = document.getElementById("riwCountInfo");
+      var unduhLabel = document.getElementById("unduhLabel");
+      var resetBtn = document.getElementById("resetFilters");
+      var emptyResetBtn = document.getElementById("emptyReset");
+      var totalRiwayat = 2418;
+      var initial = { tipe: fTipe.value, divisi: fDivisi.value, status: fStatus.value };
+
+      function visibleRows() {
+        return rows.filter(function (r) { return r.style.display !== "none"; });
+      }
+
+      /* Perbarui jumlah baris, status pilih-semua, dan label tombol unduh */
+      function updateSelection() {
+        var visible = visibleRows();
+        var checks = [];
+        visible.forEach(function (row) {
+          var c = row.querySelector(".rowCheck");
+          if (c) checks.push(c);
+        });
+        var n = checks.filter(function (c) { return c.checked; }).length;
+        if (unduhLabel) unduhLabel.textContent = n > 0 ? "Unduh Terpilih (" + n + ")" : "Unduh Terpilih";
+        if (checkAll) {
+          checkAll.checked = checks.length > 0 && n === checks.length;
+          checkAll.indeterminate = n > 0 && n < checks.length;
+        }
+      }
 
       function applyFilter() {
         var q = (search.value || "").trim().toLowerCase();
@@ -1157,6 +1321,26 @@ body {
           if (ok) shown++;
         });
         empty.classList.toggle("hidden", shown > 0);
+        /* baris yang tersembunyi filter tidak boleh tetap terpilih */
+        rows.forEach(function (row) {
+          if (row.style.display === "none") {
+            var c = row.querySelector(".rowCheck");
+            if (c && c.checked) c.checked = false;
+          }
+        });
+        if (countInfo) {
+          var difilter = (search.value || "").trim() !== "" ||
+            fTipe.value !== initial.tipe || fDivisi.value !== initial.divisi || fStatus.value !== initial.status ||
+            activeCat !== "semua";
+          if (shown === 0) {
+            countInfo.textContent = "Tidak ada dokumen yang cocok dari " + totalRiwayat.toLocaleString("id-ID") + " Riwayat Dokumen";
+          } else if (difilter) {
+            countInfo.textContent = "Menampilkan " + shown + " dari " + totalRiwayat.toLocaleString("id-ID") + " Riwayat Dokumen (difilter)";
+          } else {
+            countInfo.textContent = "Menampilkan " + shown + " baris dari " + totalRiwayat.toLocaleString("id-ID") + " Riwayat Dokumen";
+          }
+        }
+        updateSelection();
       }
 
       // Sinkron pill (data-tabs) dengan filter kategori
@@ -1173,12 +1357,50 @@ body {
       // Select-all checkbox
       var checkAll = document.getElementById("checkAll");
       checkAll.addEventListener("change", function () {
-        document.querySelectorAll(".rowCheck").forEach(function (c) { c.checked = checkAll.checked; });
+        visibleRows().forEach(function (row) {
+          var c = row.querySelector(".rowCheck");
+          if (c) c.checked = checkAll.checked;
+        });
+        updateSelection();
+      });
+
+      /* checkbox baris: label unduh ikut berubah */
+      document.querySelectorAll(".rowCheck").forEach(function (c) {
+        c.addEventListener("change", updateSelection);
+      });
+
+      /* Reset semua filter (tombol di filter bar & di empty state) */
+      function resetFilters() {
+        search.value = "";
+        fTipe.value = initial.tipe;
+        fDivisi.value = initial.divisi;
+        fStatus.value = initial.status;
+        activeCat = "semua";
+        var group = document.querySelector('[data-tabs="riwayat"]');
+        if (group) {
+          group.querySelectorAll("[data-tab]").forEach(function (p) {
+            p.classList.remove("ai-pill-active");
+            p.setAttribute("aria-selected", "false");
+          });
+          var allPill = group.querySelector('[data-tab="semua"]');
+          if (allPill) {
+            allPill.classList.add("ai-pill-active");
+            allPill.setAttribute("aria-selected", "true");
+          }
+        }
+        applyFilter();
+        if (window.aiToast) window.aiToast("Filter dikembalikan ke kondisi awal", "info");
+      }
+      [resetBtn, emptyResetBtn].forEach(function (b) {
+        if (b) b.addEventListener("click", resetFilters);
       });
 
       // Unduh Terpilih
       document.getElementById("btnUnduh").addEventListener("click", function () {
-        var n = document.querySelectorAll(".rowCheck:checked").length;
+        var n = visibleRows().filter(function (row) {
+          var c = row.querySelector(".rowCheck");
+          return c && c.checked;
+        }).length;
         if (n === 0) window.aiToast("Pilih minimal 1 dokumen untuk diunduh.", "warn");
         else window.aiToast(n + " dokumen terpilih disiapkan untuk diunduh (PDF).");
       });

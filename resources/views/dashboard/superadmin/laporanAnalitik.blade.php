@@ -8,6 +8,19 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Ikon sidebar & topbar: komponen Blade (sidebar/navbar) memakai Font Awesome 6.
+         Sebelumnya stylesheet ini belum dimuat sehingga semua ikon menu tidak tampil. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Font Inter untuk teks antarmuka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide dimuat langsung (bukan lazy) supaya ikon konten tidak hilang saat CDN lambat -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>document.documentElement.classList.add('ai-js');</script>
+
     <style>
 /* ==== Astro Inventory design system (inlined) ==== */
 /* ============================================================
@@ -138,11 +151,16 @@ body {
 }
 
 /* ---------- Entrance animations ---------- */
+/* Animasi masuk hanya aktif bila JS berjalan (html.ai-js).
+   Tanpa JS / jika skrip gagal, konten tetap terlihat (tidak blank). */
 .ai-reveal {
+  opacity: 1;
+}
+.ai-js .ai-reveal {
   opacity: 0;
   transform: translateY(14px);
 }
-.ai-reveal.ai-revealed {
+.ai-js .ai-reveal.ai-revealed {
   animation: ai-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @keyframes ai-fade-up {
@@ -474,6 +492,73 @@ body {
 .ai-clickable:hover {
   background: #f8fafc;
 }
+    /* ---------- Sidebar (komponen Blade: components/sidebar.blade.php) ---------- */
+    .nav-link {
+        transition: all 0.16s ease;
+    }
+    .nav-link:hover {
+        background: #f1f5f9;
+        color: #172033;
+        transform: translateX(3px);
+    }
+    .nav-link.active {
+        background: var(--brand);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55);
+    }
+    .nav-link.active:hover {
+        transform: none;
+        background: var(--brand);
+    }
+
+    /* ---------- Fokus keyboard yang jelas ---------- */
+    a:focus-visible,
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+    }
+
+    /* ---------- Empty state panel tab ---------- */
+    .ai-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 42px 24px;
+        text-align: center;
+    }
+    .ai-empty-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eff6ff;
+        color: var(--brand);
+        margin-bottom: 4px;
+    }
+
+    /* ---------- Hormati preferensi "kurangi animasi" ---------- */
+    @media (prefers-reduced-motion: reduce) {
+        .ai-js .ai-reveal,
+        .ai-js .ai-reveal.ai-revealed {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        .ai-card,
+        .ai-card-hover:hover,
+        .nav-link:hover,
+        .ai-pill:hover {
+            transition: none;
+            transform: none;
+        }
+    }
     </style>
 
     <script>
@@ -516,6 +601,13 @@ body {
     var s = document.createElement("script");
     s.src = "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js";
     s.onload = cb;
+    /* fallback: coba CDN alternatif bila unpkg diblokir/lambat */
+    s.onerror = function () {
+      var alt = document.createElement("script");
+      alt.src = "https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js";
+      alt.onload = cb;
+      document.head.appendChild(alt);
+    };
     document.head.appendChild(s);
   }
 
@@ -629,9 +721,25 @@ body {
       pills.forEach(function (pill) {
         if (pill.__aiTab) return;
         pill.__aiTab = true;
+        /* Navigasi tab via keyboard (panah kiri/kanan) */
+        pill.addEventListener("keydown", function (e) {
+          if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+          e.preventDefault();
+          var list = Array.prototype.slice.call(pills);
+          var idx = list.indexOf(pill);
+          var next = e.key === "ArrowRight"
+            ? list[(idx + 1) % list.length]
+            : list[(idx - 1 + list.length) % list.length];
+          next.focus();
+          next.click();
+        });
         pill.addEventListener("click", function () {
-          pills.forEach(function (p) { p.classList.remove("ai-pill-active"); });
+          pills.forEach(function (p) {
+            p.classList.remove("ai-pill-active");
+            p.setAttribute("aria-selected", "false");
+          });
           pill.classList.add("ai-pill-active");
+          pill.setAttribute("aria-selected", "true");
           var name = pill.getAttribute("data-tab");
           document.querySelectorAll('[data-tabpanel="' + group.getAttribute("data-tabs") + '"]').forEach(function (panel) {
             var match = panel.getAttribute("data-panel-name") === name;
@@ -639,6 +747,17 @@ body {
             if (match) { panel.classList.remove("ai-revealed"); panel.classList.add("ai-revealed"); }
           });
           group.dispatchEvent(new CustomEvent("ai:tabchange", { detail: { tab: name }, bubbles: true }));
+        });
+      });
+
+      /* Tombol "Kembali ke Overview" di dalam panel empty state */
+      document.querySelectorAll("[data-tab-target]").forEach(function (btn) {
+        if (btn.__aiTabTarget) return;
+        btn.__aiTabTarget = true;
+        btn.addEventListener("click", function () {
+          var target = btn.getAttribute("data-tab-target");
+          var pill = group.querySelector('[data-tab="' + target + '"]');
+          if (pill) pill.click();
         });
       });
     });
@@ -729,6 +848,15 @@ body {
     initReveal();
     loadLucide(function () { window.aiIcons(); });
   }
+
+  /* Jaring aman: bila ada error JS/CDN, konten .ai-reveal jangan sampai tetap tersembunyi */
+  function safeRevealAll() {
+    document.querySelectorAll(".ai-reveal:not(.ai-revealed)").forEach(function (e) {
+      e.classList.add("ai-revealed");
+    });
+  }
+  window.addEventListener("error", safeRevealAll);
+  window.addEventListener("unhandledrejection", safeRevealAll);
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
@@ -857,15 +985,18 @@ body {
 
         <!-- ===== Tabs + filter ===== -->
         <section class="ai-card ai-reveal p-4" data-delay="100">
-          <div data-tabs="laporan" class="flex gap-2 overflow-x-auto pb-1">
-            <button class="ai-pill ai-pill-active" data-tab="semua">Semua Laporan (Overview)</button>
-            <button class="ai-pill" data-tab="aging">Perputaran &amp; Aging Stok</button>
-            <button class="ai-pill" data-tab="throughput">Throughput Inbound/Outbound</button>
-            <button class="ai-pill" data-tab="abc">Klasifikasi ABC &amp; Fast Moving</button>
-            <button class="ai-pill" data-tab="rak">Kapasitas Rak Gudang</button>
+          <div class="flex flex-wrap items-center gap-2">
+            <div data-tabs="laporan" class="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Jenis laporan analitik">
+              <button type="button" role="tab" aria-selected="true" class="ai-pill ai-pill-active" data-tab="semua">Semua Laporan (Overview)</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="aging">Perputaran &amp; Aging Stok</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="throughput">Throughput Inbound/Outbound</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="abc">Klasifikasi ABC &amp; Fast Moving</button>
+              <button type="button" role="tab" aria-selected="false" class="ai-pill" data-tab="rak">Kapasitas Rak Gudang</button>
+            </div>
+            <button type="button" id="resetFilters" class="ai-btn ai-btn-soft flex-none" aria-label="Reset semua filter"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>Reset</button>
           </div>
           <div class="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
-            <select id="fKategori" class="ai-input lg:col-span-3 text-slate-600">
+            <select id="fKategori" aria-label="Filter kategori barang" class="ai-input lg:col-span-3 text-slate-600">
               <option value="semua">Kategori: Semua Kategori</option>
               <option value="elektronik">Elektronik IT</option>
               <option value="alat-kerja">Alat Kerja &amp; Hardware</option>
@@ -873,25 +1004,25 @@ body {
               <option value="k3">K3 &amp; Keselamatan</option>
               <option value="infrastruktur">Infrastruktur DC</option>
             </select>
-            <select id="fLokasi" class="ai-input lg:col-span-3 text-slate-600">
+            <select id="fLokasi" aria-label="Filter lokasi hub" class="ai-input lg:col-span-3 text-slate-600">
               <option value="cakung">Lokasi: Hub Cakung DC-01 (Utama)</option>
               <option value="surabaya">Hub Surabaya DC-02</option>
               <option value="semua">Semua Lokasi</option>
             </select>
-            <select id="fUrgensi" class="ai-input lg:col-span-3 text-slate-600">
+            <select id="fUrgensi" aria-label="Filter urgensi dead stock" class="ai-input lg:col-span-3 text-slate-600">
               <option value="semua">Urgensi Dead Stock: &gt; 90 Hari</option>
               <option value="sehat">Sehat (&lt; 90 Hari)</option>
               <option value="aging">Aging (&gt; 90 Hari)</option>
             </select>
             <div class="lg:col-span-3 relative">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input id="anaSearch" class="ai-input pl-10" placeholder="Cari SKU, Nama Barang, Batch..." />
+              <input id="anaSearch" type="search" aria-label="Cari SKU, nama barang, atau batch" class="ai-input pl-10" placeholder="Cari SKU, Nama Barang, Batch..." />
             </div>
           </div>
         </section>
 
         <!-- ===== Panel: Overview ===== -->
-        <div data-tabpanel="laporan" data-panel-name="semua">
+        <div data-tabpanel="laporan" data-panel-name="semua" role="tabpanel" aria-label="Overview laporan analitik">
           <section class="grid grid-cols-1 xl:grid-cols-5 gap-4">
             <!-- Chart card -->
             <div class="ai-card ai-card-hover ai-reveal p-5 xl:col-span-3" data-delay="150">
@@ -906,7 +1037,10 @@ body {
                 </div>
               </div>
               <div class="mt-4 relative" style="height: 340px;">
-                <canvas id="arusChart"></canvas>
+                <canvas id="arusChart" role="img" aria-label="Grafik batang volume inbound dan outbound per minggu"></canvas>
+                <div id="arusChartEmpty" class="hidden absolute inset-0 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+                  <p class="text-[12.5px] leading-relaxed text-slate-500">Grafik tidak dapat dimuat karena pustaka Chart.js tidak tersedia. Ringkasan angka tetap tampil pada kartu di bawah grafik.</p>
+                </div>
               </div>
               <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-xl bg-slate-50 border border-slate-100 p-4">
                 <div>
@@ -1019,32 +1153,39 @@ body {
         </div>
 
         <!-- Panel tab lainnya -->
-        <div data-tabpanel="laporan" data-panel-name="aging" style="display:none">
-          <section class="ai-card p-8 text-center">
-            <i data-lucide="bar-chart-3" class="w-8 h-8 text-blue-500 mx-auto"></i>
-            <h3 class="mt-3 text-[15px] font-bold text-slate-800">Perputaran &amp; Aging Stok</h3>
-            <p class="mt-1 text-[12.5px] text-slate-500">Breakdown usia persediaan (Days on Hand) per kategori dan zona rak sedang dimuat untuk periode ini.</p>
+        <div data-tabpanel="laporan" data-panel-name="aging" role="tabpanel" style="display:none">
+          <section class="ai-card ai-empty">
+            <div class="ai-empty-icon"><i data-lucide="bar-chart-3" class="w-6 h-6"></i></div>
+            <h3 class="text-[15px] font-bold text-slate-800">Perputaran &amp; Aging Stok</h3>
+            <p class="max-w-md text-[12.5px] text-slate-500">Breakdown usia persediaan (Days on Hand) per kategori dan zona rak belum tersedia untuk periode ini.</p>
+            <span class="ai-badge bg-amber-50 text-amber-700 mt-2">Belum tersedia</span>
+            <button type="button" class="ai-btn ai-btn-secondary mt-3" data-tab-target="semua"><i data-lucide="arrow-left" class="w-4 h-4"></i>Kembali ke Overview</button>
           </section>
         </div>
-        <div data-tabpanel="laporan" data-panel-name="throughput" style="display:none">
-          <section class="ai-card p-8 text-center">
-            <i data-lucide="arrow-right-left" class="w-8 h-8 text-blue-500 mx-auto"></i>
-            <h3 class="mt-3 text-[15px] font-bold text-slate-800">Throughput Inbound/Outbound</h3>
-            <p class="mt-1 text-[12.5px] text-slate-500">Analisis hourly throughput per dock door tersedia pada laporan operasional mingguan.</p>
+        <div data-tabpanel="laporan" data-panel-name="throughput" role="tabpanel" style="display:none">
+          <section class="ai-card ai-empty">
+            <div class="ai-empty-icon"><i data-lucide="arrow-right-left" class="w-6 h-6"></i></div>
+            <h3 class="text-[15px] font-bold text-slate-800">Throughput Inbound/Outbound</h3>
+            <p class="max-w-md text-[12.5px] text-slate-500">Analisis throughput per jam dan per dock door tersedia pada laporan operasional mingguan.</p>
+            <button type="button" class="ai-btn ai-btn-secondary mt-3" data-toast="Laporan operasional mingguan belum tersedia di modul ini" data-toast-type="info"><i data-lucide="external-link" class="w-4 h-4"></i>Buka Laporan Operasional Mingguan</button>
+            <button type="button" class="mt-2 text-[12.5px] font-bold text-blue-600 hover:text-blue-700" data-tab-target="semua">Kembali ke Overview</button>
           </section>
         </div>
-        <div data-tabpanel="laporan" data-panel-name="abc" style="display:none">
-          <section class="ai-card p-8 text-center">
-            <i data-lucide="shapes" class="w-8 h-8 text-blue-500 mx-auto"></i>
-            <h3 class="mt-3 text-[15px] font-bold text-slate-800">Klasifikasi ABC &amp; Fast Moving</h3>
-            <p class="mt-1 text-[12.5px] text-slate-500">Pareto kontribusi valuasi per SKU (Kelas A/B/C) ditampilkan pada ringkasan kuarter.</p>
+        <div data-tabpanel="laporan" data-panel-name="abc" role="tabpanel" style="display:none">
+          <section class="ai-card ai-empty">
+            <div class="ai-empty-icon"><i data-lucide="shapes" class="w-6 h-6"></i></div>
+            <h3 class="text-[15px] font-bold text-slate-800">Klasifikasi ABC &amp; Fast Moving</h3>
+            <p class="max-w-md text-[12.5px] text-slate-500">Pareto kontribusi valuasi per SKU (Kelas A/B/C) ditampilkan pada ringkasan kuarter. Rincian per SKU dapat dilihat pada tabel di bawah halaman ini.</p>
+            <button type="button" class="ai-btn ai-btn-secondary mt-3" data-tab-target="semua"><i data-lucide="arrow-left" class="w-4 h-4"></i>Kembali ke Overview</button>
           </section>
         </div>
-        <div data-tabpanel="laporan" data-panel-name="rak" style="display:none">
-          <section class="ai-card p-8 text-center">
-            <i data-lucide="warehouse" class="w-8 h-8 text-blue-500 mx-auto"></i>
-            <h3 class="mt-3 text-[15px] font-bold text-slate-800">Kapasitas Rak Gudang</h3>
-            <p class="mt-1 text-[12.5px] text-slate-500">Utilisasi kapasitas zona rak A&ndash;E Hub Cakung DC-01 sedang disinkronkan dengan WMS.</p>
+        <div data-tabpanel="laporan" data-panel-name="rak" role="tabpanel" style="display:none">
+          <section class="ai-card ai-empty">
+            <div class="ai-empty-icon"><i data-lucide="warehouse" class="w-6 h-6"></i></div>
+            <h3 class="text-[15px] font-bold text-slate-800">Kapasitas Rak Gudang</h3>
+            <p class="max-w-md text-[12.5px] text-slate-500">Utilisasi kapasitas zona rak A&ndash;E Hub Cakung DC-01 belum tersinkron dengan WMS.</p>
+            <span class="ai-badge bg-amber-50 text-amber-700 mt-2">Sinkronisasi WMS tertunda</span>
+            <button type="button" class="ai-btn ai-btn-secondary mt-3" data-tab-target="semua"><i data-lucide="arrow-left" class="w-4 h-4"></i>Kembali ke Overview</button>
           </section>
         </div>
 
@@ -1065,14 +1206,14 @@ body {
             <table class="w-full ai-table min-w-[1050px]">
               <thead>
                 <tr>
-                  <th>Kode SKU &amp; Nama Barang</th>
-                  <th>Kategori</th>
-                  <th>Stok On-Hand</th>
-                  <th>Avg Keluar/Bln</th>
-                  <th>DOH (Days on Hand)</th>
-                  <th>Klasifikasi ABC</th>
-                  <th>Status Rekomendasi</th>
-                  <th class="text-right">Aksi</th>
+                  <th scope="col">Kode SKU &amp; Nama Barang</th>
+                  <th scope="col">Kategori</th>
+                  <th scope="col">Stok On-Hand</th>
+                  <th scope="col">Avg Keluar/Bln</th>
+                  <th scope="col">DOH (Days on Hand)</th>
+                  <th scope="col">Klasifikasi ABC</th>
+                  <th scope="col">Status Rekomendasi</th>
+                  <th scope="col" class="text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody id="skuBody">
@@ -1093,7 +1234,7 @@ body {
                   <td class="font-semibold text-slate-700">41 Hari</td>
                   <td><span class="ai-badge bg-blue-50 text-blue-700">Kelas A (High Value)</span></td>
                   <td><span class="text-[12px] font-bold text-emerald-600 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Reorder Point Terjaga (Aman)</span></td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-LAP-0921 dibuka" data-toast-type="info" title="Menu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-LAP-0921 dibuka" data-toast-type="info" title="Menu" aria-label="Buka menu aksi barang"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
                 </tr>
 
                 <tr data-cat="alat-kerja" data-lok="cakung" data-urgensi="sehat"
@@ -1113,7 +1254,7 @@ body {
                   <td class="font-semibold text-slate-700">41 Hari</td>
                   <td><span class="ai-badge bg-blue-50 text-blue-700">Kelas A (High Value)</span></td>
                   <td><span class="text-[12px] font-bold text-blue-600 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i>Permintaan Naik +18%</span></td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-SCN-0055 dibuka" data-toast-type="info" title="Menu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-SCN-0055 dibuka" data-toast-type="info" title="Menu" aria-label="Buka menu aksi barang"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
                 </tr>
 
                 <tr data-cat="packaging" data-lok="cakung" data-urgensi="sehat"
@@ -1133,7 +1274,7 @@ body {
                   <td class="font-bold text-red-600">23 Hari</td>
                   <td><span class="ai-badge bg-indigo-50 text-indigo-700">Kelas B (High Velocity)</span></td>
                   <td><span class="text-[12px] font-bold text-red-600 flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>Perlu Restock &lt; 5 Hari</span></td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-PKG-0112 dibuka" data-toast-type="info" title="Menu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-PKG-0112 dibuka" data-toast-type="info" title="Menu" aria-label="Buka menu aksi barang"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
                 </tr>
 
                 <tr data-cat="k3" data-lok="cakung" data-urgensi="aging"
@@ -1153,7 +1294,7 @@ body {
                   <td class="font-semibold text-slate-700">140 Hari</td>
                   <td><span class="ai-badge bg-slate-100 text-slate-600">Kelas C (Slow Moving)</span></td>
                   <td><span class="text-[12px] font-bold text-slate-500 flex items-center gap-1.5"><i data-lucide="search" class="w-3.5 h-3.5"></i>Review Pembelian / Slow</span></td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-HSE-4421 dibuka" data-toast-type="info" title="Menu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-HSE-4421 dibuka" data-toast-type="info" title="Menu" aria-label="Buka menu aksi barang"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
                 </tr>
 
                 <tr data-cat="infrastruktur" data-lok="cakung" data-urgensi="aging"
@@ -1173,7 +1314,7 @@ body {
                   <td class="font-bold text-red-600">360 Hari</td>
                   <td><span class="ai-badge bg-red-50 text-red-600">Dead Stock (&gt;180 Hari)</span></td>
                   <td><span class="text-[12px] font-bold text-red-600 flex items-center gap-1.5"><i data-lucide="archive-x" class="w-3.5 h-3.5"></i>Relokasi / Write-down</span></td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-SRV-8802 dibuka" data-toast-type="info" title="Menu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Menu aksi SKU-SRV-8802 dibuka" data-toast-type="info" title="Menu" aria-label="Buka menu aksi barang"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
                 </tr>
               </tbody>
             </table>
@@ -1186,15 +1327,15 @@ body {
 
           <!-- Pagination -->
           <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
-            <div class="text-[12px] text-slate-500 font-medium">Menampilkan 1 - 5 dari 1.240 SKU Teranalisis &bull; Halaman 1 dari 248</div>
+            <div class="text-[12px] text-slate-500 font-medium"><span id="skuCountInfo">Menampilkan 1 - 5 dari 1.240 SKU Teranalisis</span> &bull; Halaman 1 dari 248</div>
             <div class="flex items-center gap-1.5">
-              <button class="w-9 h-9 rounded-lg text-slate-400 hover:bg-slate-100 flex items-center justify-center" disabled><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+              <button type="button" aria-label="Halaman sebelumnya" class="w-9 h-9 rounded-lg text-slate-400 hover:bg-slate-100 flex items-center justify-center" disabled><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
               <button class="w-9 h-9 rounded-lg bg-blue-600 text-white text-[12.5px] font-bold shadow-md shadow-blue-600/30">1</button>
               <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 2 dimuat" data-toast-type="info">2</button>
               <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 3 dimuat" data-toast-type="info">3</button>
               <span class="text-slate-400 px-1">...</span>
               <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 248 dimuat" data-toast-type="info">248</button>
-              <button class="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center" data-toast="Halaman 2 dimuat" data-toast-type="info"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+              <button type="button" aria-label="Halaman berikutnya" class="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center" data-toast="Halaman 2 dimuat" data-toast-type="info"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
             </div>
           </div>
         </section>
@@ -1226,6 +1367,11 @@ body {
     (function () {
       /* ---------- Chart: Tren Arus Barang ---------- */
       var canvas = document.getElementById("arusChart");
+      var chartFallback = document.getElementById("arusChartEmpty");
+      if (canvas && !window.Chart && chartFallback) {
+        chartFallback.classList.remove("hidden");
+        chartFallback.classList.add("flex");
+      }
       if (canvas && window.Chart) {
         var annotation = {
           id: "peakAnnotation",
@@ -1324,6 +1470,11 @@ body {
       var fUrgensi = document.getElementById("fUrgensi");
       var empty = document.getElementById("skuEmpty");
 
+      var countInfo = document.getElementById("skuCountInfo");
+      var totalSku = 1240;
+      var resetBtn = document.getElementById("resetFilters");
+      var initial = { kategori: fKategori.value, lokasi: fLokasi.value, urgensi: fUrgensi.value };
+
       function applyFilter() {
         var q = (search.value || "").trim().toLowerCase();
         var shown = 0;
@@ -1337,10 +1488,35 @@ body {
           if (ok) shown++;
         });
         empty.classList.toggle("hidden", shown > 0);
+        if (countInfo) {
+          var difilter = q !== "" ||
+            fKategori.value !== initial.kategori ||
+            fLokasi.value !== initial.lokasi ||
+            fUrgensi.value !== initial.urgensi;
+          if (shown === 0) {
+            countInfo.textContent = "Tidak ada SKU yang cocok dari " + totalSku.toLocaleString("id-ID") + " SKU Teranalisis";
+          } else if (difilter) {
+            countInfo.textContent = "Menampilkan " + shown + " dari " + totalSku.toLocaleString("id-ID") + " SKU Teranalisis (difilter)";
+          } else {
+            countInfo.textContent = "Menampilkan " + shown + " baris dari " + totalSku.toLocaleString("id-ID") + " SKU Teranalisis";
+          }
+        }
       }
 
       search.addEventListener("input", applyFilter);
       [fKategori, fLokasi, fUrgensi].forEach(function (s) { s.addEventListener("change", applyFilter); });
+
+      /* Reset semua filter ke kondisi awal halaman */
+      if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+          search.value = "";
+          fKategori.value = initial.kategori;
+          fLokasi.value = initial.lokasi;
+          fUrgensi.value = initial.urgensi;
+          applyFilter();
+          if (window.aiToast) window.aiToast("Filter dikembalikan ke kondisi awal", "info");
+        });
+      }
 
       applyFilter();
       window.aiRefresh();
