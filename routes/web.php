@@ -228,7 +228,7 @@ Route::middleware('auth')->group(function () {
 })->name('persetujuan-barang');
 
         Route::get('/riwayat-persetujuan', function () {
-            return view('dashboard.hr.riwayat-persetujuan');
+            return view('dashboard.riwayat-persetujuan');
         })->name('riwayat-persetujuan');
 
         Route::middleware('permission:issue.approve')->group(function () {
@@ -291,7 +291,7 @@ Route::middleware('auth')->group(function () {
             })->name('data-barang');
 
             Route::get('/temuan-audit', function () {
-                return view('dashboard.audit.temuan-audit');
+                return view('dashboard.temuan-audit');
             })->name('temuan-audit');
 
               Route::get('/data-gudang-lokasi', function () {
