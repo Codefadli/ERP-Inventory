@@ -13,6 +13,7 @@
     {{-- Main Content Area --}}
     <div class="ml-64 lg:ml-264 min-h-screen pt-6 pb-6 animate-fade-in">
 
+        {{-- 1. ROLE AUDITOR: Tampilan Khusus Audit & Kepatuhan Inbound --}}
         @if(auth()->user()->isAuditor())
             {{-- ============ AUDITOR VIEW: Audit Barang Masuk ============ --}}
             <div class="max-w-7xl mx-auto">
@@ -276,6 +277,7 @@
                     </div>
                 </div>
             </div>
+        {{-- 2. ROLE OPERASIONAL (SuperAdmin, KepalaGudang, Pegawai): Manajemen Inbound --}}
         @elseif(auth()->user()->isSuperAdmin() || auth()->user()->isKepalaGudang() || auth()->user()->isPegawai())
             {{-- ============ OPERASIONAL VIEW: Manajemen Barang Masuk ============ --}}
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
