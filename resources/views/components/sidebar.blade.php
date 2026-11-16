@@ -6,10 +6,10 @@
             <i class="fas fa-th-large w-4"></i>
             <span>Dashboard</span>
         </a>
-        
+
         @if(auth()->user()->isSuperAdmin())
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen Sistem</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.pengguna') }}" class="nav-link {{ request()->routeIs('admin.pengguna') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-users w-4"></i>
             <span>Manajemen Pengguna</span>
         </a>
@@ -17,33 +17,33 @@
             <i class="fas fa-user-shield w-4"></i>
             <span>Role & Permission</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.log-aktivitas') }}" class="nav-link {{ request()->routeIs('admin.log-aktivitas') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-alt w-4"></i>
             <span>Log Aktivitas</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-barang') }}" class="nav-link {{ request()->routeIs('admin.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-gudang-lokasi') }}" class="nav-link {{ request()->routeIs('admin.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-warehouse w-4"></i>
-            <span>Data Gudang & Lokasi</span>
+            <span>Data Gudang &amp; Lokasi</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-departemen') }}" class="nav-link {{ request()->routeIs('admin.data-departemen') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-building w-4"></i>
             <span>Data Departemen</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.data-supplier') }}" class="nav-link {{ request()->routeIs('admin.data-supplier') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck w-4"></i>
             <span>Data Supplier</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.kategori-barang') }}" class="nav-link {{ request()->routeIs('admin.kategori-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-tags w-4"></i>
             <span>Kategori Barang</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-down w-4"></i>
@@ -61,35 +61,36 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Laporan & Analitik</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.laporan-analitik') }}" class="nav-link {{ request()->routeIs('admin.laporan-analitik') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.laporan-riwayat') }}" class="nav-link {{ request()->routeIs('admin.laporan-riwayat') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
             <span>Laporan & Riwayat</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Persetujuan</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('admin.persetujuan-barang') }}" class="nav-link {{ request()->routeIs('admin.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-contract w-4"></i>
             <span>Persetujuan Barang</span>
         </a>
         @endif
-        
+
         @if(auth()->user()->isKepalaGudang())
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data & Inventaris</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('gudang.data-barang') }}" class="nav-link {{ request()->routeIs('gudang.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('gudang.data-gudang-lokasi') }}"
+            class="nav-link {{ request()->routeIs('gudang.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang & Lokasi</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional & Transaksi</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck-loading w-4"></i>
@@ -107,23 +108,21 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-        <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-file-contract w-4"></i>
-                <span>Persetujuan Barang</span>
-            </div>
-            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
+        <a href="{{ route('gudang.persetujuan-barang') }}"
+            class="nav-link {{ request()->routeIs('gudang.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+            <i class="fas fa-clipboard-check w-4"></i>
+            <span>Persetujuan Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('gudang.laporan') }}" class="nav-link {{ request()->routeIs('gudang.laporan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>
         @endif
-        
+
         @if(auth()->user()->isHR())
         <!-- HR Menu -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional & Persetujuan</p>
-        <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('hr.persetujuan-barang') }}" class="nav-link {{ request()->routeIs('hr.persetujuan-barang') ? 'active' : '' }} flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <div class="flex items-center gap-3">
                 <i class="fas fa-clock w-4"></i>
                 <span>Antrean Persetujuan</span>
@@ -138,7 +137,7 @@
             <i class="fas fa-history w-4"></i>
             <span>Riwayat Persetujuan</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen & Laporan</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-line w-4"></i>
@@ -149,7 +148,7 @@
             <span>Log Audit & Otorisasi</span>
         </a>
         @endif
-        
+
         @if(auth()->user()->isPegawai())
         <!-- Pegawai Menu -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional Gudang</p>
@@ -165,7 +164,7 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-        
+
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Monitoring & Laporan</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
@@ -179,7 +178,7 @@
             <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">2</span>
         </a>
         @endif
-        
+
         @if(auth()->user()->isAuditor())
         <!-- Auditor Menu -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Audit & Pemeriksaan</p>
@@ -195,11 +194,11 @@
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('audit.data-barang') }}" class="nav-link {{ request()->routeIs('audit.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('audit.data-gudang-lokasi') }}" class="nav-link {{ request()->routeIs('audit.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang & Lokasi</span>
         </a>
@@ -212,7 +211,7 @@
             <span>Temuan Audit</span>
         </a>
         @endif
-        
+
         <!-- Common Menu for All Roles -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Pengaturan & Akun</p>
         <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.notifikasi' : (auth()->user()->isKepalaGudang() ? 'gudang.notifikasi' : (auth()->user()->isHR() ? 'hr.notifikasi' : (auth()->user()->isPegawai() ? 'pegawai.notifikasi' : 'audit.notifikasi')))) }}" class="nav-link {{ request()->routeIs('*.notifikasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
@@ -228,7 +227,7 @@
             <span>Profil Saya</span>
         </a>
     </nav>
-    
+
     <!-- Sidebar Footer Info (for Pegawai & Kepala Gudang) -->
     @if(auth()->user()->isPegawai() || auth()->user()->isKepalaGudang())
     <div class="m-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">

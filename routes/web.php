@@ -11,6 +11,8 @@ use App\Http\Controllers\Auth\LoginController;
 //     return view('dashboard-sebelum-login');
 // })->name('dashboard-sebelum-login');
 
+
+
 Route::get('/', function () {
     return view('dashboard-sebelum-login');
 })->name('home');
@@ -25,15 +27,15 @@ Route::middleware('guest')->group(function () {
 // ============================================================================
 
 Route::middleware('auth')->group(function () {
-    
+
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    
+
     Route::prefix('hub-selection')->name('hub.selection.')->group(function () {
         Route::get('/', [App\Http\Controllers\HubSelectionController::class, 'show'])->name('show');
         Route::post('/', [App\Http\Controllers\HubSelectionController::class, 'store'])->name('store');
         Route::get('/hubs-by-city', [App\Http\Controllers\HubSelectionController::class, 'getHubsByCity'])->name('hubs-by-city');
     });
-    
+
     // ========================================================================
     // PROFILE ROUTES (All authenticated users)
     // ========================================================================
@@ -48,7 +50,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard-redirect', function () {
         $user = auth()->user();
-        
+
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
         }
@@ -64,10 +66,10 @@ Route::middleware('auth')->group(function () {
         if ($user->isAuditor()) {
             return redirect()->route('audit.dashboard');
         }
-        
+
         return view('homepage.documentation');
     })->name('homepage');
-    
+
     // ========================================================================
     // SUPER ADMIN ROUTES
     // ========================================================================
@@ -85,29 +87,71 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
-        Route::get('/mutasi-barang', function () {
-            return view('dashboard.mutasi-barang');
-        })->name('mutasi-barang');
-
         Route::middleware('permission:user.manage')->group(function () {
+            Route::get('/pengguna', function () {
+                return view('dashboard.superadmin.manajemenPengguna');
+            })->name('pengguna');
+
             Route::get('/users', function () {
                 return view('admin.users.index');
             })->name('users.index');
         });
-        
+
         Route::middleware('permission:role.manage')->group(function () {
             Route::get('/roles', function () {
                 return view('admin.roles.index');
             })->name('roles.index');
         });
-        
+
         Route::middleware('permission:settings.manage')->group(function () {
             Route::get('/settings', function () {
                 return view('admin.settings.index');
             })->name('settings.index');
         });
+
+        Route::get('/persetujuan-barang', function () {
+            return view('admin.persetujuan-barang');
+        })->name('persetujuan-barang');
+
+        Route::get('/data-gudang-lokasi', function () {
+            return view('admin.data-gudang-lokasi');
+        })->name('data-gudang-lokasi');
+
+        Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/log-aktivitas', function () {
+                return view('dashboard.superadmin.logAktivitas');
+            })->name('log-aktivitas');
+        });
+
+        Route::middleware('permission:master.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+
+            Route::get('/data-departemen', function () {
+                return view('dashboard.superadmin.dataDepartemen');
+            })->name('data-departemen');
+
+            Route::get('/data-supplier', function () {
+                return view('dashboard.superadmin.dataSuplier');
+            })->name('data-supplier');
+
+            Route::get('/kategori-barang', function () {
+                return view('dashboard.superadmin.kategoriBarang');
+            })->name('kategori-barang');
+        });
+
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan-analitik', function () {
+                return view('dashboard.superadmin.laporanAnalitik');
+            })->name('laporan-analitik');
+
+            Route::get('/laporan-riwayat', function () {
+                return view('dashboard.superadmin.laporanRiwayat');
+            })->name('laporan-riwayat');
+        });
     });
-    
+
     // ========================================================================
     // KEPALA GUDANG ROUTES
     // ========================================================================
@@ -125,27 +169,43 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
-        Route::get('/mutasi-barang', function () {
-            return view('dashboard.mutasi-barang');
-        })->name('mutasi-barang');
+        Route::get('/data-gudang-lokasi', function () {
+            return view('gudang.data-gudang-lokasi');
+        })->name('data-gudang-lokasi');
+
+        Route::get('/persetujuan-barang', function () {
+            return view('gudang.persetujuan-barang');
+        })->name('persetujuan-barang');
+
+        Route::middleware('permission:report.view')->group(function () {
+            Route::get('/laporan', function () {
+                return view('dashboard.kepalagudang.laporan');
+            })->name('laporan');
+        });
+
+        Route::middleware('permission:master.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+        });
 
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
                 return view('gudang.master.categories');
             })->name('master.categories');
-            
+
             Route::get('/master/locations', function () {
                 return view('gudang.master.locations');
             })->name('master.locations');
         });
-        
+
         Route::middleware('permission:product.manage')->group(function () {
             Route::get('/products', function () {
                 return view('gudang.products.index');
             })->name('products.index');
         });
     });
-    
+
     // ========================================================================
     // HR ROUTES (Approver)
     // ========================================================================
@@ -162,18 +222,22 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-        
+
+        Route::get('/persetujuan-barang', function () {
+    return view('dashboard.hr.persetujuan-barang');
+})->name('persetujuan-barang');
+
         Route::get('/riwayat-persetujuan', function () {
             return view('dashboard.riwayat-persetujuan');
         })->name('riwayat-persetujuan');
-        
+
         Route::middleware('permission:issue.approve')->group(function () {
             Route::get('/approvals', function () {
                 return view('hr.approvals.index');
             })->name('approvals.index');
         });
     });
-    
+
     // ========================================================================
     // PEGAWAI GUDANG ROUTES
     // ========================================================================
@@ -190,20 +254,20 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-        
+
         Route::middleware('permission:receipt.create')->group(function () {
             Route::get('/receipts', function () {
                 return view('pegawai.receipts.index');
             })->name('receipts.index');
         });
-        
+
         Route::middleware('permission:issue.create')->group(function () {
             Route::get('/issues', function () {
                 return view('pegawai.issues.index');
             })->name('issues.index');
         });
     });
-    
+
     // ========================================================================
     // AUDITOR ROUTES
     // ========================================================================
@@ -220,44 +284,47 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-        
+
         Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/data-barang', function () {
+                return view('dashboard.dataBarang');
+            })->name('data-barang');
+
             Route::get('/temuan-audit', function () {
                 return view('dashboard.temuan-audit');
             })->name('temuan-audit');
 
-            Route::get('/mutasi-barang', function () {
-                return view('dashboard.mutasi-barang');
-            })->name('mutasi-barang');
-
+              Route::get('/data-gudang-lokasi', function () {
+                    return view('dashboard.audit.data-gudang-lokasi');
+                })->name('data-gudang-lokasi');
             Route::get('/logs', function () {
                 return view('audit.logs.index');
             })->name('logs.index');
         });
     });
-    
+
     // ========================================================================
     // SHARED ROUTES (All authenticated users)
     // ========================================================================
-    
+
     Route::middleware('permission:catalog.view')->group(function () {
         Route::get('/catalog', function () {
             return view('catalog.index');
         })->name('catalog.index');
     });
-    
+
     Route::middleware('permission:report.view')->group(function () {
         Route::get('/reports', function () {
             return view('reports.index');
         })->name('reports.index');
     });
-    
+
     Route::middleware('permission:transaction.view')->group(function () {
         Route::get('/transactions', function () {
             return view('transactions.index');
         })->name('transactions.index');
     });
-    
+
     Route::get('/dashboard', function () {
         return view('dashboard.index');
     })->name('dashboard');
