@@ -72,7 +72,7 @@
             <span>Laporan & Riwayat</span>
         </a>
 
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Persetujuan</p>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Persetujuan</p>
         <a href="{{ route('admin.persetujuan-barang') }}" class="nav-link {{ request()->routeIs('admin.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-contract w-4"></i>
             <span>Persetujuan Barang</span>
@@ -86,7 +86,7 @@
             <span>Data Barang</span>
         </a>
         <a href="{{ route('gudang.data-gudang-lokasi') }}"
-        class="nav-link {{ request()->routeIs('gudang.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+            class="nav-link {{ request()->routeIs('gudang.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang & Lokasi</span>
         </a>
@@ -108,8 +108,8 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-       <a href="{{ route('gudang.persetujuan-barang') }}"
-        class="nav-link {{ request()->routeIs('gudang.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('gudang.persetujuan-barang') }}"
+            class="nav-link {{ request()->routeIs('gudang.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Persetujuan Barang</span>
         </a>
@@ -198,10 +198,10 @@
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-       <a href="{{ route('audit.data-gudang-lokasi') }}" class="nav-link {{ request()->routeIs('audit.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
-                <i class="fas fa-warehouse w-4"></i>
-                <span>Data Gudang & Lokasi</span>
-            </a>
+        <a href="{{ route('audit.data-gudang-lokasi') }}" class="nav-link {{ request()->routeIs('audit.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+            <i class="fas fa-warehouse w-4"></i>
+            <span>Data Gudang & Lokasi</span>
+        </a>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
