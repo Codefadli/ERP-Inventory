@@ -84,7 +84,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-        
+
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/users', function () {
                 return view('admin.users.index');
@@ -120,7 +124,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
-        
+
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::middleware('permission:master.manage')->group(function () {
             Route::get('/master/categories', function () {
                 return view('gudang.master.categories');
@@ -156,7 +164,7 @@ Route::middleware('auth')->group(function () {
             ->name('profile');
         
         Route::get('/riwayat-persetujuan', function () {
-            return view('dashboard.hr.riwayat-persetujuan');
+            return view('dashboard.riwayat-persetujuan');
         })->name('riwayat-persetujuan');
         
         Route::middleware('permission:issue.approve')->group(function () {
@@ -215,8 +223,12 @@ Route::middleware('auth')->group(function () {
         
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/temuan-audit', function () {
-                return view('dashboard.audit.temuan-audit');
+                return view('dashboard.temuan-audit');
             })->name('temuan-audit');
+
+            Route::get('/mutasi-barang', function () {
+                return view('dashboard.mutasi-barang');
+            })->name('mutasi-barang');
 
             Route::get('/logs', function () {
                 return view('audit.logs.index');
