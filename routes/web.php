@@ -87,6 +87,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/pengguna', function () {
                 return view('dashboard.superadmin.manajemenPengguna');
@@ -169,6 +173,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::get('/data-gudang-lokasi', function () {
             return view('gudang.data-gudang-lokasi');
         })->name('data-gudang-lokasi');
@@ -223,6 +231,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::get('/persetujuan-barang', function () {
     return view('dashboard.hr.persetujuan-barang');
 })->name('persetujuan-barang');
@@ -255,6 +267,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
+
         Route::middleware('permission:receipt.create')->group(function () {
             Route::get('/receipts', function () {
                 return view('pegawai.receipts.index');
@@ -284,6 +300,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
+
+        Route::get('/mutasi-barang', function () {
+            return view('dashboard.mutasi-barang');
+        })->name('mutasi-barang');
 
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/data-barang', function () {

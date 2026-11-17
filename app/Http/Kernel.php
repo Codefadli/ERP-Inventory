@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\EnsureHubSelected::class, // Pastikan hub dipilih untuk admin/hr/audit
+            \App\Http\Middleware\CheckRevokedSession::class, // Invalidasi sesi yang telah dicabut
         ],
 
         'api' => [

@@ -110,6 +110,49 @@ class LoginController extends Controller
         // Regenerate session untuk keamanan (SR-ASTRO-005)
         $request->session()->regenerate();
 
+        // Record active session ke user_sessions table
+        try {
+            $sessionId = $request->session()->getId();
+            $ua = $request->userAgent() ?? '';
+            $deviceName = 'Desktop';
+            if (preg_match('/Mobile|Android|iPhone/i', $ua)) {
+                $deviceName = 'Mobile Device';
+            } elseif (preg_match('/Tablet|iPad/i', $ua)) {
+                $deviceName = 'Tablet';
+            }
+
+            $platform = 'Unknown OS';
+            if (preg_match('/Windows/i', $ua)) $platform = 'Windows';
+            elseif (preg_match('/Macintosh|Mac OS/i', $ua)) $platform = 'macOS';
+            elseif (preg_match('/Linux/i', $ua)) $platform = 'Linux';
+            elseif (preg_match('/Android/i', $ua)) $platform = 'Android';
+            elseif (preg_match('/iPhone|iPad/i', $ua)) $platform = 'iOS';
+
+            $browser = 'Unknown Browser';
+            if (preg_match('/Edge|Edg/i', $ua)) $browser = 'Edge';
+            elseif (preg_match('/Chrome/i', $ua)) $browser = 'Chrome';
+            elseif (preg_match('/Firefox/i', $ua)) $browser = 'Firefox';
+            elseif (preg_match('/Safari/i', $ua)) $browser = 'Safari';
+
+            \App\Models\UserSession::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'session_id' => $sessionId,
+                ],
+                [
+                    'ip_address' => $request->ip(),
+                    'user_agent' => substr($ua, 0, 500),
+                    'device_name' => $deviceName,
+                    'platform' => $platform,
+                    'browser' => $browser,
+                    'last_activity_at' => now(),
+                    'status' => 'active',
+                ]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to record UserSession: ' . $e->getMessage());
+        }
+
         // Log audit trail
         \Log::info('User login', [
             'user_id' => $user->id,
@@ -163,6 +206,17 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $user = Auth::user();
+
+        // Invalidate user_sessions record
+        if ($user) {
+            try {
+                \App\Models\UserSession::where('user_id', $user->id)
+                    ->where('session_id', $request->session()->getId())
+                    ->update(['status' => 'revoked']);
+            } catch (\Throwable $e) {
+                // ignore
+            }
+        }
 
         // Log audit trail
         if ($user) {
