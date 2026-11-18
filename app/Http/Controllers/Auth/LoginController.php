@@ -181,7 +181,7 @@ class LoginController extends Controller
         }
 
         if ($user->isKepalaGudang()) {
-            return redirect()->route('gudang.dashboard')->with('success', 'Selamat datang, ' . $user->nama_lengkap);
+            return redirect()->route('kepalagudang.dashboard')->with('success', 'Selamat datang, ' . $user->nama_lengkap);
         }
 
         if ($user->isHR()) {
