@@ -1,1055 +1,1312 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
 
-@section('title', 'Log Audit & Otorisasi | ASTRO Inventory')
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Audit & Otorisasi - Astro Inventory</title>
 
-@section('styles')
-<style>
-    .audit-page {
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1f2937;
-        overflow-x: hidden;
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    .audit-page * {
-        box-sizing: border-box;
-    }
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    .audit-page .metric-card {
-        transition: transform .25s ease, box-shadow .25s ease;
-    }
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    .audit-page .metric-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 25px rgba(15, 23, 42, .09);
-    }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        brand: '#2563eb',
+                        ink: '#172033',
+                        canvas: '#f5f7fb'
+                    }
+                }
+            }
+        };
+    </script>
 
-    .audit-page .table-row {
-        transition: background .2s ease;
-    }
-
-    .audit-page .table-row:hover {
-        background: #f8fafc;
-    }
-
-    .audit-page .btn-primary {
-        transition: all .2s ease;
-    }
-
-    .audit-page .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(37, 99, 235, .2);
-    }
-
-    .audit-page .hash-display {
-        font-family: "Courier New", monospace;
-        overflow-wrap: anywhere;
-    }
-
-    .audit-page .network-node {
-        transition: transform .2s ease;
-    }
-
-    .audit-page .network-node:hover {
-        transform: scale(1.15);
-    }
-
-    .audit-page .network-line {
-        stroke-dasharray: 1000;
-        stroke-dashoffset: 1000;
-        animation: auditDash 2s linear forwards;
-    }
-
-    @keyframes auditDash {
-        to {
-            stroke-dashoffset: 0;
-        }
-    }
-
-    @keyframes auditFade {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
+    <style>
+        :root {
+            --brand: #2563eb;
+            --brand-dark: #1d4ed8;
+            --bg: #f5f7fb;
+            --line: #e7ebf2;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .audit-page .animate-audit {
-        animation: auditFade .45s ease-out both;
-    }
-
-    .audit-page .badge-glow {
-        animation: auditPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes auditPulse {
-
-        0%,
-        100% {
-            opacity: 1;
+        * {
+            box-sizing: border-box;
         }
 
-        50% {
-            opacity: .7;
-        }
-    }
-
-    .audit-page .toast-message {
-        transform: translateY(20px);
-        opacity: 0;
-        pointer-events: none;
-        transition: all .25s ease;
-    }
-
-    .audit-page .toast-message.show {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    @media (max-width: 640px) {
-        .audit-page .page-heading {
-            font-size: 1.25rem;
-        }
-    }
-
-    @media print {
-
-        .audit-page .no-print,
-        .audit-page aside,
-        .audit-page header {
-            display: none !important;
+        html {
+            scroll-behavior: smooth;
         }
 
-        .audit-page main {
-            padding: 0 !important;
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: #172033;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 99px;
+            border: 2px solid #f5f7fb;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .audit-page {
+            min-height: 100vh;
+            width: 100%;
         }
 
         .audit-page .metric-card {
-            break-inside: avoid;
+            transition: transform .25s ease, box-shadow .25s ease;
         }
-    }
 
-    @media (prefers-reduced-motion: reduce) {
-
-        .audit-page *,
-        .audit-page *::before,
-        .audit-page *::after {
-            animation-duration: .01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: .01ms !important;
+        .audit-page .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px -12px rgba(37, 99, 235, .22),
+                0 4px 10px rgba(15, 23, 42, .06);
         }
-    }
-</style>
-@endsection
 
-@section('content')
-<div class="audit-page flex min-h-screen bg-slate-50">
+        .audit-page .panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .04);
+        }
 
-    {{-- Shared Sidebar --}}
-    @include('components.sidebar')
+        .audit-page .btn-primary {
+            transition: all .2s ease;
+        }
 
-    <div class="min-w-0 flex-1">
+        .audit-page .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(37, 99, 235, .2);
+        }
 
-        {{-- Shared Navbar --}}
-        @include('components.navbar')
+        .audit-page .filter-pill {
+            transition: all .2s ease;
+        }
 
-        <main class="p-4 lg:p-6 overflow-x-hidden">
+        .audit-page .filter-pill.active {
+            background: #dbeafe;
+            border-color: #2563eb;
+            color: #1d4ed8;
+        }
 
-            {{-- Breadcrumb --}}
-            <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
-                <a href="#" class="hover:text-blue-600">Beranda</a>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <span>Manajemen & Laporan</span>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <span class="font-medium text-gray-900">Log Audit & Otorisasi</span>
+        .audit-page .audit-row {
+            transition: background .2s ease;
+        }
+
+        .audit-page .audit-row:hover {
+            background: #f8fafc;
+        }
+
+        .audit-page .hash-text {
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+
+        .audit-page .status-dot {
+            width: 8px;
+            height: 8px;
+            display: inline-block;
+            border-radius: 50%;
+        }
+
+        .audit-page .network-line {
+            stroke-dasharray: 5 5;
+            animation: dashMove 18s linear infinite;
+        }
+
+        @keyframes dashMove {
+            to {
+                stroke-dashoffset: -200;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .audit-page .fade-up {
+            animation: fadeUp .5s ease both;
+        }
+
+        .audit-page .delay-1 {
+            animation-delay: .08s;
+        }
+
+        .audit-page .delay-2 {
+            animation-delay: .16s;
+        }
+
+        .audit-page .delay-3 {
+            animation-delay: .24s;
+        }
+
+        .audit-page .delay-4 {
+            animation-delay: .32s;
+        }
+
+        #auditToastContainer {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .audit-toast {
+            min-width: 250px;
+            max-width: 360px;
+            padding: 12px 15px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid #2563eb;
+            border-radius: 9px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, .13);
+            color: #1e293b;
+            font-size: 12px;
+            animation: fadeUp .25s ease;
+        }
+
+        .audit-toast.success {
+            border-left-color: #16a34a;
+        }
+
+        .audit-toast.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .audit-toast.error {
+            border-left-color: #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .audit-page .page-heading {
+                align-items: flex-start;
+            }
+
+            .audit-page .table-container {
+                overflow-x: auto;
+            }
+
+            .audit-page table {
+                min-width: 1050px;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff !important;
+            }
+
+            #auditToastContainer,
+            .no-print,
+            aside,
+            nav {
+                display: none !important;
+            }
+
+            .audit-page {
+                display: block !important;
+            }
+
+            .audit-page main {
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            .audit-page .panel,
+            .audit-page .metric-card {
+                box-shadow: none !important;
+                break-inside: avoid;
+            }
+
+            .audit-page .table-container {
+                overflow: visible !important;
+            }
+
+            .audit-page table {
+                min-width: 0 !important;
+                font-size: 9px !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    @include('components.navbar')
+
+    <div class="audit-page flex min-h-screen">
+
+        <!-- SIDEBAR -->
+        @include('components.sidebar')
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 min-w-0 p-4 lg:p-6 overflow-x-hidden">
+
+            @if(auth()->check() && auth()->user()->isHR())
+
+            <!-- BREADCRUMB -->
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-400 mb-4">
+                <a href="{{ url('/') }}" class="hover:text-blue-600">
+                    <i class="fas fa-home mr-1"></i>Beranda
+                </a>
+                <i class="fas fa-chevron-right text-[9px]"></i>
+                <span>Manajemen &amp; Laporan</span>
+                <i class="fas fa-chevron-right text-[9px]"></i>
+                <span class="text-blue-600 font-semibold">Log Audit &amp; Otorisasi</span>
             </div>
 
-            {{-- Page Header --}}
-            <section class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 animate-audit">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 flex-wrap mb-2">
-                        <h1 class="page-heading text-xl lg:text-2xl font-bold text-gray-900">
-                            Log Audit, Integritas Kriptografis & Otorisasi
+            <!-- PAGE HEADER -->
+            <div class="page-heading flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 fade-up">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <h1 class="text-xl md:text-2xl font-extrabold text-gray-900">
+                            Log Audit &amp; Otorisasi
                         </h1>
-
-                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                            <i class="fas fa-shield-alt mr-1"></i>
-                            Monitoring Audit
-                        </span>
-
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                            <i class="fas fa-fingerprint mr-1"></i>
-                            SHA-256
+                        <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full px-2.5 py-1 text-[10px] font-bold">
+                            <span class="status-dot bg-green-500"></span>
+                            AUDIT SYSTEM ACTIVE
                         </span>
                     </div>
-
-                    <p class="text-sm text-gray-600 max-w-4xl">
-                        Halaman ini digunakan untuk memantau rekam jejak aktivitas pengguna,
-                        perubahan data inventaris, persetujuan transaksi, serta aktivitas
-                        otorisasi dalam sistem.
+                    <p class="text-xs text-gray-500 max-w-2xl leading-relaxed">
+                        Pemantauan aktivitas pengguna, riwayat otorisasi, integritas data,
+                        dan jejak perubahan sistem inventaris secara terstruktur.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap gap-2 no-print">
-                    <button type="button" id="exportAudit"
-                        class="btn-primary px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
-                        <i class="fas fa-download"></i>
-                        <span>Ekspor Laporan Audit</span>
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <button id="btnExport"
+                        class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 flex items-center gap-2">
+                        <i class="fas fa-file-csv text-green-600"></i>
+                        Ekspor CSV
                     </button>
 
-                    <button type="button" id="printAudit"
-                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm">
+                    <button id="btnPrint"
+                        class="btn-primary bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 flex items-center gap-2">
                         <i class="fas fa-print"></i>
-                        <span>Cetak</span>
+                        Cetak Laporan
                     </button>
                 </div>
-            </section>
-
-            {{-- Demo Notice --}}
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 flex items-start gap-3">
-                <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
-                <p class="text-xs text-amber-800">
-                    <strong>Informasi:</strong> Data pada halaman ini merupakan data simulasi
-                    untuk tampilan antarmuka. Data belum diambil dari database audit atau
-                    sistem ledger sebenarnya.
-                </p>
             </div>
 
-            {{-- Status Cards --}}
-            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- INFORMATION NOTICE -->
+            <div class="panel border-l-4 border-l-amber-400 bg-amber-50 p-3.5 mb-6 fade-up">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-amber-800 mb-1">Informasi Data Audit</h3>
+                        <p class="text-[11px] text-amber-700 leading-relaxed">
+                            Data aktivitas pada halaman ini merupakan data contoh untuk tampilan
+                            antarmuka. Nilai hash dan catatan audit belum terhubung dengan
+                            penyimpanan log produksi.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-check text-green-600"></i>
-                            </div>
-                            <span class="text-sm font-semibold text-gray-900">Status Audit</span>
+            <!-- SYSTEM STATUS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+                <div class="metric-card panel p-4 fade-up delay-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        <span class="badge-glow bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">
+                        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
                             AKTIF
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-3">Status simulasi monitoring audit</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Status Sistem Audit</p>
+                    <h2 class="text-2xl font-extrabold text-gray-900 mt-1">Aktif</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">Pemantauan aktivitas berjalan</p>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-chart-line text-blue-600"></i>
+                <div class="metric-card panel p-4 fade-up delay-2">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <i class="fas fa-list-check"></i>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-900">
-                                <span class="count-up" data-target="4">0</span>
-                                <span class="text-green-600 text-xs ml-1">+14,2%</span>
-                            </p>
-                            <p class="text-xs text-gray-500">Aktivitas bulan ini</p>
-                        </div>
+                        <span class="text-[10px] font-semibold text-indigo-600">Hari ini</span>
                     </div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Aktivitas</p>
+                    <h2 class="text-2xl font-extrabold text-gray-900 mt-1" id="totalActivity">24.810</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">Catatan aktivitas tercatat</p>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 bg-pink-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-pink-600"></i>
-                            </div>
-                            <span class="text-sm font-semibold text-gray-900">
-                                <span class="count-up" data-target="2">0</span>
-                            </span>
+                <div class="metric-card panel p-4 fade-up delay-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fas fa-magnifying-glass-chart"></i>
                         </div>
-                        <span class="bg-pink-100 text-pink-700 px-2 py-1 rounded text-xs font-semibold">
-                            Perlu Review
+                        <span class="text-[10px] font-semibold text-amber-600">Perlu perhatian</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Dalam Peninjauan</p>
+                    <h2 class="text-2xl font-extrabold text-gray-900 mt-1">02</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">Aktivitas menunggu pemeriksaan</p>
+                </div>
+
+                <div class="metric-card panel p-4 fade-up delay-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <span class="text-[10px] font-semibold text-green-600">Normal</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Konflik Otorisasi</p>
+                    <h2 class="text-2xl font-extrabold text-gray-900 mt-1">00</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">Tidak ada konflik pada data contoh</p>
+                </div>
+
+            </div>
+
+            <!-- INTEGRITY METRICS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
+                <div class="panel p-4 lg:col-span-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900">Integritas Rantai Audit</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Ringkasan validasi integritas data log</p>
+                        </div>
+                        <span class="text-[10px] bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full font-bold">
+                            <i class="fas fa-check-circle mr-1"></i>TERVALIDASI (SIMULASI)
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-3">Aktivitas yang perlu diperiksa</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-[10px] text-gray-500 font-semibold uppercase">Integritas Chain</p>
+                            <p class="text-2xl font-extrabold text-blue-600 mt-1">100%</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Status contoh</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-[10px] text-gray-500 font-semibold uppercase">Total Log</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mt-1">24.810</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Entri tercatat</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-[10px] text-gray-500 font-semibold uppercase">Penyimpangan</p>
+                            <p class="text-2xl font-extrabold text-green-600 mt-1">00</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Tidak ditemukan</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="flex justify-between text-[10px] mb-1.5">
+                            <span class="text-gray-500 font-semibold">Status pemeriksaan integritas</span>
+                            <span class="text-blue-600 font-bold">100%</span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-600 rounded-full" style="width:100%"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 bg-cyan-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-check-double text-cyan-600"></i>
-                        </div>
+                <div class="panel p-4">
+                    <div class="flex items-center justify-between mb-3">
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">Zero Conflict</p>
-                            <p class="text-xs text-gray-500">Status simulasi: OK</p>
+                            <h3 class="text-sm font-bold text-gray-900">Segregation of Duties</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Pemisahan tugas otorisasi</p>
                         </div>
+                        <i class="fas fa-user-lock text-blue-500"></i>
                     </div>
-                </div>
 
-            </section>
-
-            {{-- Metric Cards --}}
-            <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-link text-green-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="100">0</span>%
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Integritas Rantai Audit</p>
-                    <p class="text-xs text-gray-500">Indikator integritas data contoh</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-database text-blue-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="24810">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Total Entri Audit</p>
-                    <p class="text-xs text-gray-500">Angka simulasi jumlah rekaman</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-exclamation-circle text-orange-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="4">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Intervensi / Deviasi</p>
-                    <p class="text-xs text-gray-500">2 deviasi opname dan 2 mutasi ditolak</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-user-shield text-purple-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="100">0</span>%
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Kepatuhan SoD</p>
-                    <p class="text-xs text-gray-500">Indikator pemisahan tugas pengguna</p>
-                </div>
-
-            </section>
-
-            {{-- Merkle Root --}}
-            <section class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 mb-6 shadow-lg">
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-
-                    <div class="flex items-start gap-3 flex-1 min-w-0">
-                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-lock text-white"></i>
-                        </div>
-
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap mb-2">
-                                <p class="text-white font-bold text-sm">
-                                    CONTOH HASH AUDIT (#BLK-202505-09)
-                                </p>
-                                <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                                    Contoh SHA-256
-                                </span>
-                            </div>
-
-                            <div id="auditHash"
-                                class="hash-display bg-white/10 rounded px-3 py-2 text-xs text-white break-all">
-                                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    <div class="flex items-center justify-center py-3">
+                        <div class="relative w-28 h-28 rounded-full flex items-center justify-center"
+                            style="background:conic-gradient(#2563eb 0% 100%, #e5e7eb 100% 100%)">
+                            <div class="w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center">
+                                <span class="text-xl font-extrabold text-gray-900">100%</span>
+                                <span class="text-[9px] text-gray-400 font-semibold">SOD</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 no-print">
-                        <button type="button" id="copyHash"
-                            class="btn-primary bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
-                            <i class="fas fa-copy"></i>
-                            <span>Salin Hash</span>
+                    <div class="space-y-2 text-[11px]">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500"><i class="fas fa-circle text-blue-500 text-[7px] mr-2"></i>Validasi peran</span>
+                            <span class="font-bold text-gray-800">Aktif</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500"><i class="fas fa-circle text-green-500 text-[7px] mr-2"></i>Konflik tugas</span>
+                            <span class="font-bold text-green-600">0 Konflik</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- HASH PANEL -->
+            <div class="panel p-4 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900">
+                            <i class="fas fa-fingerprint text-blue-600 mr-2"></i>
+                            Root Hash Audit
+                        </h3>
+                        <p class="text-[11px] text-gray-500 mt-1">
+                            Contoh identitas hash untuk demonstrasi validasi SHA-256
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 no-print">
+                        <button id="copyHash"
+                            class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600">
+                            <i class="fas fa-copy mr-1"></i> Salin Hash
+                        </button>
+                        <button id="verifyHash"
+                            class="text-xs font-semibold px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                            <i class="fas fa-shield-check mr-1"></i> Uji SHA-256
                         </button>
                     </div>
-
                 </div>
-            </section>
 
-            {{-- Filter Section --}}
-            <section class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+                <div class="bg-slate-950 rounded-lg p-4">
+                    <p class="text-[9px] text-blue-300 font-bold uppercase tracking-widest mb-2">SHA-256 ROOT HASH</p>
+                    <p id="rootHash" class="hash-text text-[11px] md:text-xs text-green-300 leading-relaxed">
+                        8f14e45fceea167a5a36dedd4bea2543b7f8e2a9c3d4b5e6f708192a3b4c5d6e
+                    </p>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-700">
+                        <span class="text-[10px] text-slate-400">
+                            <i class="fas fa-clock mr-1"></i> Pemeriksaan terakhir: 18 November 2026
+                        </span>
+                        <span id="hashStatus" class="text-[10px] text-green-300 font-semibold">
+                            <i class="fas fa-check-circle mr-1"></i> Hash contoh tersedia
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <!-- FILTER -->
+            <div class="panel p-4 mb-4 no-print">
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
 
                     <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase mr-1">Periode:</span>
 
-                        <select id="filterHub"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                        <div id="dateFilters" class="flex flex-wrap gap-2">
+                            <button type="button" data-days="1" class="filter-pill border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-days="7" class="filter-pill active border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-semibold">
+                                7 Hari
+                            </button>
+                            <button type="button" data-days="30" class="filter-pill border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600">
+                                30 Hari
+                            </button>
+                            <button type="button" data-days="all" class="filter-pill border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-semibold text-gray-600">
+                                Semua
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full xl:w-80">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+                        <input type="text" id="searchAudit"
+                            placeholder="Cari ID, pengguna, aktivitas..."
+                            class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <label for="filterHub" class="text-[10px] text-gray-500 font-semibold">HUB</label>
+                        <select id="filterHub" class="border border-gray-200 rounded-lg px-3 py-2 text-[11px] bg-white text-gray-700 outline-none focus:border-blue-500">
                             <option value="">Semua Hub</option>
                             <option value="DC-01">Cakung DC-01</option>
-                            <option value="DC-02">Rungkut DC-02</option>
-                            <option value="DC-03">Gedebage DC-03</option>
-                            <option value="DC-04">Belawan DC-04</option>
+                            <option value="DC-02">Halim DC-02</option>
+                            <option value="DC-03">Surabaya DC-03</option>
+                            <option value="DC-04">Medan DC-04</option>
                         </select>
+                    </div>
 
-                        <select id="filterType"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="">Semua Tipe Event</option>
-                            <option value="approval">Approval</option>
+                    <div class="flex items-center gap-2">
+                        <label for="filterType" class="text-[10px] text-gray-500 font-semibold">AKTIVITAS</label>
+                        <select id="filterType" class="border border-gray-200 rounded-lg px-3 py-2 text-[11px] bg-white text-gray-700 outline-none focus:border-blue-500">
+                            <option value="">Semua Aktivitas</option>
+                            <option value="approval">Persetujuan</option>
                             <option value="discrepancy">Discrepancy</option>
-                            <option value="master">Master Data</option>
+                            <option value="master">Perubahan Master</option>
                             <option value="rejection">Penolakan</option>
                             <option value="system">Sistem</option>
                         </select>
-
-                        <button type="button" data-range="today"
-                            class="range-button px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
-                            Hari Ini
-                        </button>
-
-                        <button type="button" data-range="7"
-                            class="range-button px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">
-                            7 Hari
-                        </button>
-
-                        <button type="button" data-range="30"
-                            class="range-button px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
-                            30 Hari
-                        </button>
-
                     </div>
 
-                    <div class="flex flex-wrap gap-2 no-print">
-                        <button type="button" id="resetFilter"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                            <i class="fas fa-sync-alt mr-1"></i>
-                            Reset Filter
-                        </button>
-
-                        <button type="button" id="refreshAudit"
-                            class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                            <i class="fas fa-redo mr-1"></i>
-                            Segarkan
-                        </button>
+                    <div class="flex items-center gap-2">
+                        <label for="filterStatus" class="text-[10px] text-gray-500 font-semibold">STATUS</label>
+                        <select id="filterStatus" class="border border-gray-200 rounded-lg px-3 py-2 text-[11px] bg-white text-gray-700 outline-none focus:border-blue-500">
+                            <option value="">Semua Status</option>
+                            <option value="success">Berhasil</option>
+                            <option value="review">Ditinjau</option>
+                            <option value="rejected">Ditolak</option>
+                        </select>
                     </div>
 
+                    <div class="ml-auto flex items-center gap-3">
+                        <button id="resetAudit"
+                            class="text-[11px] text-gray-500 hover:text-gray-800 font-semibold">
+                            <i class="fas fa-rotate-left mr-1"></i> Reset
+                        </button>
+                        <button id="refreshAudit"
+                            class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold">
+                            <i class="fas fa-rotate mr-1"></i> Muat Ulang
+                        </button>
+                    </div>
                 </div>
+            </div>
 
-                <div class="flex flex-wrap items-center gap-2 mt-4">
-                    <span class="text-xs text-gray-500">Filter aktif:</span>
-
-                    <span id="activeFilter"
-                        class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs">
-                        7 Hari Terakhir • Semua Hub • Semua Event
-                    </span>
-                </div>
-
-            </section>
-
-            {{-- Summary --}}
-            <section class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-book text-blue-600"></i>
-                        </div>
-
-                        <div>
-                            <p class="font-semibold text-blue-900 text-sm">
-                                Rincian Log Transaksi & Aktivitas Pengguna
-                            </p>
-                            <p class="text-xs text-blue-700">
-                                Daftar contoh rekaman aktivitas audit sistem inventaris.
-                            </p>
-                        </div>
-                    </div>
-
-                    <p class="text-sm text-blue-700">
-                        Menampilkan
-                        <span id="visibleCount" class="font-bold">5</span>
-                        dari 5 contoh log
+            <!-- TABLE TITLE -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+                <div>
+                    <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+                        Riwayat Aktivitas Audit
+                    </h3>
+                    <p class="text-[10px] text-gray-400 mt-1" id="resultCount">
+                        Menampilkan seluruh aktivitas contoh
                     </p>
-
                 </div>
-            </section>
+                <span class="text-[10px] text-gray-400">
+                    <i class="fas fa-database mr-1"></i> Audit Log Registry
+                </span>
+            </div>
 
-            {{-- Audit Table --}}
-            <section class="bg-white border border-gray-200 rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
-
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div>
-                        <h2 class="font-bold text-gray-900 text-lg">Riwayat Log Audit</h2>
-                        <p class="text-xs text-gray-500 mt-1">
-                            Detail waktu, identitas event, pelaku, dan jenis operasi.
-                        </p>
-                    </div>
-
-                    <span class="text-xs text-gray-500">
-                        <i class="fas fa-clock mr-1"></i>
-                        Zona waktu: WIB
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1000px]">
+            <!-- AUDIT TABLE -->
+            <div class="panel overflow-hidden mb-6">
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Timestamp (WIB)
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Event ID & Hash
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Pelaku / Aktor
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Tipe Operasi
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Hub
-                                </th>
+                            <tr class="bg-slate-50 border-b border-gray-200 text-[10px] uppercase tracking-wider text-gray-400">
+                                <th class="px-4 py-3 font-bold">ID &amp; Waktu</th>
+                                <th class="px-4 py-3 font-bold">Pengguna</th>
+                                <th class="px-4 py-3 font-bold">Aktivitas</th>
+                                <th class="px-4 py-3 font-bold">Modul</th>
+                                <th class="px-4 py-3 font-bold">Hub</th>
+                                <th class="px-4 py-3 font-bold">Status</th>
+                                <th class="px-4 py-3 font-bold">Hash / Referensi</th>
+                                <th class="px-4 py-3 font-bold text-center">Aksi</th>
                             </tr>
                         </thead>
 
-                        <tbody id="auditTableBody">
+                        <tbody id="auditTableBody" class="divide-y divide-gray-100 text-xs">
 
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-01" data-type="approval">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 14:32:18</p>
-                                    <p class="text-xs text-gray-500">10 menit yang lalu</p>
+                            <tr class="audit-row"
+                                data-date="2026-11-18"
+                                data-hub="DC-01"
+                                data-type="approval"
+                                data-status="success">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-bold text-blue-600">EVT-2026-098412</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">18 Nov 2026, 14:10 WIB</p>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-semibold text-gray-800">Siti Rahmawati</p>
+                                    <p class="text-[10px] text-gray-400">HR Administrator</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098412</p>
-                                    <p class="text-xs text-gray-500 font-mono">7e8d5ff01...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            SR
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
-                                            <p class="text-xs text-gray-500">HR Lead Approver</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Approval Mutasi Antar-Hub
+                                    <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 rounded-md px-2 py-1 text-[10px] font-bold">
+                                        <i class="fas fa-check-circle"></i> Persetujuan
                                     </span>
+                                    <p class="text-[10px] text-gray-500 mt-1">Approval mutasi inventaris</p>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-01</td>
+                                <td class="px-4 py-4 text-gray-600">Otorisasi Mutasi</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">Cakung DC-01</td>
+                                <td class="px-4 py-4">
+                                    <span class="text-green-700 bg-green-50 px-2 py-1 rounded-md text-[10px] font-bold">Berhasil</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="font-mono text-[10px] text-gray-500">8f14e45f...c5d6e</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">REF-AUD-8412</p>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button class="detail-btn text-blue-600 hover:text-blue-800 font-semibold"
+                                        data-id="EVT-2026-098412"
+                                        data-user="Siti Rahmawati"
+                                        data-action="Approval mutasi inventaris"
+                                        data-module="Otorisasi Mutasi"
+                                        data-hub="Cakung DC-01"
+                                        data-status="Berhasil"
+                                        data-time="18 November 2026, 14:10 WIB"
+                                        data-description="Permintaan mutasi inventaris telah disetujui oleh HR Administrator.">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
                             </tr>
 
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-02" data-type="discrepancy">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 13:45:02</p>
-                                    <p class="text-xs text-gray-500">1 jam yang lalu</p>
+                            <tr class="audit-row"
+                                data-date="2026-11-18"
+                                data-hub="DC-02"
+                                data-type="discrepancy"
+                                data-status="review">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-bold text-blue-600">EVT-2026-098408</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">18 Nov 2026, 13:45 WIB</p>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-semibold text-gray-800">Dewi Anggraini</p>
+                                    <p class="text-[10px] text-gray-400">Auditor Internal</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098408</p>
-                                    <p class="text-xs text-gray-500 font-mono">19ac32ff09...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            DA
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Dewi Anggraini</p>
-                                            <p class="text-xs text-gray-500">Auditor Internal Logistik</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Selisih Opname
+                                    <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 rounded-md px-2 py-1 text-[10px] font-bold">
+                                        <i class="fas fa-triangle-exclamation"></i> Discrepancy
                                     </span>
+                                    <p class="text-[10px] text-gray-500 mt-1">Pemeriksaan selisih stok</p>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-02</td>
+                                <td class="px-4 py-4 text-gray-600">Stok Opname</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">Halim DC-02</td>
+                                <td class="px-4 py-4">
+                                    <span class="text-amber-700 bg-amber-50 px-2 py-1 rounded-md text-[10px] font-bold">Ditinjau</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="font-mono text-[10px] text-gray-500">a3b8c21d...8f219</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">REF-AUD-8408</p>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button class="detail-btn text-blue-600 hover:text-blue-800 font-semibold"
+                                        data-id="EVT-2026-098408"
+                                        data-user="Dewi Anggraini"
+                                        data-action="Pemeriksaan selisih stok"
+                                        data-module="Stok Opname"
+                                        data-hub="Halim DC-02"
+                                        data-status="Ditinjau"
+                                        data-time="18 November 2026, 13:45 WIB"
+                                        data-description="Terdapat perbedaan antara jumlah stok sistem dan hasil pemeriksaan fisik. Aktivitas menunggu peninjauan.">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
                             </tr>
 
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-03" data-type="master">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 12:11:40</p>
-                                    <p class="text-xs text-gray-500">2 jam yang lalu</p>
+                            <tr class="audit-row"
+                                data-date="2026-11-17"
+                                data-hub="DC-03"
+                                data-type="master"
+                                data-status="success">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-bold text-blue-600">EVT-2026-098389</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">17 Nov 2026, 16:20 WIB</p>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-semibold text-gray-800">Budi Santoso</p>
+                                    <p class="text-[10px] text-gray-400">Inventory Manager</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098389</p>
-                                    <p class="text-xs text-gray-500 font-mono">cc9d216de8...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            BS
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
-                                            <p class="text-xs text-gray-500">Admin Utama</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Penyesuaian Master Bin
+                                    <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 rounded-md px-2 py-1 text-[10px] font-bold">
+                                        <i class="fas fa-pen-to-square"></i> Perubahan Master
                                     </span>
+                                    <p class="text-[10px] text-gray-500 mt-1">Pembaruan data barang</p>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-03</td>
+                                <td class="px-4 py-4 text-gray-600">Master Barang</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">Surabaya DC-03</td>
+                                <td class="px-4 py-4">
+                                    <span class="text-green-700 bg-green-50 px-2 py-1 rounded-md text-[10px] font-bold">Berhasil</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="font-mono text-[10px] text-gray-500">b7d91f20...a7812</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">REF-AUD-8389</p>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button class="detail-btn text-blue-600 hover:text-blue-800 font-semibold"
+                                        data-id="EVT-2026-098389"
+                                        data-user="Budi Santoso"
+                                        data-action="Pembaruan data barang"
+                                        data-module="Master Barang"
+                                        data-hub="Surabaya DC-03"
+                                        data-status="Berhasil"
+                                        data-time="17 November 2026, 16:20 WIB"
+                                        data-description="Data master barang diperbarui oleh Inventory Manager.">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
                             </tr>
 
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-01" data-type="rejection">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 10:20:15</p>
-                                    <p class="text-xs text-gray-500">4 jam yang lalu</p>
+                            <tr class="audit-row"
+                                data-date="2026-11-16"
+                                data-hub="DC-01"
+                                data-type="rejection"
+                                data-status="rejected">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-bold text-blue-600">EVT-2026-098381</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">16 Nov 2026, 10:30 WIB</p>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-semibold text-gray-800">Siti Rahmawati</p>
+                                    <p class="text-[10px] text-gray-400">HR Administrator</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098381</p>
-                                    <p class="text-xs text-gray-500 font-mono">33e1150c89...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            SR
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
-                                            <p class="text-xs text-gray-500">HR Lead Approver</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Penolakan Mutasi Stok
+                                    <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 rounded-md px-2 py-1 text-[10px] font-bold">
+                                        <i class="fas fa-ban"></i> Penolakan
                                     </span>
+                                    <p class="text-[10px] text-gray-500 mt-1">Penolakan permintaan mutasi</p>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-01</td>
+                                <td class="px-4 py-4 text-gray-600">Otorisasi Mutasi</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">Cakung DC-01</td>
+                                <td class="px-4 py-4">
+                                    <span class="text-red-700 bg-red-50 px-2 py-1 rounded-md text-[10px] font-bold">Ditolak</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="font-mono text-[10px] text-gray-500">c4e29a17...d6210</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">REF-AUD-8381</p>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button class="detail-btn text-blue-600 hover:text-blue-800 font-semibold"
+                                        data-id="EVT-2026-098381"
+                                        data-user="Siti Rahmawati"
+                                        data-action="Penolakan permintaan mutasi"
+                                        data-module="Otorisasi Mutasi"
+                                        data-hub="Cakung DC-01"
+                                        data-status="Ditolak"
+                                        data-time="16 November 2026, 10:30 WIB"
+                                        data-description="Permintaan mutasi ditolak karena persyaratan dokumen belum memenuhi ketentuan.">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
                             </tr>
 
-                            <tr class="table-row"
-                                data-hub="DC-04" data-type="system">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 08:00:00</p>
-                                    <p class="text-xs text-gray-500">6 jam yang lalu</p>
+                            <tr class="audit-row"
+                                data-date="2026-11-15"
+                                data-hub="DC-04"
+                                data-type="system"
+                                data-status="success">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-bold text-blue-600">EVT-2026-098350</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">15 Nov 2026, 08:00 WIB</p>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <p class="font-semibold text-gray-800">Sistem Otomatis</p>
+                                    <p class="text-[10px] text-gray-400">System Service</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098350</p>
-                                    <p class="text-xs text-gray-500 font-mono">a641f92c64...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
-                                            <i class="fas fa-robot"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Sistem Otomatis</p>
-                                            <p class="text-xs text-gray-500">ASTRO-CORE-AUTORUN</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Snapshot Integritas Harian
+                                    <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 rounded-md px-2 py-1 text-[10px] font-bold">
+                                        <i class="fas fa-gear"></i> Sistem
                                     </span>
+                                    <p class="text-[10px] text-gray-500 mt-1">Sinkronisasi audit harian</p>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-04</td>
+                                <td class="px-4 py-4 text-gray-600">System Monitoring</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">Medan DC-04</td>
+                                <td class="px-4 py-4">
+                                    <span class="text-green-700 bg-green-50 px-2 py-1 rounded-md text-[10px] font-bold">Berhasil</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <p class="font-mono text-[10px] text-gray-500">d8f102ab...b091c</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">REF-AUD-8350</p>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button class="detail-btn text-blue-600 hover:text-blue-800 font-semibold"
+                                        data-id="EVT-2026-098350"
+                                        data-user="Sistem Otomatis"
+                                        data-action="Sinkronisasi audit harian"
+                                        data-module="System Monitoring"
+                                        data-hub="Medan DC-04"
+                                        data-status="Berhasil"
+                                        data-time="15 November 2026, 08:00 WIB"
+                                        data-description="Sistem menjalankan proses sinkronisasi audit harian secara otomatis.">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
                             </tr>
 
                         </tbody>
                     </table>
                 </div>
 
-                <div id="emptyAudit" class="hidden text-center py-10">
-                    <i class="fas fa-search text-3xl text-gray-300 mb-3"></i>
-                    <p class="text-sm font-semibold text-gray-600">Data tidak ditemukan</p>
-                    <p class="text-xs text-gray-500 mt-1">Silakan ubah filter pencarian.</p>
-                </div>
-
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5 pt-5 border-t border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan <span id="tableCount" class="font-semibold">5</span> data contoh
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-gray-50 border-t border-gray-200">
+                    <p class="text-[10px] text-gray-500">
+                        Data contoh ditampilkan: <strong id="visibleCount">5</strong> aktivitas
                     </p>
-                    <p class="text-xs text-gray-500">
-                        Halaman 1 dari 1
-                    </p>
-                </div>
-
-            </section>
-
-            {{-- Bottom Cards --}}
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-                {{-- SoD Matrix --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <h3 class="font-bold text-gray-900">Matriks Segregation of Duties</h3>
-                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                            SoD
-                        </span>
+                    <div class="flex items-center gap-1 text-[10px]">
+                        <button type="button" class="px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-400 cursor-not-allowed">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="px-3 py-1.5 rounded bg-blue-600 text-white font-bold">1</button>
+                        <button type="button" class="px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-400 cursor-not-allowed">2</button>
+                        <button type="button" class="px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-400 cursor-not-allowed">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <p class="text-sm text-gray-600 mb-4">
-                        Pemisahan tugas dilakukan agar satu pengguna tidak memiliki
-                        seluruh kewenangan dalam satu proses transaksi.
-                    </p>
+            <!-- BOTTOM INFORMATION -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Petugas opname berbeda dengan approver HR.</span>
+                <div class="panel p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-fingerprint"></i>
                         </div>
-
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Petugas opname berbeda dengan pengelola master SKU.</span>
-                        </div>
-
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Persetujuan transaksi dilakukan sesuai hak akses.</span>
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-900 mb-1">Integritas Kriptografis</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed">
+                                Setiap aktivitas dapat memiliki identitas hash untuk membantu
+                                pemeriksaan perubahan dan konsistensi catatan audit.
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Network Diagram --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <h3 class="font-bold text-gray-900">Distribusi Node Log</h3>
-                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                            Simulasi
-                        </span>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mb-3">
-                        Ilustrasi hubungan antara node utama dan node pendukung.
-                    </p>
-
-                    <svg class="w-full h-40" viewBox="0 0 200 120" role="img" aria-label="Diagram jaringan node audit">
-                        <line x1="100" y1="60" x2="100" y2="20" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="160" y2="40" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="160" y2="80" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="100" y2="100" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="40" y2="80" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="40" y2="40" class="network-line stroke-blue-400" stroke-width="2" />
-
-                        <circle cx="100" cy="60" r="12" class="network-node fill-blue-600" />
-                        <circle cx="100" cy="20" r="8" class="network-node fill-green-500" />
-                        <circle cx="160" cy="40" r="8" class="network-node fill-green-500" />
-                        <circle cx="160" cy="80" r="8" class="network-node fill-green-500" />
-                        <circle cx="100" cy="100" r="8" class="network-node fill-green-500" />
-                        <circle cx="40" cy="80" r="8" class="network-node fill-green-500" />
-                        <circle cx="40" cy="40" r="8" class="network-node fill-green-500" />
-                    </svg>
-
-                    <div class="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-                        <span><i class="fas fa-circle text-blue-600 mr-1"></i>Node Utama</span>
-                        <span><i class="fas fa-circle text-green-500 mr-1"></i>Node Pendukung</span>
-                    </div>
-                </div>
-
-                {{-- SHA Test --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <h3 class="font-bold text-gray-900 mb-3">Uji Mandiri SHA-256</h3>
-
-                    <p class="text-sm text-gray-600 mb-4">
-                        Masukkan teks untuk menghasilkan hash SHA-256 menggunakan browser.
-                        Fitur ini merupakan simulasi, bukan verifikasi ledger database.
-                    </p>
-
-                    <input type="text" id="hashInput"
-                        placeholder="Masukkan teks untuk diuji..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 mb-3">
-
-                    <button type="button" id="testHash"
-                        class="btn-primary w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm">
-                        <i class="fas fa-fingerprint"></i>
-                        <span>Hitung Hash SHA-256</span>
-                    </button>
-
-                    <div id="hashResult" class="hidden mt-4">
-                        <p class="text-xs font-semibold text-gray-700 mb-1">Hasil Hash:</p>
-                        <div id="hashOutput"
-                            class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono break-all text-gray-700">
+                <div class="panel p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-900 mb-1">Kontrol Otorisasi</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed">
+                                Pemisahan peran membantu memastikan aktivitas persetujuan
+                                dan perubahan data dilakukan sesuai kewenangan.
+                            </p>
                         </div>
                     </div>
                 </div>
 
-            </section>
-
-            {{-- Footer --}}
-            <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <div>
-                    <p class="text-sm font-semibold text-gray-800">Log Audit & Otorisasi</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        Monitoring aktivitas dan pemisahan hak akses pengguna.
-                    </p>
+                <div class="panel p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-900 mb-1">Tindak Lanjut Audit</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed">
+                                Aktivitas yang memerlukan pemeriksaan dapat ditinjau lebih lanjut
+                                berdasarkan catatan, pengguna, dan referensi transaksi.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <p class="text-sm text-gray-600">
-                    <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
-                    Modul khusus HR
+            </div>
+
+            <!-- FOOTER NOTE -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-gray-200 pt-4 text-[10px] text-gray-400">
+                <p>
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Astro Inventory — Audit &amp; Authorization Monitoring
                 </p>
-            </section>
+                <p>Data contoh antarmuka · 18 November 2026</p>
+            </div>
+
+            @else
+
+            <div class="panel p-10 text-center">
+                <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock text-2xl"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-900">Akses Tidak Diizinkan</h2>
+                <p class="text-sm text-gray-500 mt-2">
+                    Halaman Log Audit &amp; Otorisasi hanya dapat diakses oleh pengguna dengan role HR.
+                </p>
+                <a href="{{ url('/') }}"
+                    class="inline-flex mt-5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                    Kembali ke Beranda
+                </a>
+            </div>
+
+            @endif
 
         </main>
     </div>
 
-    {{-- Toast --}}
-    <div id="auditToast"
-        class="toast-message fixed bottom-5 right-5 z-[100] bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-check-circle text-green-400"></i>
-            <span id="auditToastText" class="text-sm">Berhasil.</span>
+    <!-- DETAIL MODAL -->
+    <div id="detailModal" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-slate-950/50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900">Detail Aktivitas Audit</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Informasi catatan aktivitas</p>
+                </div>
+                <button id="closeModal" class="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-5">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
+                    <p class="text-[9px] uppercase tracking-wider font-bold text-blue-500">Event ID</p>
+                    <p id="modalId" class="text-sm font-extrabold text-blue-700 mt-1"></p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Pengguna</p>
+                        <p id="modalUser" class="font-semibold text-gray-800"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Waktu</p>
+                        <p id="modalTime" class="font-semibold text-gray-800"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Aktivitas</p>
+                        <p id="modalAction" class="font-semibold text-gray-800"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Modul</p>
+                        <p id="modalModule" class="font-semibold text-gray-800"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Hub</p>
+                        <p id="modalHub" class="font-semibold text-gray-800"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 mb-1">Status</p>
+                        <p id="modalStatus" class="font-semibold text-gray-800"></p>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-gray-50 rounded-lg p-3">
+                    <p class="text-[10px] text-gray-400 font-bold mb-1">KETERANGAN AKTIVITAS</p>
+                    <p id="modalDescription" class="text-xs text-gray-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-gray-100 flex justify-end">
+                <button id="modalDone" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-xs font-semibold">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 
-</div>
-@endsection
+    <!-- TOAST -->
+    <div id="auditToastContainer"></div>
 
-@section('scripts')
-<script>
-    (() => {
-        'use strict';
+    <script>
+        (function() {
+            'use strict';
 
-        const page = document.querySelector('.audit-page');
-        if (!page) return;
+            const tableBody = document.getElementById('auditTableBody');
 
-        const $ = (selector) => page.querySelector(selector);
-        const $$ = (selector) => page.querySelectorAll(selector);
+            // Halaman ini hanya memiliki script audit jika tabel tersedia.
+            if (!tableBody) return;
 
-        let toastTimer;
+            const rows = Array.from(tableBody.querySelectorAll('.audit-row'));
+            const searchInput = document.getElementById('searchAudit');
+            const hubFilter = document.getElementById('filterHub');
+            const typeFilter = document.getElementById('filterType');
+            const statusFilter = document.getElementById('filterStatus');
+            const resultCount = document.getElementById('resultCount');
+            const visibleCount = document.getElementById('visibleCount');
+            const dateButtons = document.querySelectorAll('#dateFilters [data-days]');
 
-        // Toast notification
-        function showToast(message) {
-            const toast = $('#auditToast');
-            const text = $('#auditToastText');
+            let selectedDays = '7';
 
-            if (!toast || !text) return;
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('auditToastContainer');
+                const toast = document.createElement('div');
 
-            text.textContent = message;
-            toast.classList.add('show');
+                toast.className = 'audit-toast ' + type;
+                toast.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fas ${
+                            type === 'success' ? 'fa-circle-check' :
+                            type === 'warning' ? 'fa-triangle-exclamation' :
+                            'fa-circle-xmark'
+                        }"></i>
+                        <span></span>
+                    </div>
+                `;
 
-            clearTimeout(toastTimer);
+                toast.querySelector('span').textContent = message;
+                container.appendChild(toast);
 
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Count up animation
-        function animateCounters() {
-            $$('.count-up').forEach((counter) => {
-                const target = Number(counter.dataset.target || 0);
-                const duration = 1200;
-                const startTime = performance.now();
-
-                function update(now) {
-                    const progress = Math.min((now - startTime) / duration, 1);
-                    const current = Math.floor(target * progress);
-
-                    counter.textContent = current.toLocaleString('id-ID');
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    }
-                }
-
-                requestAnimationFrame(update);
-            });
-        }
-
-        // Copy hash
-        $('#copyHash')?.addEventListener('click', async () => {
-            const hash = $('#auditHash')?.textContent.trim();
-
-            if (!hash) return;
-
-            try {
-                await navigator.clipboard.writeText(hash);
-                showToast('Hash berhasil disalin.');
-            } catch (error) {
-                const temp = document.createElement('textarea');
-                temp.value = hash;
-                document.body.appendChild(temp);
-                temp.select();
-
-                const copied = document.execCommand('copy');
-                temp.remove();
-
-                showToast(copied ? 'Hash berhasil disalin.' : 'Gagal menyalin hash.');
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity .25s ease';
+                    setTimeout(() => toast.remove(), 250);
+                }, 3000);
             }
-        });
 
-        // Filter audit table
-        function applyFilters() {
-            const hub = $('#filterHub')?.value || '';
-            const type = $('#filterType')?.value || '';
-            const rows = [...$$('#auditTableBody tr')];
+            function applyFilters() {
+                const keyword = searchInput.value.trim().toLowerCase();
+                const selectedHub = hubFilter.value;
+                const selectedType = typeFilter.value;
+                const selectedStatus = statusFilter.value;
 
-            let visible = 0;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-            rows.forEach((row) => {
-                const matchesHub = !hub || row.dataset.hub === hub;
-                const matchesType = !type || row.dataset.type === type;
-                const show = matchesHub && matchesType;
+                let visible = 0;
 
-                row.classList.toggle('hidden', !show);
+                rows.forEach(row => {
+                    let matches = true;
 
-                if (show) visible++;
-            });
+                    const rowDate = new Date(row.dataset.date + 'T00:00:00');
+                    const rowText = row.textContent.toLowerCase();
 
-            $('#visibleCount').textContent = visible;
-            $('#tableCount').textContent = visible;
-            $('#emptyAudit').classList.toggle('hidden', visible !== 0);
+                    if (keyword && !rowText.includes(keyword)) {
+                        matches = false;
+                    }
 
-            const hubText = hub || 'Semua Hub';
-            const typeText = type ?
-                $('#filterType').selectedOptions[0].textContent :
-                'Semua Event';
+                    if (selectedHub && row.dataset.hub !== selectedHub) {
+                        matches = false;
+                    }
 
-            const rangeButton = $('.range-button.bg-blue-600');
-            const rangeText = rangeButton ? rangeButton.textContent.trim() : '7 Hari';
+                    if (selectedType && row.dataset.type !== selectedType) {
+                        matches = false;
+                    }
 
-            $('#activeFilter').textContent =
-                `${rangeText} • ${hubText} • ${typeText}`;
-        }
+                    if (selectedStatus && row.dataset.status !== selectedStatus) {
+                        matches = false;
+                    }
 
-        $('#filterHub')?.addEventListener('change', applyFilters);
-        $('#filterType')?.addEventListener('change', applyFilters);
+                    if (selectedDays !== 'all') {
+                        const days = Number(selectedDays);
+                        const startDate = new Date(today);
+                        startDate.setDate(today.getDate() - (days - 1));
 
-        // Reset filters
-        $('#resetFilter')?.addEventListener('click', () => {
-            $('#filterHub').value = '';
-            $('#filterType').value = '';
+                        if (rowDate < startDate || rowDate > today) {
+                            matches = false;
+                        }
+                    }
 
-            $$('.range-button').forEach((button) => {
-                button.classList.remove('bg-blue-600', 'text-white');
-                button.classList.add('bg-gray-100', 'text-gray-700');
-            });
+                    row.style.display = matches ? '' : 'none';
 
-            const defaultRange = $('[data-range="7"]');
-
-            defaultRange.classList.add('bg-blue-600', 'text-white');
-            defaultRange.classList.remove('bg-gray-100', 'text-gray-700');
-
-            applyFilters();
-            showToast('Filter berhasil direset.');
-        });
-
-        // Range buttons (visual filter period)
-        $$('.range-button').forEach((button) => {
-            button.addEventListener('click', () => {
-                $$('.range-button').forEach((item) => {
-                    item.classList.remove('bg-blue-600', 'text-white');
-                    item.classList.add('bg-gray-100', 'text-gray-700');
+                    if (matches) visible++;
                 });
 
-                button.classList.add('bg-blue-600', 'text-white');
-                button.classList.remove('bg-gray-100', 'text-gray-700');
+                visibleCount.textContent = visible;
+                resultCount.textContent = `Menampilkan ${visible} dari ${rows.length} aktivitas contoh`;
+
+                if (visible === 0) {
+                    resultCount.textContent = 'Tidak ada aktivitas yang sesuai dengan filter.';
+                }
+            }
+
+            // Filter pencarian dan dropdown.
+            searchInput.addEventListener('input', applyFilters);
+            hubFilter.addEventListener('change', applyFilters);
+            typeFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+
+            // Filter rentang waktu.
+            dateButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    dateButtons.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+
+                    selectedDays = this.dataset.days;
+                    applyFilters();
+
+                    showToast('Filter periode ' + this.textContent.trim() + ' diterapkan.');
+                });
+            });
+
+            // Reset filter.
+            document.getElementById('resetAudit').addEventListener('click', function() {
+                searchInput.value = '';
+                hubFilter.value = '';
+                typeFilter.value = '';
+                statusFilter.value = '';
+                selectedDays = 'all';
+
+                dateButtons.forEach(item => item.classList.remove('active'));
+                document.querySelector('#dateFilters [data-days="all"]').classList.add('active');
 
                 applyFilters();
-                showToast('Rentang tampilan diperbarui.');
+                showToast('Semua filter berhasil direset.');
             });
-        });
 
-        // Refresh demo data
-        $('#refreshAudit')?.addEventListener('click', () => {
+            // Refresh tampilan.
+            document.getElementById('refreshAudit').addEventListener('click', function() {
+                applyFilters();
+                showToast('Tampilan audit berhasil diperbarui.');
+            });
+
+            // Ekspor CSV berdasarkan baris yang sedang terlihat.
+            document.getElementById('btnExport').addEventListener('click', function() {
+                const visibleRows = rows.filter(row => row.style.display !== 'none');
+
+                if (visibleRows.length === 0) {
+                    showToast('Tidak ada data untuk diekspor.', 'warning');
+                    return;
+                }
+
+                const csvRows = [
+                    ['ID Audit', 'Tanggal', 'Pengguna', 'Aktivitas', 'Modul', 'Hub', 'Status']
+                ];
+
+                visibleRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+
+                    csvRows.push([
+                        cells[0].innerText.trim().replace(/\n/g, ' '),
+                        row.dataset.date,
+                        cells[1].innerText.trim().replace(/\n/g, ' '),
+                        cells[2].innerText.trim().replace(/\n/g, ' '),
+                        cells[3].innerText.trim(),
+                        row.dataset.hub,
+                        row.dataset.status
+                    ]);
+                });
+
+                const csv = csvRows.map(row =>
+                    row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(',')
+                ).join('\n');
+
+                const blob = new Blob(['\uFEFF' + csv], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                link.href = url;
+                link.download = 'log-audit-astro-inventory.csv';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                URL.revokeObjectURL(url);
+                showToast('File CSV berhasil disiapkan.');
+            });
+
+            // Cetak laporan.
+            document.getElementById('btnPrint').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Salin hash.
+            document.getElementById('copyHash').addEventListener('click', async function() {
+                const hash = document.getElementById('rootHash').textContent.trim();
+
+                try {
+                    await navigator.clipboard.writeText(hash);
+                    showToast('Hash berhasil disalin.');
+                } catch (error) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = hash;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+
+                    const copied = document.execCommand('copy');
+                    textarea.remove();
+
+                    showToast(
+                        copied ? 'Hash berhasil disalin.' : 'Hash gagal disalin.',
+                        copied ? 'success' : 'error'
+                    );
+                }
+            });
+
+            // Uji SHA-256 pada browser.
+            document.getElementById('verifyHash').addEventListener('click', async function() {
+                const status = document.getElementById('hashStatus');
+                const hashText = document.getElementById('rootHash').textContent.trim();
+
+                if (!window.crypto || !window.crypto.subtle) {
+                    status.textContent = 'Browser tidak mendukung Web Crypto API.';
+                    showToast('Fitur SHA-256 tidak tersedia pada browser ini.', 'warning');
+                    return;
+                }
+
+                try {
+                    const bytes = new TextEncoder().encode(hashText);
+                    const digest = await crypto.subtle.digest('SHA-256', bytes);
+
+                    const result = Array.from(new Uint8Array(digest))
+                        .map(byte => byte.toString(16).padStart(2, '0'))
+                        .join('');
+
+                    status.textContent = 'SHA-256 berhasil dihitung: ' + result.substring(0, 16) + '...';
+                    showToast('Perhitungan SHA-256 berhasil. Ini bukan validasi database.', 'success');
+                } catch (error) {
+                    status.textContent = 'Pemeriksaan gagal dilakukan.';
+                    showToast('Terjadi kesalahan saat menghitung SHA-256.', 'error');
+                }
+            });
+
+            // Modal detail aktivitas.
+            const modal = document.getElementById('detailModal');
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            document.querySelectorAll('.detail-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('modalId').textContent = this.dataset.id;
+                    document.getElementById('modalUser').textContent = this.dataset.user;
+                    document.getElementById('modalTime').textContent = this.dataset.time;
+                    document.getElementById('modalAction').textContent = this.dataset.action;
+                    document.getElementById('modalModule').textContent = this.dataset.module;
+                    document.getElementById('modalHub').textContent = this.dataset.hub;
+                    document.getElementById('modalStatus').textContent = this.dataset.status;
+                    document.getElementById('modalDescription').textContent = this.dataset.description;
+
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                });
+            });
+
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('modalDone').addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') closeModal();
+            });
+
+            // Inisialisasi.
             applyFilters();
-            showToast('Tampilan log diperbarui.');
-        });
 
-        // Export visible rows to CSV
-        $('#exportAudit')?.addEventListener('click', () => {
-            const rows = [...$$('#auditTableBody tr')]
-                .filter(row => !row.classList.contains('hidden'));
+        })();
+    </script>
 
-            if (!rows.length) {
-                showToast('Tidak ada data untuk diekspor.');
-                return;
-            }
+</body>
 
-            const csvRows = [
-                ['Timestamp WIB', 'Event ID', 'Hash', 'Pelaku', 'Tipe Operasi', 'Hub']
-            ];
-
-            rows.forEach((row) => {
-                const cells = row.querySelectorAll('td');
-
-                csvRows.push([
-                    cells[0]?.querySelector('p')?.textContent.trim() || '',
-                    cells[1]?.querySelector('p')?.textContent.trim() || '',
-                    cells[1]?.querySelectorAll('p')[1]?.textContent.trim() || '',
-                    cells[2]?.querySelectorAll('p')[0]?.textContent.trim() || '',
-                    cells[3]?.textContent.trim() || '',
-                    cells[4]?.textContent.trim() || ''
-                ]);
-            });
-
-            const escapeCSV = value =>
-                `"${String(value).replace(/"/g, '""')}"`;
-
-            const csv = csvRows
-                .map(row => row.map(escapeCSV).join(','))
-                .join('\r\n');
-
-            const blob = new Blob(['\uFEFF' + csv], {
-                type: 'text/csv;charset=utf-8;'
-            });
-
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-
-            link.href = url;
-            link.download = 'log-audit-otorisasi.csv';
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            URL.revokeObjectURL(url);
-
-            showToast('File CSV berhasil dibuat.');
-        });
-
-        // Print report
-        $('#printAudit')?.addEventListener('click', () => {
-            window.print();
-        });
-
-        // SHA-256 test
-        $('#testHash')?.addEventListener('click', async () => {
-            const input = $('#hashInput').value.trim();
-
-            if (!input) {
-                showToast('Masukkan teks terlebih dahulu.');
-                $('#hashInput').focus();
-                return;
-            }
-
-            if (!window.crypto?.subtle) {
-                showToast('SHA-256 memerlukan browser dengan Web Crypto API.');
-                return;
-            }
-
-            try {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(input);
-                const digest = await crypto.subtle.digest('SHA-256', data);
-
-                const hash = Array.from(new Uint8Array(digest))
-                    .map(byte => byte.toString(16).padStart(2, '0'))
-                    .join('');
-
-                $('#hashOutput').textContent = hash;
-                $('#hashResult').classList.remove('hidden');
-
-                showToast('Hash SHA-256 berhasil dihitung.');
-            } catch (error) {
-                showToast('Gagal menghitung hash.');
-            }
-        });
-
-        // Initialize
-        animateCounters();
-        applyFilters();
-
-    })();
-</script>
-@endsection
+</html>

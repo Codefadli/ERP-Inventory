@@ -113,30 +113,82 @@ class RolesAndUsersSeeder extends Seeder
 
         $rolePermissions = [
             'super_admin' => [
-                'catalog.view', 'dashboard.view', 'master.view', 'master.manage', 'product.manage',
-                'master.delete', 'product.label', 'transaction.view', 'issue.print', 'report.view',
-                'report.export', 'user.view', 'user.manage', 'role.manage', 'audit.view',
-                'settings.view', 'settings.manage', 'system.errors', 'backup.view', 'backup.manage'
+                'catalog.view',
+                'dashboard.view',
+                'master.view',
+                'master.manage',
+                'product.manage',
+                'master.delete',
+                'product.label',
+                'transaction.view',
+                'issue.print',
+                'report.view',
+                'report.export',
+                'user.view',
+                'user.manage',
+                'role.manage',
+                'audit.view',
+                'settings.view',
+                'settings.manage',
+                'system.errors',
+                'backup.view',
+                'backup.manage'
             ],
             'kepala_gudang' => [
-                'catalog.view', 'dashboard.view', 'master.view', 'master.manage', 'product.manage',
-                'master.delete', 'product.label', 'transaction.view', 'receipt.create', 'receipt.void',
-                'issue.create', 'issue.cancel_approved', 'issue.handover', 'issue.print',
-                'adjustment.create', 'opname.count', 'opname.manage', 'report.view', 'report.export',
+                'catalog.view',
+                'dashboard.view',
+                'master.view',
+                'master.manage',
+                'product.manage',
+                'master.delete',
+                'product.label',
+                'transaction.view',
+                'receipt.create',
+                'receipt.void',
+                'issue.create',
+                'issue.cancel_approved',
+                'issue.handover',
+                'issue.print',
+                'adjustment.create',
+                'opname.count',
+                'opname.manage',
+                'report.view',
+                'report.export',
                 'settings.view'
             ],
             'hr' => [
-                'catalog.view', 'dashboard.view', 'master.view', 'transaction.view', 'issue.create',
-                'issue.approve', 'issue.print', 'adjustment.approve', 'opname.approve',
-                'report.view', 'report.export'
+                'catalog.view',
+                'dashboard.view',
+                'master.view',
+                'transaction.view',
+                'issue.create',
+                'issue.approve',
+                'issue.print',
+                'adjustment.approve',
+                'opname.approve',
+                'report.view',
+                'report.export'
             ],
             'pegawai' => [
-                'catalog.view', 'master.view', 'product.label', 'transaction.view', 'receipt.create',
-                'issue.create', 'issue.handover', 'issue.print', 'opname.count', 'report.view'
+                'catalog.view',
+                'master.view',
+                'product.label',
+                'transaction.view',
+                'receipt.create',
+                'issue.create',
+                'issue.handover',
+                'issue.print',
+                'opname.count',
+                'report.view'
             ],
             'audit' => [
-                'catalog.view', 'dashboard.view', 'master.view', 'transaction.view',
-                'report.view', 'report.export', 'audit.view'
+                'catalog.view',
+                'dashboard.view',
+                'master.view',
+                'transaction.view',
+                'report.view',
+                'report.export',
+                'audit.view'
             ],
         ];
 
