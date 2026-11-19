@@ -9,7 +9,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// Hasil & input stok opname (tabel stock_opnames), per hub.
+// Hasil & input stok opname.
 class StokOpnameController extends Controller
 {
     public function index(Request $request)

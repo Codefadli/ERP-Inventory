@@ -7,7 +7,7 @@ use App\Models\RequestBarang;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
-// Persetujuan pengajuan barang oleh Kepala Gudang (tabel requests).
+// Persetujuan pengajuan barang oleh Kepala Gudang.
 class PersetujuanBarangController extends Controller
 {
     public function index(Request $request)

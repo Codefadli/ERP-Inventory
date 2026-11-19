@@ -8,7 +8,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// Temuan audit / LTA (tabel temuan_audits), per hub.
+// Temuan audit / LTA.
 class TemuanAuditController extends Controller
 {
     public function index(Request $request)

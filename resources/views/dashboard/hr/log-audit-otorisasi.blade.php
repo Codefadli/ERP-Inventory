@@ -273,7 +273,7 @@
             </footer>
         </section>
 
-        {{-- Kartu bawah: SoD + ilustrasi + SHA --}}
+        
         <section class="reveal reveal-delay-3 mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div class="mb-3 flex items-center justify-between">

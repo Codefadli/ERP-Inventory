@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Transaksi Barang Masuk — Astro Inventory</title>
+    <title>Transaksi Barang Masuk Astro Inventory</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -63,7 +63,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Inventaris <span class="text-blue-700">&gt; Transaksi Barang Masuk (Inbound)</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Transaksi Barang Masuk</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Penerimaan barang dari supplier / transfer gudang: nomor PO, surat jalan, status QC, dan alokasi rak —</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Penerimaan barang dari supplier / transfer gudang: nomor PO, surat jalan, status QC, dan alokasi rak</p>
             </div>
             <div class="flex items-center gap-2">
                 @if($canManage)

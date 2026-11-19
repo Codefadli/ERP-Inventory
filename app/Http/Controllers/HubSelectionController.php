@@ -22,11 +22,6 @@ class HubSelectionController extends Controller
             return $this->redirectToDashboard($user);
         }
 
-        // Jika sudah pilih hub, redirect ke dashboard
-        if ($user->hasSelectedHub()) {
-            return $this->redirectToDashboard($user);
-        }
-
         // Ambil data cities dengan hubs aktif
         $cities = City::with(['hubs' => function ($query) {
             $query->where('status', 'active')->orderBy('name');
@@ -38,6 +33,7 @@ class HubSelectionController extends Controller
         return view('hub-selection.index', [
             'user' => $user,
             'cities' => $cities,
+            'currentHub' => $user->selectedHub,
         ]);
     }
 

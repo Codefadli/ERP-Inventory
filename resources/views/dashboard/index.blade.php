@@ -953,7 +953,7 @@
                                     <i class="fas fa-file-alt text-[10px]"></i>
                                 </div>
                                 <div>
-                                    <div class="text-[12.5px] text-slate-700 leading-tight"><span class="font-bold">{{ $log->user?->nama_lengkap ?? 'Sistem' }}</span> — {{ $log->description ?: ucfirst($log->action) }}</div>
+                                    <div class="text-[12.5px] text-slate-700 leading-tight"><span class="font-bold">{{ $log->user?->nama_lengkap ?? 'Sistem' }}</span> {{ $log->description ?: ucfirst($log->action) }}</div>
                                     <div class="text-[11px] text-slate-500 mt-1">{{ $log->entity_type }}@if($log->entity_id) #{{ $log->entity_id }}@endif • hasil: {{ $log->result }}</div>
                                     <div class="text-[10px] text-slate-400 mt-1 font-medium">{{ $log->created_at?->diffForHumans() ?? '-' }}</div>
                                 </div>

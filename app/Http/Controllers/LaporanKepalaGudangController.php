@@ -49,7 +49,6 @@ class LaporanKepalaGudangController extends Controller
         $stats['qty_masuk'] = (clone $inboundBase)->sum('qty');
         $stats['qty_keluar'] = (clone $outboundBase)->sum('qty');
 
-        // Distribusi per kategori (untuk analitik sederhana).
         $kategoriData = Category::query()
             ->withCount(['items' => fn ($q) => $q->when($hubId !== 'all', fn ($w) => $w->where('hub_id', $hubId))])
             ->orderByDesc('items_count')
