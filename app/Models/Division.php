@@ -16,12 +16,18 @@ class Division extends Model
         'nama',
         'kepala',
         'keterangan',
+        'hub_id',
         'status',
     ];
 
     protected $casts = [
         'status' => 'boolean',
     ];
+
+    public function hub()
+    {
+        return $this->belongsTo(Hub::class, 'hub_id');
+    }
 
     public function items(): HasMany
     {

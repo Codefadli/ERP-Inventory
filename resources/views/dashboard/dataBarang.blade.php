@@ -89,23 +89,26 @@
             $user = auth()->user();
             $isSuperAdmin = $user->isSuperAdmin();
             $isKepalaGudang = $user->isKepalaGudang();
+            $isPegawai = $user->isPegawai();
             $isAuditor = $user->isAuditor();
 
             // Hak lihat katalog (semua role yang punya route ke halaman ini)
-            $canView = $isSuperAdmin || $isKepalaGudang || $isAuditor || $user->hasPermission('master.view');
-            // Hak ubah master barang (tambah/edit) - auditor read-only
+            $canView = $isSuperAdmin || $isKepalaGudang || $isPegawai || $isAuditor || $user->hasPermission('master.view');
+            // Hak ubah master barang (tambah/edit) - auditor & pegawai read-only
             $canManage = $isSuperAdmin || $user->hasPermission('product.manage') || $user->hasPermission('master.manage');
             // Hak import batch (master.manage saja)
             $canImport = $isSuperAdmin || $user->hasPermission('master.manage');
 
             $roleLabel = $user->role->name ?? ucfirst($user->role->code ?? 'Pengguna');
-            $scopeLabel = $isSuperAdmin ? 'Manajemen Sistem' : ($isKepalaGudang ? 'Operasional Gudang' : 'Pengendalian Audit');
+            $scopeLabel = $isSuperAdmin ? 'Manajemen Sistem' : ($isKepalaGudang ? 'Operasional Gudang' : ($isPegawai ? 'Portal Operasional' : 'Pengendalian Audit'));
             $scopeDesc = $isSuperAdmin
-                ? 'Katalog terpusat seluruh SKU produk, klasifikasi kategori, status stok multi-gudang, harga acuan, dan unit penyimpanan fisik Hub DC-01.'
+                ? 'Katalog terpusat seluruh SKU produk, klasifikasi kategori, status stok multi-gudang, harga acuan, dan unit penyimpanan fisik hub.'
                 : ($isKepalaGudang
                     ? 'Katalog SKU untuk pengelolaan stok harian hub Anda: status stok, lokasi rak/bin, reorder point (ROP), dan harga acuan.'
-                    : 'Katalog referensi pemeriksaan: bandingkan stok fisik, lokasi rak, dan nilai aset tanpa hak mengubah data.');
-            $roleRoute = $isSuperAdmin ? 'admin.data-barang' : ($isKepalaGudang ? 'gudang.data-barang' : 'audit.data-barang');
+                    : ($isPegawai
+                        ? 'Informasi ketersediaan stok fisik, lokasi bin rak, nomor serial SKU, dan status pergerakan barang untuk staf operasional.'
+                        : 'Katalog referensi pemeriksaan: bandingkan stok fisik, lokasi rak, dan nilai aset tanpa hak mengubah data.'));
+            $roleRoute = $isSuperAdmin ? 'admin.data-barang' : ($isKepalaGudang ? 'kepalagudang.data-barang' : ($isPegawai ? 'pegawai.data-barang' : 'audit.data-barang'));
         @endphp
 
         @if($canView)
@@ -120,62 +123,75 @@
             <p class="mt-1.5 max-w-[600px] text-[12px] leading-relaxed text-slate-500">{{ $scopeDesc }}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Data</button>
+            <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm opacity-60 cursor-not-allowed" disabled title="Ekspor data belum tersedia"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Data</button>
             @if($canImport)
-            <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i data-lucide="upload" class="h-4 w-4 text-blue-600"></i>Import Batch</button>
+            <button class="flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm opacity-60 cursor-not-allowed" disabled title="Import batch belum tersedia"><i data-lucide="upload" class="h-4 w-4 text-blue-600"></i>Import Batch</button>
             @endif
             @if($canManage)
-            <button class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="square-plus" class="h-4 w-4"></i>Tambah Barang Baru</button>
+            <button type="button" onclick="document.getElementById('modalTambahBarang').classList.remove('hidden')" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i data-lucide="square-plus" class="h-4 w-4"></i>Tambah Barang Baru</button>
             @endif
           </div>
         </section>
 
-        @unless($canManage)
+        {{-- @unless($canManage)
         <section class="reveal reveal-delay-1 mb-4 flex items-start gap-2.5 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
           <i data-lucide="eye" class="mt-0.5 h-4 w-4 shrink-0"></i>
-          <p><b>Mode baca ({{ $roleLabel }})</b> &mdash; Anda dapat menelusuri katalog, memakai filter, dan mengekspor data, tetapi tidak dapat menambah atau mengubah barang.</p>
+          <p><b>Mode baca ({{ $roleLabel }})</b> &mdash; Anda dapat menelusuri katalog, memakai filter, tetapi tidak dapat menambah atau mengubah barang.</p>
         </section>
-        @endunless
+        @endunless --}}
 
         <section aria-label="Ringkasan inventaris" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total SKU Terdaftar</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight">8.650</p><p class="mt-2.5 text-[10.5px] text-slate-500"><span class="font-semibold text-emerald-700">↗ +142 SKU</span> &nbsp;baru bulan ini</p></div>
+            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total SKU Terdaftar</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight">{{ number_format($stats['total']) }}</p><p class="mt-2.5 text-[10.5px] text-slate-500"><span class="font-semibold text-emerald-700">Hub:</span> &nbsp;{{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</p></div>
             <span class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="archive" class="h-4 w-4"></i></span>
           </article>
           <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Unit Fisik</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight">428.500</p><p class="mt-2.5 text-[10.5px] text-slate-500"><span class="font-semibold text-emerald-700">● &nbsp;98.4%</span> &nbsp;Akurasi stok audit</p></div>
+            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Barang Aktif</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight">{{ number_format($stats['aktif']) }}</p><p class="mt-2.5 text-[10.5px] text-slate-500"><span class="font-semibold text-emerald-700">●</span> &nbsp;Status Aktif</p></div>
             <span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="settings" class="h-4 w-4"></i></span>
           </article>
           <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-red-600">Stok Kritis (ROP)</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">24 <span class="text-[10.5px] font-normal text-slate-600">SKU</span></p><p class="mt-2.5 text-[10.5px] font-semibold text-red-600">! &nbsp;Perlu PO & Restock Segera</p></div>
+            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-red-600">Stok Kritis (ROP)</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight text-red-600">{{ number_format($stats['kritis']) }} <span class="text-[10.5px] font-normal text-slate-600">SKU</span></p><p class="mt-2.5 text-[10.5px] font-semibold text-red-600">! &nbsp;Perlu PO &amp; Restock Segera</p></div>
             <span class="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-600"><i data-lucide="triangle-alert" class="h-4 w-4"></i></span>
           </article>
           <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Out of Stock</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">3 <span class="text-[10.5px] font-normal text-slate-600">SKU</span></p><p class="mt-2.5 text-[10.5px] text-slate-600"><span class="font-semibold text-blue-600">▣</span> &nbsp;Dalam rute inbound supplier</p></div>
+            <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Kategori</p><p class="mt-1.5 flex items-baseline gap-1.5 text-[24px] font-bold leading-tight tracking-tight">{{ number_format($stats['kategori']) }}</p><p class="mt-2.5 text-[10.5px] text-slate-600"><span class="font-semibold text-blue-600">▣</span> &nbsp;Klasifikasi produk</p></div>
             <span class="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-600"><i data-lucide="shopping-cart" class="h-4 w-4"></i></span>
           </article>
         </section>
 
         <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-          <div class="flex flex-wrap items-center gap-2">
+          <form method="GET" action="{{ route($roleRoute) }}" class="flex flex-wrap items-center gap-2">
             <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 md:max-w-[430px]">
               <i data-lucide="search" class="h-4 w-4"></i>
-              <input id="product-search" type="search" placeholder="Cari SKU, nama produk, barcode EAN, brand..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400" />
+              <input id="product-search" name="q" value="{{ $q }}" type="search" placeholder="Cari SKU, nama produk, barcode, lokasi rak..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400" />
               <i data-lucide="scan-line" class="h-4 w-4 text-blue-500"></i>
             </label>
-            <select id="category-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Semua Kategori</option><option>Kamera & Optik</option><option>Wearable Gadget</option><option>Laptop & Komputer</option><option>Aksesoris Komputer</option><option>Audio & Sound</option><option>Storage Drive</option></select>
-            <select id="status-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Semua Status Stok</option><option>Menipis</option><option>Stok Aman</option><option>Habis</option></select>
-            <select class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option>Semua Lokasi Gudang</option><option>WH01-RA-01</option><option>WH01-RA-02</option><option>WH01-RA-03</option></select>
-            <button class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] text-slate-700"><i data-lucide="list-filter" class="h-4 w-4"></i>Filter</button>
-            <button id="reset-filters" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></button>
-          </div>
+            <select name="hub" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none">
+              <option value="all" {{ $selectedHubId === 'all' ? 'selected' : '' }}>Semua Hub</option>
+              @foreach($hubs as $hubOpt)
+                <option value="{{ $hubOpt->id }}" {{ (string) $hubOpt->id === (string) $selectedHubId ? 'selected' : '' }}>
+                    {{ $hubOpt->name }} ({{ $hubOpt->code }})
+                </option>
+              @endforeach
+            </select>
+            <select id="category-filter" name="category" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none">
+              <option value="">Semua Kategori</option>
+              @foreach($categories as $catOpt)
+                <option value="{{ $catOpt->id }}" {{ (string) $catOpt->id === (string) $category ? 'selected' : '' }}>{{ $catOpt->nama }}</option>
+              @endforeach
+            </select>
+            <select id="status-filter" name="status" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none">
+              <option value="">Semua Status</option>
+              <option value="Aktif" {{ $status === 'Aktif' ? 'selected' : '' }}>Aktif</option>
+              <option value="Stok Kritis" {{ $status === 'Stok Kritis' ? 'selected' : '' }}>Stok Kritis</option>
+            </select>
+            <button type="submit" class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] text-slate-700"><i data-lucide="list-filter" class="h-4 w-4"></i>Filter</button>
+            <a href="{{ route($roleRoute) }}" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter" title="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></a>
+          </form>
           <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
             <span class="mr-1 font-semibold uppercase text-slate-600">FILTER CEPAT:</span>
-            <button data-quick-filter="" class="rounded-full bg-blue-600 px-3 py-1 font-semibold text-white">Semua Barang (8.650)</button>
-            <button data-quick-filter="Stok Aman" class="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Stok Aman (8.412)</button>
-            <button data-quick-filter="Menipis" class="rounded-full bg-red-50 px-3 py-1 font-semibold text-red-600">● Stok Menipis (24)</button>
-            <button data-quick-filter="Habis" class="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Stok Habis (3)</button>
-            <button data-quick-filter="Stok Aman" class="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">Fast Moving (1.240)</button>
+            <a href="{{ route($roleRoute, ['hub' => $selectedHubId === 'all' ? null : $selectedHubId]) }}" class="rounded-full bg-blue-600 px-3 py-1 font-semibold text-white">Semua Barang ({{ number_format($stats['total']) }})</a>
+            <a href="{{ route($roleRoute, ['status' => 'Stok Kritis', 'hub' => $selectedHubId === 'all' ? null : $selectedHubId]) }}" class="rounded-full bg-red-50 px-3 py-1 font-semibold text-red-600">● Stok Kritis ({{ number_format($stats['kritis']) }})</a>
           </div>
         </section>
 
@@ -197,92 +213,46 @@
                 </tr>
               </thead>
               <tbody id="inventory-rows" class="divide-y divide-slate-100 text-[12px]">
-                <tr data-category="Kamera & Optik" data-status="Menipis" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Canon 60D" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-CAM-60D</a><p class="mt-0.5 text-[10.5px] text-slate-500">899273681290</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="camera" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Canon 60D DSLR Camera Body</b><span class="text-[10.5px] text-slate-500">Brand: Canon Inc.</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Kamera & Optik</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-02</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-red-600">4 Unit</b><span class="text-slate-500">ROP: 25</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[14%] rounded bg-red-600"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 8.500.000</td>
-                  <td class="px-2"><span class="rounded-full bg-red-100 px-2.5 py-1 text-[10.5px] font-semibold text-red-700">● Menipis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Canon 60D"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Canon 60D"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Canon 60D"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                @forelse($items as $item)
+                <tr class="hover:bg-slate-50/70">
+                  <td class="px-2"><input type="checkbox" aria-label="Pilih {{ $item->nama }}" class="h-4 w-4 accent-blue-600"></td>
+                  <td class="px-2"><span class="font-bold text-blue-700">{{ $item->sku }}</span><p class="mt-0.5 text-[10.5px] text-slate-500">{{ $item->barcode }}</p></td>
+                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="box" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">{{ $item->nama }}</b><span class="text-[10.5px] text-slate-500">{{ optional($item->supplier)->nama }}</span></span></div></td>
+                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">{{ optional($item->category)->nama }}</span></td>
+                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>{{ optional($item->location)->kode }}<span class="text-slate-400">{{ optional($item->location)->nama_rak }}</span></span></td>
+                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-slate-600">Stok: -</b><span class="text-slate-500">ROP: {{ $item->stok_minimum ?? '-' }}</span></div></td>
+                  <td class="px-2 text-center text-slate-600">{{ optional($item->unit)->nama }}</td>
+                  <td class="px-2 text-right font-semibold text-slate-800">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>
+                  <td class="px-2"><span class="rounded-full px-2.5 py-1 text-[10.5px] font-semibold {{ $item->status === 'Stok Kritis' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800' }}">● {{ $item->status }}</span></td>
+                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 opacity-50 cursor-not-allowed" disabled title="Lihat detail belum tersedia" aria-label="Lihat {{ $item->nama }}"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 opacity-50 cursor-not-allowed" disabled title="Edit belum tersedia" aria-label="Edit {{ $item->nama }}"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 opacity-50 cursor-not-allowed" disabled title="QR belum tersedia" aria-label="Detail {{ $item->nama }}"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
                 </tr>
-                <tr data-category="Kamera & Optik" data-status="Menipis" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Nikon Coolpix Pro X" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-CAM-NIK8</a><p class="mt-0.5 text-[10.5px] text-slate-500">899273681412</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="aperture" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Nikon Coolpix Pro X</b><span class="text-[10.5px] text-slate-500">Brand: Nikon Corp</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Kamera & Optik</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-03</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-red-600">7 Unit</b><span class="text-slate-500">ROP: 20</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[25%] rounded bg-red-600"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 12.450.000</td>
-                  <td class="px-2"><span class="rounded-full bg-red-100 px-2.5 py-1 text-[10.5px] font-semibold text-red-700">● Menipis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Nikon Coolpix"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Nikon Coolpix"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Nikon Coolpix"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
+                @empty
+                <tr>
+                  <td colspan="10" class="px-4 py-10 text-center">
+                    <i data-lucide="search-x" class="h-8 w-8 text-slate-300 mx-auto"></i>
+                    <p class="mt-2 text-[12.5px] font-semibold text-slate-500">Belum ada barang yang cocok dengan filter pada hub ini.</p>
+                  </td>
                 </tr>
-                <tr data-category="Wearable Gadget" data-status="Stok Aman" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Titan Smart Watch" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-WTC-AR40</a><p class="mt-0.5 text-[10.5px] text-slate-500">899120491023</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="watch" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Titan Smart Watch Classic Silver</b><span class="text-[10.5px] text-slate-500">Brand: Titan Gear</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Wearable Gadget</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-02-T3</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">180 Pcs</b><span class="text-slate-500">ROP: 40</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[75%] rounded bg-emerald-700"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Pcs</td><td class="px-2 text-right font-semibold text-slate-800">Rp 1.850.000</td>
-                  <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Titan Smart Watch"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Titan Smart Watch"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Titan Smart Watch"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
-                </tr>
-                <tr data-category="Laptop & Komputer" data-status="Stok Aman" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Macbook Pro M1" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-LAP-M102</a><p class="mt-0.5 text-[10.5px] text-slate-500">899535102450</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="laptop" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Macbook Pro M1 2020 Space Gray</b><span class="text-[10.5px] text-slate-500">Brand: Apple</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Laptop & Komputer</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-01</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">100 Unit</b><span class="text-slate-500">ROP: 15</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[68%] rounded bg-emerald-700"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 16.200.000</td>
-                  <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Macbook Pro"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Macbook Pro"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Macbook Pro"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
-                </tr>
-                <tr data-category="Aksesoris Komputer" data-status="Stok Aman" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Mechanical Keyboard" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-ACC-KB05</a><p class="mt-0.5 text-[10.5px] text-slate-500">899610023441</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="keyboard" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Mechanical Keyboard RGB Wireless</b><span class="text-[10.5px] text-slate-500">Brand: Keychron</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Aksesoris Komputer</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-02-T1</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">210 Unit</b><span class="text-slate-500">ROP: 50</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[80%] rounded bg-emerald-700"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 1.450.000</td>
-                  <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Keyboard"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Keyboard"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Keyboard"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
-                </tr>
-                <tr data-category="Audio & Sound" data-status="Stok Aman" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Sony Headphone" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-AUD-SN09</a><p class="mt-0.5 text-[10.5px] text-slate-500">899778219011</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="headphones" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Sony Wireless Headphone WH-1000XM4</b><span class="text-[10.5px] text-slate-500">Brand: Sony</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Audio & Sound</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-04</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-emerald-700">120 Unit</b><span class="text-slate-500">ROP: 25</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"><div class="h-full w-[70%] rounded bg-emerald-700"></div></div></td>
-                  <td class="px-2 text-center text-slate-600">Unit</td><td class="px-2 text-right font-semibold text-slate-800">Rp 3.899.000</td>
-                  <td class="px-2"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-800">● Stok Aman</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Headphone"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Headphone"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Headphone"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
-                </tr>
-                <tr data-category="Storage Drive" data-status="Habis" class="hover:bg-slate-50/70">
-                  <td class="px-2"><input type="checkbox" aria-label="Pilih Sandisk SSD" class="h-4 w-4 accent-blue-600"></td>
-                  <td class="px-2"><a href="#" class="font-bold text-blue-700">SKU-STR-SD01</a><p class="mt-0.5 text-[10.5px] text-slate-500">899881920387</p></td>
-                  <td class="px-2"><div class="flex items-center gap-1.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="hard-drive" class="h-4 w-4"></i></span><span class="truncate"><b class="block truncate font-semibold text-slate-800">Sandisk Extreme Portable SSD 1TB</b><span class="text-[10.5px] text-slate-500">Brand: SanDisk</span></span></div></td>
-                  <td class="px-2"><span class="rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-600">Storage Drive</span></td>
-                  <td class="px-2"><span class="inline-flex whitespace-nowrap items-center gap-2 rounded bg-blue-50 px-2.5 py-1 text-[10.5px] text-slate-700"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600"></i>WH01-RA-01-T2</span></td>
-                  <td class="px-2"><div class="flex items-center justify-between text-[10.5px]"><b class="text-slate-600">0 Unit</b><span class="text-slate-500">ROP: 30</span></div><div class="mt-0.5 h-1 rounded bg-blue-100"></div></td>
-                  <td class="px-2 text-center text-slate-600">Box</td><td class="px-2 text-right font-semibold text-slate-800">Rp 2.100.000</td>
-                  <td class="px-2"><span class="rounded-full bg-indigo-100 px-2.5 py-1 text-[10.5px] font-semibold text-indigo-800">● Habis</span></td>
-                  <td class="px-2"><div class="flex items-center gap-1 text-slate-600"><button class="rounded p-1.5 hover:bg-slate-100" aria-label="Lihat Sandisk SSD"><i data-lucide="eye" class="h-4 w-4"></i></button>@if($canManage)<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Edit Sandisk SSD"><i data-lucide="pencil" class="h-4 w-4"></i></button>@endif<button class="rounded p-1.5 hover:bg-slate-100" aria-label="Detail Sandisk SSD"><i data-lucide="qr-code" class="h-4 w-4"></i></button></div></td>
-                </tr>
+                @endforelse
               </tbody>
             </table>
           </div>
           <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
-            <div class="flex items-center gap-2"><span id="row-count">Menampilkan 1 - 7 dari 8.650 total barang</span><span>Baris:</span><select class="h-8 rounded bg-blue-50 px-2 text-[12px]"><option>10</option><option>25</option><option>50</option></select></div>
+            <div class="flex items-center gap-2"><span>Menampilkan {{ $items->firstItem() ?? 0 }} - {{ $items->lastItem() ?? 0 }} dari {{ number_format($items->total()) }} total barang &bull; Hub: {{ $hubScopeLabel }}</span></div>
             <div class="flex items-center gap-1">
-              <button class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">‹ Sebelumnya</button>
-              <button class="h-8 min-w-8 rounded bg-blue-600 px-2 text-[12px] font-semibold text-white">1</button><button class="h-8 min-w-8 rounded px-2 text-[12px]">2</button><button class="h-8 min-w-8 rounded px-2 text-[12px]">3</button><span class="px-1">…</span><button class="h-8 min-w-8 rounded px-2 text-[12px]">865</button>
-              <button class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Selanjutnya ›</button>
+              @if($items->onFirstPage())
+                <span class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400">‹ Sebelumnya</span>
+              @else
+                <a href="{{ $items->previousPageUrl() }}" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">‹ Sebelumnya</a>
+              @endif
+              @foreach($items->getUrlRange(max(1, $items->currentPage() - 2), min($items->lastPage(), $items->currentPage() + 2)) as $page => $url)
+                <a href="{{ $url }}" class="h-8 min-w-8 rounded px-2 text-[12px] {{ $page === $items->currentPage() ? 'bg-blue-600 px-2 font-semibold text-white' : 'text-slate-600' }}">{{ $page }}</a>
+              @endforeach
+              @if($items->hasMorePages())
+                <a href="{{ $items->nextPageUrl() }}" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Selanjutnya ›</a>
+              @else
+                <span class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400">Selanjutnya ›</span>
+              @endif
             </div>
           </footer>
         </section>
@@ -290,80 +260,190 @@
         @else
         <section class="reveal rounded-xl border border-red-100 bg-white p-6 shadow-sm">
           <h1 class="text-[18px] font-bold text-slate-800">Akses ditolak</h1>
-          <p class="mt-1 text-[12.5px] text-slate-500">Modul Data Barang hanya tersedia untuk Super Admin, Kepala Gudang, dan Auditor.</p>
+          <p class="mt-1 text-[12.5px] text-slate-500">Modul Data Barang hanya tersedia untuk Super Admin, Kepala Gudang, Pegawai, dan Auditor.</p>
         </section>
+        @endif
+
+        @if(session('success'))
+        <div class="reveal mb-4 flex items-start gap-2.5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-[12px] text-emerald-800">
+          <i data-lucide="check-circle-2" class="mt-0.5 h-4 w-4 shrink-0"></i>
+          <p>{{ session('success') }}</p>
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="reveal mb-4 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-[12px] text-red-800">
+          <i data-lucide="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0"></i>
+          <ul class="list-disc pl-4 space-y-0.5">
+            @foreach($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
         @endif
 
     </main>
 </div>
 
+{{-- ===== Modal Tambah Barang ===== --}}
+@if($canManage)
+<div id="modalTambahBarang" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/45" onclick="document.getElementById('modalTambahBarang').classList.add('hidden')"></div>
+  <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
+    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+      <div>
+        <h2 class="text-[16px] font-bold text-slate-800">Tambah Barang Baru</h2>
+        <p class="text-[11.5px] text-slate-500 mt-0.5">Lengkapi data SKU barang di bawah ini.</p>
+      </div>
+      <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" onclick="document.getElementById('modalTambahBarang').classList.add('hidden')" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+    <form method="POST" action="{{ route($user->isSuperAdmin() ? 'admin.data-barang.store' : 'kepalagudang.data-barang.store') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5">
+      @csrf
+
+      <div class="sm:col-span-2">
+        <label class="text-[11.5px] font-semibold text-slate-600">Nama Barang <span class="text-red-500">*</span></label>
+        <input type="text" name="nama" value="{{ old('nama') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" placeholder="Contoh: Barcode Scanner Wireless 2D" required>
+        @error('nama')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Kode SKU <span class="text-red-500">*</span></label>
+        <input type="text" name="sku" value="{{ old('sku') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" placeholder="ELK-0010" required>
+        @error('sku')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Barcode <span class="text-red-500">*</span></label>
+        <input type="text" name="barcode" value="{{ old('barcode') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" placeholder="899275300101" required>
+        @error('barcode')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Kategori <span class="text-red-500">*</span></label>
+        <select name="category_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" required>
+          <option value="">-- Pilih Kategori --</option>
+          @foreach($categories as $catOpt)
+            <option value="{{ $catOpt->id }}" {{ old('category_id') == $catOpt->id ? 'selected' : '' }}>{{ $catOpt->nama }}</option>
+          @endforeach
+        </select>
+        @error('category_id')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Satuan <span class="text-red-500">*</span></label>
+        <select name="unit_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" required>
+          <option value="">-- Pilih Satuan --</option>
+          @foreach($units as $unitOpt)
+            <option value="{{ $unitOpt->id }}" {{ old('unit_id') == $unitOpt->id ? 'selected' : '' }}>{{ $unitOpt->nama }}</option>
+          @endforeach
+        </select>
+        @error('unit_id')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Lokasi Rak <span class="text-red-500">*</span></label>
+        <select name="location_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" required>
+          <option value="">-- Pilih Lokasi --</option>
+          @foreach($locations as $locOpt)
+            <option value="{{ $locOpt->id }}" {{ old('location_id') == $locOpt->id ? 'selected' : '' }}>{{ $locOpt->kode }} - {{ $locOpt->nama }}</option>
+          @endforeach
+        </select>
+        @error('location_id')<p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>@enderror
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Supplier</label>
+        <select name="supplier_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500">
+          <option value="">-- Pilih Supplier --</option>
+          @foreach($suppliers as $supOpt)
+            <option value="{{ $supOpt->id }}" {{ old('supplier_id') == $supOpt->id ? 'selected' : '' }}>{{ $supOpt->nama }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Divisi</label>
+        <select name="division_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500">
+          <option value="">-- Pilih Divisi --</option>
+          @foreach($divisions as $divOpt)
+            <option value="{{ $divOpt->id }}" {{ old('division_id') == $divOpt->id ? 'selected' : '' }}>{{ $divOpt->nama }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Hub</label>
+        <select name="hub_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500">
+          <option value="">-- Default: hub terpilih Anda --</option>
+          @foreach($hubs as $hubOpt)
+            <option value="{{ $hubOpt->id }}" {{ old('hub_id') == $hubOpt->id ? 'selected' : '' }}>{{ $hubOpt->name }} ({{ $hubOpt->code }})</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Stok Minimum (ROP)</label>
+        <input type="number" name="stok_minimum" value="{{ old('stok_minimum') }}" min="0" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" placeholder="5">
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Harga Beli</label>
+        <input type="number" name="harga_beli" value="{{ old('harga_beli') }}" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" placeholder="750000">
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Harga Jual</label>
+        <input type="number" name="harga_jual" value="{{ old('harga_jual') }}" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" placeholder="920000">
+      </div>
+
+      <div>
+        <label class="text-[11.5px] font-semibold text-slate-600">Status <span class="text-red-500">*</span></label>
+        <select name="status" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" required>
+          <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+          <option value="Stok Kritis" {{ old('status') == 'Stok Kritis' ? 'selected' : '' }}>Stok Kritis</option>
+        </select>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-[11.5px] font-semibold text-slate-600">URL Foto</label>
+        <input type="url" name="foto" value="{{ old('foto') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" placeholder="https://...">
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="text-[11.5px] font-semibold text-slate-600">Deskripsi</label>
+        <textarea name="deskripsi" rows="2" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12.5px] outline-none focus:border-blue-500" placeholder="Keterangan singkat barang">{{ old('deskripsi') }}</textarea>
+      </div>
+
+      <div class="sm:col-span-2 mt-2 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+        <button type="button" onclick="document.getElementById('modalTambahBarang').classList.add('hidden')" class="rounded-lg border border-slate-200 px-4 py-2 text-[12.5px] font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-blue-700"><i data-lucide="check" class="h-4 w-4 inline-block mr-1"></i>Simpan Barang</button>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
+
 <script>
 /* ============================================================
-   Astro Inventory — logika halaman Data Barang: loader ikon Lucide,
-   pencarian produk, filter kategori/status, quick filter, reset.
-   Shell sidebar/topbar file sumber dibuang (digantikan komponen Blade
-   components.navbar & components.sidebar); handler toggleSidebar() ikut
-   dibuang karena sidebar komponen mengurus dirinya sendiri.
+   Astro Inventory — logika halaman Data Barang: loader ikon Lucide.
+   Filter (pencarian, hub, kategori, status) berjalan server-side;
+   select langsung submit form GET.
    ============================================================ */
     lucide.createIcons();
 
-    const rows = [...document.querySelectorAll('#inventory-rows tr')];
+    const filterForm = document.querySelector('form[method="GET"]');
     const productSearch = document.getElementById('product-search');
-    /* Kotak pencarian global pada file sumber ada di topbar; layout komponen
-       tidak punya input itu, jadi referensinya dibuat null-safe. Beri
-       id="global-search" pada input mana pun untuk mengaktifkannya. */
-    const globalSearch = document.getElementById('global-search');
     const categoryFilter = document.getElementById('category-filter');
     const statusFilter = document.getElementById('status-filter');
 
-    function applyFilters() {
-      const query = `${productSearch.value} ${globalSearch ? globalSearch.value : ''}`.trim().toLowerCase();
-      const visibleRows = rows.filter((row) => {
-        const matchesSearch = !query || row.textContent.toLowerCase().includes(query);
-        const matchesCategory = !categoryFilter.value || row.dataset.category === categoryFilter.value;
-        const matchesStatus = !statusFilter.value || row.dataset.status === statusFilter.value;
-        row.hidden = !(matchesSearch && matchesCategory && matchesStatus);
-        return !row.hidden;
-      });
-      const hasFilters = query || categoryFilter.value || statusFilter.value;
-      document.getElementById('row-count').textContent = hasFilters
-        ? `${visibleRows.length} barang sesuai filter`
-        : 'Menampilkan 1 - 7 dari 8.650 total barang';
-    }
-
-    [productSearch, globalSearch].filter(Boolean).forEach((input) => input.addEventListener('input', applyFilters));
-    [categoryFilter, statusFilter].forEach((select) => select.addEventListener('change', applyFilters));
-
-    /* Pill filter cepat: pada file sumber klik pill hanya mengubah select status
-       tanpa menandai pill mana yang aktif — penanda aktif ditambahkan di sini
-       agar status filter terlihat. */
-    const quickFilters = [...document.querySelectorAll('[data-quick-filter]')];
-    const pillActiveClass = 'rounded-full bg-blue-600 px-3 py-1 font-semibold text-white';
-    const pillIdleClasses = quickFilters.map((button) => button.className.includes('bg-blue-600')
-      ? 'rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600'
-      : button.className);
-
-    function setActiveQuickFilter(activeIndex) {
-      quickFilters.forEach((button, index) => {
-        button.className = index === activeIndex ? pillActiveClass : pillIdleClasses[index];
-      });
-    }
-
-    quickFilters.forEach((button, index) => {
-      button.addEventListener('click', () => {
-        statusFilter.value = button.dataset.quickFilter;
-        applyFilters();
-        setActiveQuickFilter(index);
-      });
+    // Submit otomatis saat filter diubah (kecuali input pencarian)
+    [categoryFilter, statusFilter].filter(Boolean).forEach((select) => {
+        select.addEventListener('change', () => filterForm && filterForm.submit());
     });
 
-    document.getElementById('reset-filters').addEventListener('click', () => {
-      productSearch.value = '';
-      if (globalSearch) globalSearch.value = '';
-      categoryFilter.value = '';
-      statusFilter.value = '';
-      applyFilters();
-      setActiveQuickFilter(0);
+    // Enter pada kolom pencarian langsung submit
+    productSearch && productSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); filterForm && filterForm.submit(); }
     });
 </script>
 </body>
