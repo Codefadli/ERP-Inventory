@@ -679,7 +679,7 @@
                             <td class="px-4 py-4 align-top whitespace-nowrap">
                                 <div class="flex flex-col gap-1.5">
                                     <button onclick="openDetail('SO-2025-0085')" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs"><i class="fas fa-eye"></i> Detail</button>
-                                    <button onclick="toast('Adjustment SO-2025-0085 diajukan — menunggu persetujuan HR/Finance.','success')" class="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded text-xs border border-indigo-200"><i class="fas fa-paper-plane"></i> Ajukan Adjustment</button>
+                                    <button onclick="toast('Adjustment SO-2025-0085 diajukan menunggu persetujuan HR/Finance.','success')" class="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded text-xs border border-indigo-200"><i class="fas fa-paper-plane"></i> Ajukan Adjustment</button>
                                 </div>
                             </td>
                         </tr>
@@ -1416,7 +1416,7 @@
                                                                     <i class="fas fa-eye mr-1"></i>Detail
                                                                 </button>
                                                                 <button type="button"
-                                                                    onclick="toast('Adjustment SO-2025-0085 diajukan — menunggu persetujuan HR/Finance.','success')"
+                                                                    onclick="toast('Adjustment SO-2025-0085 diajukan menunggu persetujuan HR/Finance.','success')"
                                                                     class="text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg text-xs text-left">
                                                                     <i class="fas fa-paper-plane mr-1"></i>Ajukan Adjustment
                                                                 </button>

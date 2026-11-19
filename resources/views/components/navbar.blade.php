@@ -2,13 +2,7 @@
 <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
     <div class="w-full px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fas fa-cube text-white text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-base lg:text-lg font-bold text-gray-900">Astro Inventory</h1>
-                <p class="text-xs text-gray-500">Sistem Inventaris Terpadu</p>
-            </div>
+            <img src="{{ asset('images/astro.png') }}" width="200px" alt="">
             @if(auth()->user()->selectedHub)
             <div class="hidden lg:flex items-center gap-2 ml-4 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">
                 <i class="fas fa-building"></i>

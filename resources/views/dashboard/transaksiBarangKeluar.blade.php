@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Transaksi Barang Keluar — Astro Inventory</title>
+    <title>Transaksi Barang Keluar Astro Inventory</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -71,7 +71,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Inventaris <span class="text-blue-700">&gt; Transaksi Barang Keluar (Outbound)</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Transaksi Barang Keluar</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Pengeluaran barang ke unit / cabang: nomor DO, tiket permintaan, departemen pemohon, dan status pengiriman —</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Pengeluaran barang ke unit / cabang: nomor DO, tiket permintaan, departemen pemohon, dan status pengiriman</p>
             </div>
             <div class="flex items-center gap-2">
                 @if($canManage)
@@ -140,7 +140,7 @@
             </form>
         </section>
 
-        {{-- Kartu transaksi: layout dinamis, tidak kaku --}}
+        
         <section class="reveal reveal-delay-3 space-y-2.5">
             @forelse($outbounds as $ob)
             <article class="trx-card flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
