@@ -15,15 +15,12 @@
                 <span>{{ auth()->user()->selectedHub->name }}</span>
             </div>
             @endif
-            <span class="hidden lg:inline-flex items-center gap-1 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                <i class="fas fa-circle text-[5px]"></i> Operasional Normal
-            </span>
         </div>
         <div class="flex items-center gap-3">
-            <button class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.notifikasi' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.notifikasi' : (auth()->user()->isHR() ? 'hr.notifikasi' : (auth()->user()->isPegawai() ? 'pegawai.notifikasi' : 'audit.notifikasi')))) }}" class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg" title="Notifikasi">
                 <i class="fas fa-bell text-lg"></i>
                 <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
-            </button>
+            </a>
             <div class="flex items-center gap-2 pl-3 border-l border-gray-200">
                 <div class="text-right hidden md:block">
                     <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->nama_lengkap }}</p>

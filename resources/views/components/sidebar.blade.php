@@ -160,7 +160,7 @@
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('pegawai.stok-opname') }}" class="nav-link {{ request()->routeIs('pegawai.stok-opname') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
@@ -170,16 +170,21 @@
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('pegawai.riwayat-transaksi') }}" class="nav-link {{ request()->routeIs('pegawai.riwayat-transaksi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
             <span>Riwayat Transaksi</span>
         </a>
-        <a href="#" class="nav-link flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('pegawai.status-permintaan') }}" class="nav-link {{ request()->routeIs('pegawai.status-permintaan') ? 'active' : '' }} flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <div class="flex items-center gap-3">
                 <i class="fas fa-tasks w-4"></i>
                 <span>Status Permintaan</span>
             </div>
-            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">2</span>
+            @php
+                $permintaanPending = auth()->user() && auth()->user()->isPegawai()
+                    ? \App\Models\RequestBarang::where('status', 'Menunggu')->count()
+                    : 0;
+            @endphp
+            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $permintaanPending }}</span>
         </a>
         @endif
 

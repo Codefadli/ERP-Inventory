@@ -321,17 +321,18 @@ Route::middleware('auth')->group(function () {
                 ->name('data-barang');
         });
 
-        Route::middleware('permission:receipt.create')->group(function () {
-            Route::get('/receipts', function () {
-                return view('pegawai.receipts.index');
-            })->name('receipts.index');
-        });
+        Route::get('/riwayat-transaksi', [App\Http\Controllers\PegawaiPageController::class, 'riwayat'])
+            ->name('riwayat-transaksi');
 
-        Route::middleware('permission:issue.create')->group(function () {
-            Route::get('/issues', function () {
-                return view('pegawai.issues.index');
-            })->name('issues.index');
-        });
+        Route::get('/status-permintaan', [App\Http\Controllers\PegawaiPageController::class, 'permintaan'])
+            ->name('status-permintaan');
+        Route::post('/status-permintaan', [App\Http\Controllers\PegawaiPageController::class, 'storePermintaan'])
+            ->name('status-permintaan.store');
+
+        Route::get('/stok-opname', [App\Http\Controllers\PegawaiPageController::class, 'opname'])
+            ->name('stok-opname');
+        Route::post('/stok-opname', [App\Http\Controllers\PegawaiPageController::class, 'storeOpname'])
+            ->name('stok-opname.store');
     });
 
     // ========================================================================
