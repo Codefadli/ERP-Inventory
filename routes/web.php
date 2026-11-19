@@ -347,9 +347,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
-        Route::get('/mutasi-barang', function () {
-            return view('dashboard.mutasi-barang');
-        })->name('mutasi-barang');
+        Route::get('/mutasi-barang', [App\Http\Controllers\MutasiBarangController::class, 'index'])
+            ->name('mutasi-barang');
 
         Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
             ->name('barang-masuk');
@@ -357,19 +356,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
             ->name('barang-keluar');
 
+        Route::get('/stok-opname', [App\Http\Controllers\StokOpnameController::class, 'index'])
+            ->name('stok-opname');
+
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/data-barang', [App\Http\Controllers\DataBarangController::class, 'index'])
                 ->name('data-barang');
 
-            Route::get('/temuan-audit', function () {
-                return view('dashboard.temuan-audit');
-            })->name('temuan-audit');
+            Route::get('/temuan-audit', [App\Http\Controllers\TemuanAuditController::class, 'index'])
+                ->name('temuan-audit');
+            Route::post('/temuan-audit', [App\Http\Controllers\TemuanAuditController::class, 'store'])
+                ->name('temuan-audit.store');
+            Route::post('/temuan-audit/{id}/status', [App\Http\Controllers\TemuanAuditController::class, 'updateStatus'])
+                ->name('temuan-audit.status');
 
             Route::get('/data-gudang-lokasi', [App\Http\Controllers\MasterDataPageController::class, 'lokasi'])
                 ->name('data-gudang-lokasi');
-            Route::get('/logs', function () {
-                return view('audit.logs.index');
-            })->name('logs.index');
         });
     });
 

@@ -57,9 +57,12 @@ class StokOpnameController extends Controller
             ->orderBy('sku')
             ->get(['id', 'sku', 'nama', 'location_id', 'hub_id']);
 
-        return view('dashboard.kepalagudang.stokOpname', [
+        $view = $user->isAuditor() ? 'dashboard.audit.stokOpname' : 'dashboard.kepalagudang.stokOpname';
+        $routeName = $user->isAuditor() ? 'audit.stok-opname' : 'kepalagudang.stok-opname';
+
+        return view($view, [
             'user'          => $user,
-            'routeName'     => 'kepalagudang.stok-opname',
+            'routeName'     => $routeName,
             'opnames'       => $opnames,
             'stats'         => $stats,
             'hubs'          => Hub::orderBy('name')->get(),

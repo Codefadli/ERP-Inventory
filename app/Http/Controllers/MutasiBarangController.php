@@ -80,9 +80,12 @@ class MutasiBarangController extends Controller
 
         $selectedHub = $hubId === 'all' ? null : Hub::find((int) $hubId);
 
-        return view('dashboard.kepalagudang.mutasiBarang', [
+        $view = $user->isAuditor() ? 'dashboard.audit.mutasiBarang' : 'dashboard.kepalagudang.mutasiBarang';
+        $routeName = $user->isAuditor() ? 'audit.mutasi-barang' : 'kepalagudang.mutasi-barang';
+
+        return view($view, [
             'user'          => $user,
-            'routeName'     => 'kepalagudang.mutasi-barang',
+            'routeName'     => $routeName,
             'mutasis'       => $mutasiPage,
             'stats'         => $stats,
             'hubs'          => Hub::orderBy('name')->get(),
