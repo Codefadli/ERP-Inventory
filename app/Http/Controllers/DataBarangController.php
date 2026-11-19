@@ -14,19 +14,6 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Halaman Data Barang / Katalog SKU.
- *
- * Tampilan tersedia untuk role yang memiliki prototype di FolderHTML:
- * - Super Admin   -> admin.data-barang        (master.view)
- * - Kepala Gudang -> kepalagudang.data-barang (master.view)
- * - Pegawai       -> pegawai.data-barang      (master.view)
- * - Auditor       -> audit.data-barang        (audit.view, read-only)
- *
- * Data diambil dari tabel items (bukan simulasi). Filter server-side:
- * hub (default hub terpilih user; opsi "Semua Hub"), pencarian SKU/
- * barcode/nama/lokasi, filter kategori, filter status, paginasi.
- */
 class DataBarangController extends Controller
 {
     public function index(Request $request)
@@ -34,7 +21,7 @@ class DataBarangController extends Controller
         $user = auth()->user();
         $hub = $user->selectedHub;
 
-        // Pilihan hub: query param 'hub' => 'all' | id. Default hub terpilih user.
+
         $hubId = $request->query('hub');
         if ($hubId === null || $hubId === '') {
             $hubId = $hub ? (string) $hub->id : 'all';
@@ -44,7 +31,7 @@ class DataBarangController extends Controller
             ->with(['category', 'unit', 'location', 'supplier', 'division', 'hub'])
             ->when($hubId !== 'all', fn ($q) => $q->where('hub_id', $hubId));
 
-        // Pencarian: SKU, barcode, nama, kode/nama lokasi
+
         if ($q = trim((string) $request->query('q'))) {
             $query->where(function ($w) use ($q) {
                 $w->where('sku', 'like', "%{$q}%")
@@ -58,12 +45,12 @@ class DataBarangController extends Controller
             });
         }
 
-        // Filter kategori
+
         if ($categoryId = $request->query('category')) {
             $query->where('category_id', $categoryId);
         }
 
-        // Filter status
+
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
@@ -109,10 +96,7 @@ class DataBarangController extends Controller
         ]);
     }
 
-    /**
-     * Menyimpan barang baru (tambah data barang).
-     * Hanya role dengan permission product.manage / master.manage.
-     */
+    /** Simpan barang baru (permission product.manage / master.manage). */
     public function store(StoreItemRequest $request)
     {
         $user = auth()->user();
@@ -126,7 +110,7 @@ class DataBarangController extends Controller
 
         $data = $request->validated();
 
-        // Default hub: jika kosong, pakai hub terpilih user
+
         if (empty($data['hub_id']) && $user->selectedHub) {
             $data['hub_id'] = $user->selectedHub->id;
         }

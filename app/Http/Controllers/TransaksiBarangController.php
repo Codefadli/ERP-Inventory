@@ -12,17 +12,10 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Transaksi Barang Masuk (inbound) & Barang Keluar (outbound).
- * Data nyata dari tabel inbounds / outbounds — bukan simulasi.
- * Filter hub (default hub terpilih user; opsi "Semua Hub"),
- * pencarian, filter status, paginasi.
- */
+
 class TransaksiBarangController extends Controller
 {
-    /**
-     * Halaman Barang Masuk. Route: *.barang-masuk (semua role).
-     */
+    /** Halaman barang masuk. */
     public function masuk(Request $request)
     {
         $user = auth()->user();
@@ -75,9 +68,7 @@ class TransaksiBarangController extends Controller
         ]);
     }
 
-    /**
-     * Simpan barang masuk baru.
-     */
+    /** Simpan barang masuk. */
     public function storeMasuk(Request $request)
     {
         $user = auth()->user();
@@ -124,9 +115,7 @@ class TransaksiBarangController extends Controller
             ->with('success', 'Barang masuk ' . $inbound->kode . ' berhasil dicatat.');
     }
 
-    /**
-     * Halaman Barang Keluar. Route: *.barang-keluar (semua role).
-     */
+    /** Halaman barang keluar. */
     public function keluar(Request $request)
     {
         $user = auth()->user();
@@ -178,9 +167,7 @@ class TransaksiBarangController extends Controller
         ]);
     }
 
-    /**
-     * Simpan barang keluar baru.
-     */
+    /** Simpan barang keluar. */
     public function storeKeluar(Request $request)
     {
         $user = auth()->user();

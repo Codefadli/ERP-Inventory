@@ -6,17 +6,6 @@ use App\Models\AuditLog;
 use App\Models\Hub;
 use Illuminate\Http\Request;
 
-/**
- * Halaman Log Aktivitas & Audit Trail.
- *
- * Tampilan hanya tersedia untuk role yang memiliki prototype di FolderHTML:
- * - Super Admin  -> dashboard.superadmin.logAktivitas
- * - HR           -> dashboard.hr.log-audit-otorisasi
- *
- * Data diambil dari tabel audit_logs (bukan simulasi). Pencarian, filter
- * kategori, dan paginasi berjalan server-side. Data di-scope berdasarkan
- * pilihan hub (default: hub terpilih user; opsi "Semua Hub" tersedia).
- */
 class LogAktivitasController extends Controller
 {
     public function index(Request $request)
@@ -32,12 +21,12 @@ class LogAktivitasController extends Controller
 
         $scoped = fn ($query) => $query->whereHas('user', fn ($u) => $u->where('selected_hub_id', $hubId));
 
-        // ------------------------- Query utama -------------------------
+
         $query = AuditLog::query()
             ->with(['user.role', 'user.selectedHub'])
             ->when($hubId !== 'all', $scoped);
 
-        // Pencarian: nama/NIP/username, deskripsi, aksi, entitas, IP
+
         if ($q = trim((string) $request->query('q'))) {
             $query->where(function ($w) use ($q) {
                 $w->where('description', 'like', "%{$q}%")
@@ -52,7 +41,7 @@ class LogAktivitasController extends Controller
             });
         }
 
-        // Filter kategori (pill pada tampilan)
+
         $cat = $request->query('cat');
         if ($cat && $cat !== 'semua') {
             $query->whereIn('action', match ($cat) {
@@ -64,14 +53,14 @@ class LogAktivitasController extends Controller
             });
         }
 
-        // Filter status hasil
+
         if ($result = $request->query('result')) {
             $query->where('result', $result);
         }
 
         $logs = $query->latest('created_at')->paginate(15)->withQueryString();
 
-        // ------------------------- Statistik (scope hub sama) -------------------------
+
         $base = AuditLog::query()->when($hubId !== 'all', $scoped);
 
         $masterActions = ['create', 'update', 'delete'];
@@ -91,7 +80,7 @@ class LogAktivitasController extends Controller
             'insiden'   => (clone $base)->where('result', 'failure')->count(),
         ];
 
-        // Hub terpilih (untuk label di header)
+
         $selectedHub = $hubId === 'all' ? null : Hub::find((int) $hubId);
         $hubScopeLabel = $selectedHub?->name ?? 'Semua Hub';
         $hubScopeCode = $selectedHub?->code;

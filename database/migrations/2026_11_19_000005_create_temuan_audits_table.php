@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Temuan Audit & Ketidaksesuaian (LTA) oleh auditor.
+        // Temuan audit (LTA).
         Schema::create('temuan_audits', function (Blueprint $table) {
             $table->id();
             $table->string('kode', 30)->unique();               // no. LTA / temuan

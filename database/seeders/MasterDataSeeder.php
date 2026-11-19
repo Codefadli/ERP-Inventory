@@ -16,14 +16,14 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Hub untuk distribusi master data (filter "pemilihan hub").
+        // Distribusi hub_id untuk data master.
         $hubIds = DB::table('hubs')->orderBy('id')->pluck('id')->all();
         $hubFor = function (int $index) use ($hubIds) {
             if (empty($hubIds)) return null;
             return $hubIds[$index % count($hubIds)];
         };
 
-        // 1. Categories — matching hardcoded data from MasterDataController::getCommonData()
+        // 1. Categories
         $categories = [
             ['kode' => 'CAT-001', 'nama' => 'Elektronik & Hardware', 'deskripsi' => 'Komponen IT, kabel, adaptor, dan perangkat periferal', 'status' => true],
             ['kode' => 'CAT-002', 'nama' => 'Alat Tulis Kantor (ATK)', 'deskripsi' => 'Kertas, pena, map, binder, dan perlengkapan administrasi', 'status' => true],
@@ -117,8 +117,7 @@ class MasterDataSeeder extends Seeder
             DB::table('divisions')->insert($division);
         }
 
-        // 6. Items — setiap item diberi hub_id (distribusi ke hub yang ada,
-        //    agar filter "pemilihan hub" pada halaman Data Barang berfungsi).
+        // 6. Items — distribusi hub_id.
         $items = [
             [
                 'sku' => 'ELK-0010',

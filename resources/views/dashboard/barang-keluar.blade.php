@@ -62,7 +62,6 @@
             $selesaiCount = collect($outboundTransactions)->where('status', 'selesai')->count();
         @endphp
 
-        {{-- 1. ROLE AUDITOR: Tampilan Khusus Audit & Kepatuhan Outbound --}}
         @if(auth()->user()->isAuditor())
             {{-- ============ AUDITOR VIEW: Audit Barang Keluar ============ --}}
             <div class="w-full">

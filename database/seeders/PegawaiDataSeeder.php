@@ -6,18 +6,14 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Data demo modul pegawai: permintaan barang (requests) dan
- * hasil stok opname (stock_opnames) — agar halaman pegawai
- * menampilkan data nyata dari DB, bukan simulasi.
- */
+// Data demo modul pegawai: requests & stock_opnames.
 class PegawaiDataSeeder extends Seeder
 {
     use WithoutModelEvents;
 
     public function run(): void
     {
-        // Idempoten: kosongkan dulu agar bisa dijalankan ulang tanpa error unik.
+        // Idempoten: truncate agar bisa di-seed ulang.
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::table('requests')->truncate();
         DB::table('stock_opnames')->truncate();
@@ -32,7 +28,7 @@ class PegawaiDataSeeder extends Seeder
         $pegawaiId = $pegawaiIds[0];
         $pegawai2 = count($pegawaiIds) > 1 ? $pegawaiIds[1] : $pegawaiId;
 
-        // --- Requests (permintaan barang) ---
+        // Requests
         $requests = [
             [
                 'tiket' => 'REQ-' . now()->format('ymd') . '-001',
@@ -92,7 +88,7 @@ class PegawaiDataSeeder extends Seeder
             DB::table('requests')->insert($req);
         }
 
-        // --- Stock Opnames (hasil hitung fisik) ---
+        // Stock opnames
         $items = DB::table('items')->orderBy('id')->take(4)->get();
         foreach ($items as $i => $item) {
             $qtyFisik = 12 + ($i * 5);

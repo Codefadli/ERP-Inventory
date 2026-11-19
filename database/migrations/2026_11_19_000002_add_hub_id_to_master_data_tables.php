@@ -8,15 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Data gudang & lokasi
+        // Lokasi gudang per hub
         Schema::table('locations', function (Blueprint $table) {
             $table->foreignId('hub_id')->nullable()->after('gudang')
                 ->constrained('hubs')->nullOnDelete();
             $table->index('hub_id');
         });
 
-        // Master data: departemen / supplier / kategori (agar konsisten
-        // dengan filter "pemilihan hub" pada halaman masing-masing).
+        // Master data lain (konsisten dengan filter hub).
         Schema::table('divisions', function (Blueprint $table) {
             $table->foreignId('hub_id')->nullable()->after('kepala')
                 ->constrained('hubs')->nullOnDelete();

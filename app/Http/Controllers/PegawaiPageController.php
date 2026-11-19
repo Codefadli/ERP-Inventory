@@ -12,19 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Halaman modul Pegawai: Riwayat Transaksi, Status Permintaan,
- * dan Stok Opname — sesuai prototype FolderHTML/Pegawai.
- *
- * Data nyata dari tabel requests & stock_opnames (bukan simulasi).
- * Filter hub (default hub terpilih user; opsi "Semua Hub").
- */
+
 class PegawaiPageController extends Controller
 {
-    /**
-     * Riwayat Transaksi & Log Aktivitas Staf.
-     * Route: pegawai.riwayat-transaksi
-     */
+    /** Riwayat transaksi & log aktivitas staf. */
     public function riwayat(Request $request)
     {
         $user = auth()->user();
@@ -72,10 +63,7 @@ class PegawaiPageController extends Controller
         ]);
     }
 
-    /**
-     * Status Permintaan (portal pegawai).
-     * Route: pegawai.status-permintaan
-     */
+    /** Status permintaan (portal pegawai). */
     public function permintaan(Request $request)
     {
         $user = auth()->user();
@@ -124,10 +112,7 @@ class PegawaiPageController extends Controller
         ]);
     }
 
-    /**
-     * Simpan permintaan baru oleh pegawai.
-     * Route: pegawai.status-permintaan.store
-     */
+    /** Simpan permintaan baru. */
     public function storePermintaan(Request $request)
     {
         $user = auth()->user();
@@ -176,10 +161,7 @@ class PegawaiPageController extends Controller
             ->with('success', 'Permintaan ' . $requestBarang->tiket . ' berhasil diajukan (status Menunggu).');
     }
 
-    /**
-     * Stok Opname (hasil hitung fisik).
-     * Route: pegawai.stok-opname
-     */
+    /** Stok opname (hasil hitung fisik). */
     public function opname(Request $request)
     {
         $user = auth()->user();
@@ -233,10 +215,7 @@ class PegawaiPageController extends Controller
         ]);
     }
 
-    /**
-     * Simpan hasil opname fisik baru.
-     * Route: pegawai.stok-opname.store
-     */
+    /** Simpan hasil opname fisik. */
     public function storeOpname(Request $request)
     {
         $user = auth()->user();

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Transaksi Barang Masuk (inbound / penerimaan).
+        // Penerimaan barang (inbound).
         Schema::create('inbounds', function (Blueprint $table) {
             $table->id();
             $table->string('kode', 30)->unique();               // no. PO / ref penerimaan
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Transaksi Barang Keluar (outbound / pengeluaran).
+        // Pengeluaran barang (outbound).
         Schema::create('outbounds', function (Blueprint $table) {
             $table->id();
             $table->string('kode', 30)->unique();               // no. DO / ref pengeluaran

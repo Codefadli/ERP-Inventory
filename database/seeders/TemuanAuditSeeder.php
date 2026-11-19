@@ -6,9 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Data demo temuan audit (LTA) — terhubung ke user & hub nyata.
- */
+// Data demo temuan audit (LTA).
 class TemuanAuditSeeder extends Seeder
 {
     use WithoutModelEvents;

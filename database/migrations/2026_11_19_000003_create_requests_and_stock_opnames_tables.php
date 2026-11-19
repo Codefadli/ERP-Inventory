@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Permintaan barang oleh pegawai (status permintaan / approval flow).
+        // Permintaan barang pegawai (approval flow).
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
             $table->string('tiket', 30)->unique();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Hasil stok opname fisik oleh pegawai.
+        // Hasil stok opname fisik.
         Schema::create('stock_opnames', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();

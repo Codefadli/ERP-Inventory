@@ -8,12 +8,8 @@ use App\Models\RequestBarang;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
-/**
- * Halaman modul HR: Persetujuan Barang, Riwayat Persetujuan,
- * Detail Permintaan, dan Laporan Inventaris — sesuai prototype
- * FolderHTML/HR. Data nyata dari tabel requests & items;
- * filter hub (default hub terpilih user; opsi "Semua Hub").
- */
+// Modul HR: persetujuan, riwayat, detail permintaan, laporan inventaris.
+// Sumber data: requests & items. Filter hub + paginasi.
 class HrPageController extends Controller
 {
     private function resolveHubId(Request $request, $user): string
@@ -25,10 +21,7 @@ class HrPageController extends Controller
         return $hubId;
     }
 
-    /**
-     * Antrean Persetujuan Barang (prototype: persetujuan_barang.html).
-     * Route: hr.persetujuan-barang
-     */
+    /** Antrean persetujuan barang. */
     public function persetujuan(Request $request)
     {
         $user = auth()->user();
@@ -72,10 +65,7 @@ class HrPageController extends Controller
         ]);
     }
 
-    /**
-     * Proses keputusan antrean persetujuan HR (setujui/tolak).
-     * Route: hr.persetujuan-barang.proses
-     */
+    /** Proses keputusan antrean (setujui/tolak). */
     public function proses(Request $request, int $id)
     {
         $user = auth()->user();
@@ -108,10 +98,7 @@ class HrPageController extends Controller
             ->with('success', 'Pengajuan ' . $requestBarang->tiket . ' berhasil ' . strtolower($validated['keputusan']) . '.');
     }
 
-    /**
-     * Riwayat Persetujuan (prototype: riwayat_persetujuan.html).
-     * Route: hr.riwayat-persetujuan
-     */
+    /** Riwayat persetujuan yang sudah diputuskan. */
     public function riwayat(Request $request)
     {
         $user = auth()->user();
@@ -160,10 +147,7 @@ class HrPageController extends Controller
         ]);
     }
 
-    /**
-     * Detail Permintaan (prototype: detail_permintaan.html).
-     * Route: hr.detail-permintaan
-     */
+    /** Detail satu permintaan. */
     public function detail(Request $request, int $id)
     {
         $user = auth()->user();
@@ -176,10 +160,7 @@ class HrPageController extends Controller
         ]);
     }
 
-    /**
-     * Laporan Inventaris HR (prototype: laporan-inventaris-hr.html).
-     * Route: hr.laporan-inventaris
-     */
+    /** Laporan inventaris untuk HR. */
     public function laporan(Request $request)
     {
         $user = auth()->user();

@@ -25,13 +25,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ============================================================
-           Astro Inventory — gaya lokal halaman Data Barang
-           (diambil dari file sumber; blok milik shell sidebar/topbar
-           dibuang karena digantikan komponen Blade)
-           ============================================================ */
-        /* Token disamakan dengan halaman superadmin lain supaya komponen
-           components.sidebar tampil identik di seluruh aplikasi */
+        /* Gaya lokal halaman ini. */
+        
         :root {
             --brand: #2563eb;
             --brand-dark: #1d4ed8;

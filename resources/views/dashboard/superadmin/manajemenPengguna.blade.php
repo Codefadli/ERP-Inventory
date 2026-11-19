@@ -25,7 +25,7 @@
 
     <style>
         /* ============================================================
-           Astro Inventory — Design System (inlined dari file sumber)
+           Astro Inventory — Design System
            ============================================================ */
         :root {
             --brand: #2563eb;
@@ -695,7 +695,6 @@
   </div>
 </div>
 
-
 <script>
 /* ============================================================
    Astro Inventory — interaction layer halaman (toast, modal, tabs,
@@ -897,8 +896,6 @@
 })();
 </script>
 
-
-
 <!-- ============ MODAL: RIWAYAT AKTIVITAS ============ -->
 <div id="modalRiwayat" class="ai-modal-overlay" style="display:none">
   <div class="ai-modal">
@@ -1039,7 +1036,6 @@
       @endif
     })();
 </script>
-
 
 </body>
 </html>

@@ -8,11 +8,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Temuan Audit & Ketidaksesuaian (LTA) — role Auditor.
- * Data nyata dari tabel temuan_audits; filter hub (default hub
- * terpilih user; opsi "Semua Hub"), pencarian, paginasi.
- */
+// Temuan audit / LTA (tabel temuan_audits), per hub.
 class TemuanAuditController extends Controller
 {
     public function index(Request $request)

@@ -63,7 +63,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Manajemen & Laporan <span class="text-blue-700">&gt; Log Audit &amp; Otorisasi</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Log Audit, Integritas &amp; Otorisasi</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Rekam jejak aktivitas pengguna, perubahan data, persetujuan transaksi, dan otorisasi — data nyata dari tabel audit_logs.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Rekam jejak aktivitas pengguna, perubahan data, persetujuan transaksi, dan otorisasi —</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700"><i class="fas fa-shield-alt mr-1"></i>AUDIT AKTIF</span>
@@ -126,8 +126,7 @@
             </article>
         </section>
 
-        {{-- Ringkasan audit trail --}}
-        <section class="reveal reveal-delay-2 mb-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-4 shadow-lg">
+                <section class="reveal reveal-delay-2 mb-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-4 shadow-lg">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex min-w-0 items-center gap-3">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white"><i data-lucide="lock" class="h-4 w-4"></i></span>
@@ -140,8 +139,7 @@
             </div>
         </section>
 
-        {{-- Filter --}}
-        <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+                <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
             <form method="GET" action="{{ route($routeName) }}" class="flex flex-wrap items-center gap-2">
                 <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 md:max-w-[400px]">
                     <i data-lucide="search" class="h-4 w-4"></i>
@@ -321,7 +319,6 @@
     </main>
 </div>
 
-{{-- Toast --}}
 <div id="auditToast" class="toast-message fixed bottom-5 right-5 z-[100] rounded-lg bg-gray-900 px-5 py-3 text-white shadow-xl">
     <div class="flex items-center gap-2">
         <i data-lucide="check-circle-2" class="h-4 w-4 text-green-400"></i>

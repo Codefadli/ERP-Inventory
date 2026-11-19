@@ -7,12 +7,7 @@ use App\Models\RequestBarang;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
-/**
- * Persetujuan Barang — Kepala Gudang.
- * Daftar pengajuan (requests) yang harus disetujui/ditolak KG,
- * filter hub (default hub terpilih user; opsi "Semua Hub").
- * Data nyata dari tabel requests.
- */
+// Persetujuan pengajuan barang oleh Kepala Gudang (tabel requests).
 class PersetujuanBarangController extends Controller
 {
     public function index(Request $request)
@@ -67,9 +62,7 @@ class PersetujuanBarangController extends Controller
         ]);
     }
 
-    /**
-     * Proses pengajuan: setujui / tolak.
-     */
+    /** Proses pengajuan: setujui / tolak. */
     public function proses(Request $request, int $id)
     {
         $user = auth()->user();

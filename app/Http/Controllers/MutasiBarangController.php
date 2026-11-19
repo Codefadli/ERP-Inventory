@@ -8,12 +8,7 @@ use App\Models\Outbound;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-/**
- * Mutasi Barang — Kepala Gudang.
- * Menampilkan seluruh pergerakan stok (barang masuk + barang keluar)
- * sebagai satu alur mutasi kronologis. Data nyata dari tabel
- * inbounds & outbounds; filter hub (default hub user; opsi "Semua Hub").
- */
+// Alur mutasi kronologis: gabungan inbounds & outbounds per hub.
 class MutasiBarangController extends Controller
 {
     public function index(Request $request)

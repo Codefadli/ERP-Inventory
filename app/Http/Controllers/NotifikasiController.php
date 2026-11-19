@@ -8,7 +8,7 @@ class NotifikasiController extends Controller
 {
     /**
      * Menampilkan Pusat Notifikasi & Pemberitahuan.
-     * Satu view bersama untuk semua role (Kepala Gudang, HR, Pegawai, dst)
+     * Satu view bersama untuk semua role.
      * dengan blok konten per-role.
      */
     public function index()

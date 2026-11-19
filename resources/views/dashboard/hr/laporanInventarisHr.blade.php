@@ -59,7 +59,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Manajemen & Laporan <span class="text-blue-700">&gt; Laporan Inventaris</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Laporan Inventaris</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Ringkasan katalog inventaris &amp; aktivitas pengajuan pada lingkup hub — data nyata dari tabel items &amp; requests.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Ringkasan katalog inventaris &amp; aktivitas pengajuan pada lingkup hub — &amp; requests.</p>
             </div>
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
         </section>

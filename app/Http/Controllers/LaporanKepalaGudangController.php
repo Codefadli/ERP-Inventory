@@ -9,11 +9,7 @@ use App\Models\Item;
 use App\Models\Outbound;
 use Illuminate\Http\Request;
 
-/**
- * Laporan & Analitik — Kepala Gudang.
- * Ringkasan katalog (stok kritis), pergerakan masuk/keluar, dan
- * distribusi kategori pada lingkup hub terpilih. Data nyata.
- */
+// Laporan & analitik: katalog, pergerakan stok, distribusi kategori.
 class LaporanKepalaGudangController extends Controller
 {
     public function index(Request $request)

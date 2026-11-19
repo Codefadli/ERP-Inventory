@@ -59,7 +59,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional & Persetujuan <span class="text-blue-700">&gt; Antrean Persetujuan</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Antrean Persetujuan Barang</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Pengajuan barang dari pegawai yang menunggu keputusan HR: setujui, tolak, atau lihat detail — data nyata dari tabel requests.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Pengajuan barang dari pegawai yang menunggu keputusan HR: setujui, tolak, atau lihat detail —</p>
             </div>
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
         </section>

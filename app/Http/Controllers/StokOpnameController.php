@@ -9,11 +9,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Stok Opname — Kepala Gudang.
- * Hasil hitung fisik + input opname baru. Data nyata dari tabel
- * stock_opnames; filter hub (default hub user; opsi "Semua Hub").
- */
+// Hasil & input stok opname (tabel stock_opnames), per hub.
 class StokOpnameController extends Controller
 {
     public function index(Request $request)
@@ -74,9 +70,7 @@ class StokOpnameController extends Controller
         ]);
     }
 
-    /**
-     * Simpan hasil opname fisik baru (KG bisa mencatat/verifikasi).
-     */
+    /** Simpan hasil opname fisik baru. */
     public function store(Request $request)
     {
         $user = auth()->user();

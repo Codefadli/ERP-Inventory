@@ -66,7 +66,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional & Persetujuan <span class="text-blue-700">&gt; Detail Permintaan</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Detail Permintaan {{ $permintaan->tiket }}</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Informasi lengkap pengajuan dan status keputusan — data nyata dari tabel requests.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Informasi lengkap pengajuan dan status keputusan —</p>
             </div>
             <a href="{{ route($backRoute) }}" class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] font-semibold text-slate-700 hover:bg-blue-100" title="Kembali ke antrean persetujuan"><i data-lucide="arrow-left" class="h-4 w-4"></i>Kembali</a>
         </section>

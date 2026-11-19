@@ -59,7 +59,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan & Audit <span class="text-blue-700">&gt; Temuan Audit (LTA)</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Pusat Temuan Audit &amp; Ketidaksesuaian</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Discrepancy log hasil pemeriksaan: tingkat keparahan, status tindak lanjut, dan lokasi temuan — data nyata dari tabel temuan_audits.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Discrepancy log hasil pemeriksaan: tingkat keparahan, status tindak lanjut, dan lokasi temuan —</p>
             </div>
             <div class="flex items-center gap-2">
                 <button id="btn-tambah-temuan" type="button" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700">

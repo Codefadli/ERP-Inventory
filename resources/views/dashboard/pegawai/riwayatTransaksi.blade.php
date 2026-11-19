@@ -59,7 +59,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Portal Pegawai <span class="text-blue-700">&gt; Riwayat Transaksi &amp; Log Aktivitas</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Riwayat Transaksi &amp; Log Aktivitas Staf</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Riwayat permintaan dan aktivitas pengajuan yang tercatat atas nama Anda — data nyata dari tabel requests.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Riwayat permintaan dan aktivitas pengajuan yang tercatat atas nama Anda —</p>
             </div>
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
         </section>

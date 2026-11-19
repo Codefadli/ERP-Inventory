@@ -63,7 +63,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Inventaris <span class="text-blue-700">&gt; Transaksi Barang Masuk (Inbound)</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Transaksi Barang Masuk</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Penerimaan barang dari supplier / transfer gudang: nomor PO, surat jalan, status QC, dan alokasi rak — data nyata dari tabel inbounds.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Penerimaan barang dari supplier / transfer gudang: nomor PO, surat jalan, status QC, dan alokasi rak —</p>
             </div>
             <div class="flex items-center gap-2">
                 @if($canManage)
@@ -90,8 +90,7 @@
         </div>
         @endif
 
-        {{-- Ringkasan: card ringkas (tinggi kecil) --}}
-        <section aria-label="Ringkasan barang masuk" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+                <section aria-label="Ringkasan barang masuk" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-2.5 md:grid-cols-4">
             <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
                 <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Total Dokumen</p><p class="mt-0.5 text-[20px] font-bold leading-tight">{{ number_format($stats['total']) }}</p></div>
                 <span class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="file-down" class="h-3.5 w-3.5"></i></span>

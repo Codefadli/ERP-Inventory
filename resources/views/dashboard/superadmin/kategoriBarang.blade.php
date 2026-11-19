@@ -75,7 +75,7 @@
           <div class="max-w-[600px]">
             <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Manajemen Kategori</span></p>
             <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Manajemen Kategori Barang & Klasifikasi</h1>
-            <p class="mt-1.5 max-w-[600px] text-[12px] leading-relaxed text-slate-500">Pengelompokan hierarki komoditas inventaris dan rekapitulasi SKU aktif — data nyata dari tabel categories.</p>
+            <p class="mt-1.5 max-w-[600px] text-[12px] leading-relaxed text-slate-500">Pengelompokan hierarki komoditas inventaris dan rekapitulasi SKU aktif —</p>
           </div>
           <div class="flex items-center gap-2">
             <button disabled title="Fitur ekspor belum tersedia" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-100 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Hierarki</button>

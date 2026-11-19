@@ -51,7 +51,6 @@
 
     <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
 
-        {{-- 1. ROLE AUDITOR: Tampilan Khusus Audit & Kepatuhan Inbound --}}
         @if(auth()->user()->isAuditor())
             {{-- ============ AUDITOR VIEW: Audit Barang Masuk ============ --}}
             <div class="w-full">

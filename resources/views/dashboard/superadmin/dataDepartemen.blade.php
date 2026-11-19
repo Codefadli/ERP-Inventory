@@ -74,7 +74,7 @@
           <div>
             <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Master Data & Inventaris <span class="text-blue-700">&gt; Manajemen Departemen & Divisi</span></p>
             <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Manajemen Data Departemen & Unit Pemohon</h1>
-            <p class="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-500">Direktori master divisi internal penerima dan pemohon alokasi barang keluar (outbound), penanggung jawab (PIC), dan lingkup hub — data nyata dari tabel divisions.</p>
+            <p class="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-500">Direktori master divisi internal penerima dan pemohon alokasi barang keluar (outbound), penanggung jawab (PIC), dan lingkup hub —</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <button disabled title="Fitur ekspor belum tersedia" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i data-lucide="download" class="h-4 w-4 text-blue-600"></i>Ekspor Struktur Divisi</button>

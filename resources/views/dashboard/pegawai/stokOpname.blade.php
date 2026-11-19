@@ -59,7 +59,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Portal Pegawai <span class="text-blue-700">&gt; Stok Opname</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Audit Stok Opname Fisik</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Hasil penghitungan fisik (stock count) yang dicatat staf: qty sistem vs qty fisik aktual, selisih, dan status verifikasi — data nyata dari tabel stock_opnames.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Hasil penghitungan fisik (stock count) yang dicatat staf: qty sistem vs qty fisik aktual, selisih, dan status verifikasi —</p>
             </div>
             <div class="flex items-center gap-2">
                 <button id="btn-input-opname" type="button" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700">

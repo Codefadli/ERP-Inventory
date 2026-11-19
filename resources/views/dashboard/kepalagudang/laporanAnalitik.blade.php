@@ -65,7 +65,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional Gudang <span class="text-blue-700">&gt; Laporan &amp; Analitik</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Laporan &amp; Analitik</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Ringkasan katalog, stok kritis, pergerakan masuk/keluar, dan distribusi kategori pada lingkup hub — data nyata dari tabel items, inbounds &amp; outbounds.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Ringkasan katalog, stok kritis, pergerakan masuk/keluar, dan distribusi kategori pada lingkup hub —, inbounds &amp; outbounds.</p>
             </div>
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
         </section>

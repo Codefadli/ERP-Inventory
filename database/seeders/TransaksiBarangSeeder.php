@@ -6,11 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Data demo transaksi barang masuk (inbounds) dan barang keluar
- * (outbounds) — terhubung ke item/supplier/lokasi nyata di DB,
- * agar halaman Barang Masuk & Barang Keluar menampilkan data asli.
- */
+// Data demo transaksi: inbounds & outbounds (terhubung item/supplier/lokasi).
 class TransaksiBarangSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -30,7 +26,7 @@ class TransaksiBarangSeeder extends Seeder
 
         if ($items->isEmpty()) return;
 
-        // --- Barang Masuk (inbounds) ---
+        // Inbounds
         $inbounds = [
             ['kode' => 'PO-2025-0819', 'surat_jalan' => 'SJ-01829-DC', 'qty' => 120, 'satuan' => 'Unit', 'dock' => 'DOCK 01', 'status' => 'Selesai', 'keterangan' => 'Penerimaan barcode scanner batch 1, QC lolos.'],
             ['kode' => 'PO-2025-0831', 'surat_jalan' => 'SJ-01844-DC', 'qty' => 300, 'satuan' => 'Rim', 'dock' => 'DOCK 02', 'status' => 'Lolos QC', 'keterangan' => 'Kertas HVS A4 siap putaway.'],
@@ -52,7 +48,7 @@ class TransaksiBarangSeeder extends Seeder
             ]));
         }
 
-        // --- Barang Keluar (outbounds) ---
+        // Outbounds
         $outbounds = [
             ['kode' => 'DO-2025-0819', 'permintaan' => 'REQ-2510-001', 'departemen' => 'Operasional & Warehouse', 'pic' => 'Siti Nurhaliza', 'qty' => 5, 'satuan' => 'Roll', 'tujuan' => 'Kurir Internal DC', 'status' => 'Selesai', 'keterangan' => 'Stretch film untuk wrapping pallet ekspedisi.'],
             ['kode' => 'DO-2025-0820', 'permintaan' => 'REQ-2510-002', 'departemen' => 'Teknologi Informasi', 'pic' => 'Rian Kurniawan', 'qty' => 2, 'satuan' => 'Unit', 'tujuan' => 'Kurir Internal DC', 'status' => 'Picking', 'keterangan' => 'Barcode scanner untuk stasiun QC lantai 1.'],

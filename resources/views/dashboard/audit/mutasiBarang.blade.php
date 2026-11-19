@@ -62,7 +62,7 @@
             <div>
                 <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Kepatuhan & Audit <span class="text-blue-700">&gt; Mutasi Barang</span></p>
                 <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Mutasi Barang</h1>
-                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Alur pergerakan stok (barang masuk &amp; keluar) untuk pemeriksaan rekonsiliasi — data nyata dari tabel inbounds &amp; outbounds.</p>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Alur pergerakan stok (barang masuk &amp; keluar) untuk pemeriksaan rekonsiliasi — &amp; outbounds.</p>
             </div>
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
         </section>
