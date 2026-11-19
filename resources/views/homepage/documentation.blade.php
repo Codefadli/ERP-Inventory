@@ -171,12 +171,8 @@
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
             <div class="flex items-center space-x-3 animate-fade-in-down">
-                <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center">
-                    <i class="fas fa-cube text-white text-lg"></i>
-                </div>
                 <div>
-                    <h1 class="text-lg font-bold text-gray-900">ASTRO INVENTORY</h1>
-                    <p class="text-xs text-gray-500">WMS Enterprise Edition</p>
+                    <img src="{{ asset('images/astro.png') }}" width="200px" alt="">
                 </div>
             </div>
 

@@ -11,6 +11,12 @@
             @endif
         </div>
         <div class="flex items-center gap-3">
+            @if(auth()->user()->needsHubSelection())
+            <a href="{{ route('hub.selection.show') }}" class="flex items-center gap-2 text-sm text-gray-600 hover:bg-gray-100 px-3 py-2 rounded-lg" title="Kembali ke pemilihan hub">
+                <i class="fas fa-building text-sm"></i>
+                <span class="hidden lg:inline">Ganti Hub</span>
+            </a>
+            @endif
             <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.notifikasi' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.notifikasi' : (auth()->user()->isHR() ? 'hr.notifikasi' : (auth()->user()->isPegawai() ? 'pegawai.notifikasi' : 'audit.notifikasi')))) }}" class="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg" title="Notifikasi">
                 <i class="fas fa-bell text-lg"></i>
                 <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>

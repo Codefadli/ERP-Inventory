@@ -35,14 +35,8 @@
             <div class="flex items-center justify-between">
                 <!-- Logo & Brand -->
                 <div class="flex items-center space-x-3">
-                    <div class="bg-indigo-600 w-10 h-10 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                    </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-900">Astro Inventory</h1>
-                        <p class="text-xs text-gray-500">SISTEM INVENTARIS TERPADU</p>
+                        <img src="{{ asset('images/astro.png') }}" width="200px" alt="">
                     </div>
                 </div>
 
@@ -67,6 +61,13 @@
         <div class="text-center mb-8">
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Pilih Kota & Hub Operasional</h2>
             <p class="text-gray-600">Pilih lokasi kota dan hub operasional Anda untuk melanjutkan ke dashboard</p>
+
+            @if($currentHub)
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                <i class="fas fa-check-circle"></i>
+                <span>Hub aktif saat ini: <strong>{{ $currentHub->name }}</strong> ({{ $currentHub->code }})</span>
+            </div>
+            @endif
         </div>
 
         <!-- Alerts -->
@@ -240,10 +241,20 @@
         let selectedHubId = null;
         let selectedHubName = null;
 
+        @php
+        $hubData = $currentHub ? [
+            'id' => $currentHub->id,
+            'city_id' => $currentHub->city_id,
+            'city_name' => optional($currentHub->city)->name,
+            'name' => $currentHub->name,
+            'code' => $currentHub->code,
+        ] : null;
+        @endphp
+        const currentHub = @json($hubData);
+
         function selectCity(cityId, cityName) {
             selectedCityId = cityId;
             selectedCityName = cityName;
-            
             // Update UI
             document.querySelectorAll('.city-card').forEach(card => {
                 card.classList.remove('card-selected');
@@ -330,6 +341,14 @@
                     </div>
                 </div>
             `).join('');
+
+            // Tandai hub aktif jika halaman dibuka ulang untuk ganti hub
+            if (currentHub) {
+                const active = container.querySelector(`[data-hub-id="${currentHub.id}"]`);
+                if (active) {
+                    selectHub(currentHub.id, currentHub.name, currentHub.code);
+                }
+            }
         }
 
         function selectHub(hubId, hubName, hubCode) {
@@ -363,6 +382,11 @@
             document.getElementById('infoCity').textContent = selectedCityName;
             document.getElementById('infoHub').textContent = `${hubName} (${hubCode})`;
             document.getElementById('submitButton').disabled = false;
+        }
+
+        // Inisialisasi: pilih kota & hub aktif saat halaman dibuka ulang
+        if (currentHub && currentHub.city_id) {
+            selectCity(currentHub.city_id, currentHub.city_name);
         }
     </script>
 </body>
