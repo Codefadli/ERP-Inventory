@@ -25,7 +25,7 @@
 
     <style>
         /* ============================================================
-           Astro Inventory — Design System (inlined dari file sumber)
+           Astro Inventory — Design System
            ============================================================ */
         :root {
             --brand: #2563eb;
@@ -260,7 +260,6 @@
 
         {{-- ================= SUPER ADMIN ================= --}}
         @if(auth()->user()->isSuperAdmin())
-
 
         <!-- ===== Breadcrumb strip ===== -->
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -579,7 +578,6 @@
     </main>
 </div>
 
-
 <script>
 /* ============================================================
    Astro Inventory — interaction layer halaman (toast, tabs, ripple,
@@ -768,7 +766,6 @@
     };
 })();
 </script>
-
 
 <script>
 /* ============================================================

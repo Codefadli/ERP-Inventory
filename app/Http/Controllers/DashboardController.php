@@ -17,12 +17,8 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Dashboard berbasis data nyata.
-     *
-     * Modul yang belum memiliki tabel pendukung (transaksi, opname,
-     * persetujuan, temuan audit) TIDAK disimulasikan. Modul tersebut
-     * dikirim ke view sebagai daftar "belum tersedia" agar UI menampilkan
-     * empty state yang jujur.
+     * Dashboard. Modul tanpa tabel pendukung dikirim sebagai daftar
+     * "belum tersedia" (empty state jujur, tanpa simulasi).
      */
     public function index()
     {

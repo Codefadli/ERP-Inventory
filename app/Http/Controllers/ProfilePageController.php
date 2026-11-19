@@ -8,7 +8,7 @@ class ProfilePageController extends Controller
 {
     /**
      * Menampilkan halaman Profil Saya.
-     * Satu view bersama untuk semua role (Super Admin, Kepala Gudang, HR, Pegawai, Auditor)
+     * Satu view bersama untuk semua role.
      * dengan blok konten per-role.
      */
     public function index()

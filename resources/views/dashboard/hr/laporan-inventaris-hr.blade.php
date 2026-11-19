@@ -508,7 +508,6 @@
     </div>
 </div>
 
-{{-- TOAST --}}
 <div id="toasts" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2"></div>
 
 @endsection

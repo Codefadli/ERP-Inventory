@@ -15,19 +15,7 @@ use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Halaman master data: Data Gudang & Lokasi, Data Departemen,
- * Data Supplier, dan Kategori Barang.
- *
- * Tampilan per prototype FolderHTML:
- * - Data Gudang & Lokasi  -> SuperAdmin, KepalaGudang, Auditor (route per role)
- * - Data Departemen       -> SuperAdmin saja
- * - Data Supplier         -> SuperAdmin saja
- * - Kategori Barang       -> SuperAdmin saja
- *
- * Data dari tabel master (bukan simulasi). Filter server-side:
- * hub (default hub terpilih user; opsi "Semua Hub"), pencarian, paginasi.
- */
+
 class MasterDataPageController extends Controller
 {
     private function hubScope(Request $request)
@@ -50,11 +38,7 @@ class MasterDataPageController extends Controller
         ];
     }
 
-    /**
-     * Data Gudang & Lokasi Rak.
-     * Route: admin.data-gudang-lokasi, kepalagudang.data-gudang-lokasi,
-     *        audit.data-gudang-lokasi (satu view bersama, blok per role).
-     */
+    /** Data gudang & lokasi rak (satu view bersama 3 role). */
     public function lokasi(Request $request)
     {
         $user = auth()->user();
@@ -114,9 +98,7 @@ class MasterDataPageController extends Controller
         ]);
     }
 
-    /**
-     * Data Departemen (SuperAdmin saja).
-     */
+    /** Data departemen. */
     public function departemen(Request $request)
     {
         $user = auth()->user();
@@ -156,9 +138,7 @@ class MasterDataPageController extends Controller
         ]);
     }
 
-    /**
-     * Data Supplier (SuperAdmin saja).
-     */
+    /** Data supplier. */
     public function supplier(Request $request)
     {
         $user = auth()->user();
@@ -199,9 +179,7 @@ class MasterDataPageController extends Controller
         ]);
     }
 
-    /**
-     * Kategori Barang (SuperAdmin saja).
-     */
+    /** Kategori barang. */
     public function kategori(Request $request)
     {
         $user = auth()->user();
@@ -241,10 +219,7 @@ class MasterDataPageController extends Controller
         ]);
     }
 
-    /**
-     * Simpan lokasi / fasilitas rak baru.
-     * Route: admin.data-gudang-lokasi.store & kepalagudang.data-gudang-lokasi.store.
-     */
+    /** Simpan lokasi / fasilitas rak baru. */
     public function storeLokasi(StoreLocationRequest $request)
     {
         $user = auth()->user();
@@ -278,9 +253,7 @@ class MasterDataPageController extends Controller
             ->with('success', 'Lokasi ' . $location->nama . ' berhasil ditambahkan.');
     }
 
-    /**
-     * Simpan departemen baru (SuperAdmin saja).
-     */
+    /** Simpan departemen baru. */
     public function storeDepartemen(StoreDivisionRequest $request)
     {
         $user = auth()->user();
@@ -314,9 +287,7 @@ class MasterDataPageController extends Controller
             ->with('success', 'Departemen ' . $division->nama . ' berhasil ditambahkan.');
     }
 
-    /**
-     * Simpan supplier baru (SuperAdmin saja).
-     */
+    /** Simpan supplier baru. */
     public function storeSupplier(StoreSupplierRequest $request)
     {
         $user = auth()->user();
@@ -350,9 +321,7 @@ class MasterDataPageController extends Controller
             ->with('success', 'Supplier ' . $supplier->nama . ' berhasil ditambahkan.');
     }
 
-    /**
-     * Simpan kategori barang baru (SuperAdmin saja).
-     */
+    /** Simpan kategori baru. */
     public function storeKategori(StoreCategoryRequest $request)
     {
         $user = auth()->user();

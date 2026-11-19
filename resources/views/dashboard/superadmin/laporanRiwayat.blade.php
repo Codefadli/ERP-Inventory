@@ -616,7 +616,6 @@ body {
     document.head.appendChild(s);
   }
 
-
   function el(html) {
     var t = document.createElement("template");
     t.innerHTML = html.trim();

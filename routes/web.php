@@ -88,13 +88,11 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
-        Route::get('/barang-masuk', function () {
-            return view('dashboard.barang-masuk');
-        })->name('barang-masuk');
+        Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
+            ->name('barang-masuk');
 
-        Route::get('/barang-keluar', function () {
-            return view('dashboard.barang-keluar');
-        })->name('barang-keluar');
+        Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
+            ->name('barang-keluar');
 
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/pengguna', [UserManagementController::class, 'index'])->name('pengguna');
@@ -156,6 +154,10 @@ Route::middleware('auth')->group(function () {
                 ->name('data-supplier.store');
             Route::post('/kategori-barang', [App\Http\Controllers\MasterDataPageController::class, 'storeKategori'])
                 ->name('kategori-barang.store');
+            Route::post('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'storeMasuk'])
+                ->name('barang-masuk.store');
+            Route::post('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'storeKeluar'])
+                ->name('barang-keluar.store');
         });
 
         Route::middleware('permission:report.view')->group(function () {
@@ -191,26 +193,31 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
-        Route::get('/barang-masuk', function () {
-            return view('dashboard.barang-masuk');
-        })->name('barang-masuk');
+        Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
+            ->name('barang-masuk');
 
-        Route::get('/barang-keluar', function () {
-            return view('dashboard.barang-keluar');
-        })->name('barang-keluar');
+        Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
+            ->name('barang-keluar');
 
-        Route::get('/data-gudang-lokasi', function () {
-            return view('gudang.data-gudang-lokasi');
-        })->name('data-gudang-lokasi');
+        Route::get('/data-gudang-lokasi', [App\Http\Controllers\MasterDataPageController::class, 'lokasi'])
+            ->name('data-gudang-lokasi');
 
-        Route::get('/persetujuan-barang', function () {
-            return view('gudang.persetujuan-barang');
-        })->name('persetujuan-barang');
+        Route::get('/persetujuan-barang', [App\Http\Controllers\PersetujuanBarangController::class, 'index'])
+            ->name('persetujuan-barang');
+        Route::post('/persetujuan-barang/{id}/proses', [App\Http\Controllers\PersetujuanBarangController::class, 'proses'])
+            ->name('persetujuan-barang.proses');
+
+        Route::get('/mutasi-barang', [App\Http\Controllers\MutasiBarangController::class, 'index'])
+            ->name('mutasi-barang');
+
+        Route::get('/stok-opname', [App\Http\Controllers\StokOpnameController::class, 'index'])
+            ->name('stok-opname');
+        Route::post('/stok-opname', [App\Http\Controllers\StokOpnameController::class, 'store'])
+            ->name('stok-opname.store');
 
         Route::middleware('permission:report.view')->group(function () {
-            Route::get('/laporan', function () {
-                return view('dashboard.kepalagudang.laporan');
-            })->name('laporan');
+            Route::get('/laporan', [App\Http\Controllers\LaporanKepalaGudangController::class, 'index'])
+                ->name('laporan');
         });
 
         Route::middleware('permission:master.view')->group(function () {
@@ -225,19 +232,11 @@ Route::middleware('auth')->group(function () {
             Route::post('/data-gudang-lokasi', [App\Http\Controllers\MasterDataPageController::class, 'storeLokasi'])
                 ->name('data-gudang-lokasi.store');
 
-            Route::get('/master/categories', function () {
-                return view('gudang.master.categories');
-            })->name('master.categories');
+            Route::post('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'storeMasuk'])
+                ->name('barang-masuk.store');
 
-            Route::get('/master/locations', function () {
-                return view('gudang.master.locations');
-            })->name('master.locations');
-        });
-
-        Route::middleware('permission:product.manage')->group(function () {
-            Route::get('/products', function () {
-                return view('gudang.products.index');
-            })->name('products.index');
+            Route::post('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'storeKeluar'])
+                ->name('barang-keluar.store');
         });
     });
 
@@ -262,30 +261,28 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
-        Route::get('/barang-masuk', function () {
-            return view('dashboard.barang-masuk');
-        })->name('barang-masuk');
+        Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
+            ->name('barang-masuk');
 
-        Route::get('/barang-keluar', function () {
-            return view('dashboard.barang-keluar');
-        })->name('barang-keluar');
+        Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
+            ->name('barang-keluar');
 
-        Route::get('/persetujuan-barang', function () {
-            return view('dashboard.hr.persetujuan-barang');
-        })->name('persetujuan-barang');
+        Route::get('/persetujuan-barang', [App\Http\Controllers\HrPageController::class, 'persetujuan'])
+            ->name('persetujuan-barang');
+        Route::post('/persetujuan-barang/{id}/proses', [App\Http\Controllers\HrPageController::class, 'proses'])
+            ->name('persetujuan-barang.proses');
+
+        Route::get('/detail-permintaan/{id}', [App\Http\Controllers\HrPageController::class, 'detail'])
+            ->name('detail-permintaan');
+
+        Route::get('/riwayat-persetujuan', [App\Http\Controllers\HrPageController::class, 'riwayat'])
+            ->name('riwayat-persetujuan');
+
+        Route::get('/laporan-inventaris', [App\Http\Controllers\HrPageController::class, 'laporan'])
+            ->name('laporan-inventaris');
 
         Route::get('/log-audit-otorisasi', [App\Http\Controllers\LogAktivitasController::class, 'index'])
             ->name('log-audit-otorisasi');
-
-        Route::get('/riwayat-persetujuan', function () {
-            return view('dashboard.riwayat-persetujuan');
-        })->name('riwayat-persetujuan');
-
-        Route::middleware('permission:issue.approve')->group(function () {
-            Route::get('/approvals', function () {
-                return view('hr.approvals.index');
-            })->name('approvals.index');
-        });
     });
 
     // ========================================================================
@@ -309,29 +306,28 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
-        Route::get('/barang-masuk', function () {
-            return view('dashboard.barang-masuk');
-        })->name('barang-masuk');
+        Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
+            ->name('barang-masuk');
 
-        Route::get('/barang-keluar', function () {
-            return view('dashboard.barang-keluar');
-        })->name('barang-keluar');
+        Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
+            ->name('barang-keluar');
         Route::middleware('permission:master.view')->group(function () {
             Route::get('/data-barang', [App\Http\Controllers\DataBarangController::class, 'index'])
                 ->name('data-barang');
         });
 
-        Route::middleware('permission:receipt.create')->group(function () {
-            Route::get('/receipts', function () {
-                return view('pegawai.receipts.index');
-            })->name('receipts.index');
-        });
+        Route::get('/riwayat-transaksi', [App\Http\Controllers\PegawaiPageController::class, 'riwayat'])
+            ->name('riwayat-transaksi');
 
-        Route::middleware('permission:issue.create')->group(function () {
-            Route::get('/issues', function () {
-                return view('pegawai.issues.index');
-            })->name('issues.index');
-        });
+        Route::get('/status-permintaan', [App\Http\Controllers\PegawaiPageController::class, 'permintaan'])
+            ->name('status-permintaan');
+        Route::post('/status-permintaan', [App\Http\Controllers\PegawaiPageController::class, 'storePermintaan'])
+            ->name('status-permintaan.store');
+
+        Route::get('/stok-opname', [App\Http\Controllers\PegawaiPageController::class, 'opname'])
+            ->name('stok-opname');
+        Route::post('/stok-opname', [App\Http\Controllers\PegawaiPageController::class, 'storeOpname'])
+            ->name('stok-opname.store');
     });
 
     // ========================================================================
@@ -351,31 +347,31 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfilePageController::class, 'index'])
             ->name('profile');
 
-        Route::get('/mutasi-barang', function () {
-            return view('dashboard.mutasi-barang');
-        })->name('mutasi-barang');
+        Route::get('/mutasi-barang', [App\Http\Controllers\MutasiBarangController::class, 'index'])
+            ->name('mutasi-barang');
 
-        Route::get('/barang-masuk', function () {
-            return view('dashboard.barang-masuk');
-        })->name('barang-masuk');
+        Route::get('/barang-masuk', [App\Http\Controllers\TransaksiBarangController::class, 'masuk'])
+            ->name('barang-masuk');
 
-        Route::get('/barang-keluar', function () {
-            return view('dashboard.barang-keluar');
-        })->name('barang-keluar');
+        Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
+            ->name('barang-keluar');
+
+        Route::get('/stok-opname', [App\Http\Controllers\StokOpnameController::class, 'index'])
+            ->name('stok-opname');
 
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/data-barang', [App\Http\Controllers\DataBarangController::class, 'index'])
                 ->name('data-barang');
 
-            Route::get('/temuan-audit', function () {
-                return view('dashboard.temuan-audit');
-            })->name('temuan-audit');
+            Route::get('/temuan-audit', [App\Http\Controllers\TemuanAuditController::class, 'index'])
+                ->name('temuan-audit');
+            Route::post('/temuan-audit', [App\Http\Controllers\TemuanAuditController::class, 'store'])
+                ->name('temuan-audit.store');
+            Route::post('/temuan-audit/{id}/status', [App\Http\Controllers\TemuanAuditController::class, 'updateStatus'])
+                ->name('temuan-audit.status');
 
             Route::get('/data-gudang-lokasi', [App\Http\Controllers\MasterDataPageController::class, 'lokasi'])
                 ->name('data-gudang-lokasi');
-            Route::get('/logs', function () {
-                return view('audit.logs.index');
-            })->name('logs.index');
         });
     });
 
