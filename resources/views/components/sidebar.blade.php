@@ -104,7 +104,7 @@
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.stok-opname') }}" class="nav-link {{ request()->routeIs('kepalagudang.stok-opname') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>

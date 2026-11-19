@@ -1,8 +1,49 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Transaksi Barang Keluar — Astro Inventory</title>
 
-@section('title', 'Transaksi Barang Keluar — Astro Inventory')
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { DEFAULT: '#2563eb', dark: '#1d4ed8', 50: '#eff6ff', 100: '#dbeafe', 600: '#2563eb', 700: '#1d4ed8' } },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                },
+            },
+        };
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-@section('content')
+    <style>
+        :root { --brand: #2563eb; --brand-dark: #1d4ed8; --bg: #f5f7fb; --line: #e7ebf2; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+        .nav-link { transition: all 0.16s ease; }
+        .nav-link:hover { background: #f1f5f9; color: #172033; transform: translateX(3px); }
+        .nav-link.active { background: var(--brand); color: #fff; font-weight: 600; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55); }
+        .nav-link.active:hover { transform: none; background: var(--brand); }
+
+        .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (min-width: 768px) { main { zoom: 1.1; } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
 @include('components.navbar')
 
 <div class="flex min-h-screen bg-[#f5f7fc] text-[#17243b] antialiased">
@@ -743,4 +784,5 @@
         });
     }
 </script>
-@endsection
+</body>
+</html>

@@ -1,503 +1,55 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Transaksi Barang Masuk — Astro Inventory</title>
 
-@section('title', 'Transaksi Barang Masuk — Astro Inventory')
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { DEFAULT: '#2563eb', dark: '#1d4ed8', 50: '#eff6ff', 100: '#dbeafe', 600: '#2563eb', 700: '#1d4ed8' } },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                },
+            },
+        };
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-@section('content')
+    <style>
+        :root { --brand: #2563eb; --brand-dark: #1d4ed8; --bg: #f5f7fb; --line: #e7ebf2; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+        .nav-link { transition: all 0.16s ease; }
+        .nav-link:hover { background: #f1f5f9; color: #172033; transform: translateX(3px); }
+        .nav-link.active { background: var(--brand); color: #fff; font-weight: 600; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55); }
+        .nav-link.active:hover { transform: none; background: var(--brand); }
+
+        .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (min-width: 768px) { main { zoom: 1.1; } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
 @include('components.navbar')
 
 <div class="flex min-h-screen bg-[#f5f7fc] text-[#17243b] antialiased">
     @include('components.sidebar')
 
     <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
-            <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div class="max-w-2xl">
-                    <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Operasional & Transaksi <span class="text-blue-700">&gt; Transaksi Barang Masuk (Inbound DC)</span></p>
-                    <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Transaksi Barang Masuk (Inbound DC)</h1>
-                    <p class="mt-1.5 text-[10.5px] leading-relaxed text-slate-500">Monitoring penerimaan logistik dari mitra pemasok/supplier, validasi Purchase Order (PO), inspeksi Quality Control (QC), penerbitan Berita Acara Serah Terima, dan alokasi rak parah Hub Cabang DC-01.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="hidden rounded-full bg-blue-50 px-3 py-1 text-[10.5px] font-semibold text-blue-700 xl:inline-flex"><i class="fas fa-truck mr-1"></i>4 Antrean Dock Aktif</span>
-                    <button id="export-inbound" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i class="fas fa-download text-blue-600"></i>Ekspor Data Inbound</button>
-                    <button id="schedule-dock" class="soft-button flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-[12px] font-semibold text-slate-700 shadow-sm"><i class="fas fa-calendar-alt text-blue-600"></i>Jadwal Kedatangan Dock</button>
-                    <button id="add-inbound" class="soft-button flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm hover:bg-blue-700"><i class="fas fa-plus"></i>Catat Penerimaan Barang Masuk</button>
-                </div>
-            </section>
-
-            <section aria-label="Ringkasan inbound" class="reveal delay-1 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Total Masuk Hari Ini</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">1.420 <span class="text-[10.5px] font-medium text-slate-500">Unit</span></p><p class="mt-2.5 text-[10.5px] font-semibold text-blue-700">✓ 8 SKU terverifikasi lengkap</p></div>
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i class="fas fa-box-check"></i></span>
-                </article>
-                <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">PO Dalam Proses Inbound</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">14 <span class="text-[10.5px] font-medium text-slate-500">Berkas PO</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">8 Selesai &nbsp;·&nbsp; 6 Sedang Bongkar</p></div>
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i class="fas fa-clipboard-list"></i></span>
-                </article>
-                <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Lolos Uji Quality Control</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">99.4% <span class="text-[10.5px] font-medium text-slate-500">AQL 1.5</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">1.412 Diterima &nbsp;·&nbsp; 8 Karantina / Defect</p></div>
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i class="fas fa-badge-check"></i></span>
-                </article>
-                <article class="flex min-h-[112px] items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div><p class="text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Menunggu Putaway / Staging</p><p class="mt-1.5 text-[24px] font-bold leading-tight tracking-tight text-slate-800">320 <span class="text-[10.5px] font-medium text-slate-500">Unit / Pallet</span></p><p class="mt-2.5 text-[10.5px] text-slate-500">Area Transit Inbound Dock 01-03</p></div>
-                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-700"><i class="fas fa-warehouse"></i></span>
-                </article>
-            </section>
-
-            <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div><h2 class="flex items-center gap-2 text-[12px] font-semibold text-slate-800"><i class="fas fa-truck text-blue-600"></i>Status Slot Loading Dock & Antrean Truk Pemasok</h2><p class="ml-6 text-[10.5px] text-slate-500">Hub Cabang DC-01 · 4 Loading Bays Tersedia dengan Sistem Sensor Pallet</p></div>
-                    <button id="dock-cctv" class="text-[10.5px] font-semibold text-blue-600 hover:text-blue-800">Lihat Kamera CCTV & Jadwal Dock Lengkap →</button>
-                </div>
-                <div id="dock-cards" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
-            </section>
-
-            <section class="reveal delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-                <div class="flex flex-wrap items-center gap-2">
-                    <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 xl:max-w-[430px]"><i class="fas fa-search"></i><input id="inbound-search" type="search" placeholder="Cari nomor PO, surat jalan, nama supplier, atau SKU barang..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400"><i class="fas fa-barcode text-blue-500"></i></label>
-                    <select id="supplier-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Semua Supplier (Semua DC)</option></select>
-                    <select id="status-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Status Penerimaan (Semua)</option><option value="Selesai Putaway">Selesai & Diterima</option><option value="Sedang QC">Sedang Proses Bongkar</option><option value="Proses Bongkar">Proses Bongkar</option><option value="Menunggu Putaway">Menunggu Putaway</option><option value="Retur / Masalah">Retur / Masalah</option></select>
-                    <select id="dock-filter" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none"><option value="">Metode QC: Semua (AQL/Full)</option><option value="AQL">Sampling AQL</option><option value="Full">Full Inspection</option></select>
-                    <button id="advanced-filter" class="flex h-10 items-center gap-2 rounded-md bg-blue-50 px-3 text-[12px] text-slate-700"><i class="fas fa-filter"></i>Filter Lanjutan</button>
-                    <button id="reset-filters" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter"><i class="fas fa-rotate"></i></button>
-                </div>
-                <div class="mt-3 flex flex-wrap items-center gap-2 text-[10.5px]">
-                    <span class="mr-1 font-semibold uppercase text-slate-600">FILTER CEPAT:</span>
-                    <button data-quick-filter="all" class="rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white">Semua Inbound (14)</button>
-                    <button data-quick-filter="Selesai Putaway" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Selesai & Diterima (8)</button>
-                    <button data-quick-filter="Proses Bongkar" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Sedang Proses Bongkar (2)</button>
-                    <button data-quick-filter="Sedang QC" class="rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600">Inspeksi Karantina / QC (2)</button>
-                    <button data-quick-filter="Retur / Masalah" class="rounded-full bg-red-50 px-3 py-1 text-[10.5px] font-semibold text-red-600">Retur / Masalah (1)</button>
-                </div>
-            </section>
-
-            <section class="reveal delay-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center justify-between gap-2 px-3 pb-2 pt-3">
-                    <h2 class="text-[12px] font-semibold text-slate-800">Daftar Transaksi Inbound Terjadwal Hari Ini <span id="transaction-total" class="ml-1 rounded bg-blue-50 px-2 py-1 text-[10.5px] font-semibold text-blue-700">14 TRANSAKSI</span></h2>
-                    <div class="flex items-center gap-1"><button id="refresh-list" class="rounded p-1 text-slate-500 hover:bg-slate-100" aria-label="Segarkan daftar"><i class="fas fa-rotate"></i></button><button id="compact-toggle" class="rounded p-1 text-slate-500 hover:bg-slate-100" aria-label="Ubah kerapatan tabel"><i class="fas fa-list"></i></button></div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1300px] table-fixed border-collapse text-left">
-                        <thead class="h-11 whitespace-nowrap bg-[#f0f4fc] text-[9.5px] font-semibold uppercase tracking-wide text-slate-600">
-                            <tr>
-                                <th class="w-[48px] px-2"><input id="select-all" type="checkbox" aria-label="Pilih semua transaksi" class="h-4 w-4 accent-blue-600"></th>
-                                <th class="w-[145px] px-2">No. PO & Surat Jalan</th>
-                                <th class="w-[220px] px-2">Supplier & PIC Ekspedisi</th>
-                                <th class="w-[210px] px-2">Detail Komoditas / Barang</th>
-                                <th class="w-[150px] px-2">Total Qty & Kemasan</th>
-                                <th class="w-[175px] px-2">Lokasi Staging / Rak Tujuan</th>
-                                <th class="w-[220px] px-2">Hasil QC & Status Inbound</th>
-                                <th class="w-[100px] px-2 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inbound-rows" class="divide-y divide-slate-100 text-[12px]"></tbody>
-                    </table>
-                </div>
-                <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
-                    <div class="flex items-center gap-2"><span id="row-count" aria-live="polite"></span><span>Baris per halaman:</span><select id="page-size" class="h-8 rounded bg-blue-50 px-2 text-[12px]"><option value="7">7</option><option value="10">10</option><option value="25">25</option></select></div>
-                    <div class="flex items-center gap-1.5"><button id="previous-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] disabled:opacity-40">‹</button><div id="pagination" class="flex items-center gap-1"></div><button id="next-page" class="h-8 min-w-8 rounded bg-blue-50 px-2 text-[12px] disabled:opacity-40">›</button></div>
-                </footer>
-            </section>
-
-            <section class="reveal delay-3 mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i class="fas fa-barcode"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Pindai Barcode Surat Jalan (ASN)</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Pemindaian QR Code dokumen jalan supplier secara presisi untuk sinkronisasi dengan integrasi scanner nirkabel Zebra DS2208 & kamera terminal handheld.</p></div></div>
-                    <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="font-semibold text-emerald-700">● Scanner Nirkabel Terhubung</span><button data-action="scanner" class="font-semibold text-blue-600 hover:text-blue-800">Buka Scanner →</button></div>
-                </article>
-                <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i class="fas fa-shield-check"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Standar Prosedur QC Inbound</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Protokol uji sampling fisik (AQL Level 1.5), verifikasi barcode SKU, label kemasan, dan uji kecocokan spesifikasi sebelum alokasi putaway.</p></div></div>
-                    <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="text-slate-500">SOP Revisi 4.2 (2025)</span><button data-action="checklist" class="font-semibold text-blue-600 hover:text-blue-800">Unduh Checklist QC →</button></div>
-                </article>
-                <article class="flex min-h-[60px] flex-col justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                    <div class="flex gap-3"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-700"><i class="fas fa-file-invoice"></i></span><div><h2 class="text-[12px] font-semibold text-slate-800">Integrasi Surat Jalan Elektronik (e-DO)</h2><p class="mt-1 text-[10.5px] leading-relaxed text-slate-500">Otomatisasi pengiriman Berita Acara Penerimaan Barang (BAPB) digital dan tanda tangan elektronik tersertifikasi ke portal vendor supplier.</p></div></div>
-                    <div class="mt-3 flex items-center justify-between text-[10.5px]"><span class="font-semibold text-emerald-700">● Sync API Vendor Aktif</span><button data-action="edo" class="font-semibold text-blue-600 hover:text-blue-800">Log Integrasi e-DO →</button></div>
-                </article>
-            </section>
-        </main>
-    </div>
-
-    <div id="inbound-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 p-4">
-        <form id="inbound-form" class="max-h-[90vh] w-full max-w-[540px] overflow-y-auto rounded-xl bg-white p-4 shadow-xl">
-            <div class="mb-4 flex items-start justify-between"><div><h2 class="text-[12px] font-bold text-slate-800">Catat Penerimaan Barang Masuk</h2><p class="mt-1 text-[10.5px] text-slate-500">Daftarkan kedatangan PO dan mulai proses inspeksi inbound.</p></div><button type="button" id="close-modal" class="rounded p-1 text-slate-400 hover:bg-slate-100" aria-label="Tutup"><i class="fas fa-times"></i></button></div>
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label class="text-[12px] font-medium text-slate-700">Nomor PO<input name="po" required maxlength="24" pattern="([A-Za-z0-9]+-)*[A-Za-z0-9]+" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] uppercase outline-none focus:border-blue-500" placeholder="PO-2025-0898"></label>
-                <label class="text-[12px] font-medium text-slate-700">Surat jalan<input name="delivery" required maxlength="30" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="SJ-01829-DC"></label>
-                <label class="text-[12px] font-medium text-slate-700 sm:col-span-2">Supplier<input name="supplier" required maxlength="80" list="supplier-options" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Nama perusahaan supplier"><datalist id="supplier-options"></datalist></label>
-                <label class="text-[12px] font-medium text-slate-700 sm:col-span-2">Nama barang / komoditas<input name="product" required maxlength="100" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="Nama barang yang diterima"></label>
-                <label class="text-[12px] font-medium text-slate-700">Jumlah & kemasan<input name="quantity" required maxlength="50" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="120 Unit"></label>
-                <label class="text-[12px] font-medium text-slate-700">Lokasi tujuan<input name="location" required maxlength="40" class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500" placeholder="WH01-ZA-RA01"></label>
-                <label class="text-[12px] font-medium text-slate-700">Dock penerimaan<select name="dock" required class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"><option value="">Pilih dock</option><option>DOCK 01</option><option>DOCK 02</option><option>DOCK 03</option><option>DOCK 04</option></select></label>
-                <label class="text-[12px] font-medium text-slate-700">Metode QC<select name="method" required class="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500"><option value="AQL">Sampling AQL</option><option value="Full">Full Inspection</option></select></label>
-            </div>
-            <div class="mt-5 flex justify-end gap-2"><button type="button" id="cancel-modal" class="h-10 rounded-md border border-slate-200 px-4 text-[12px] font-medium text-slate-600 hover:bg-slate-50">Batal</button><button type="submit" class="h-10 rounded-md bg-blue-600 px-4 text-[12px] font-semibold text-white hover:bg-blue-700">Simpan & Mulai QC</button></div>
-        </form>
-    </div>
-    <div id="toast" role="status" class="fixed bottom-4 right-4 z-[80] hidden rounded-lg bg-slate-900 px-4 py-3 text-[12px] text-white shadow-lg"></div>
-</div>
-
-<script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      if (sidebar) sidebar.classList.toggle('open');
-    }
-
-    const records = [
-      { po: 'PO-2025-0891', delivery: 'SJ-01829-DC', time: '07:45 WIB', supplier: 'PT Surya Elektronik', pic: 'Hendra W. (PT. Citra Trans)', product: 'Canon 60D Body & Nikon Optical Kit', category: 'Kamera & Optik', sku: '2 SKU', quantity: '350 Unit', package: '25 Master Carton', location: 'WH01-ZA-RA31', destination: 'Rak Tier 2 - ZA', dock: 'DOCK 01', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Sampel Baik)', status: 'Selesai Putaway', method: 'AQL' },
-      { po: 'PO-2025-0892', delivery: 'SJ-01830-DC', time: '08:10 WIB', supplier: 'CV Digital Mandiri', pic: 'Bambang H. (CV Mandiri)', product: 'Macbook Pro M1 & Workstation', category: 'Komputer & Laptop', sku: '3 SKU', quantity: '120 Unit', package: '10 Box Anti-Static', location: 'WH01-ZA-RA32', destination: 'High-Security Cage B-01', dock: 'DOCK 02', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (High Value)', status: 'Selesai Putaway', method: 'Full' },
-      { po: 'PO-2025-0893', delivery: 'SJ-01831-DC', time: '08:25 WIB', supplier: 'PT Bintang Audio Prima', pic: 'Hendra K. (PT. Sagara Cargo)', product: 'Sony WH-1000XM4 & Studio Mic', category: 'Audio & Sound', sku: '2 SKU', quantity: '280 Unit', package: '14 Koli Karton', location: 'WH01-ZB-RB02', destination: 'Rak Heavy-Duty ZB', dock: 'DOCK 03', qc: 'Sedang QC', qcDetail: 'Sampling QC 1.280 Unit AQL 1.5%', status: 'Sedang QC', method: 'AQL' },
-      { po: 'PO-2025-0894', delivery: 'SJ-01832-DC', time: '08:55 WIB', supplier: 'PT Global Storage Solusindo', pic: 'Dedi S. (Global Express)', product: 'Sandisk SSD NVMe 1TB & HDD 4TB', category: 'Storage & Barcode', sku: '2 SKU', quantity: '500 Unit', package: '20 Master Carton', location: 'WH02-ZC-RC01', destination: 'Rak Data & Storage', dock: 'DOCK 01', qc: 'Proses Bongkar', qcDetail: 'Dock 01 (Unloading 75%)', status: 'Proses Bongkar', method: 'AQL' },
-      { po: 'PO-2025-0895', delivery: 'SJ-01833-DC', time: '09:15 WIB', supplier: 'CV Jaya Optik Instruments', pic: 'Bambang S. (Jaya Optik)', product: 'Tripod Studio & Lighting Kit', category: 'Aksesoris & Studio', sku: '3 SKU', quantity: '95 Unit', package: '12 Dus Pallet', location: 'WH01-ZA-RA31', destination: 'Rak Tier 2 - ZA', dock: 'DOCK 04', qc: 'Menunggu Putaway', qcDetail: 'QC Lolos · Pindah Rak', status: 'Menunggu Putaway', method: 'Full' },
-      { po: 'PO-2025-0896', delivery: 'SJ-01834-DC', time: '09:40 WIB', supplier: 'PT Mega Periferal Indonesia', pic: 'Kusnadi (Mega Periferal)', product: 'Mechanical Keyboard RGB Switch', category: 'Komputer & Aksesoris', sku: '4 SKU', quantity: '410 Unit', package: '22 Box Karton', location: 'WH01-ZB-RB01', destination: 'Rak Tier 1 - ZB', dock: 'DOCK 02', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Batch Pass)', status: 'Selesai Putaway', method: 'AQL' },
-      { po: 'PO-2025-0897', delivery: 'SJ-01835-DC', time: '10:00 WIB', supplier: 'CV Logistik Pack Sentosa', pic: 'Eko P. (Pack Sentosa)', product: 'Bubble Wrap Roll & Dus Karton A3', category: 'Packaging', sku: '2 SKU', quantity: '800 Roll', package: 'Bulk Packaging', location: 'WH02-ZD-STG01', destination: 'Staging Dock 03', dock: 'DOCK 03', qc: 'Selesai Putaway', qcDetail: 'Fisik Sesuai PO & Timbangan', status: 'Selesai Putaway', method: 'Full' },
-      { po: 'PO-2025-0898', delivery: 'SJ-01836-DC', time: '10:15 WIB', supplier: 'PT Solusi Komputasi Terpadu', pic: 'Nadia P. (Solusi Komputasi)', product: 'RAM DDR5 & Mainboard ATX', category: 'Komputer & Laptop', sku: '4 SKU', quantity: '220 Unit', package: '18 Box Anti-Static', location: 'WH01-ZA-RA33', destination: 'Rak Tier 3 - ZA', dock: 'DOCK 01', qc: 'Proses Bongkar', qcDetail: 'Dock 01 (Menunggu QC)', status: 'Proses Bongkar', method: 'AQL' },
-      { po: 'PO-2025-0899', delivery: 'SJ-01837-DC', time: '10:30 WIB', supplier: 'PT Lensa Citra Abadi', pic: 'Dimas S. (Lensa Citra)', product: 'Lensa Mirrorless & Filter Kit', category: 'Kamera & Optik', sku: '3 SKU', quantity: '75 Unit', package: '8 Hard Case', location: 'WH01-ZA-RA35', destination: 'Rak Lensa High-Value', dock: 'DOCK 04', qc: 'Sedang QC', qcDetail: '2 Unit Karantina (Scratch)', status: 'Sedang QC', method: 'Full' },
-      { po: 'PO-2025-0900', delivery: 'SJ-01838-DC', time: '10:45 WIB', supplier: 'CV Karya Office Digital', pic: 'Sari W. (Karya Office)', product: 'Tinta Printer & Label Thermal', category: 'Packaging', sku: '3 SKU', quantity: '340 Unit', package: '16 Dus Karton', location: 'WH02-ZD-RD02', destination: 'Rak ATK & Supplies', dock: 'DOCK 02', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Batch Pass)', status: 'Selesai Putaway', method: 'AQL' },
-      { po: 'PO-2025-0901', delivery: 'SJ-01839-DC', time: '11:00 WIB', supplier: 'PT Prima Jaringan Digital', pic: 'Rizky A. (Prima Jaringan)', product: 'Router WiFi 6 & Switch 24-Port', category: 'Jaringan & Komunikasi', sku: '2 SKU', quantity: '160 Unit', package: '10 Box Anti-Static', location: 'WH01-ZC-RC04', destination: 'Rak Network & Server', dock: 'DOCK 03', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Sampel Baik)', status: 'Selesai Putaway', method: 'AQL' },
-      { po: 'PO-2025-0902', delivery: 'SJ-01840-DC', time: '11:20 WIB', supplier: 'PT Global Storage Solusindo', pic: 'Dian K. (Global Express)', product: 'SSD NVMe Enterprise 2TB', category: 'Storage & Barcode', sku: '1 SKU', quantity: '90 Unit', package: '5 Master Carton', location: 'WH02-ZC-RC03', destination: 'Rak Data & Storage', dock: 'DOCK 04', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Batch Pass)', status: 'Selesai Putaway', method: 'Full' },
-      { po: 'PO-2025-0903', delivery: 'SJ-01841-DC', time: '11:45 WIB', supplier: 'PT Bintang Audio Prima', pic: 'Ricky P. (Bintang Audio)', product: 'Microphone Wireless Set', category: 'Audio & Sound', sku: '2 SKU', quantity: '110 Unit', package: '8 Koli Karton', location: 'WH01-ZB-RB04', destination: 'Rak Audio & Studio', dock: 'DOCK 02', qc: 'Selesai Putaway', qcDetail: 'Lolos QC 100% (Sampel Baik)', status: 'Selesai Putaway', method: 'AQL' },
-      { po: 'PO-2025-0904', delivery: 'SJ-01842-DC', time: '12:00 WIB', supplier: 'CV Jaya Optik Instruments', pic: 'Bambang S. (Jaya Optik)', product: 'Studio Light Stand Set', category: 'Aksesoris & Studio', sku: '1 SKU', quantity: '24 Unit', package: '4 Hard Case', location: 'WH01-ZA-RA38', destination: 'Rak Tier 3 - ZA', dock: 'DOCK 03', qc: 'Retur / Masalah', qcDetail: 'Kemasan rusak · 2 unit retur', status: 'Retur / Masalah', method: 'Full' }
-    ];
-
-    const docks = [
-      { name: 'DOCK 01', supplier: 'PT Surya Elektronik', detail: 'PO-2025-0898 · Kamera & Lensa', volume: 'Volume: 450 Box (Palletized)', status: 'Proses Bongkar', progress: 75, tone: 'bg-blue-600 text-white', bar: 'bg-blue-600' },
-      { name: 'DOCK 02', supplier: 'CV Digital Mandiri', detail: 'PO-2025-0892 · Laptop & PC S1', volume: 'Volume: 200 Unit High-Value', status: 'Jadwal 09.30', progress: 90, tone: 'bg-emerald-600 text-white', bar: 'bg-emerald-600' },
-      { name: 'DOCK 03', supplier: 'PT Logistik Pack', detail: 'PO-2025-0825 · Dus & Bubble Wrap', volume: 'Volume: 1.200 Kg Material', status: 'Masuk Rak', progress: 40, tone: 'bg-slate-600 text-white', bar: 'bg-blue-600' },
-      { name: 'DOCK 04', supplier: 'PT Bintang Audio', detail: 'PO-2025-0820 · Audio & Headset', volume: 'Volume: 180 Unit Master Pack', status: 'Menunggu Giliran', progress: 0, tone: 'bg-slate-200 text-slate-700', bar: 'bg-slate-300' }
-    ];
-    const dockCards = document.getElementById('dock-cards');
-    if (dockCards) {
-      dockCards.innerHTML = docks.map((dock) => `<article class="rounded-lg border border-slate-100 bg-[#f6f8fe] p-3">
-        <div class="flex items-center justify-between gap-2"><b class="rounded bg-white px-2 py-1 text-[10.5px] text-slate-600">${dock.name}</b><span class="rounded-full ${dock.tone} px-2.5 py-1 text-[10.5px] font-semibold">${dock.status}</span></div>
-        <h3 class="mt-2 truncate text-[12px] font-semibold text-slate-800">${dock.supplier}</h3><p class="truncate text-[10.5px] text-slate-500">${dock.detail}</p><p class="mt-1 text-[10.5px] text-slate-500">${dock.volume}</p>
-        <div class="mt-2 flex items-center justify-between text-[10.5px]"><span class="text-slate-500">Bongkar Muat</span><b class="text-blue-700">${dock.progress ? `${dock.progress}%` : '10:15 WIB'}</b></div><div class="mt-1 h-1 rounded-full bg-blue-100"><div class="h-full rounded-full ${dock.bar}" style="width:${dock.progress}%"></div></div>
-      </article>`).join('');
-    }
-
-    const rowsHost = document.getElementById('inbound-rows');
-    const searchInput = document.getElementById('inbound-search');
-    const globalSearch = document.getElementById('global-search');
-    const supplierFilter = document.getElementById('supplier-filter');
-    const statusFilter = document.getElementById('status-filter');
-    const dockFilter = document.getElementById('dock-filter');
-    const pageSizeInput = document.getElementById('page-size');
-    const totalTransactions = 14;
-    let activeQuickFilter = 'all';
-    let filteredRecords = [...records];
-    let currentPage = 1;
-    let toastTimer;
-    let compactRows = false;
-
-    const escapeHtml = (value) => String(value).replace(/[&<>\"']/g, (char) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "\'": '&#39;'
-    })[char]);
-
-    function renderPagination() {
-      const host = document.getElementById('pagination');
-      if (!host) return;
-      const totalPages = Math.max(1, Math.ceil(filteredRecords.length / Number(pageSizeInput.value)));
-      host.innerHTML = '';
-      for (let page = 1; page <= totalPages; page++) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = String(page);
-        button.setAttribute('aria-label', `Halaman ${page}`);
-        button.className = `h-8 min-w-8 rounded px-2 text-[12px] ${page === currentPage ? 'bg-blue-600 font-semibold text-white' : 'text-slate-600 hover:bg-blue-50'}`;
-        button.addEventListener('click', () => { currentPage = page; renderRows(); });
-        host.append(button);
-      }
-      document.getElementById('previous-page').disabled = currentPage <= 1;
-      document.getElementById('next-page').disabled = currentPage >= totalPages;
-    }
-
-    function renderRows() {
-      if (!rowsHost) return;
-      const size = Number(pageSizeInput.value);
-      const start = (currentPage - 1) * size;
-      const pageItems = filteredRecords.slice(start, start + size);
-      rowsHost.innerHTML = pageItems.map((record, index) => {
-        const safe = Object.fromEntries(Object.entries(record).map(([key, value]) => [key, typeof value === 'string' ? escapeHtml(value) : value]));
-        const statusTone = safe.status === 'Selesai Putaway' ? 'bg-emerald-50 text-emerald-700'
-          : safe.status === 'Retur / Masalah' ? 'bg-red-50 text-red-700'
-          : safe.status === 'Proses Bongkar' ? 'bg-blue-600 text-white'
-          : safe.status === 'Menunggu Putaway' ? 'bg-slate-100 text-slate-700'
-          : 'bg-indigo-50 text-indigo-700';
-        const rowHeight = compactRows ? 'h-[48px]' : 'h-[60px]';
-        return `<tr class="inbound-row ${rowHeight} hover:bg-slate-50/70" style="animation-delay:${Math.min(index * 20, 140)}ms" data-po="${safe.po}">
-          <td class="px-2"><input type="checkbox" class="inbound-checkbox h-4 w-4 accent-blue-600" aria-label="Pilih ${safe.po}"></td>
-          <td class="px-2"><a href="#" class="font-semibold text-blue-700">${safe.po}</a><span class="mt-1 block truncate text-[10.5px] text-slate-500">${safe.delivery}</span><span class="block text-[10.5px] text-slate-500">Tiba: ${safe.time}</span></td>
-          <td class="px-2"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[9.5px] font-bold text-blue-700">${safe.supplier.split(' ').map((word) => word[0]).slice(0, 2).join('')}</span><span class="min-w-0"><b class="block truncate text-[12px] font-semibold text-slate-800">${safe.supplier}</b><span class="block truncate text-[10.5px] text-slate-500">${safe.pic}</span></span></div></td>
-          <td class="px-2"><b class="block text-[12px] font-medium leading-tight text-slate-800">${safe.product}</b><span class="mt-1 inline-block rounded bg-slate-100 px-2 py-1 text-[10.5px] text-slate-600">${safe.category}</span><span class="ml-1 text-[10.5px] text-slate-500">· ${safe.sku}</span></td>
-          <td class="px-2"><b class="block text-[12px] text-slate-700">${safe.quantity}</b><span class="mt-1 block text-[10.5px] text-slate-500">${safe.package}</span></td>
-          <td class="px-2"><span class="inline-flex max-w-full items-center gap-1 rounded bg-blue-50 px-2 py-1 text-[10.5px] font-semibold text-blue-700"><i class="fas fa-map-pin h-3.5 w-3.5 shrink-0"></i><span class="truncate">${safe.location}</span></span><span class="mt-1 block truncate text-[10.5px] text-slate-500">${safe.destination}</span></td>
-          <td class="px-2"><span class="inline-flex items-center gap-1 rounded-full ${statusTone} px-2.5 py-1 text-[10.5px] font-semibold"><i class="fas ${safe.status === 'Selesai Putaway' ? 'fa-circle-check' : safe.status === 'Retur / Masalah' ? 'fa-triangle-exclamation' : safe.status === 'Sedang QC' ? 'fa-barcode' : 'fa-clock'}" class="h-3.5 w-3.5"></i>${safe.qc}</span><span class="mt-1 block text-[10.5px] ${safe.status === 'Retur / Masalah' ? 'text-red-600' : 'text-slate-500'}">${safe.qcDetail}</span></td>
-          <td class="px-2"><div class="flex items-center justify-center gap-1 text-slate-500"><button data-row-action="view" aria-label="Lihat ${safe.po}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i class="fas fa-eye h-4 w-4"></i></button><button data-row-action="print" aria-label="Cetak ${safe.po}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i class="fas fa-print h-4 w-4"></i></button><button data-row-action="qc" aria-label="Proses QC ${safe.po}" class="rounded p-1.5 hover:bg-slate-100 hover:text-blue-600"><i class="fas fa-clipboard-check h-4 w-4"></i></button></div></td>
-        </tr>`;
-      }).join('');
-      const end = Math.min(start + size, filteredRecords.length);
-      const rowCountEl = document.getElementById('row-count');
-      if (rowCountEl) {
-        rowCountEl.textContent = filteredRecords.length
-          ? `Menampilkan ${start + 1} - ${end} dari ${filteredRecords.length} transaksi${filteredRecords.length === records.length ? ` · ${totalTransactions} inbound hari ini` : ' sesuai filter'}`
-          : 'Tidak ada transaksi yang sesuai dengan filter';
-      }
-      renderPagination();
-    }
-
-    function applyFilters() {
-      const qVal = searchInput ? searchInput.value : '';
-      const gVal = globalSearch ? globalSearch.value : '';
-      const query = `${qVal} ${gVal}`.trim().toLowerCase();
-      filteredRecords = records.filter((record) => {
-        const matchesSearch = !query || Object.values(record).join(' ').toLowerCase().includes(query);
-        const matchesSupplier = !supplierFilter || !supplierFilter.value || record.supplier === supplierFilter.value;
-        const matchesStatus = !statusFilter || !statusFilter.value || record.status === statusFilter.value;
-        const matchesMethod = !dockFilter || !dockFilter.value || record.method === dockFilter.value;
-        const matchesQuick = activeQuickFilter === 'all' || record.status === activeQuickFilter;
-        return matchesSearch && matchesSupplier && matchesStatus && matchesMethod && matchesQuick;
-      });
-      currentPage = 1;
-      renderRows();
-    }
-
-    if (supplierFilter) {
-      [...new Set(records.map((record) => record.supplier))].sort().forEach((supplier) => {
-        const option = document.createElement('option');
-        option.value = supplier;
-        option.textContent = supplier;
-        supplierFilter.append(option);
-      });
-    }
-    document.querySelectorAll('#supplier-options').forEach((list) => {
-      [...new Set(records.map((record) => record.supplier))].sort().forEach((supplier) => {
-        const option = document.createElement('option');
-        option.value = supplier;
-        list.append(option);
-      });
-    });
-
-    [searchInput, globalSearch].forEach((input) => { if (input) input.addEventListener('input', applyFilters); });
-    [supplierFilter, statusFilter, dockFilter].forEach((select) => { if (select) select.addEventListener('change', applyFilters); });
-    if (pageSizeInput) pageSizeInput.addEventListener('change', () => { currentPage = 1; renderRows(); });
-    
-    const prevPageBtn = document.getElementById('previous-page');
-    if (prevPageBtn) prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderRows(); } });
-    
-    const nextPageBtn = document.getElementById('next-page');
-    if (nextPageBtn) nextPageBtn.addEventListener('click', () => {
-      if (currentPage < Math.ceil(filteredRecords.length / Number(pageSizeInput.value))) { currentPage++; renderRows(); }
-    });
-
-    document.querySelectorAll('[data-quick-filter]').forEach((button) => button.addEventListener('click', () => {
-      activeQuickFilter = button.dataset.quickFilter;
-      if (searchInput) searchInput.value = '';
-      if (globalSearch) globalSearch.value = '';
-      if (supplierFilter) supplierFilter.value = '';
-      if (statusFilter) statusFilter.value = '';
-      if (dockFilter) dockFilter.value = '';
-      document.querySelectorAll('[data-quick-filter]').forEach((item) => item.className = item === button
-        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
-        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
-      applyFilters();
-    }));
-
-    const resetFiltersBtn = document.getElementById('reset-filters');
-    if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', () => {
-      if (searchInput) searchInput.value = '';
-      if (globalSearch) globalSearch.value = '';
-      if (supplierFilter) supplierFilter.value = '';
-      if (statusFilter) statusFilter.value = '';
-      if (dockFilter) dockFilter.value = '';
-      activeQuickFilter = 'all';
-      document.querySelectorAll('[data-quick-filter]').forEach((item, index) => item.className = index === 0
-        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
-        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
-      applyFilters();
-    });
-
-    const selectAllCb = document.getElementById('select-all');
-    if (selectAllCb) selectAllCb.addEventListener('change', (event) => {
-      document.querySelectorAll('.inbound-checkbox').forEach((checkbox) => { checkbox.checked = event.target.checked; });
-    });
-
-    if (rowsHost) rowsHost.addEventListener('change', (event) => {
-      if (event.target.matches('.inbound-checkbox') && !event.target.checked) {
-        const sa = document.getElementById('select-all');
-        if (sa) sa.checked = false;
-      }
-    });
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.remove('hidden');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.add('hidden'), 2800);
-    }
-
-    const modal = document.getElementById('inbound-modal');
-    const form = document.getElementById('inbound-form');
-    function closeModal() {
-      if (!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      document.body.classList.remove('overflow-hidden');
-    }
-    
-    const addInboundBtn = document.getElementById('add-inbound');
-    if (addInboundBtn) addInboundBtn.addEventListener('click', () => {
-      if (!modal) return;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.classList.add('overflow-hidden');
-      if (form && form.elements.po) form.elements.po.focus();
-    });
-
-    ['close-modal', 'cancel-modal'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('click', closeModal);
-    });
-
-    if (modal) modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeModal(); });
-    
-    if (form) form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (!form.reportValidity()) return;
-      const values = new FormData(form);
-      const supplier = String(values.get('supplier')).trim();
-      const record = {
-        po: String(values.get('po')).trim().toUpperCase(),
-        delivery: String(values.get('delivery')).trim(),
-        time: new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).format(new Date()) + ' WIB',
-        supplier,
-        pic: 'PIC ekspedisi belum dicatat',
-        product: String(values.get('product')).trim(),
-        category: 'Penerimaan Baru',
-        sku: '1 SKU',
-        quantity: String(values.get('quantity')).trim(),
-        package: 'Kemasan belum diverifikasi',
-        location: String(values.get('location')).trim().toUpperCase(),
-        destination: `${String(values.get('dock'))} · Area staging`,
-        dock: String(values.get('dock')),
-        qc: 'Menunggu QC',
-        qcDetail: `${String(values.get('method'))} · Inspeksi belum dimulai`,
-        status: 'Sedang QC',
-        method: String(values.get('method'))
-      };
-      records.unshift(record);
-      if (supplierFilter && ![...supplierFilter.options].some((option) => option.value === supplier)) {
-        const option = document.createElement('option');
-        option.value = supplier;
-        option.textContent = supplier;
-        supplierFilter.append(option);
-        const datalistOption = document.createElement('option');
-        datalistOption.value = supplier;
-        const supOpt = document.getElementById('supplier-options');
-        if (supOpt) supOpt.append(datalistOption);
-      }
-      form.reset();
-      closeModal();
-      activeQuickFilter = 'all';
-      document.querySelectorAll('[data-quick-filter]').forEach((item, index) => item.className = index === 0
-        ? 'rounded-full bg-blue-600 px-3 py-1 text-[10.5px] font-semibold text-white'
-        : 'rounded-full bg-slate-100 px-3 py-1 text-[10.5px] font-semibold text-slate-600');
-      if (statusFilter) statusFilter.value = '';
-      if (supplierFilter) supplierFilter.value = '';
-      if (dockFilter) dockFilter.value = '';
-      if (searchInput) searchInput.value = '';
-      if (globalSearch) globalSearch.value = '';
-      const txTotal = document.getElementById('transaction-total');
-      if (txTotal) txTotal.textContent = `${totalTransactions + 1} TRANSAKSI`;
-      applyFilters();
-      showToast('Penerimaan dicatat dan masuk antrean inspeksi QC.');
-    });
-
-    const exportInbBtn = document.getElementById('export-inbound');
-    if (exportInbBtn) exportInbBtn.addEventListener('click', () => {
-      const headers = ['Nomor PO', 'Surat Jalan', 'Waktu Tiba', 'Supplier', 'PIC Ekspedisi', 'Barang', 'Kategori', 'SKU', 'Jumlah', 'Kemasan', 'Lokasi Tujuan', 'Dock', 'Hasil QC', 'Status', 'Metode QC'];
-      const csvCell = (value) => `"${String(value).replace(/\"/g, '\"\"')}"`;
-      const csv = [headers, ...filteredRecords.map((record) => [
-        record.po, record.delivery, record.time, record.supplier, record.pic, record.product,
-        record.category, record.sku, record.quantity, record.package, record.location, record.dock,
-        record.qc, record.status, record.method
-      ])].map((row) => row.map(csvCell).join(',')).join('\r\n');
-      const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'transaksi-barang-masuk.csv';
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-
-    const schedDock = document.getElementById('schedule-dock');
-    if (schedDock) schedDock.addEventListener('click', () => showToast('Jadwal kedatangan dock: 4 antrean aktif hari ini.'));
-    
-    const dockCctv = document.getElementById('dock-cctv');
-    if (dockCctv) dockCctv.addEventListener('click', () => showToast('Ringkasan CCTV dan jadwal loading dock Hub DC-01.'));
-    
-    const advFilter = document.getElementById('advanced-filter');
-    if (advFilter) advFilter.addEventListener('click', () => {
-      if (dockFilter) dockFilter.focus();
-      showToast('Pilih metode inspeksi QC untuk menyaring transaksi.');
-    });
-
-    const refreshList = document.getElementById('refresh-list');
-    if (refreshList) refreshList.addEventListener('click', () => { applyFilters(); showToast('Daftar transaksi inbound diperbarui.'); });
-
-    const compactToggle = document.getElementById('compact-toggle');
-    if (compactToggle) compactToggle.addEventListener('click', () => {
-      compactRows = !compactRows;
-      renderRows();
-      showToast(compactRows ? 'Tampilan tabel ringkas aktif.' : 'Tampilan tabel standar aktif.');
-    });
-
-    if (rowsHost) rowsHost.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-row-action]');
-      if (!button) return;
-      const row = button.closest('tr');
-      const record = records.find((item) => item.po === row.dataset.po);
-      if (!record) return;
-      const action = button.dataset.rowAction;
-      if (action === 'qc' && record.status === 'Sedang QC') {
-        record.status = 'Selesai Putaway';
-        record.qc = 'Selesai Putaway';
-        record.qcDetail = 'QC lulus · Siap dialokasikan';
-        renderRows();
-        showToast(`QC ${record.po} ditandai selesai.`);
-        return;
-      }
-      if (action === 'print') {
-        showToast(`Dokumen penerimaan ${record.po} siap dicetak.`);
-        return;
-      }
-      showToast(`Detail transaksi ${record.po} · ${record.supplier}`);
-    });
-
-    document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
-      const messages = {
-        scanner: 'Scanner nirkabel terhubung. Pemindaian ASN siap digunakan.',
-        checklist: 'Checklist standar prosedur QC inbound.',
-        edo: 'Log integrasi e-DO dan Berita Acara Penerimaan Barang.'
-      };
-      showToast(messages[button.dataset.action]);
-    }));
-
-    renderRows();
-</script>
-@endsection
-
-@section('title', 'Transaksi Barang Masuk — Astro Inventory')
-
-@section('content')
-<div class="space-y-6 animate-fade-in">
-    {{-- Header Section --}}
-    @include('components.navbar')
-
-    {{-- Sidebar --}}
-    @include('components.sidebar')
-
-    {{-- Main Content Area --}}
-    <div class="min-h-screen md:ml-[220px] px-4 lg:px-6 pt-6 pb-6 animate-fade-in">
 
         {{-- 1. ROLE AUDITOR: Tampilan Khusus Audit & Kepatuhan Inbound --}}
         @if(auth()->user()->isAuditor())
@@ -990,11 +542,10 @@
                 <p class="text-slate-500">Role Anda tidak memiliki akses ke modul Barang Masuk.</p>
             </div>
         @endif
-    </div>
+    </main>
 </div>
 
 {{-- Add Inbound Modal --}}
-@if(auth()->user()->isSuperAdmin() || auth()->user()->isKepalaGudang() || auth()->user()->isPegawai() || auth()->user()->isAuditor())
 <div id="addInboundModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm hidden">
     <div class="bg-white rounded-2xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-slate-200 animate-fade-up">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -1185,5 +736,5 @@
         toast('Penerimaan barang masuk berhasil dicatat dan masuk antrean QC!', 'success');
     }
 </script>
-@endif
-@endsection
+</body>
+</html>
