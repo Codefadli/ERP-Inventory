@@ -1,906 +1,434 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Log Audit & Otorisasi | Astro Inventory</title>
 
-@section('title', 'Log Audit & Otorisasi | ASTRO Inventory')
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { DEFAULT: '#2563eb', dark: '#1d4ed8', 50: '#eff6ff', 100: '#dbeafe', 600: '#2563eb', 700: '#1d4ed8' } },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                },
+            },
+        };
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-@section('styles')
-<style>
-    .audit-page {
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1f2937;
-        overflow-x: hidden;
-    }
+    <style>
+        :root { --brand: #2563eb; --brand-dark: #1d4ed8; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
 
-    .audit-page * {
-        box-sizing: border-box;
-    }
+        .nav-link { transition: all 0.16s ease; }
+        .nav-link:hover { background: #f1f5f9; color: #172033; transform: translateX(3px); }
+        .nav-link.active { background: var(--brand); color: #fff; font-weight: 600; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.55); }
+        .nav-link.active:hover { transform: none; background: var(--brand); }
 
-    .audit-page .metric-card {
-        transition: transform .25s ease, box-shadow .25s ease;
-    }
+        .reveal { animation: rise-in .4s cubic-bezier(.2,.8,.2,1) both; }
+        .reveal-delay-1 { animation-delay: 50ms; }
+        .reveal-delay-2 { animation-delay: 100ms; }
+        .reveal-delay-3 { animation-delay: 150ms; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    .audit-page .metric-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 25px rgba(15, 23, 42, .09);
-    }
+        .hash-display { font-family: "Courier New", monospace; overflow-wrap: anywhere; }
+        .toast-message { transform: translateY(20px); opacity: 0; pointer-events: none; transition: all .25s ease; }
+        .toast-message.show { transform: translateY(0); opacity: 1; }
 
-    .audit-page .table-row {
-        transition: background .2s ease;
-    }
-
-    .audit-page .table-row:hover {
-        background: #f8fafc;
-    }
-
-    .audit-page .btn-primary {
-        transition: all .2s ease;
-    }
-
-    .audit-page .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(37, 99, 235, .2);
-    }
-
-    .audit-page .hash-display {
-        font-family: "Courier New", monospace;
-        overflow-wrap: anywhere;
-    }
-
-    .audit-page .network-node {
-        transition: transform .2s ease;
-    }
-
-    .audit-page .network-node:hover {
-        transform: scale(1.15);
-    }
-
-    .audit-page .network-line {
-        stroke-dasharray: 1000;
-        stroke-dashoffset: 1000;
-        animation: auditDash 2s linear forwards;
-    }
-
-    @keyframes auditDash {
-        to {
-            stroke-dashoffset: 0;
+        @media (min-width: 768px) { main { zoom: 1.1; } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
-    }
+    </style>
+</head>
 
-    @keyframes auditFade {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
-        }
+<body class="bg-gray-50">
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+@include('components.navbar')
 
-    .audit-page .animate-audit {
-        animation: auditFade .45s ease-out both;
-    }
-
-    .audit-page .badge-glow {
-        animation: auditPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes auditPulse {
-
-        0%,
-        100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: .7;
-        }
-    }
-
-    .audit-page .toast-message {
-        transform: translateY(20px);
-        opacity: 0;
-        pointer-events: none;
-        transition: all .25s ease;
-    }
-
-    .audit-page .toast-message.show {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    @media (max-width: 640px) {
-        .audit-page .page-heading {
-            font-size: 1.25rem;
-        }
-    }
-
-    @media print {
-
-        .audit-page .no-print,
-        .audit-page aside,
-        .audit-page header {
-            display: none !important;
-        }
-
-        .audit-page main {
-            padding: 0 !important;
-        }
-
-        .audit-page .metric-card {
-            break-inside: avoid;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-        .audit-page *,
-        .audit-page *::before,
-        .audit-page *::after {
-            animation-duration: .01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: .01ms !important;
-        }
-    }
-</style>
-@endsection
-
-@section('content')
-<div class="audit-page flex min-h-screen bg-slate-50">
-
-    {{-- Shared Sidebar --}}
+<div class="flex min-h-screen">
     @include('components.sidebar')
 
-    <div class="min-w-0 flex-1">
+    <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
 
-        {{-- Shared Navbar --}}
-        @include('components.navbar')
-
-        <main class="p-4 lg:p-6 overflow-x-hidden">
-
-            {{-- Breadcrumb --}}
-            <div class="flex items-center gap-2 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap">
-                <a href="#" class="hover:text-blue-600">Beranda</a>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <span>Manajemen & Laporan</span>
-                <i class="fas fa-chevron-right text-xs"></i>
-                <span class="font-medium text-gray-900">Log Audit & Otorisasi</span>
+        <section class="reveal mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <p class="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-slate-500">Manajemen & Laporan <span class="text-blue-700">&gt; Log Audit &amp; Otorisasi</span></p>
+                <h1 class="text-[24px] font-bold leading-tight tracking-tight text-slate-800">Log Audit, Integritas &amp; Otorisasi</h1>
+                <p class="mt-1.5 max-w-[620px] text-[12px] leading-relaxed text-slate-500">Rekam jejak aktivitas pengguna, perubahan data, persetujuan transaksi, dan otorisasi — data nyata dari tabel audit_logs.</p>
             </div>
-
-            {{-- Page Header --}}
-            <section class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6 animate-audit">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 flex-wrap mb-2">
-                        <h1 class="page-heading text-xl lg:text-2xl font-bold text-gray-900">
-                            Log Audit, Integritas Kriptografis & Otorisasi
-                        </h1>
-
-                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                            <i class="fas fa-shield-alt mr-1"></i>
-                            Monitoring Audit
-                        </span>
-
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                            <i class="fas fa-fingerprint mr-1"></i>
-                            SHA-256
-                        </span>
-                    </div>
-
-                    <p class="text-sm text-gray-600 max-w-4xl">
-                        Halaman ini digunakan untuk memantau rekam jejak aktivitas pengguna,
-                        perubahan data inventaris, persetujuan transaksi, serta aktivitas
-                        otorisasi dalam sistem.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap gap-2 no-print">
-                    <button type="button" id="exportAudit"
-                        class="btn-primary px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
-                        <i class="fas fa-download"></i>
-                        <span>Ekspor Laporan Audit</span>
-                    </button>
-
-                    <button type="button" id="printAudit"
-                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm">
-                        <i class="fas fa-print"></i>
-                        <span>Cetak</span>
-                    </button>
-                </div>
-            </section>
-
-            {{-- Info Hub --}}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 flex items-start gap-3">
-                <i class="fas fa-building text-blue-600 mt-0.5"></i>
-                <p class="text-xs text-blue-800">
-                    <strong>Hub terpilih:</strong> {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}
-                    &mdash; menampilkan {{ number_format($stats['total']) }} rekaman audit dari tabel <code>audit_logs</code>.
-                </p>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700"><i class="fas fa-shield-alt mr-1"></i>AUDIT AKTIF</span>
+                <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</span>
             </div>
-
-            {{-- Status Cards --}}
-            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-check text-green-600"></i>
-                            </div>
-                            <span class="text-sm font-semibold text-gray-900">Status Audit</span>
-                        </div>
-                        <span class="badge-glow bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">
-                            AKTIF
-                        </span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-3">Pencatatan audit berjalan realtime</p>
-                </div>
-
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-chart-line text-blue-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-900">
-                                <span class="count-up" data-target="{{ $stats['today'] }}">0</span>
-                                <span class="text-xs text-gray-500 ml-1">hari ini</span>
-                            </p>
-                            <p class="text-xs text-gray-500">Aktivitas tercatat</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 bg-pink-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-pink-600"></i>
-                            </div>
-                            <span class="text-sm font-semibold text-gray-900">
-                                <span class="count-up" data-target="{{ $stats['insiden'] }}">0</span>
-                            </span>
-                        </div>
-                        <span class="bg-pink-100 text-pink-700 px-2 py-1 rounded text-xs font-semibold">
-                            Insiden
-                        </span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-3">Aktivitas gagal / perlu review</p>
-                </div>
-
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 bg-cyan-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-check-double text-cyan-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">Zero Conflict</p>
-                            <p class="text-xs text-gray-500 mt-1">Kepatuhan pemisahan tugas</p>
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-
-            {{-- Metric Cards --}}
-            <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-link text-green-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="{{ $stats['total'] }}">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Total Entri Audit</p>
-                    <p class="text-xs text-gray-500">Seluruh rekaman pada hub terpilih</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-database text-blue-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="{{ $stats['master'] }}">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Modifikasi Data</p>
-                    <p class="text-xs text-gray-500">Create / Update / Delete</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-exclamation-circle text-orange-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="{{ $stats['kritis'] }}">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Aktivitas Kritis</p>
-                    <p class="text-xs text-gray-500">Hapus, nonaktifkan, cabut sesi, failure</p>
-                </div>
-
-                <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-user-shield text-purple-600"></i>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="{{ $stats['akses'] }}">0</span>
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2">Akses & Keamanan</p>
-                    <p class="text-xs text-gray-500">Login, logout, aktivasi, cabut sesi</p>
-                </div>
-
-            </section>
-
-            {{-- Ringkasan Audit --}}
-            <section class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 mb-6 shadow-lg">
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-
-                    <div class="flex items-start gap-3 flex-1 min-w-0">
-                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-lock text-white"></i>
-                        </div>
-
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap mb-2">
-                                <p class="text-white font-bold text-sm">
-                                    AUDIT TRAIL &bull; {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}
-                                </p>
-                                <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                                    Realtime
-                                </span>
-                            </div>
-
-                            <div id="auditHash"
-                                class="hash-display bg-white/10 rounded px-3 py-2 text-xs text-white break-all">
-                                {{ number_format($stats['total']) }} rekaman audit tercatat &bull; {{ $stats['today'] }} hari ini
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 no-print">
-                        <button type="button" id="copyHash"
-                            class="btn-primary bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
-                            <i class="fas fa-copy"></i>
-                            <span>Salin Ringkasan</span>
-                        </button>
-                    </div>
-
-                </div>
-            </section>
-
-            {{-- Filter Section --}}
-            <form method="GET" action="{{ route('hr.log-audit-otorisasi') }}" class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
-
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-
-                    <div class="flex flex-wrap items-center gap-2">
-
-                        <select name="hub" id="filterHub"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="all" {{ $selectedHubId === 'all' ? 'selected' : '' }}>Semua Hub</option>
-                            @foreach($hubs as $hubOpt)
-                                <option value="{{ $hubOpt->id }}" {{ (string) $hubOpt->id === (string) $selectedHubId ? 'selected' : '' }}>
-                                    {{ $hubOpt->name }} ({{ $hubOpt->code }})
-                                </option>
-                            @endforeach
-                        </select>
-
-                        <select name="result" id="filterResult"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="">Semua Hasil</option>
-                            <option value="success" {{ $result === 'success' ? 'selected' : '' }}>Sukses</option>
-                            <option value="failure" {{ $result === 'failure' ? 'selected' : '' }}>Gagal / Insiden</option>
-                        </select>
-
-                        <div class="relative">
-                            <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
-                            <input type="text" name="q" value="{{ $q }}" placeholder="Cari nama, NIP, aksi, entitas..."
-                                class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 w-52">
-                        </div>
-
-                    </div>
-
-                    <div class="flex flex-wrap gap-2 no-print">
-                        <button type="submit"
-                            class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                            <i class="fas fa-filter mr-1"></i>Terapkan
-                        </button>
-
-                        <a href="{{ route('hr.log-audit-otorisasi') }}"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                            <i class="fas fa-sync-alt mr-1"></i>Reset
-                        </a>
-                    </div>
-
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 mt-4">
-                    <span class="text-xs text-gray-500">Filter aktif:</span>
-
-                    <span id="activeFilter"
-                        class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs">
-                        {{ $hubScopeLabel }} &bull; {{ $result === 'failure' ? 'Gagal / Insiden' : ($result === 'success' ? 'Sukses' : 'Semua Hasil') }} &bull; {{ $q ?: 'Tanpa pencarian' }}
-                    </span>
-                </div>
-
-            </form>
-
-            {{-- Summary --}}
-            <section class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-book text-blue-600"></i>
-                        </div>
-
-                        <div>
-                            <p class="font-semibold text-blue-900 text-sm">
-                                Rincian Log Transaksi & Aktivitas Pengguna
-                            </p>
-                            <p class="text-xs text-blue-700">
-                                Rekaman audit realtime dari tabel audit_logs pada hub terpilih.
-                            </p>
-                        </div>
-                    </div>
-
-                    <p class="text-sm text-blue-700">
-                        Menampilkan
-                        <span id="visibleCount" class="font-bold">{{ $logs->count() }}</span>
-                        dari {{ number_format($logs->total()) }} log
-                    </p>
-
-                </div>
-            </section>
-
-            {{-- Audit Table --}}
-            <section class="bg-white border border-gray-200 rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
-
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div>
-                        <h2 class="font-bold text-gray-900 text-lg">Riwayat Log Audit</h2>
-                        <p class="text-xs text-gray-500 mt-1">
-                            Detail waktu, identitas event, pelaku, dan jenis operasi.
-                        </p>
-                    </div>
-
-                    <span class="text-xs text-gray-500">
-                        <i class="fas fa-clock mr-1"></i>
-                        Zona waktu: WIB
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1000px]">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Timestamp (WIB)
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Event ID &amp; Entitas
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Pelaku / Aktor
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Tipe Operasi
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Hasil
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="auditTableBody">
-                            @php
-                                $actionLabels = [
-                                    'create' => 'Membuat Data', 'update' => 'Memperbarui Data', 'delete' => 'Menghapus Data',
-                                    'activate' => 'Mengaktifkan Akun', 'deactivate' => 'Menonaktifkan Akun',
-                                    'login' => 'Login', 'logout' => 'Logout', 'revoke_session' => 'Cabut Sesi',
-                                    'approve' => 'Approval', 'reject' => 'Penolakan', 'approval' => 'Approval',
-                                    'export' => 'Ekspor Data', 'reset' => 'Reset Konfigurasi',
-                                ];
-                                $entityLabels = [
-                                    'App\\Models\\User' => 'Pengguna', 'App\\Models\\Setting' => 'Pengaturan',
-                                    'App\\Models\\Category' => 'Kategori', 'App\\Models\\Unit' => 'Satuan',
-                                    'App\\Models\\Location' => 'Lokasi', 'App\\Models\\Supplier' => 'Supplier',
-                                    'App\\Models\\Division' => 'Divisi', 'App\\Models\\Item' => 'Barang',
-                                    'App\\Models\\Hub' => 'Hub',
-                                ];
-                            @endphp
-                            @forelse($logs as $log)
-                            @php
-                                $actorName = $log->user?->nama_lengkap ?? 'Sistem';
-                                $actorRole = $log->user?->role?->name ?? 'Otomatis';
-                                $entityLabel = $entityLabels[$log->entity_type] ?? ($log->entity_type ? class_basename($log->entity_type) : 'Entitas');
-                            @endphp
-                            <tr class="table-row border-b border-gray-100">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">{{ $log->created_at->format('d M Y, H:i:s') }}</p>
-                                    <p class="text-xs text-gray-500">{{ $log->created_at->diffForHumans() }}</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">#{{ $log->id }}</p>
-                                    <p class="text-xs text-gray-500">{{ $entityLabel }} &bull; ID {{ $log->entity_id ?? '-' }}</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 {{ $log->user ? 'bg-blue-600' : 'bg-gray-500' }}">
-                                            {{ $actorName === 'Sistem' ? 'SY' : collect(preg_split('/\s+/', $actorName))->take(2)->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->join('') }}
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">{{ $actorName }}</p>
-                                            <p class="text-xs text-gray-500">{{ $actorRole }}{{ $log->user?->nip ? ' &bull; NIP ' . $log->user->nip : '' }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="{{ $log->result === 'failure' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }} px-3 py-1 rounded-full text-xs font-semibold">
-                                        {{ $actionLabels[$log->action] ?? ucwords(str_replace('_', ' ', $log->action)) }}
-                                    </span>
-                                    @if($log->description)
-                                    <p class="text-xs text-gray-500 mt-1.5">{{ \Illuminate\Support\Str::limit($log->description, 90) }}</p>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="{{ $log->result === 'failure' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }} px-3 py-1 rounded-full text-xs font-semibold">
-                                        {{ $log->result === 'failure' ? 'Gagal / Insiden' : 'Sukses' }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-10 text-center">
-                                    <i class="fas fa-search text-3xl text-gray-300 mb-3"></i>
-                                    <p class="text-sm font-semibold text-gray-600">Belum ada log pada hub ini</p>
-                                    <p class="text-xs text-gray-500 mt-1">Silakan ubah hub atau filter pencarian.</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="emptyAudit" class="hidden text-center py-10">
-                    <i class="fas fa-search text-3xl text-gray-300 mb-3"></i>
-                    <p class="text-sm font-semibold text-gray-600">Data tidak ditemukan</p>
-                    <p class="text-xs text-gray-500 mt-1">Silakan ubah filter pencarian.</p>
-                </div>
-
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5 pt-5 border-t border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan <span id="tableCount" class="font-semibold">{{ $logs->count() }}</span> dari {{ number_format($logs->total()) }} rekaman
-                    </p>
-                    <p class="text-xs text-gray-500">
-                        Halaman {{ $logs->currentPage() }} dari {{ $logs->lastPage() }}
-                    </p>
-                    <div class="flex items-center gap-1">
-                        @if($logs->onFirstPage())
-                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">◄◄</span>
-                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">◄</span>
-                        @else
-                            <a href="{{ $logs->url(1) }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">◄◄</a>
-                            <a href="{{ $logs->previousPageUrl() }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">◄</a>
-                        @endif
-                        @foreach($logs->getUrlRange(max(1, $logs->currentPage() - 2), min($logs->lastPage(), $logs->currentPage() + 2)) as $page => $url)
-                            <a href="{{ $url }}" class="px-3 py-1 rounded text-sm {{ $page === $logs->currentPage() ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50' }}">{{ $page }}</a>
-                        @endforeach
-                        @if($logs->hasMorePages())
-                            <a href="{{ $logs->nextPageUrl() }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">►</a>
-                            <a href="{{ $logs->url($logs->lastPage()) }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">►►</a>
-                        @else
-                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">►</span>
-                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">►►</span>
-                        @endif
-                    </div>
-                </div>
-
-            </section>
-
-            {{-- Bottom Cards --}}
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-                {{-- SoD Matrix --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <h3 class="font-bold text-gray-900">Matriks Segregation of Duties</h3>
-                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                            SoD
-                        </span>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mb-4">
-                        Pemisahan tugas dilakukan agar satu pengguna tidak memiliki
-                        seluruh kewenangan dalam satu proses transaksi.
-                    </p>
-
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Petugas opname berbeda dengan approver HR.</span>
-                        </div>
-
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Petugas opname berbeda dengan pengelola master SKU.</span>
-                        </div>
-
-                        <div class="flex items-start gap-2 text-sm">
-                            <i class="fas fa-check-circle text-green-600 mt-0.5"></i>
-                            <span class="text-gray-700">Persetujuan transaksi dilakukan sesuai hak akses.</span>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Network Diagram --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <h3 class="font-bold text-gray-900">Distribusi Node Log</h3>
-                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                            Simulasi
-                        </span>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mb-3">
-                        Ilustrasi hubungan antara node utama dan node pendukung.
-                    </p>
-
-                    <svg class="w-full h-40" viewBox="0 0 200 120" role="img" aria-label="Diagram jaringan node audit">
-                        <line x1="100" y1="60" x2="100" y2="20" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="160" y2="40" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="160" y2="80" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="100" y2="100" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="40" y2="80" class="network-line stroke-blue-400" stroke-width="2" />
-                        <line x1="100" y1="60" x2="40" y2="40" class="network-line stroke-blue-400" stroke-width="2" />
-
-                        <circle cx="100" cy="60" r="12" class="network-node fill-blue-600" />
-                        <circle cx="100" cy="20" r="8" class="network-node fill-green-500" />
-                        <circle cx="160" cy="40" r="8" class="network-node fill-green-500" />
-                        <circle cx="160" cy="80" r="8" class="network-node fill-green-500" />
-                        <circle cx="100" cy="100" r="8" class="network-node fill-green-500" />
-                        <circle cx="40" cy="80" r="8" class="network-node fill-green-500" />
-                        <circle cx="40" cy="40" r="8" class="network-node fill-green-500" />
-                    </svg>
-
-                    <div class="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-                        <span><i class="fas fa-circle text-blue-600 mr-1"></i>Node Utama</span>
-                        <span><i class="fas fa-circle text-green-500 mr-1"></i>Node Pendukung</span>
-                    </div>
-                </div>
-
-                {{-- SHA Test --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                    <h3 class="font-bold text-gray-900 mb-3">Uji Mandiri SHA-256</h3>
-
-                    <p class="text-sm text-gray-600 mb-4">
-                        Masukkan teks untuk menghasilkan hash SHA-256 menggunakan browser.
-                        Fitur ini merupakan simulasi, bukan verifikasi ledger database.
-                    </p>
-
-                    <input type="text" id="hashInput"
-                        placeholder="Masukkan teks untuk diuji..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 mb-3">
-
-                    <button type="button" id="testHash"
-                        class="btn-primary w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm">
-                        <i class="fas fa-fingerprint"></i>
-                        <span>Hitung Hash SHA-256</span>
-                    </button>
-
-                    <div id="hashResult" class="hidden mt-4">
-                        <p class="text-xs font-semibold text-gray-700 mb-1">Hasil Hash:</p>
-                        <div id="hashOutput"
-                            class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono break-all text-gray-700">
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-
-            {{-- Footer --}}
-            <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <div>
-                    <p class="text-sm font-semibold text-gray-800">Log Audit & Otorisasi</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        Monitoring aktivitas dan pemisahan hak akses pengguna.
-                    </p>
-                </div>
-
-                <p class="text-sm text-gray-600">
-                    <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
-                    Modul khusus HR
-                </p>
-            </section>
-
-        </main>
-    </div>
-
-    {{-- Toast --}}
-    <div id="auditToast"
-        class="toast-message fixed bottom-5 right-5 z-[100] bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-check-circle text-green-400"></i>
-            <span id="auditToastText" class="text-sm">Berhasil.</span>
+        </section>
+
+        @if(session('success'))
+        <div class="reveal mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-[12px] text-emerald-800">
+            <i data-lucide="check-circle-2" class="h-4 w-4"></i>{{ session('success') }}
         </div>
-    </div>
+        @endif
 
+        @if($errors->any())
+        <div class="reveal mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-700">
+            <p class="mb-1 font-semibold"><i data-lucide="triangle-alert" class="inline h-4 w-4"></i> Periksa kembali isian form:</p>
+            <ul class="ml-4 list-disc space-y-0.5">
+                @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
+            </ul>
+        </div>
+        @endif
+
+        {{-- Status & metrik --}}
+        <section aria-label="Status audit" class="reveal reveal-delay-1 mb-4 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Status Audit</p><p class="mt-0.5 text-[13px] font-bold leading-tight text-emerald-700">DATA REAL</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"><i data-lucide="shield-check" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Aktivitas Hari Ini</p><p class="mt-0.5 text-[20px] font-bold leading-tight count-up" data-target="{{ $stats['today'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i data-lucide="activity" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-pink-100 bg-pink-50/40 px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-pink-600">Insiden</p><p class="mt-0.5 text-[20px] font-bold leading-tight text-pink-700 count-up" data-target="{{ $stats['insiden'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-pink-100 text-pink-700"><i data-lucide="triangle-alert" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Total Rekaman</p><p class="mt-0.5 text-[20px] font-bold leading-tight count-up" data-target="{{ $stats['total'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-cyan-50 text-cyan-700"><i data-lucide="database" class="h-3.5 w-3.5"></i></span>
+            </article>
+        </section>
+
+        {{-- Metrik kategori --}}
+        <section aria-label="Metrik audit" class="reveal reveal-delay-2 mb-4 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Modifikasi Data</p><p class="mt-0.5 text-[20px] font-bold leading-tight count-up" data-target="{{ $stats['master'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-green-50 text-green-700"><i data-lucide="link" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Aktivitas Kritis</p><p class="mt-0.5 text-[20px] font-bold leading-tight text-orange-600 count-up" data-target="{{ $stats['kritis'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-orange-50 text-orange-600"><i data-lucide="alert-octagon" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Akses &amp; Keamanan</p><p class="mt-0.5 text-[20px] font-bold leading-tight count-up" data-target="{{ $stats['akses'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-purple-50 text-purple-700"><i data-lucide="user-shield" class="h-3.5 w-3.5"></i></span>
+            </article>
+            <article class="flex min-h-[72px] items-center justify-between rounded-xl border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
+                <div><p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500">Otorisasi / Transaksi</p><p class="mt-0.5 text-[20px] font-bold leading-tight text-blue-700 count-up" data-target="{{ $stats['otorisasi'] + $stats['transaksi'] }}">0</p></div>
+                <span class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-700"><i data-lucide="stamp" class="h-3.5 w-3.5"></i></span>
+            </article>
+        </section>
+
+        {{-- Ringkasan audit trail --}}
+        <section class="reveal reveal-delay-2 mb-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-4 shadow-lg">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white"><i data-lucide="lock" class="h-4 w-4"></i></span>
+                    <div class="min-w-0">
+                        <p class="text-[12px] font-bold text-white">AUDIT TRAIL &bull; {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</p>
+                        <p id="auditHash" class="hash-display mt-1 truncate rounded bg-white/10 px-3 py-1.5 text-[11px] text-white">{{ number_format($stats['total']) }} rekaman audit tercatat &bull; {{ $stats['today'] }} hari ini</p>
+                    </div>
+                </div>
+                <button type="button" id="copyHash" class="flex h-9 items-center gap-2 rounded-lg bg-white/20 px-3 text-[12px] font-semibold text-white hover:bg-white/30" title="Salin ringkasan"><i data-lucide="copy" class="h-4 w-4"></i>Salin Ringkasan</button>
+            </div>
+        </section>
+
+        {{-- Filter --}}
+        <section class="reveal reveal-delay-2 mb-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+            <form method="GET" action="{{ route($routeName) }}" class="flex flex-wrap items-center gap-2">
+                <label class="flex h-10 min-w-[220px] flex-1 items-center gap-2 rounded-md bg-blue-50/80 px-3 text-slate-400 md:max-w-[400px]">
+                    <i data-lucide="search" class="h-4 w-4"></i>
+                    <input name="q" value="{{ $q }}" type="search" placeholder="Cari nama, NIP, aksi, entitas..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400" />
+                </label>
+                <select name="hub" id="filterHub" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none">
+                    <option value="all" {{ $selectedHubId === 'all' ? 'selected' : '' }}>Semua Hub</option>
+                    @foreach($hubs as $hubOpt)
+                        <option value="{{ $hubOpt->id }}" {{ (string) $hubOpt->id === (string) $selectedHubId ? 'selected' : '' }}>{{ $hubOpt->name }} ({{ $hubOpt->code }})</option>
+                    @endforeach
+                </select>
+                <select name="result" class="h-10 rounded-md border-0 bg-blue-50 px-3 text-[12px] text-slate-700 outline-none">
+                    <option value="">Semua Hasil</option>
+                    <option value="success" {{ $result === 'success' ? 'selected' : '' }}>Sukses</option>
+                    <option value="failure" {{ $result === 'failure' ? 'selected' : '' }}>Gagal / Insiden</option>
+                </select>
+                <button type="submit" class="flex h-10 items-center gap-2 rounded-md bg-blue-600 px-3 text-[12px] font-semibold text-white hover:bg-blue-700"><i data-lucide="list-filter" class="h-4 w-4"></i>Terapkan</button>
+                <a href="{{ route($routeName) }}" class="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-slate-600" aria-label="Reset filter" title="Reset filter"><i data-lucide="rotate-cw" class="h-4 w-4"></i></a>
+                <span class="ml-auto rounded-full bg-blue-50 px-3 py-1.5 text-[10.5px] text-slate-600">{{ $hubScopeLabel }} &bull; {{ $result === 'failure' ? 'Gagal / Insiden' : ($result === 'success' ? 'Sukses' : 'Semua Hasil') }} &bull; {{ $q ?: 'Tanpa pencarian' }}</span>
+            </form>
+        </section>
+
+        {{-- Tabel log --}}
+        <section class="reveal reveal-delay-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
+                <div>
+                    <h2 class="text-[13px] font-bold text-slate-800">Riwayat Log Audit</h2>
+                    <p class="text-[10.5px] text-slate-500">Detail waktu, pelaku, jenis operasi, dan hasil.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10.5px] text-slate-500">Zona waktu: WIB</span>
+                    <button type="button" id="exportAudit" class="flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-2.5 text-[10.5px] font-semibold text-white hover:bg-blue-700" title="Ekspor CSV"><i data-lucide="download" class="h-3.5 w-3.5"></i>Ekspor</button>
+                    <button type="button" id="printAudit" class="flex h-8 items-center gap-1.5 rounded-md bg-blue-50 px-2.5 text-[10.5px] font-semibold text-slate-600 hover:bg-blue-100" title="Cetak"><i data-lucide="printer" class="h-3.5 w-3.5"></i>Cetak</button>
+                </div>
+            </div>
+
+            @php
+                $actionLabels = [
+                    'create' => 'Membuat Data', 'update' => 'Memperbarui Data', 'delete' => 'Menghapus Data',
+                    'activate' => 'Mengaktifkan Akun', 'deactivate' => 'Menonaktifkan Akun',
+                    'login' => 'Login', 'logout' => 'Logout', 'revoke_session' => 'Cabut Sesi',
+                    'approve' => 'Approval', 'reject' => 'Penolakan', 'approval' => 'Approval',
+                    'export' => 'Ekspor Data', 'reset' => 'Reset Konfigurasi',
+                ];
+                $entityLabels = [
+                    'App\\Models\\User' => 'Pengguna', 'App\\Models\\Setting' => 'Pengaturan',
+                    'App\\Models\\Category' => 'Kategori', 'App\\Models\\Unit' => 'Satuan',
+                    'App\\Models\\Location' => 'Lokasi', 'App\\Models\\Supplier' => 'Supplier',
+                    'App\\Models\\Division' => 'Divisi', 'App\\Models\\Item' => 'Barang',
+                    'App\\Models\\Hub' => 'Hub',
+                ];
+            @endphp
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1000px] table-fixed border-collapse text-left">
+                    <thead class="h-10 bg-[#f0f4fc] text-[9px] font-semibold uppercase tracking-wide text-slate-600">
+                        <tr>
+                            <th class="w-[160px] whitespace-nowrap px-2">Timestamp (WIB)</th>
+                            <th class="w-[150px] whitespace-nowrap px-2">Event ID &amp; Entitas</th>
+                            <th class="w-[220px] whitespace-nowrap px-2">Pelaku / Aktor</th>
+                            <th class="w-[280px] whitespace-nowrap px-2">Tipe Operasi</th>
+                            <th class="w-[110px] whitespace-nowrap px-2">Hasil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody" class="divide-y divide-slate-100 text-[12px]">
+                        @forelse($logs as $log)
+                        @php
+                            $actorName = $log->user?->nama_lengkap ?? 'Sistem';
+                            $actorRole = $log->user?->role?->name ?? 'Otomatis';
+                            $entityLabel = $entityLabels[$log->entity_type] ?? ($log->entity_type ? class_basename($log->entity_type) : 'Entitas');
+                            $initials = $actorName === 'Sistem' ? 'SY' : collect(preg_split('/\s+/', $actorName))->take(2)->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->join('');
+                        @endphp
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="px-2 py-3">
+                                <p class="text-[12px] font-semibold text-slate-800">{{ $log->created_at->format('d M Y, H:i:s') }}</p>
+                                <p class="text-[10.5px] text-slate-500">{{ $log->created_at->diffForHumans() }}</p>
+                            </td>
+                            <td class="px-2 py-3">
+                                <p class="text-[12px] font-semibold text-blue-700">#{{ $log->id }}</p>
+                                <p class="text-[10.5px] text-slate-500">{{ $entityLabel }} &bull; ID {{ $log->entity_id ?? '-' }}</p>
+                            </td>
+                            <td class="px-2 py-3">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white {{ $log->user ? 'bg-blue-600' : 'bg-gray-400' }}">{{ $initials }}</span>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-[12px] font-semibold text-slate-800">{{ $actorName }}</p>
+                                        <p class="truncate text-[10.5px] text-slate-500">{{ $actorRole }}{{ $log->user?->nip ? ' &bull; NIP ' . $log->user->nip : '' }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-2 py-3">
+                                <span class="rounded-full px-2.5 py-1 text-[10.5px] font-semibold {{ $log->result === 'failure' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800' }}">{{ $actionLabels[$log->action] ?? ucwords(str_replace('_', ' ', $log->action)) }}</span>
+                                @if($log->description)
+                                <p class="mt-1 truncate text-[10.5px] text-slate-500" title="{{ $log->description }}">{{ \Illuminate\Support\Str::limit($log->description, 90) }}</p>
+                                @endif
+                            </td>
+                            <td class="px-2 py-3">
+                                <span class="rounded-full px-2.5 py-1 text-[10.5px] font-semibold {{ $log->result === 'failure' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }}">{{ $log->result === 'failure' ? 'Gagal / Insiden' : 'Sukses' }}</span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-10 text-center">
+                                <i data-lucide="search-x" class="h-8 w-8 text-slate-300 mx-auto"></i>
+                                <p class="mt-2 text-[12.5px] font-semibold text-slate-500">Belum ada log pada hub ini.</p>
+                                <p class="text-[11px] text-slate-400">Silakan ubah hub atau filter pencarian.</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 text-[12px] text-slate-600">
+                <span>Menampilkan {{ $logs->firstItem() ?? 0 }} - {{ $logs->lastItem() ?? 0 }} dari {{ number_format($logs->total()) }} rekaman &bull; Hub: {{ $hubScopeLabel }}</span>
+                <div class="flex items-center gap-1">
+                    @if($logs->onFirstPage())
+                        <span class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400">‹ Sebelumnya</span>
+                    @else
+                        <a href="{{ $logs->previousPageUrl() }}" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">‹ Sebelumnya</a>
+                    @endif
+                    @foreach($logs->getUrlRange(max(1, $logs->currentPage() - 2), min($logs->lastPage(), $logs->currentPage() + 2)) as $page => $url)
+                        <a href="{{ $url }}" class="h-8 min-w-8 rounded px-2 text-[12px] {{ $page === $logs->currentPage() ? 'bg-blue-600 px-2 font-semibold text-white' : 'text-slate-600' }}">{{ $page }}</a>
+                    @endforeach
+                    @if($logs->hasMorePages())
+                        <a href="{{ $logs->nextPageUrl() }}" class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-600">Selanjutnya ›</a>
+                    @else
+                        <span class="h-8 rounded bg-blue-50 px-2 text-[12px] text-slate-400">Selanjutnya ›</span>
+                    @endif
+                </div>
+            </footer>
+        </section>
+
+        {{-- Kartu bawah: SoD + ilustrasi + SHA --}}
+        <section class="reveal reveal-delay-3 mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-[12px] font-bold text-slate-800">Matriks Segregation of Duties</h3>
+                    <span class="rounded bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">SoD</span>
+                </div>
+                <p class="mb-3 text-[11px] leading-relaxed text-slate-500">Pemisahan tugas agar satu pengguna tidak memiliki seluruh kewenangan dalam satu proses transaksi.</p>
+                <ul class="space-y-2 text-[11px] text-slate-600">
+                    <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600"></i>Petugas opname berbeda dengan approver HR.</li>
+                    <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600"></i>Petugas opname berbeda dengan pengelola master SKU.</li>
+                    <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600"></i>Persetujuan transaksi dilakukan sesuai hak akses.</li>
+                </ul>
+            </article>
+
+            <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-[12px] font-bold text-slate-800">Uji Mandiri SHA-256</h3>
+                    <span class="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-700">Alat Bantu</span>
+                </div>
+                <p class="mb-3 text-[11px] leading-relaxed text-slate-500">Hitung hash SHA-256 di browser. Fitur alat bantu, bukan verifikasi ledger database.</p>
+                <input id="hashInput" type="text" placeholder="Masukkan teks untuk diuji..." class="mb-2.5 h-10 w-full rounded-md border border-slate-200 px-3 text-[12px] outline-none focus:border-blue-500">
+                <button type="button" id="testHash" class="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-blue-600 text-[12px] font-semibold text-white hover:bg-blue-700"><i data-lucide="fingerprint" class="h-4 w-4"></i>Hitung Hash SHA-256</button>
+                <div id="hashResult" class="mt-3 hidden">
+                    <p class="mb-1 text-[10.5px] font-semibold text-slate-700">Hasil Hash:</p>
+                    <div id="hashOutput" class="hash-display rounded-lg bg-slate-50 p-3 text-[11px] text-slate-700"></div>
+                </div>
+            </article>
+
+            <article class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-[12px] font-bold text-slate-800">Kebijakan Otorisasi</h3>
+                    <span class="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-700">Modul HR</span>
+                </div>
+                <p class="mb-3 text-[11px] leading-relaxed text-slate-500">Monitoring aktivitas dan pemisahan hak akses pengguna pada lingkup hub terpilih.</p>
+                <div class="space-y-2 text-[11px] text-slate-600">
+                    <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2"><i data-lucide="building" class="h-3.5 w-3.5 text-blue-600"></i>{{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}</div>
+                    <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2"><i data-lucide="database" class="h-3.5 w-3.5 text-blue-600"></i>{{ number_format($stats['total']) }} rekaman audit</div>
+                    <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2"><i data-lucide="activity" class="h-3.5 w-3.5 text-blue-600"></i>{{ $stats['today'] }} aktivitas hari ini</div>
+                </div>
+            </article>
+        </section>
+
+    </main>
 </div>
-@endsection
 
-@section('scripts')
+{{-- Toast --}}
+<div id="auditToast" class="toast-message fixed bottom-5 right-5 z-[100] rounded-lg bg-gray-900 px-5 py-3 text-white shadow-xl">
+    <div class="flex items-center gap-2">
+        <i data-lucide="check-circle-2" class="h-4 w-4 text-green-400"></i>
+        <span id="auditToastText" class="text-[12px]">Berhasil.</span>
+    </div>
+</div>
+
 <script>
-    (() => {
-        'use strict';
+    lucide.createIcons();
+    const page = document;
+    const $ = (selector) => page.querySelector(selector);
+    const $$ = (selector) => page.querySelectorAll(selector);
 
-        const page = document.querySelector('.audit-page');
-        if (!page) return;
+    let toastTimer;
+    function showToast(message) {
+        const toast = $('#auditToast');
+        const text = $('#auditToastText');
+        if (!toast || !text) return;
+        text.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
-        const $ = (selector) => page.querySelector(selector);
-        const $$ = (selector) => page.querySelectorAll(selector);
+    function animateCounters() {
+        $$('.count-up').forEach((counter) => {
+            const target = Number(counter.dataset.target || 0);
+            const duration = 800;
+            const startTime = performance.now();
+            function update(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                counter.textContent = Math.floor(target * progress).toLocaleString('id-ID');
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        });
+    }
 
-        let toastTimer;
-
-        // Toast notification
-        function showToast(message) {
-            const toast = $('#auditToast');
-            const text = $('#auditToastText');
-
-            if (!toast || !text) return;
-
-            text.textContent = message;
-            toast.classList.add('show');
-
-            clearTimeout(toastTimer);
-
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+    $('#copyHash')?.addEventListener('click', async () => {
+        const hash = $('#auditHash')?.textContent.trim();
+        if (!hash) return;
+        try {
+            await navigator.clipboard.writeText(hash);
+            showToast('Ringkasan berhasil disalin.');
+        } catch (error) {
+            const temp = document.createElement('textarea');
+            temp.value = hash;
+            document.body.appendChild(temp);
+            temp.select();
+            const copied = document.execCommand('copy');
+            temp.remove();
+            showToast(copied ? 'Ringkasan berhasil disalin.' : 'Gagal menyalin ringkasan.');
         }
+    });
 
-        // Count up animation
-        function animateCounters() {
-            $$('.count-up').forEach((counter) => {
-                const target = Number(counter.dataset.target || 0);
-                const duration = 1200;
-                const startTime = performance.now();
+    // Filter hub langsung submit (server-side)
+    $('#filterHub')?.addEventListener('change', () => {
+        const form = document.querySelector('form[method="GET"]');
+        if (form) form.submit();
+    });
 
-                function update(now) {
-                    const progress = Math.min((now - startTime) / duration, 1);
-                    const current = Math.floor(target * progress);
-
-                    counter.textContent = current.toLocaleString('id-ID');
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    }
-                }
-
-                requestAnimationFrame(update);
-            });
-        }
-
-        // Copy hash
-        $('#copyHash')?.addEventListener('click', async () => {
-            const hash = $('#auditHash')?.textContent.trim();
-
-            if (!hash) return;
-
-            try {
-                await navigator.clipboard.writeText(hash);
-                showToast('Hash berhasil disalin.');
-            } catch (error) {
-                const temp = document.createElement('textarea');
-                temp.value = hash;
-                document.body.appendChild(temp);
-                temp.select();
-
-                const copied = document.execCommand('copy');
-                temp.remove();
-
-                showToast(copied ? 'Hash berhasil disalin.' : 'Gagal menyalin hash.');
-            }
+    // Ekspor CSV (baris tampil)
+    $('#exportAudit')?.addEventListener('click', () => {
+        const rows = [...$$('#auditTableBody tr')].filter(row => !row.classList.contains('hidden'));
+        if (!rows.length) { showToast('Tidak ada data untuk diekspor.'); return; }
+        const csvRows = [['Timestamp WIB', 'Event ID', 'Entitas', 'Pelaku / Aktor', 'Tipe Operasi', 'Hasil']];
+        rows.forEach((row) => {
+            const cells = row.querySelectorAll('td');
+            csvRows.push([
+                cells[0]?.querySelector('p')?.textContent.trim() || '',
+                cells[1]?.querySelector('p')?.textContent.trim() || '',
+                cells[1]?.querySelectorAll('p')[1]?.textContent.trim() || '',
+                cells[2]?.querySelectorAll('p')[0]?.textContent.trim() || '',
+                cells[3]?.querySelector('span')?.textContent.trim() || '',
+                cells[4]?.querySelector('span')?.textContent.trim() || ''
+            ]);
         });
+        const escapeCSV = value => `"${String(value).replace(/"/g, '""')}"`;
+        const csv = csvRows.map(row => row.map(escapeCSV).join(',')).join('\r\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'log-audit-otorisasi.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil dibuat.');
+    });
 
-        // Filter: ganti hub langsung submit form (server-side)
-        const filterForm = page.querySelector('form[action*="log-audit-otorisasi"]');
-        $('#filterHub')?.addEventListener('change', () => {
-            if (filterForm) filterForm.submit();
-        });
+    $('#printAudit')?.addEventListener('click', () => window.print());
 
-        // Export visible rows to CSV
-        $('#exportAudit')?.addEventListener('click', () => {
-            const rows = [...$$('#auditTableBody tr')]
-                .filter(row => !row.classList.contains('hidden'));
+    $('#testHash')?.addEventListener('click', async () => {
+        const input = $('#hashInput').value.trim();
+        if (!input) { showToast('Masukkan teks terlebih dahulu.'); $('#hashInput').focus(); return; }
+        if (!window.crypto?.subtle) { showToast('SHA-256 memerlukan browser dengan Web Crypto API.'); return; }
+        try {
+            const encoder = new TextEncoder();
+            const digest = await crypto.subtle.digest('SHA-256', encoder.encode(input));
+            $('#hashOutput').textContent = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+            $('#hashResult').classList.remove('hidden');
+            showToast('Hash SHA-256 berhasil dihitung.');
+        } catch (error) { showToast('Gagal menghitung hash.'); }
+    });
 
-            if (!rows.length) {
-                showToast('Tidak ada data untuk diekspor.');
-                return;
-            }
-
-            const csvRows = [
-                ['Timestamp WIB', 'Event ID', 'Entitas', 'Pelaku / Aktor', 'Tipe Operasi', 'Hasil']
-            ];
-
-            rows.forEach((row) => {
-                const cells = row.querySelectorAll('td');
-
-                csvRows.push([
-                    cells[0]?.querySelector('p')?.textContent.trim() || '',
-                    cells[1]?.querySelector('p')?.textContent.trim() || '',
-                    cells[1]?.querySelectorAll('p')[1]?.textContent.trim() || '',
-                    cells[2]?.querySelectorAll('p')[0]?.textContent.trim() || '',
-                    cells[3]?.querySelector('span')?.textContent.trim() || '',
-                    cells[4]?.querySelector('span')?.textContent.trim() || ''
-                ]);
-            });
-
-            const escapeCSV = value =>
-                `"${String(value).replace(/"/g, '""')}"`;
-
-            const csv = csvRows
-                .map(row => row.map(escapeCSV).join(','))
-                .join('\r\n');
-
-            const blob = new Blob(['\uFEFF' + csv], {
-                type: 'text/csv;charset=utf-8;'
-            });
-
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-
-            link.href = url;
-            link.download = 'log-audit-otorisasi.csv';
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            URL.revokeObjectURL(url);
-
-            showToast('File CSV berhasil dibuat.');
-        });
-
-        // Print report
-        $('#printAudit')?.addEventListener('click', () => {
-            window.print();
-        });
-
-        // SHA-256 test
-        $('#testHash')?.addEventListener('click', async () => {
-            const input = $('#hashInput').value.trim();
-
-            if (!input) {
-                showToast('Masukkan teks terlebih dahulu.');
-                $('#hashInput').focus();
-                return;
-            }
-
-            if (!window.crypto?.subtle) {
-                showToast('SHA-256 memerlukan browser dengan Web Crypto API.');
-                return;
-            }
-
-            try {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(input);
-                const digest = await crypto.subtle.digest('SHA-256', data);
-
-                const hash = Array.from(new Uint8Array(digest))
-                    .map(byte => byte.toString(16).padStart(2, '0'))
-                    .join('');
-
-                $('#hashOutput').textContent = hash;
-                $('#hashResult').classList.remove('hidden');
-
-                showToast('Hash SHA-256 berhasil dihitung.');
-            } catch (error) {
-                showToast('Gagal menghitung hash.');
-            }
-        });
-
-        // Initialize
-        animateCounters();
-
-    })();
+    animateCounters();
 </script>
-@endsection
+</body>
+</html>

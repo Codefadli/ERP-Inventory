@@ -127,9 +127,14 @@
                 <i class="fas fa-clock w-4"></i>
                 <span>Antrean Persetujuan</span>
             </div>
-            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">5</span>
+            @php
+                $antreanHr = auth()->user() && auth()->user()->isHR()
+                    ? \App\Models\RequestBarang::where('status', 'Menunggu')->count()
+                    : 0;
+            @endphp
+            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $antreanHr }}</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('hr.detail-permintaan', 1) }}" class="nav-link {{ request()->routeIs('hr.detail-permintaan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-alt w-4"></i>
             <span>Detail Permintaan</span>
         </a>
@@ -139,7 +144,7 @@
         </a>
 
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen & Laporan</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('hr.laporan-inventaris') }}" class="nav-link {{ request()->routeIs('hr.laporan-inventaris') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-line w-4"></i>
             <span>Laporan Inventaris</span>
         </a>

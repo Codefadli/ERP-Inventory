@@ -267,22 +267,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/barang-keluar', [App\Http\Controllers\TransaksiBarangController::class, 'keluar'])
             ->name('barang-keluar');
 
-        Route::get('/persetujuan-barang', function () {
-            return view('dashboard.hr.persetujuan-barang');
-        })->name('persetujuan-barang');
+        Route::get('/persetujuan-barang', [App\Http\Controllers\HrPageController::class, 'persetujuan'])
+            ->name('persetujuan-barang');
+        Route::post('/persetujuan-barang/{id}/proses', [App\Http\Controllers\HrPageController::class, 'proses'])
+            ->name('persetujuan-barang.proses');
+
+        Route::get('/detail-permintaan/{id}', [App\Http\Controllers\HrPageController::class, 'detail'])
+            ->name('detail-permintaan');
+
+        Route::get('/riwayat-persetujuan', [App\Http\Controllers\HrPageController::class, 'riwayat'])
+            ->name('riwayat-persetujuan');
+
+        Route::get('/laporan-inventaris', [App\Http\Controllers\HrPageController::class, 'laporan'])
+            ->name('laporan-inventaris');
 
         Route::get('/log-audit-otorisasi', [App\Http\Controllers\LogAktivitasController::class, 'index'])
             ->name('log-audit-otorisasi');
-
-        Route::get('/riwayat-persetujuan', function () {
-            return view('dashboard.riwayat-persetujuan');
-        })->name('riwayat-persetujuan');
-
-        Route::middleware('permission:issue.approve')->group(function () {
-            Route::get('/approvals', function () {
-                return view('hr.approvals.index');
-            })->name('approvals.index');
-        });
     });
 
     // ========================================================================
