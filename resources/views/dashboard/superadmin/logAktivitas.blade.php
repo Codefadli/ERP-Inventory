@@ -270,11 +270,11 @@
                 <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300"></i>
                 <span class="text-blue-600 font-bold">LOG AKTIVITAS SISTEM</span>
             </nav>
-            <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100"><span class="ai-live-dot" style="background:#2563eb"></span>STREAM: ACTIVE</span>
+            <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100"><span class="ai-live-dot" style="background:#2563eb"></span>AUDIT AKTIF</span>
           </div>
           <div class="hidden lg:flex items-center gap-1.5 text-[11.5px] font-semibold text-slate-500">
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-            Audit Trail ISO 27001 Certified &bull; Node Cakung-DC01-PROD
+            Audit Trail Forensik &bull; Hub: {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}
           </div>
         </div>
 
@@ -284,25 +284,22 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-2 min-w-0">
                 <h1 class="text-[22px] sm:text-[25px] 2xl:text-[28px] font-extrabold text-slate-800 leading-tight tracking-tight">Log Aktivitas &amp; Audit Trail Forensik</h1>
-                <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>REALTIME 10ms</span>
+                <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>DATA REAL</span>
               </div>
               <div class="flex flex-wrap items-center gap-2.5 ml-auto">
-                <button class="ai-btn ai-btn-secondary" data-toast="Rentang waktu diubah: Hari Ini (2 Mar 2025)" data-toast-type="info">
-                  <i data-lucide="calendar" class="w-4 h-4"></i>Hari Ini (2 Mar 2025)<i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
-                </button>
-                <button class="ai-btn ai-btn-secondary" data-toast="Panel Filter Audit Lanjutan dibuka" data-toast-type="info">
+                <button class="ai-btn ai-btn-secondary opacity-60 cursor-not-allowed" disabled title="Filter hub & kategori tersedia di panel bawah">
                   <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>Filter Audit Lanjutan
                 </button>
-                <button class="ai-btn ai-btn-secondary" data-toast="Export log dimulai: format JSON/CSV">
+                <button class="ai-btn ai-btn-secondary opacity-60 cursor-not-allowed" disabled title="Ekspor log (JSON/CSV) belum tersedia">
                   <i data-lucide="download" class="w-4 h-4"></i>Export Log (JSON/CSV)
                 </button>
-                <button class="ai-btn ai-btn-primary" data-toast="Live Stream Feed terhubung — latensi 10ms">
+                <button class="ai-btn ai-btn-primary opacity-60 cursor-not-allowed" disabled title="Live stream feed belum terintegrasi">
                   <span class="w-2 h-2 rounded-full bg-white ai-live-dot" style="background:#fff"></span>Live Stream Feed
                   <span class="text-[10px] font-bold bg-white/20 rounded px-1.5 py-0.5">LIVE</span>
                 </button>
               </div>
             </div>
-            <p class="text-[13px] lg:text-[13.5px] text-slate-500 leading-relaxed">Rekam jejak forensik seluruh aktivitas pengguna, perubahan data master, transaksi inventaris, otorisasi approval, dan keamanan sistem secara realtime di Hub Cakung DC-01.</p>
+            <p class="text-[13px] lg:text-[13.5px] text-slate-500 leading-relaxed">Rekam jejak forensik seluruh aktivitas pengguna, perubahan data master, dan keamanan sistem secara realtime di {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}.</p>
           </div>
         </section>
 
@@ -311,98 +308,105 @@
           <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="0">
             <div class="flex items-start justify-between">
               <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i data-lucide="history" class="w-5 h-5 text-blue-600"></i></div>
-              <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="trending-up" class="w-3 h-3"></i>+8.5% normal</span>
+              <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="trending-up" class="w-3 h-3"></i>Live</span>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="1428">0</span>
+              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="{{ $stats['total'] }}">0</span>
               <span class="text-[13px] text-slate-500 font-medium">Event</span>
             </div>
-            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Total Aktivitas Hari Ini</div>
-            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>Pencatatan realtime tanpa latensi</div>
+            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Total Aktivitas Tercatat</div>
+            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>{{ $stats['today'] }} aktivitas hari ini</div>
           </div>
 
           <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="80">
             <div class="flex items-start justify-between">
               <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i data-lucide="badge-check" class="w-5 h-5 text-blue-600"></i></div>
-              <span class="ai-badge bg-blue-50 text-blue-700"><i data-lucide="key-round" class="w-3 h-3"></i>100% 2FA Valid</span>
+              <span class="ai-badge bg-blue-50 text-blue-700"><i data-lucide="key-round" class="w-3 h-3"></i>Kritis</span>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="84">0</span>
+              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="{{ $stats['kritis'] }}">0</span>
               <span class="text-[13px] text-slate-500 font-medium">Aksi</span>
             </div>
-            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Aktivitas Kritis &amp; Approval</div>
-            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>Otorisasi pengeluaran &amp; mutasi stok</div>
+            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Aktivitas Kritis &amp; Gagal</div>
+            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>Hapus, nonaktifkan, cabut sesi, atau failure</div>
           </div>
 
           <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="160">
             <div class="flex items-start justify-between">
               <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i data-lucide="clipboard-list" class="w-5 h-5 text-blue-600"></i></div>
-              <span class="ai-badge bg-slate-100 text-slate-600"><i data-lucide="pen-line" class="w-3 h-3"></i>Perlu Review</span>
+              <span class="ai-badge bg-slate-100 text-slate-600"><i data-lucide="pen-line" class="w-3 h-3"></i>Master</span>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="19">0</span>
+              <span class="text-[34px] font-extrabold text-slate-800 leading-none" data-count="{{ $stats['master'] }}">0</span>
               <span class="text-[13px] text-slate-500 font-medium">Modifikasi</span>
             </div>
-            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Perubahan Master Data</div>
-            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>Update SKU, harga acuan &amp; batas kuota</div>
+            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Perubahan Data (Create/Update/Delete)</div>
+            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-none"></span>Perubahan master &amp; pengaturan</div>
           </div>
 
           <div class="ai-card ai-card-hover ai-reveal p-5" data-delay="240">
             <div class="flex items-start justify-between">
               <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5 text-emerald-600"></i></div>
-              <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="lock" class="w-3 h-3"></i>SHA-256 Integritas</span>
+              <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="lock" class="w-3 h-3"></i>Audit Trail</span>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-[34px] font-extrabold text-emerald-600 leading-none" data-count="0">0</span>
-              <span class="text-[13px] text-slate-500 font-medium">Ancaman</span>
+              <span class="text-[34px] font-extrabold text-emerald-600 leading-none" data-count="{{ $stats['insiden'] }}">0</span>
+              <span class="text-[13px] text-slate-500 font-medium">Insiden</span>
             </div>
-            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Insiden Keamanan / Flag</div>
-            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-none"></span>Gagal login 3x teratasi, 0 anomali IP</div>
+            <div class="mt-2 text-[13.5px] font-bold text-slate-700">Insiden Keamanan / Failure</div>
+            <div class="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-none"></span>Login gagal &amp; operasi gagal tercatat</div>
           </div>
         </section>
 
-        <!-- ===== Pill filter ===== -->
+        <!-- ===== Pill filter (kategori) ===== -->
         <section class="ai-card ai-reveal p-4" data-delay="100">
-          <div data-tabs="log" class="flex gap-2 overflow-x-auto pb-1">
-            <button class="ai-pill ai-pill-active" data-tab="semua">Semua Log <span class="text-[10.5px] font-bold bg-blue-100 text-blue-700 rounded-full px-2 py-0.5">1.428</span></button>
-            <button class="ai-pill" data-tab="transaksi">Transaksi Inventaris <span class="text-[10.5px] font-bold bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">812</span></button>
-            <button class="ai-pill" data-tab="otorisasi">Otorisasi &amp; Approval <span class="text-[10.5px] font-bold bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">84</span></button>
-            <button class="ai-pill" data-tab="master">Modifikasi Master Data <span class="text-[10.5px] font-bold bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">19</span></button>
-            <button class="ai-pill" data-tab="akses">Akses &amp; Keamanan Login <span class="text-[10.5px] font-bold bg-slate-100 text-slate-600 rounded-full px-2 py-0.5">513</span></button>
+          <div class="flex gap-2 overflow-x-auto pb-1">
+            @php
+                $pills = [
+                    'semua'    => ['Semua Log', $stats['total']],
+                    'master'   => ['Modifikasi Data', $stats['master']],
+                    'akses'    => ['Akses & Keamanan Login', $stats['akses']],
+                    'otorisasi'=> ['Otorisasi & Approval', $stats['otorisasi']],
+                    'transaksi'=> ['Transaksi Inventaris', $stats['transaksi']],
+                ];
+            @endphp
+            @foreach($pills as $key => [$label, $count])
+            <a href="{{ route($routeName, array_filter(['cat' => $key === 'semua' ? null : $key, 'q' => $q ?: null, 'result' => $result ?: null, 'hub' => $selectedHubId === 'all' ? null : $selectedHubId])) }}"
+               class="ai-pill {{ ($cat ?? 'semua') === $key ? 'ai-pill-active' : '' }}">
+                {{ $label }}
+                <span class="text-[10.5px] font-bold {{ ($cat ?? 'semua') === $key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600' }} rounded-full px-2 py-0.5">{{ number_format($count) }}</span>
+            </a>
+            @endforeach
           </div>
         </section>
 
         <!-- ===== Search + filter + tabel ===== -->
         <section class="ai-card ai-reveal p-4 md:p-5" data-delay="150">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <form method="GET" action="{{ route($routeName) }}" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <input type="hidden" name="hub" value="{{ $selectedHubId }}">
+            <input type="hidden" name="cat" value="{{ $cat ?? 'semua' }}">
             <div class="lg:col-span-4 relative">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input id="logSearch" class="ai-input pl-10" placeholder="Cari NIK, Nama Staf, IP Address, No. Dokumen, atau Aksi..." />
+              <input name="q" value="{{ $q }}" class="ai-input pl-10" placeholder="Cari nama, NIP, IP Address, entitas, atau aksi..." />
             </div>
-            <select id="fUrgensi" class="ai-input lg:col-span-2 text-slate-600">
-              <option value="semua">Semua Urgensi</option>
-              <option value="normal">Normal</option>
-              <option value="kritis">Kritis</option>
+            <select name="hub" class="ai-input lg:col-span-3 text-slate-600">
+              <option value="all" {{ $selectedHubId === 'all' ? 'selected' : '' }}>Semua Hub</option>
+              @foreach($hubs as $hubOpt)
+                <option value="{{ $hubOpt->id }}" {{ (string) $hubOpt->id === (string) $selectedHubId ? 'selected' : '' }}>
+                    {{ $hubOpt->name }} ({{ $hubOpt->code }})
+                </option>
+              @endforeach
             </select>
-            <select id="fModul" class="ai-input lg:col-span-2 text-slate-600">
-              <option value="semua">Semua Modul</option>
-              <option value="outbound">Outbound Delivery</option>
-              <option value="inbound">Inbound / Cross-Dock</option>
-              <option value="opname">Stok Opname</option>
-              <option value="master">Master Data</option>
-              <option value="auth">Akses &amp; Auth</option>
+            <select name="result" class="ai-input lg:col-span-2 text-slate-600">
+              <option value="">Semua Hasil</option>
+              <option value="success" {{ $result === 'success' ? 'selected' : '' }}>Sukses</option>
+              <option value="failure" {{ $result === 'failure' ? 'selected' : '' }}>Gagal / Insiden</option>
             </select>
-            <select id="fPeran" class="ai-input lg:col-span-2 text-slate-600">
-              <option value="semua">Semua Peran</option>
-              <option value="superadmin">Super Admin</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="staf">Staf</option>
-            </select>
-            <div class="lg:col-span-2 flex gap-2">
-              <button id="btnReset" class="ai-btn ai-btn-secondary w-full"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>Reset Filter</button>
-              <button class="ai-btn ai-btn-soft flex-none w-11 px-0" data-toast="Feed log dimuat ulang" data-toast-type="info" title="Refresh"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+            <div class="lg:col-span-3 flex gap-2">
+              <button type="submit" class="ai-btn ai-btn-primary w-full"><i data-lucide="search" class="w-4 h-4"></i>Terapkan</button>
+              <a href="{{ route($routeName) }}" class="ai-btn ai-btn-secondary flex-none w-11 px-0" title="Reset"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></a>
             </div>
-          </div>
+          </form>
 
           <div class="mt-4 overflow-x-auto">
             <table class="w-full ai-table min-w-[1150px]">
@@ -419,261 +423,130 @@
                 </tr>
               </thead>
               <tbody id="logBody">
-                <!-- Row 1 -->
-                <tr class="ai-live-row" data-cat="otorisasi" data-urgensi="kritis" data-modul="outbound" data-peran="superadmin"
-                    data-text="02 mar 2025 14:48:12 budi santoso nik-88201 persetujuan outbound delivery req-2025-0381 do-out-2025-0941 103.28.14.90 sukses 2fa macbook">
+                @php
+                    // Mapping aksi -> label, warna badge, dan kategori
+                    $actionMeta = [
+                        'create'        => ['Membuat Data', 'bg-emerald-50 text-emerald-700', 'master'],
+                        'update'        => ['Memperbarui Data', 'bg-indigo-50 text-indigo-700', 'master'],
+                        'delete'        => ['Menghapus Data', 'bg-red-50 text-red-700', 'master'],
+                        'activate'      => ['Mengaktifkan Akun', 'bg-emerald-50 text-emerald-700', 'akses'],
+                        'deactivate'    => ['Menonaktifkan Akun', 'bg-amber-50 text-amber-700', 'akses'],
+                        'login'         => ['Login', 'bg-blue-50 text-blue-700', 'akses'],
+                        'logout'        => ['Logout', 'bg-slate-100 text-slate-600', 'akses'],
+                        'revoke_session'=> ['Cabut Sesi', 'bg-red-50 text-red-700', 'akses'],
+                        'approve'       => ['Persetujuan', 'bg-green-50 text-green-700', 'otorisasi'],
+                        'reject'        => ['Penolakan', 'bg-red-50 text-red-700', 'otorisasi'],
+                        'approval'      => ['Approval', 'bg-green-50 text-green-700', 'otorisasi'],
+                        'export'        => ['Ekspor Data', 'bg-cyan-50 text-cyan-700', 'master'],
+                        'reset'         => ['Reset Konfigurasi', 'bg-orange-50 text-orange-700', 'master'],
+                        'barang_masuk'  => ['Barang Masuk', 'bg-emerald-50 text-emerald-700', 'transaksi'],
+                        'barang_keluar' => ['Barang Keluar', 'bg-blue-50 text-blue-700', 'transaksi'],
+                        'mutasi'        => ['Mutasi Barang', 'bg-violet-50 text-violet-700', 'transaksi'],
+                    ];
+                    $entityLabels = [
+                        'App\\Models\\User' => 'Pengguna',
+                        'App\\Models\\Setting' => 'Pengaturan',
+                        'App\\Models\\Category' => 'Kategori',
+                        'App\\Models\\Unit' => 'Satuan',
+                        'App\\Models\\Location' => 'Lokasi',
+                        'App\\Models\\Supplier' => 'Supplier',
+                        'App\\Models\\Division' => 'Divisi',
+                        'App\\Models\\Item' => 'Barang',
+                        'App\\Models\\Hub' => 'Hub',
+                    ];
+                    $initialsOf = fn ($name) => ($name === 'Sistem' ? 'SY'
+                        : (collect(preg_split('/\s+/', $name))->take(2)->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->join('') ?: '?'));
+                @endphp
+
+                @forelse($logs as $log)
+                @php
+                    $meta = $actionMeta[$log->action] ?? [ucwords(str_replace('_', ' ', $log->action)), 'bg-slate-100 text-slate-600', 'master'];
+                    $actorName = $log->user?->nama_lengkap ?? 'Sistem';
+                    $actorRole = $log->user?->role?->name ?? 'Otomatis';
+                    $actorNip  = $log->user?->nip;
+                    $entityLabel = $entityLabels[$log->entity_type] ?? ($log->entity_type ? class_basename($log->entity_type) : 'Entitas');
+                    $changesJson = json_encode($log->changes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                @endphp
+                <tr class="ai-live-row" data-cat="{{ $meta[2] }}" data-text="{{ strtolower($log->created_at->format('d M Y H:i:s') . ' ' . $actorName . ' ' . ($actorNip ?? '') . ' ' . $log->action . ' ' . ($log->entity_type ?? '') . ' ' . ($log->ip_address ?? '') . ' ' . $log->result) }}">
                   <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 14:48:12</div>
-                    <div class="mt-1 flex items-center gap-1.5"><span class="ai-badge bg-blue-50 text-blue-600 ai-blink-soft">12 detik lalu</span></div>
+                    <div class="font-bold text-slate-700 whitespace-nowrap">{{ $log->created_at->format('d M Y') }} &bull; {{ $log->created_at->format('H:i:s') }}</div>
+                    <div class="mt-1 flex items-center gap-1.5"><span class="ai-badge bg-blue-50 text-blue-600 ai-blink-soft">{{ $log->created_at->diffForHumans() }}</span></div>
                     <div class="text-[10.5px] text-slate-400 mt-0.5">WIB (GMT+7)</div>
                   </td>
                   <td>
                     <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center flex-none">BS</div>
+                      <div class="w-9 h-9 rounded-full bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center flex-none">{{ $initialsOf($actorName) }}</div>
                       <div>
-                        <div class="font-bold text-slate-700">Budi Santoso</div>
-                        <div class="text-[11px] text-slate-500">Super Admin &bull; NIK-88201</div>
+                        <div class="font-bold text-slate-700">{{ $actorName }}</div>
+                        <div class="text-[11px] text-slate-500">{{ $actorRole }}{{ $actorNip ? ' &bull; NIP ' . $actorNip : '' }}</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span class="ai-badge bg-blue-50 text-blue-700"><i data-lucide="check-circle-2" class="w-3 h-3"></i>Persetujuan</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">Outbound Delivery</div>
+                    <span class="ai-badge {{ $meta[1] }}">{{ $meta[0] }}</span>
+                    <div class="text-[11px] text-slate-500 mt-1.5">{{ $entityLabel }}</div>
                   </td>
                   <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Menyetujui permohonan pengeluaran inventaris kategori high-value</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Disetujui untuk transfer 15 unit MacBook Pro 14" M3 Max ke Hub Surabaya DC-02</div>
+                    <div class="font-bold text-slate-700 leading-snug">{{ $log->description ?: 'Tidak ada deskripsi.' }}</div>
+                    @if(!empty($log->changes) && is_array($log->changes))
+                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Perubahan: {{ implode(', ', array_keys($log->changes)) }}</div>
+                    @endif
                   </td>
                   <td>
-                    <div class="font-bold text-blue-600">REQ-2025-0381</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">DO-OUT-2025-0941</div>
+                    <div class="font-bold text-blue-600">{{ $entityLabel }}</div>
+                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">#{{ $log->entity_id ?? '-' }}</div>
                   </td>
                   <td>
-                    <div class="font-semibold text-slate-600">103.28.14.90</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Chrome 122 (macOS) &bull; DC-01 LAN</div>
+                    <div class="font-semibold text-slate-600">{{ $log->ip_address ?? '-' }}</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">{{ $log->user_agent ? \Illuminate\Support\Str::limit($log->user_agent, 40) : 'Tanpa user agent' }}</div>
                   </td>
                   <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="shield-check" class="w-3 h-3"></i>Sukses / 2FA</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#a9e4d1f2b</div>
+                    <span class="ai-badge {{ $log->result === 'failure' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }}">
+                        <i data-lucide="{{ $log->result === 'failure' ? 'alert-triangle' : 'shield-check' }}" class="w-3 h-3"></i>
+                        {{ $log->result === 'failure' ? 'Gagal / Insiden' : 'Sukses' }}
+                    </span>
+                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#{{ $log->id }}</div>
                   </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log REQ-2025-0381 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
+                  <td class="text-right">
+                    <button type="button" class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+                            onclick="showLogJson('{{ addslashes($actorName) }}', '{{ addslashes($meta[0]) }}', {{ addslashes($changesJson ?: '{}') }})" title="Lihat JSON">
+                        <i data-lucide="braces" class="w-4 h-4"></i>
+                    </button>
+                  </td>
                 </tr>
-
-                <!-- Row 2 -->
-                <tr data-cat="transaksi" data-urgensi="normal" data-modul="inbound" data-peran="staf"
-                    data-text="02 mar 2025 14:41:05 rian hidayat nik-88412 barang masuk cross-dock bay 04 po-in-2025-0814 sku-mon-9920 192.168.10.42 verified sha-256 samsung">
-                  <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 14:41:05</div>
-                    <div class="text-[10.5px] text-slate-400 mt-1">7 menit lalu &bull; WIB (GMT+7)</div>
+                @empty
+                <tr>
+                  <td colspan="8" class="py-10 text-center">
+                    <i data-lucide="search-x" class="w-8 h-8 text-slate-300 mx-auto"></i>
+                    <div class="mt-2 text-[13px] font-semibold text-slate-500">Belum ada log aktivitas yang cocok dengan filter pada hub ini.</div>
                   </td>
-                  <td>
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center flex-none">RH</div>
-                      <div>
-                        <div class="font-bold text-slate-700">Rian Hidayat</div>
-                        <div class="text-[11px] text-slate-500">Staf Checker Inbound &bull; NIK-88412</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="corner-down-left" class="w-3 h-3"></i>Barang Masuk</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">Cross-Dock Bay 04</div>
-                  </td>
-                  <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Penerimaan fisik barang &amp; validasi Barcode PO-IN-2025-0814</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Berhasil verifikasi 250 karton 'Samsung Odyssey Neo G9' dari PT Elektronik Mega Sentosa</div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-blue-600">PO-IN-2025-0814</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">SKU-MON-9920</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold text-slate-600">192.168.10.42</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Zebra TC57 Scanner &bull; Android 11</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="fingerprint" class="w-3 h-3"></i>Verified / SHA-256</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#77c8e90a1</div>
-                  </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log PO-IN-2025-0814 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
                 </tr>
-
-                <!-- Row 3 -->
-                <tr data-cat="transaksi" data-urgensi="kritis" data-modul="opname" data-peran="supervisor"
-                    data-text="02 mar 2025 14:15:30 dewi anggraini nik-88195 stok opname audit rak b-04-12 sku-pkg-0112 opn-2025-0043 discrepancy karantina">
-                  <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 14:15:30</div>
-                    <div class="text-[10.5px] text-slate-400 mt-1">33 menit lalu &bull; WIB (GMT+7)</div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-slate-400 text-white text-[11px] font-bold flex items-center justify-center flex-none">DA</div>
-                      <div>
-                        <div class="font-bold text-slate-700">Dewi Anggraini</div>
-                        <div class="text-[11px] text-slate-500">Supervisor Inventory &bull; NIK-88195</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-slate-100 text-slate-600"><i data-lucide="clipboard-check" class="w-3 h-3"></i>Stok Opname</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">Audit Rak B-04-12</div>
-                  </td>
-                  <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Penyesuaian stok on-hand SKU-PKG-0112 (Discrepancy -2 unit)</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Alasan: Kerusakan kemasan saat pemindahan tier forklift. Dipindahkan ke karantina WH-Q01</div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-blue-600">SKU-PKG-0112</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">OPN-2025-0043</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold text-slate-600">103.28.14.92</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Firefox 123 (Windows 11) &bull; Desk Supv</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-slate-100 text-slate-600"><i data-lucide="archive" class="w-3 h-3"></i>Audit Disimpan</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#45b1f08bc</div>
-                  </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log OPN-2025-0043 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
-                </tr>
-
-                <!-- Row 4 -->
-                <tr data-cat="master" data-urgensi="normal" data-modul="master" data-peran="superadmin"
-                    data-text="02 mar 2025 13:50:18 budi santoso nik-88201 master data katalog minimum reorder sku-srv-2041 kategori it enterprise threshold safety stock">
-                  <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 13:50:18</div>
-                    <div class="text-[10.5px] text-slate-400 mt-1">58 menit lalu &bull; WIB (GMT+7)</div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center flex-none">BS</div>
-                      <div>
-                        <div class="font-bold text-slate-700">Budi Santoso</div>
-                        <div class="text-[11px] text-slate-500">Super Admin &bull; NIK-88201</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-indigo-50 text-indigo-700"><i data-lucide="database" class="w-3 h-3"></i>Master Data</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">Katalog &amp; Minimum Reorder</div>
-                  </td>
-                  <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Pembaruan threshold minimum reorder &amp; lokasi bin primer</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">SKU-SRV-2041: Safety stock dinaikkan dari 50 unit menjadi 80 unit untuk mitigasi peak season</div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-blue-600">SKU-SRV-2041</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">Kategori IT Enterprise</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold text-slate-600">103.28.14.90</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Chrome 122 (macOS) &bull; Admin Console</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="save" class="w-3 h-3"></i>Tersimpan</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#12df6a87</div>
-                  </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log SKU-SRV-2041 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
-                </tr>
-
-                <!-- Row 5 -->
-                <tr data-cat="akses" data-urgensi="kritis" data-modul="auth" data-peran="staf"
-                    data-text="02 mar 2025 13:02:44 wahyu kusuma nik-88004 akses auth fido2 hardware key usr-ses-9941 yubikey otp biometrik login">
-                  <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 13:02:44</div>
-                    <div class="text-[10.5px] text-slate-400 mt-1">1 jam 46 menit lalu &bull; WIB (GMT+7)</div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-slate-500 text-white text-[11px] font-bold flex items-center justify-center flex-none">WK</div>
-                      <div>
-                        <div class="font-bold text-slate-700">Wahyu Kusuma</div>
-                        <div class="text-[11px] text-slate-500">Kepala Gudang DC-01 &bull; NIK-88004</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-violet-50 text-violet-700"><i data-lucide="lock" class="w-3 h-3"></i>Akses &amp; Auth</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">FIDO2 Hardware Key</div>
-                  </td>
-                  <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Login berhasil via Hardware YubiKey OTP + Biometrik</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Otentikasi ganda berhasil diverifikasi pada workstation terminal DC-01 Command Desk</div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-blue-600">USR-SES-9941</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">Tervalidasi FIDO2</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold text-slate-600">103.28.14.88</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Edge 122 (Windows 11) &bull; IP Whitelisted</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="key-round" class="w-3 h-3"></i>Otentikasi Sah</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#e3290fb4</div>
-                  </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log USR-SES-9941 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
-                </tr>
-
-                <!-- Row 6 -->
-                <tr data-cat="transaksi" data-urgensi="normal" data-modul="outbound" data-peran="staf"
-                    data-text="02 mar 2025 12:20:11 agus prasetyo nik-88339 barang keluar staging area gate 02 do-out-2025-0941 surat jalan label segel armada 40 pallet">
-                  <td>
-                    <div class="font-bold text-slate-700 whitespace-nowrap">02 Mar 2025 &bull; 12:20:11</div>
-                    <div class="text-[10.5px] text-slate-400 mt-1">2 jam 28 menit lalu &bull; WIB (GMT+7)</div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-full bg-slate-800 text-white text-[11px] font-bold flex items-center justify-center flex-none">AP</div>
-                      <div>
-                        <div class="font-bold text-slate-700">Agus Prasetyo</div>
-                        <div class="text-[11px] text-slate-500">Staf Dispatch Outbound &bull; NIK-88339</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-blue-50 text-blue-700"><i data-lucide="send" class="w-3 h-3"></i>Barang Keluar</span>
-                    <div class="text-[11px] text-slate-500 mt-1.5">Staging Area Gate 02</div>
-                  </td>
-                  <td class="max-w-[240px]">
-                    <div class="font-bold text-slate-700 leading-snug">Membuat Surat Jalan DO-OUT-2025-0941 &amp; Cetak Label Segel Armada</div>
-                    <div class="text-[11.5px] text-slate-500 mt-1 leading-snug">Pelepasan armada box truck B 9421 KDC membawa 40 pallet logistik ritel</div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-blue-600">DO-OUT-2025-0941</div>
-                    <div class="font-semibold text-blue-600 text-[12px] mt-0.5">40 Palet Dispatch</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold text-slate-600">192.168.10.65</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Zebra Thermal Print Engine &bull; Gate 02</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700"><i data-lucide="badge-check" class="w-3 h-3"></i>Tervalidasi</span>
-                    <div class="text-[11px] font-semibold text-blue-400 mt-1.5">#381ab9210</div>
-                  </td>
-                  <td class="text-right"><button class="w-8 h-8 rounded-lg hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors" data-toast="Detail event log DO-OUT-2025-0941 dibuka" data-toast-type="info" title="Lihat JSON"><i data-lucide="braces" class="w-4 h-4"></i></button></td>
-                </tr>
+                @endforelse
               </tbody>
             </table>
           </div>
 
-          <!-- Empty state -->
-          <div id="logEmpty" class="hidden py-10 text-center">
-            <i data-lucide="search-x" class="w-8 h-8 text-slate-300 mx-auto"></i>
-            <div class="mt-2 text-[13px] font-semibold text-slate-500">Tidak ada log aktivitas yang cocok dengan filter.</div>
-          </div>
+          {{-- Empty state: data kosong sudah ditangani forelse di tbody --}}
 
           <!-- Pagination -->
           <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
-            <div class="text-[12px] text-slate-500 font-medium">Menampilkan 1 - 6 dari 1.428 Log Aktivitas &bull; Halaman 1 dari 238</div>
+            <div class="text-[12px] text-slate-500 font-medium">
+                Menampilkan {{ $logs->firstItem() ?? 0 }} - {{ $logs->lastItem() ?? 0 }} dari {{ number_format($logs->total()) }} Log Aktivitas &bull; Halaman {{ $logs->currentPage() }} dari {{ $logs->lastPage() }}
+            </div>
             <div class="flex items-center gap-1.5">
-              <button class="ai-btn ai-btn-secondary opacity-50 cursor-not-allowed" disabled>Sebelumnya</button>
-              <button class="w-9 h-9 rounded-lg bg-blue-600 text-white text-[12.5px] font-bold shadow-md shadow-blue-600/30">1</button>
-              <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 2 dimuat" data-toast-type="info">2</button>
-              <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 3 dimuat" data-toast-type="info">3</button>
-              <span class="text-slate-400 px-1">...</span>
-              <button class="w-9 h-9 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100" data-toast="Halaman 238 dimuat" data-toast-type="info">238</button>
-              <button class="ai-btn ai-btn-secondary" data-toast="Halaman 2 dimuat" data-toast-type="info">Berikutnya</button>
+              @if($logs->onFirstPage())
+                <button class="ai-btn ai-btn-secondary opacity-50 cursor-not-allowed" disabled>Sebelumnya</button>
+              @else
+                <a href="{{ $logs->previousPageUrl() }}" class="ai-btn ai-btn-secondary">Sebelumnya</a>
+              @endif
+              @foreach($logs->getUrlRange(max(1, $logs->currentPage() - 2), min($logs->lastPage(), $logs->currentPage() + 2)) as $page => $url)
+                <a href="{{ $url }}" class="w-9 h-9 rounded-lg text-[12.5px] font-semibold {{ $page === $logs->currentPage() ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-600 hover:bg-slate-100' }} flex items-center justify-center">{{ $page }}</a>
+              @endforeach
+              @if($logs->hasMorePages())
+                <a href="{{ $logs->nextPageUrl() }}" class="ai-btn ai-btn-secondary">Berikutnya</a>
+              @else
+                <button class="ai-btn ai-btn-secondary opacity-50 cursor-not-allowed" disabled>Berikutnya</button>
+              @endif
             </div>
           </div>
         </section>
@@ -684,19 +557,19 @@
             <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i data-lucide="lock" class="w-5 h-5 text-blue-600"></i></div>
             <h3 class="mt-3.5 text-[15px] font-bold text-slate-800">Penyimpanan Log Anti-Tamper (WORM)</h3>
             <p class="mt-2 text-[12.5px] text-slate-500 leading-relaxed">Standar keamanan kepatuhan audit Write-Once-Read-Many, memastikan rekaman log tidak dapat dimanipulasi atau dihapus oleh siapapun termasuk super admin. Dilengkapi cryptographic hashing per blok event.</p>
-            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1" data-toast="Membuka dokumentasi Arsitektur Log WORM" data-toast-type="info">Pelajari Arsitektur Log WORM <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 opacity-60 cursor-not-allowed" disabled title="Dokumentasi arsitektur belum tersedia">Pelajari Arsitektur Log WORM <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
           </div>
           <div class="ai-card ai-card-hover ai-reveal p-6" data-delay="80">
             <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center"><i data-lucide="brain-circuit" class="w-5 h-5 text-indigo-600"></i></div>
             <h3 class="mt-3.5 text-[15px] font-bold text-slate-800">Deteksi Anomali Berbasis AI</h3>
             <p class="mt-2 text-[12.5px] text-slate-500 leading-relaxed">Pemantauan otomatis perilaku transaksi tidak wajar, lonjakan penyesuaian stok di luar jam kerja, atau login dari perangkat tidak dikenal dengan notifikasi push instan ke Security Officer.</p>
-            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1" data-toast="Panel Konfigurasi Alert Keamanan AI dibuka" data-toast-type="info">Konfigurasi Alert Keamanan AI <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 opacity-60 cursor-not-allowed" disabled title="Konfigurasi alert belum tersedia">Konfigurasi Alert Keamanan AI <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
           </div>
           <div class="ai-card ai-card-hover ai-reveal p-6" data-delay="160">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i></div>
             <h3 class="mt-3.5 text-[15px] font-bold text-slate-800">Arsip &amp; Kebijakan Ekspor Forensik</h3>
             <p class="mt-2 text-[12.5px] text-slate-500 leading-relaxed">Ekspor data log terenkripsi dengan stempel waktu tersertifikasi digital (Digital Timestamp RFC 3161) untuk kebutuhan kepatuhan audit internal dan audit eksternal standar sertifikasi ISO 27001.</p>
-            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1" data-toast="Berkas audit resmi disiapkan untuk diunduh">
+            <button class="mt-3.5 text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 opacity-60 cursor-not-allowed" disabled title="Ekspor berkas audit belum tersedia">
               Unduh Berkas Audit Resmi <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
           </div>
         </section>
@@ -899,56 +772,53 @@
 
 <script>
 /* ============================================================
-   Log Aktivitas — filter pill kategori, search, urgensi, modul, peran
+   Log Aktivitas — modal JSON perubahan data
    ============================================================ */
     (function () {
-      var rows = Array.prototype.slice.call(document.querySelectorAll("#logBody tr"));
-      var search = document.getElementById("logSearch");
-      var fUrgensi = document.getElementById("fUrgensi");
-      var fModul = document.getElementById("fModul");
-      var fPeran = document.getElementById("fPeran");
-      var empty = document.getElementById("logEmpty");
-      var activeCat = "semua";
+      var modalRoot = null;
 
-      function applyFilter() {
-        var q = (search.value || "").trim().toLowerCase();
-        var shown = 0;
-        rows.forEach(function (r) {
-          var ok = true;
-          if (activeCat !== "semua" && r.getAttribute("data-cat") !== activeCat) ok = false;
-          if (ok && fUrgensi.value !== "semua" && r.getAttribute("data-urgensi") !== fUrgensi.value) ok = false;
-          if (ok && fModul.value !== "semua" && r.getAttribute("data-modul") !== fModul.value) ok = false;
-          if (ok && fPeran.value !== "semua" && r.getAttribute("data-peran") !== fPeran.value) ok = false;
-          if (ok && q && (r.getAttribute("data-text") + " " + r.textContent.toLowerCase()).indexOf(q) === -1) ok = false;
-          r.style.display = ok ? "" : "none";
-          if (ok) shown++;
+      function ensureModal() {
+        if (modalRoot) return modalRoot;
+        modalRoot = document.createElement('div');
+        modalRoot.className = 'fixed inset-0 z-[9999] hidden items-center justify-center p-4';
+        modalRoot.id = 'logJsonModal';
+        modalRoot.innerHTML =
+          '<div class="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]" data-close></div>' +
+          '<div class="ai-card relative w-full max-w-xl max-h-[80vh] overflow-auto p-5">' +
+          '<div class="flex items-start justify-between gap-3 mb-3">' +
+          '<div><div class="text-[16px] font-extrabold text-slate-800" id="logJsonTitle">Detail Log</div>' +
+          '<div class="text-[12px] text-slate-500 mt-0.5" id="logJsonActor"></div></div>' +
+          '<button type="button" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500" data-close><i data-lucide="x" class="w-4 h-4"></i></button>' +
+          '</div>' +
+          '<pre id="logJsonBody" class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11.5px] font-mono text-slate-700 overflow-auto max-h-[50vh]"></pre>' +
+          '</div>';
+        document.body.appendChild(modalRoot);
+        modalRoot.addEventListener('click', function (e) {
+          if (e.target.closest('[data-close]')) close();
         });
-        empty.classList.toggle("hidden", shown > 0);
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !modalRoot.classList.contains('hidden')) close();
+        });
+        return modalRoot;
       }
 
-      // Sinkron pill (data-tabs) dengan filter kategori
-      document.querySelector('[data-tabs="log"]').addEventListener("ai:tabchange", function (e) {
-        activeCat = e.detail.tab;
-        applyFilter();
-        var labels = { semua: "Semua Log", transaksi: "Transaksi Inventaris", otorisasi: "Otorisasi & Approval", master: "Modifikasi Master Data", akses: "Akses & Keamanan Login" };
-        window.aiToast("Filter kategori: " + labels[e.detail.tab], "info");
-      });
+      function open() { var m = ensureModal(); m.classList.remove('hidden'); m.classList.add('flex'); }
+      function close() { var m = ensureModal(); m.classList.add('hidden'); m.classList.remove('flex'); }
 
-      search.addEventListener("input", applyFilter);
-      [fUrgensi, fModul, fPeran].forEach(function (s) { s.addEventListener("change", applyFilter); });
-
-      document.getElementById("btnReset").addEventListener("click", function () {
-        search.value = ""; fUrgensi.value = "semua"; fModul.value = "semua"; fPeran.value = "semua";
-        activeCat = "semua";
-        document.querySelectorAll('[data-tabs="log"] [data-tab]').forEach(function (p) {
-          p.classList.toggle("ai-pill-active", p.getAttribute("data-tab") === "semua");
-        });
-        applyFilter();
-        window.aiToast("Semua filter log berhasil direset.", "success");
-      });
-
-      applyFilter();
-      window.aiRefresh();
+      window.showLogJson = function (actor, action, changesJson) {
+        var m = ensureModal();
+        document.getElementById('logJsonTitle').textContent = 'Detail Log — ' + action;
+        document.getElementById('logJsonActor').textContent = 'Oleh: ' + actor;
+        var body = document.getElementById('logJsonBody');
+        try {
+          var parsed = JSON.parse(changesJson || '{}');
+          body.textContent = JSON.stringify(parsed, null, 2);
+        } catch (err) {
+          body.textContent = changesJson || '{}';
+        }
+        open();
+        if (window.aiIcons) window.aiIcons();
+      };
     })();
 </script>
 

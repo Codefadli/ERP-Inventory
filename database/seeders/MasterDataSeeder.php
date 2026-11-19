@@ -16,6 +16,13 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // Hub untuk distribusi master data (filter "pemilihan hub").
+        $hubIds = DB::table('hubs')->orderBy('id')->pluck('id')->all();
+        $hubFor = function (int $index) use ($hubIds) {
+            if (empty($hubIds)) return null;
+            return $hubIds[$index % count($hubIds)];
+        };
+
         // 1. Categories — matching hardcoded data from MasterDataController::getCommonData()
         $categories = [
             ['kode' => 'CAT-001', 'nama' => 'Elektronik & Hardware', 'deskripsi' => 'Komponen IT, kabel, adaptor, dan perangkat periferal', 'status' => true],
@@ -26,10 +33,13 @@ class MasterDataSeeder extends Seeder
             ['kode' => 'CAT-006', 'nama' => 'Safety & APD', 'deskripsi' => 'Helm proyek, sarung tangan safety, kacamata pelindung', 'status' => false],
         ];
 
-        foreach ($categories as $cat) {
+        foreach ($categories as $index => $cat) {
             $cat['created_at'] = now();
             $cat['updated_at'] = now();
             $cat['deleted_at'] = null;
+            if (!array_key_exists('hub_id', $cat)) {
+                $cat['hub_id'] = $hubFor($index);
+            }
             DB::table('categories')->insert($cat);
         }
 
@@ -60,10 +70,13 @@ class MasterDataSeeder extends Seeder
             ['kode' => 'RAK-T-00', 'nama' => 'Lantai Transit Sementara', 'gudang' => 'Area Transit', 'nama_rak' => 'Lantai Transit Sementara', 'kapasitas' => 30, 'terisi' => 5, 'keterangan' => 'Barang baru bongkar belum QC', 'status' => true],
         ];
 
-        foreach ($locations as $loc) {
+        foreach ($locations as $index => $loc) {
             $loc['created_at'] = now();
             $loc['updated_at'] = now();
             $loc['deleted_at'] = null;
+            if (!array_key_exists('hub_id', $loc)) {
+                $loc['hub_id'] = $hubFor($index);
+            }
             DB::table('locations')->insert($loc);
         }
 
@@ -75,10 +88,13 @@ class MasterDataSeeder extends Seeder
             ['kode' => 'SPL-004', 'nama' => 'UD Sejahtera Logistik Pack', 'pic' => 'Agus Pratama', 'telepon' => '0811-2233-4455', 'email' => 'agus@sejahterapack.id', 'kota' => 'Surabaya', 'alamat' => 'Rungkut Industri Raya No 55', 'status' => true],
         ];
 
-        foreach ($suppliers as $supplier) {
+        foreach ($suppliers as $index => $supplier) {
             $supplier['created_at'] = now();
             $supplier['updated_at'] = now();
             $supplier['deleted_at'] = null;
+            if (!array_key_exists('hub_id', $supplier)) {
+                $supplier['hub_id'] = $hubFor($index);
+            }
             DB::table('suppliers')->insert($supplier);
         }
 
@@ -91,14 +107,18 @@ class MasterDataSeeder extends Seeder
             ['kode' => 'DIV-FIN', 'nama' => 'Keuangan & Akuntansi', 'kepala' => 'Budi Santoso, SE', 'keterangan' => 'ATK, kertas faktur, binder arsip pajak', 'status' => true],
         ];
 
-        foreach ($divisions as $division) {
+        foreach ($divisions as $index => $division) {
             $division['created_at'] = now();
             $division['updated_at'] = now();
             $division['deleted_at'] = null;
+            if (!array_key_exists('hub_id', $division)) {
+                $division['hub_id'] = $hubFor($index);
+            }
             DB::table('divisions')->insert($division);
         }
 
-        // 6. Items
+        // 6. Items — setiap item diberi hub_id (distribusi ke hub yang ada,
+        //    agar filter "pemilihan hub" pada halaman Data Barang berfungsi).
         $items = [
             [
                 'sku' => 'ELK-0010',
@@ -198,10 +218,13 @@ class MasterDataSeeder extends Seeder
             ],
         ];
 
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
             $item['created_at'] = now();
             $item['updated_at'] = now();
             $item['deleted_at'] = null;
+            if (!array_key_exists('hub_id', $item)) {
+                $item['hub_id'] = $hubFor($index);
+            }
             DB::table('items')->insert($item);
         }
     }

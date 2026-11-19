@@ -208,13 +208,12 @@
                 </div>
             </section>
 
-            {{-- Demo Notice --}}
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 flex items-start gap-3">
-                <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
-                <p class="text-xs text-amber-800">
-                    <strong>Informasi:</strong> Data pada halaman ini merupakan data simulasi
-                    untuk tampilan antarmuka. Data belum diambil dari database audit atau
-                    sistem ledger sebenarnya.
+            {{-- Info Hub --}}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 flex items-start gap-3">
+                <i class="fas fa-building text-blue-600 mt-0.5"></i>
+                <p class="text-xs text-blue-800">
+                    <strong>Hub terpilih:</strong> {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}
+                    &mdash; menampilkan {{ number_format($stats['total']) }} rekaman audit dari tabel <code>audit_logs</code>.
                 </p>
             </div>
 
@@ -233,7 +232,7 @@
                             AKTIF
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-3">Status simulasi monitoring audit</p>
+                    <p class="text-xs text-gray-500 mt-3">Pencatatan audit berjalan realtime</p>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
@@ -243,10 +242,10 @@
                         </div>
                         <div>
                             <p class="text-sm font-bold text-gray-900">
-                                <span class="count-up" data-target="4">0</span>
-                                <span class="text-green-600 text-xs ml-1">+14,2%</span>
+                                <span class="count-up" data-target="{{ $stats['today'] }}">0</span>
+                                <span class="text-xs text-gray-500 ml-1">hari ini</span>
                             </p>
-                            <p class="text-xs text-gray-500">Aktivitas bulan ini</p>
+                            <p class="text-xs text-gray-500">Aktivitas tercatat</p>
                         </div>
                     </div>
                 </div>
@@ -258,14 +257,14 @@
                                 <i class="fas fa-exclamation-triangle text-pink-600"></i>
                             </div>
                             <span class="text-sm font-semibold text-gray-900">
-                                <span class="count-up" data-target="2">0</span>
+                                <span class="count-up" data-target="{{ $stats['insiden'] }}">0</span>
                             </span>
                         </div>
                         <span class="bg-pink-100 text-pink-700 px-2 py-1 rounded text-xs font-semibold">
-                            Perlu Review
+                            Insiden
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-3">Aktivitas yang perlu diperiksa</p>
+                    <p class="text-xs text-gray-500 mt-3">Aktivitas gagal / perlu review</p>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-audit">
@@ -275,7 +274,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-900">Zero Conflict</p>
-                            <p class="text-xs text-gray-500">Status simulasi: OK</p>
+                            <p class="text-xs text-gray-500 mt-1">Kepatuhan pemisahan tugas</p>
                         </div>
                     </div>
                 </div>
@@ -290,10 +289,10 @@
                         <i class="fas fa-link text-green-600"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="100">0</span>%
+                        <span class="count-up" data-target="{{ $stats['total'] }}">0</span>
                     </h3>
-                    <p class="text-sm text-gray-600 mb-2">Integritas Rantai Audit</p>
-                    <p class="text-xs text-gray-500">Indikator integritas data contoh</p>
+                    <p class="text-sm text-gray-600 mb-2">Total Entri Audit</p>
+                    <p class="text-xs text-gray-500">Seluruh rekaman pada hub terpilih</p>
                 </div>
 
                 <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
@@ -301,10 +300,10 @@
                         <i class="fas fa-database text-blue-600"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="24810">0</span>
+                        <span class="count-up" data-target="{{ $stats['master'] }}">0</span>
                     </h3>
-                    <p class="text-sm text-gray-600 mb-2">Total Entri Audit</p>
-                    <p class="text-xs text-gray-500">Angka simulasi jumlah rekaman</p>
+                    <p class="text-sm text-gray-600 mb-2">Modifikasi Data</p>
+                    <p class="text-xs text-gray-500">Create / Update / Delete</p>
                 </div>
 
                 <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
@@ -312,10 +311,10 @@
                         <i class="fas fa-exclamation-circle text-orange-600"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="4">0</span>
+                        <span class="count-up" data-target="{{ $stats['kritis'] }}">0</span>
                     </h3>
-                    <p class="text-sm text-gray-600 mb-2">Intervensi / Deviasi</p>
-                    <p class="text-xs text-gray-500">2 deviasi opname dan 2 mutasi ditolak</p>
+                    <p class="text-sm text-gray-600 mb-2">Aktivitas Kritis</p>
+                    <p class="text-xs text-gray-500">Hapus, nonaktifkan, cabut sesi, failure</p>
                 </div>
 
                 <div class="metric-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
@@ -323,15 +322,15 @@
                         <i class="fas fa-user-shield text-purple-600"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-900">
-                        <span class="count-up" data-target="100">0</span>%
+                        <span class="count-up" data-target="{{ $stats['akses'] }}">0</span>
                     </h3>
-                    <p class="text-sm text-gray-600 mb-2">Kepatuhan SoD</p>
-                    <p class="text-xs text-gray-500">Indikator pemisahan tugas pengguna</p>
+                    <p class="text-sm text-gray-600 mb-2">Akses & Keamanan</p>
+                    <p class="text-xs text-gray-500">Login, logout, aktivasi, cabut sesi</p>
                 </div>
 
             </section>
 
-            {{-- Merkle Root --}}
+            {{-- Ringkasan Audit --}}
             <section class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 mb-6 shadow-lg">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
 
@@ -343,16 +342,16 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap mb-2">
                                 <p class="text-white font-bold text-sm">
-                                    CONTOH HASH AUDIT (#BLK-202505-09)
+                                    AUDIT TRAIL &bull; {{ $hubScopeLabel }}{{ $hubScopeCode ? ' (' . $hubScopeCode . ')' : '' }}
                                 </p>
                                 <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                                    Contoh SHA-256
+                                    Realtime
                                 </span>
                             </div>
 
                             <div id="auditHash"
                                 class="hash-display bg-white/10 rounded px-3 py-2 text-xs text-white break-all">
-                                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                                {{ number_format($stats['total']) }} rekaman audit tercatat &bull; {{ $stats['today'] }} hari ini
                             </div>
                         </div>
                     </div>
@@ -361,7 +360,7 @@
                         <button type="button" id="copyHash"
                             class="btn-primary bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
                             <i class="fas fa-copy"></i>
-                            <span>Salin Hash</span>
+                            <span>Salin Ringkasan</span>
                         </button>
                     </div>
 
@@ -369,60 +368,47 @@
             </section>
 
             {{-- Filter Section --}}
-            <section class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+            <form method="GET" action="{{ route('hr.log-audit-otorisasi') }}" class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
 
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 
                     <div class="flex flex-wrap items-center gap-2">
 
-                        <select id="filterHub"
+                        <select name="hub" id="filterHub"
                             class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="">Semua Hub</option>
-                            <option value="DC-01">Cakung DC-01</option>
-                            <option value="DC-02">Rungkut DC-02</option>
-                            <option value="DC-03">Gedebage DC-03</option>
-                            <option value="DC-04">Belawan DC-04</option>
+                            <option value="all" {{ $selectedHubId === 'all' ? 'selected' : '' }}>Semua Hub</option>
+                            @foreach($hubs as $hubOpt)
+                                <option value="{{ $hubOpt->id }}" {{ (string) $hubOpt->id === (string) $selectedHubId ? 'selected' : '' }}>
+                                    {{ $hubOpt->name }} ({{ $hubOpt->code }})
+                                </option>
+                            @endforeach
                         </select>
 
-                        <select id="filterType"
+                        <select name="result" id="filterResult"
                             class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="">Semua Tipe Event</option>
-                            <option value="approval">Approval</option>
-                            <option value="discrepancy">Discrepancy</option>
-                            <option value="master">Master Data</option>
-                            <option value="rejection">Penolakan</option>
-                            <option value="system">Sistem</option>
+                            <option value="">Semua Hasil</option>
+                            <option value="success" {{ $result === 'success' ? 'selected' : '' }}>Sukses</option>
+                            <option value="failure" {{ $result === 'failure' ? 'selected' : '' }}>Gagal / Insiden</option>
                         </select>
 
-                        <button type="button" data-range="today"
-                            class="range-button px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
-                            Hari Ini
-                        </button>
-
-                        <button type="button" data-range="7"
-                            class="range-button px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">
-                            7 Hari
-                        </button>
-
-                        <button type="button" data-range="30"
-                            class="range-button px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
-                            30 Hari
-                        </button>
+                        <div class="relative">
+                            <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                            <input type="text" name="q" value="{{ $q }}" placeholder="Cari nama, NIP, aksi, entitas..."
+                                class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 w-52">
+                        </div>
 
                     </div>
 
                     <div class="flex flex-wrap gap-2 no-print">
-                        <button type="button" id="resetFilter"
-                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                            <i class="fas fa-sync-alt mr-1"></i>
-                            Reset Filter
+                        <button type="submit"
+                            class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                            <i class="fas fa-filter mr-1"></i>Terapkan
                         </button>
 
-                        <button type="button" id="refreshAudit"
-                            class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                            <i class="fas fa-redo mr-1"></i>
-                            Segarkan
-                        </button>
+                        <a href="{{ route('hr.log-audit-otorisasi') }}"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            <i class="fas fa-sync-alt mr-1"></i>Reset
+                        </a>
                     </div>
 
                 </div>
@@ -432,11 +418,11 @@
 
                     <span id="activeFilter"
                         class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs">
-                        7 Hari Terakhir • Semua Hub • Semua Event
+                        {{ $hubScopeLabel }} &bull; {{ $result === 'failure' ? 'Gagal / Insiden' : ($result === 'success' ? 'Sukses' : 'Semua Hasil') }} &bull; {{ $q ?: 'Tanpa pencarian' }}
                     </span>
                 </div>
 
-            </section>
+            </form>
 
             {{-- Summary --}}
             <section class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -452,15 +438,15 @@
                                 Rincian Log Transaksi & Aktivitas Pengguna
                             </p>
                             <p class="text-xs text-blue-700">
-                                Daftar contoh rekaman aktivitas audit sistem inventaris.
+                                Rekaman audit realtime dari tabel audit_logs pada hub terpilih.
                             </p>
                         </div>
                     </div>
 
                     <p class="text-sm text-blue-700">
                         Menampilkan
-                        <span id="visibleCount" class="font-bold">5</span>
-                        dari 5 contoh log
+                        <span id="visibleCount" class="font-bold">{{ $logs->count() }}</span>
+                        dari {{ number_format($logs->total()) }} log
                     </p>
 
                 </div>
@@ -491,7 +477,7 @@
                                     Timestamp (WIB)
                                 </th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Event ID & Hash
+                                    Event ID &amp; Entitas
                                 </th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                                     Pelaku / Aktor
@@ -500,158 +486,77 @@
                                     Tipe Operasi
                                 </th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                    Hub
+                                    Hasil
                                 </th>
                             </tr>
                         </thead>
 
                         <tbody id="auditTableBody">
-
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-01" data-type="approval">
+                            @php
+                                $actionLabels = [
+                                    'create' => 'Membuat Data', 'update' => 'Memperbarui Data', 'delete' => 'Menghapus Data',
+                                    'activate' => 'Mengaktifkan Akun', 'deactivate' => 'Menonaktifkan Akun',
+                                    'login' => 'Login', 'logout' => 'Logout', 'revoke_session' => 'Cabut Sesi',
+                                    'approve' => 'Approval', 'reject' => 'Penolakan', 'approval' => 'Approval',
+                                    'export' => 'Ekspor Data', 'reset' => 'Reset Konfigurasi',
+                                ];
+                                $entityLabels = [
+                                    'App\\Models\\User' => 'Pengguna', 'App\\Models\\Setting' => 'Pengaturan',
+                                    'App\\Models\\Category' => 'Kategori', 'App\\Models\\Unit' => 'Satuan',
+                                    'App\\Models\\Location' => 'Lokasi', 'App\\Models\\Supplier' => 'Supplier',
+                                    'App\\Models\\Division' => 'Divisi', 'App\\Models\\Item' => 'Barang',
+                                    'App\\Models\\Hub' => 'Hub',
+                                ];
+                            @endphp
+                            @forelse($logs as $log)
+                            @php
+                                $actorName = $log->user?->nama_lengkap ?? 'Sistem';
+                                $actorRole = $log->user?->role?->name ?? 'Otomatis';
+                                $entityLabel = $entityLabels[$log->entity_type] ?? ($log->entity_type ? class_basename($log->entity_type) : 'Entitas');
+                            @endphp
+                            <tr class="table-row border-b border-gray-100">
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 14:32:18</p>
-                                    <p class="text-xs text-gray-500">10 menit yang lalu</p>
+                                    <p class="text-sm font-semibold text-gray-900">{{ $log->created_at->format('d M Y, H:i:s') }}</p>
+                                    <p class="text-xs text-gray-500">{{ $log->created_at->diffForHumans() }}</p>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098412</p>
-                                    <p class="text-xs text-gray-500 font-mono">7e8d5ff01...</p>
+                                    <p class="text-sm font-semibold text-blue-600">#{{ $log->id }}</p>
+                                    <p class="text-xs text-gray-500">{{ $entityLabel }} &bull; ID {{ $log->entity_id ?? '-' }}</p>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            SR
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 {{ $log->user ? 'bg-blue-600' : 'bg-gray-500' }}">
+                                            {{ $actorName === 'Sistem' ? 'SY' : collect(preg_split('/\s+/', $actorName))->take(2)->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->join('') }}
                                         </div>
                                         <div>
-                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
-                                            <p class="text-xs text-gray-500">HR Lead Approver</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ $actorName }}</p>
+                                            <p class="text-xs text-gray-500">{{ $actorRole }}{{ $log->user?->nip ? ' &bull; NIP ' . $log->user->nip : '' }}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Approval Mutasi Antar-Hub
+                                    <span class="{{ $log->result === 'failure' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }} px-3 py-1 rounded-full text-xs font-semibold">
+                                        {{ $actionLabels[$log->action] ?? ucwords(str_replace('_', ' ', $log->action)) }}
+                                    </span>
+                                    @if($log->description)
+                                    <p class="text-xs text-gray-500 mt-1.5">{{ \Illuminate\Support\Str::limit($log->description, 90) }}</p>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="{{ $log->result === 'failure' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }} px-3 py-1 rounded-full text-xs font-semibold">
+                                        {{ $log->result === 'failure' ? 'Gagal / Insiden' : 'Sukses' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-01</td>
                             </tr>
-
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-02" data-type="discrepancy">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 13:45:02</p>
-                                    <p class="text-xs text-gray-500">1 jam yang lalu</p>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-10 text-center">
+                                    <i class="fas fa-search text-3xl text-gray-300 mb-3"></i>
+                                    <p class="text-sm font-semibold text-gray-600">Belum ada log pada hub ini</p>
+                                    <p class="text-xs text-gray-500 mt-1">Silakan ubah hub atau filter pencarian.</p>
                                 </td>
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098408</p>
-                                    <p class="text-xs text-gray-500 font-mono">19ac32ff09...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            DA
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Dewi Anggraini</p>
-                                            <p class="text-xs text-gray-500">Auditor Internal Logistik</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Selisih Opname
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-02</td>
                             </tr>
-
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-03" data-type="master">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 12:11:40</p>
-                                    <p class="text-xs text-gray-500">2 jam yang lalu</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098389</p>
-                                    <p class="text-xs text-gray-500 font-mono">cc9d216de8...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            BS
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Budi Santoso</p>
-                                            <p class="text-xs text-gray-500">Admin Utama</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Penyesuaian Master Bin
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-03</td>
-                            </tr>
-
-                            <tr class="table-row border-b border-gray-100"
-                                data-hub="DC-01" data-type="rejection">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 10:20:15</p>
-                                    <p class="text-xs text-gray-500">4 jam yang lalu</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098381</p>
-                                    <p class="text-xs text-gray-500 font-mono">33e1150c89...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            SR
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Siti Rahmawati</p>
-                                            <p class="text-xs text-gray-500">HR Lead Approver</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Penolakan Mutasi Stok
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-01</td>
-                            </tr>
-
-                            <tr class="table-row"
-                                data-hub="DC-04" data-type="system">
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-gray-900">15 Mei 2025, 08:00:00</p>
-                                    <p class="text-xs text-gray-500">6 jam yang lalu</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <p class="text-sm font-semibold text-blue-600">EVT-2025-098350</p>
-                                    <p class="text-xs text-gray-500 font-mono">a641f92c64...</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
-                                            <i class="fas fa-robot"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">Sistem Otomatis</p>
-                                            <p class="text-xs text-gray-500">ASTRO-CORE-AUTORUN</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Snapshot Integritas Harian
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">DC-04</td>
-                            </tr>
-
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -664,11 +569,30 @@
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5 pt-5 border-t border-gray-200">
                     <p class="text-sm text-gray-600">
-                        Menampilkan <span id="tableCount" class="font-semibold">5</span> data contoh
+                        Menampilkan <span id="tableCount" class="font-semibold">{{ $logs->count() }}</span> dari {{ number_format($logs->total()) }} rekaman
                     </p>
                     <p class="text-xs text-gray-500">
-                        Halaman 1 dari 1
+                        Halaman {{ $logs->currentPage() }} dari {{ $logs->lastPage() }}
                     </p>
+                    <div class="flex items-center gap-1">
+                        @if($logs->onFirstPage())
+                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">◄◄</span>
+                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">◄</span>
+                        @else
+                            <a href="{{ $logs->url(1) }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">◄◄</a>
+                            <a href="{{ $logs->previousPageUrl() }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">◄</a>
+                        @endif
+                        @foreach($logs->getUrlRange(max(1, $logs->currentPage() - 2), min($logs->lastPage(), $logs->currentPage() + 2)) as $page => $url)
+                            <a href="{{ $url }}" class="px-3 py-1 rounded text-sm {{ $page === $logs->currentPage() ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-50' }}">{{ $page }}</a>
+                        @endforeach
+                        @if($logs->hasMorePages())
+                            <a href="{{ $logs->nextPageUrl() }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">►</a>
+                            <a href="{{ $logs->url($logs->lastPage()) }}" class="px-2 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">►►</a>
+                        @else
+                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">►</span>
+                            <span class="px-2 py-1 border border-gray-300 rounded text-sm text-gray-300">►►</span>
+                        @endif
+                    </div>
                 </div>
 
             </section>
@@ -877,82 +801,10 @@
             }
         });
 
-        // Filter audit table
-        function applyFilters() {
-            const hub = $('#filterHub')?.value || '';
-            const type = $('#filterType')?.value || '';
-            const rows = [...$$('#auditTableBody tr')];
-
-            let visible = 0;
-
-            rows.forEach((row) => {
-                const matchesHub = !hub || row.dataset.hub === hub;
-                const matchesType = !type || row.dataset.type === type;
-                const show = matchesHub && matchesType;
-
-                row.classList.toggle('hidden', !show);
-
-                if (show) visible++;
-            });
-
-            $('#visibleCount').textContent = visible;
-            $('#tableCount').textContent = visible;
-            $('#emptyAudit').classList.toggle('hidden', visible !== 0);
-
-            const hubText = hub || 'Semua Hub';
-            const typeText = type ?
-                $('#filterType').selectedOptions[0].textContent :
-                'Semua Event';
-
-            const rangeButton = $('.range-button.bg-blue-600');
-            const rangeText = rangeButton ? rangeButton.textContent.trim() : '7 Hari';
-
-            $('#activeFilter').textContent =
-                `${rangeText} • ${hubText} • ${typeText}`;
-        }
-
-        $('#filterHub')?.addEventListener('change', applyFilters);
-        $('#filterType')?.addEventListener('change', applyFilters);
-
-        // Reset filters
-        $('#resetFilter')?.addEventListener('click', () => {
-            $('#filterHub').value = '';
-            $('#filterType').value = '';
-
-            $$('.range-button').forEach((button) => {
-                button.classList.remove('bg-blue-600', 'text-white');
-                button.classList.add('bg-gray-100', 'text-gray-700');
-            });
-
-            const defaultRange = $('[data-range="7"]');
-
-            defaultRange.classList.add('bg-blue-600', 'text-white');
-            defaultRange.classList.remove('bg-gray-100', 'text-gray-700');
-
-            applyFilters();
-            showToast('Filter berhasil direset.');
-        });
-
-        // Range buttons (visual filter period)
-        $$('.range-button').forEach((button) => {
-            button.addEventListener('click', () => {
-                $$('.range-button').forEach((item) => {
-                    item.classList.remove('bg-blue-600', 'text-white');
-                    item.classList.add('bg-gray-100', 'text-gray-700');
-                });
-
-                button.classList.add('bg-blue-600', 'text-white');
-                button.classList.remove('bg-gray-100', 'text-gray-700');
-
-                applyFilters();
-                showToast('Rentang tampilan diperbarui.');
-            });
-        });
-
-        // Refresh demo data
-        $('#refreshAudit')?.addEventListener('click', () => {
-            applyFilters();
-            showToast('Tampilan log diperbarui.');
+        // Filter: ganti hub langsung submit form (server-side)
+        const filterForm = page.querySelector('form[action*="log-audit-otorisasi"]');
+        $('#filterHub')?.addEventListener('change', () => {
+            if (filterForm) filterForm.submit();
         });
 
         // Export visible rows to CSV
@@ -966,7 +818,7 @@
             }
 
             const csvRows = [
-                ['Timestamp WIB', 'Event ID', 'Hash', 'Pelaku', 'Tipe Operasi', 'Hub']
+                ['Timestamp WIB', 'Event ID', 'Entitas', 'Pelaku / Aktor', 'Tipe Operasi', 'Hasil']
             ];
 
             rows.forEach((row) => {
@@ -977,8 +829,8 @@
                     cells[1]?.querySelector('p')?.textContent.trim() || '',
                     cells[1]?.querySelectorAll('p')[1]?.textContent.trim() || '',
                     cells[2]?.querySelectorAll('p')[0]?.textContent.trim() || '',
-                    cells[3]?.textContent.trim() || '',
-                    cells[4]?.textContent.trim() || ''
+                    cells[3]?.querySelector('span')?.textContent.trim() || '',
+                    cells[4]?.querySelector('span')?.textContent.trim() || ''
                 ]);
             });
 
@@ -1048,7 +900,6 @@
 
         // Initialize
         animateCounters();
-        applyFilters();
 
     })();
 </script>
