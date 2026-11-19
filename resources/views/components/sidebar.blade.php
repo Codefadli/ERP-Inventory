@@ -20,11 +20,7 @@
         <!-- ================================================================ -->
 
         @if(auth()->user()->isSuperAdmin())
-
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">
-            Manajemen Sistem
-        </p>
-
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Manajemen Sistem</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-users w-4"></i>
             <span>Manajemen Pengguna</span>
@@ -34,18 +30,12 @@
             <i class="fas fa-user-shield w-4"></i>
             <span>Role & Permission</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-file-alt w-4"></i>
             <span>Log Aktivitas</span>
         </a>
 
-
-        <!-- MASTER DATA -->
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">
-            Master Data
-        </p>
-
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
@@ -57,17 +47,14 @@
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang &amp; Lokasi</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-building w-4"></i>
             <span>Data Departemen</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck w-4"></i>
             <span>Data Supplier</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-tags w-4"></i>
             <span>Kategori Barang</span>
@@ -88,7 +75,6 @@
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
@@ -101,22 +87,14 @@
             <span>Stok Opname</span>
         </a>
 
-        <!-- LAPORAN -->
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">
-            Laporan & Analitik
-        </p>
-
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Laporan & Analitik</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>
-
-        <!-- LAPORAN INVENTARIS SUPER ADMIN -->
-        <a href="{{ route('admin.laporan-inventaris') }}"
-            class="nav-link {{ request()->routeIs('admin.laporan-inventaris') ? 'active bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm mb-1">
-
-            <i class="fas fa-chart-pie w-4"></i>
-            <span>Laporan Inventaris</span>
+        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+            <i class="fas fa-history w-4"></i>
+            <span>Laporan & Riwayat</span>
         </a>
 
         <!-- PERSETUJUAN -->
@@ -139,11 +117,7 @@
         <!-- ================================================================ -->
 
         @if(auth()->user()->isKepalaGudang())
-
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">
-            Master Data & Inventaris
-        </p>
-
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data & Inventaris</p>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
@@ -171,7 +145,6 @@
             <i class="fas fa-truck w-4"></i>
             <span>Barang Keluar</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
@@ -189,7 +162,6 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Persetujuan Barang</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
@@ -322,12 +294,10 @@
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
         </a>
-
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
