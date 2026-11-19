@@ -1,0 +1,7 @@
+lokasi valid: count=1 audit=1
+lokasi duplikat: ditolak ✓
+departemen valid: count=1
+supplier valid: count=1
+kategori valid: count=1
+auditor lokasi: Illuminate\Auth\Access\AuthorizationException (403 ✓)
+ROLLBACK OK — data uji tidak tersimpan

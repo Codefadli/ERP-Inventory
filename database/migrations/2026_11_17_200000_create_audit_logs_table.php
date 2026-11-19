@@ -14,7 +14,9 @@ return new class extends Migration
             $table->string('action', 50)->comment('create|update|delete|activate|deactivate|login|logout|revoke_session');
             $table->string('entity_type', 100)->nullable()->comment('Model class atau entity name');
             $table->unsignedBigInteger('entity_id')->nullable()->comment('ID entitas yang diubah');
-            $table->json('changes')->nullable()->comment('Before/after untuk field yang diubah');
+            // MySQL 5.6 tidak mengenal tipe kolom JSON (baru ada di 5.7+).
+            // longText + cast 'array' pada model menghasilkan perilaku yang sama.
+            $table->longText('changes')->nullable()->comment('Before/after untuk field yang diubah');
             $table->string('ip_address', 45)->nullable();
             $table->string('user_agent', 255)->nullable();
             $table->string('result', 20)->default('success')->comment('success|failure');

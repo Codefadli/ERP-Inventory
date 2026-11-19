@@ -19,6 +19,7 @@ class Item extends Model
         'location_id',
         'supplier_id',
         'division_id',
+        'hub_id',
         'stok_minimum',
         'harga_beli',
         'harga_jual',
@@ -33,6 +34,7 @@ class Item extends Model
         'location_id' => 'integer',
         'supplier_id' => 'integer',
         'division_id' => 'integer',
+        'hub_id' => 'integer',
         'stok_minimum' => 'integer',
         'harga_beli' => 'decimal:2',
         'harga_jual' => 'decimal:2',
@@ -62,5 +64,10 @@ class Item extends Model
     public function division()
     {
         return $this->belongsTo(Division::class);
+    }
+
+    public function hub()
+    {
+        return $this->belongsTo(Hub::class, 'hub_id');
     }
 }

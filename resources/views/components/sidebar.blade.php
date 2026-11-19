@@ -143,7 +143,7 @@
             <i class="fas fa-chart-line w-4"></i>
             <span>Laporan Inventaris</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('hr.log-audit-otorisasi') }}" class="nav-link {{ request()->routeIs('hr.log-audit-otorisasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-shield-alt w-4"></i>
             <span>Log Audit & Otorisasi</span>
         </a>
@@ -166,6 +166,10 @@
         </a>
 
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Monitoring & Laporan</p>
+        <a href="{{ route('pegawai.data-barang') }}" class="nav-link {{ request()->routeIs('pegawai.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+            <i class="fas fa-boxes w-4"></i>
+            <span>Data Barang</span>
+        </a>
         <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-history w-4"></i>
             <span>Riwayat Transaksi</span>
