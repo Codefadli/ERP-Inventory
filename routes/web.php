@@ -88,6 +88,14 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
+        Route::get('/barang-masuk', function () {
+            return view('dashboard.barang-masuk');
+        })->name('barang-masuk');
+
+        Route::get('/barang-keluar', function () {
+            return view('dashboard.barang-keluar');
+        })->name('barang-keluar');
+
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/pengguna', [UserManagementController::class, 'index'])->name('pengguna');
             Route::post('/pengguna', [UserManagementController::class, 'store'])->name('pengguna.store');
@@ -183,8 +191,17 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
-        Route::get('/data-gudang-lokasi', [App\Http\Controllers\MasterDataPageController::class, 'lokasi'])
-            ->name('data-gudang-lokasi');
+        Route::get('/barang-masuk', function () {
+            return view('dashboard.barang-masuk');
+        })->name('barang-masuk');
+
+        Route::get('/barang-keluar', function () {
+            return view('dashboard.barang-keluar');
+        })->name('barang-keluar');
+
+        Route::get('/data-gudang-lokasi', function () {
+            return view('gudang.data-gudang-lokasi');
+        })->name('data-gudang-lokasi');
 
         Route::get('/persetujuan-barang', function () {
             return view('gudang.persetujuan-barang');
@@ -245,6 +262,14 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
+        Route::get('/barang-masuk', function () {
+            return view('dashboard.barang-masuk');
+        })->name('barang-masuk');
+
+        Route::get('/barang-keluar', function () {
+            return view('dashboard.barang-keluar');
+        })->name('barang-keluar');
+
         Route::get('/persetujuan-barang', function () {
             return view('dashboard.hr.persetujuan-barang');
         })->name('persetujuan-barang');
@@ -284,6 +309,13 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
 
+        Route::get('/barang-masuk', function () {
+            return view('dashboard.barang-masuk');
+        })->name('barang-masuk');
+
+        Route::get('/barang-keluar', function () {
+            return view('dashboard.barang-keluar');
+        })->name('barang-keluar');
         Route::middleware('permission:master.view')->group(function () {
             Route::get('/data-barang', [App\Http\Controllers\DataBarangController::class, 'index'])
                 ->name('data-barang');
@@ -322,6 +354,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/mutasi-barang', function () {
             return view('dashboard.mutasi-barang');
         })->name('mutasi-barang');
+
+        Route::get('/barang-masuk', function () {
+            return view('dashboard.barang-masuk');
+        })->name('barang-masuk');
+
+        Route::get('/barang-keluar', function () {
+            return view('dashboard.barang-keluar');
+        })->name('barang-keluar');
 
         Route::middleware('permission:audit.view')->group(function () {
             Route::get('/data-barang', [App\Http\Controllers\DataBarangController::class, 'index'])
