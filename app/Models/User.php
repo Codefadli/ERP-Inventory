@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phone',
         'profile_photo',
         'role_id',
+        'division_id',
         'selected_city_id',
         'selected_hub_id',
         'status',
@@ -66,11 +67,35 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi: User memiliki satu Divisi
+     */
+    public function division()
+    {
+        return $this->belongsTo(Division::class, 'division_id');
+    }
+
+    /**
      * Relasi: User memiliki banyak Token
      */
     public function tokens()
     {
         return $this->hasMany(UserToken::class);
+    }
+
+    /**
+     * Relasi: Registry sesi perangkat pengguna
+     */
+    public function sessions()
+    {
+        return $this->hasMany(UserSession::class);
+    }
+
+    /**
+     * Relasi: Jejak audit pengguna
+     */
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
     }
 
     /**
@@ -200,10 +225,42 @@ class User extends Authenticatable
     public function incrementLoginAttempts(): void
     {
         $this->increment('failed_login_attempts');
-        
-        // Lock akun setelah 5 kali gagal (sesuai SR-ASTRO-001)
-        if ($this->failed_login_attempts >= 5) {
-            $this->locked_until = now()->addMinutes(15);
+
+        // Batas percobaan login mengikuti konfigurasi keamanan (default 5).
+        $maxAttempts = 5;
+        try {
+            $maxAttempts = (int) \App\Models\Setting::where('key', 'security.max_login_attempts')
+                ->where('scope', 'global')
+                ->where('scope_id', 0)
+                ->value('value') ?: 5;
+        } catch (\Throwable $e) {
+            // Tabel settings belum tersedia: gunakan default.
+        }
+
+        if ($maxAttempts < 3) {
+            $maxAttempts = 3;
+        }
+
+        if ($this->failed_login_attempts >= $maxAttempts) {
+            // Durasi kunci mengikuti konfigurasi keamanan (default 15 menit).
+            $lockoutMinutes = 15;
+            try {
+                $lockoutMinutes = (int) \App\Models\Setting::where('key', 'security.lockout_minutes')
+                    ->where('scope', 'global')
+                    ->where('scope_id', 0)
+                    ->value('value') ?: 15;
+            } catch (\Throwable $e) {
+                // Tabel settings belum tersedia: gunakan default.
+            }
+
+            if ($lockoutMinutes < 5) {
+                $lockoutMinutes = 5;
+            }
+            if ($lockoutMinutes > 120) {
+                $lockoutMinutes = 120;
+            }
+
+            $this->locked_until = now()->addMinutes($lockoutMinutes);
             $this->save();
         }
     }

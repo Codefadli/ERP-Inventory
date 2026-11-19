@@ -153,6 +153,21 @@ class RolesAndUsersSeeder extends Seeder
             }
         }
 
+        $hubIds = DB::table('hubs')->pluck('id', 'code')->toArray();
+        $hubCities = DB::table('hubs')->pluck('city_id', 'code')->toArray();
+
+        // Setiap akun demo ditugaskan ke satu hub distribusi agar metrik
+        // dashboard benar-benar mencerminkan hub masing-masing (tidak
+        // mencampur seluruh pengguna sistem).
+        $homeHubByUser = [
+            'superadmin' => 'HUB-BDG-02',
+            'kepala_gudang' => 'HUB-JKT-01',
+            'hr_manager' => 'HUB-JKT-01',
+            'pegawai1' => 'HUB-JKT-01',
+            'pegawai2' => 'HUB-JKT-02',
+            'auditor' => 'HUB-JKT-01',
+        ];
+
         $users = [
             [
                 'username' => 'superadmin',
@@ -162,6 +177,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'SA001',
                 'phone' => '081234567890',
                 'role_id' => $roleIds['super_admin'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['superadmin']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['superadmin']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,
@@ -178,6 +195,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'KG001',
                 'phone' => '081234567891',
                 'role_id' => $roleIds['kepala_gudang'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['kepala_gudang']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['kepala_gudang']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,
@@ -194,6 +213,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'HR001',
                 'phone' => '081234567892',
                 'role_id' => $roleIds['hr'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['hr_manager']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['hr_manager']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,
@@ -210,6 +231,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'PG001',
                 'phone' => '081234567893',
                 'role_id' => $roleIds['pegawai'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['pegawai1']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['pegawai1']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,
@@ -226,6 +249,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'PG002',
                 'phone' => '081234567894',
                 'role_id' => $roleIds['pegawai'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['pegawai2']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['pegawai2']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,
@@ -242,6 +267,8 @@ class RolesAndUsersSeeder extends Seeder
                 'nip' => 'AU001',
                 'phone' => '081234567895',
                 'role_id' => $roleIds['audit'],
+                'selected_hub_id' => $hubIds[$homeHubByUser['auditor']] ?? null,
+                'selected_city_id' => $hubCities[$homeHubByUser['auditor']] ?? null,
                 'status' => 'active',
                 'failed_login_attempts' => 0,
                 'locked_until' => null,

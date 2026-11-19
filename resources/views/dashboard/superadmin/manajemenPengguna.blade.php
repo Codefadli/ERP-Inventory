@@ -261,17 +261,35 @@
         <span class="text-blue-600 font-bold">MANAJEMEN PENGGUNA &amp; HAK AKSES</span>
     </nav>
 
+        <!-- ============ FLASH MESSAGE ============ -->
+        @if(session('success'))
+          <div class="mb-4 ai-card p-4 border-l-4 border-emerald-500 bg-emerald-50 text-[13px] text-emerald-800">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+          <div class="mb-4 ai-card p-4 border-l-4 border-red-500 bg-red-50 text-[13px] text-red-800">{{ session('error') }}</div>
+        @endif
+        @if($errors->any())
+          <div class="mb-4 ai-card p-4 border-l-4 border-red-500 bg-red-50">
+            <div class="text-[13px] font-bold text-red-800 mb-1">Data pengguna tidak dapat disimpan:</div>
+            <ul class="list-disc pl-5 text-[12.5px] text-red-700 space-y-0.5">
+              @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
         <!-- ============ HEADER ============ -->
         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6 ai-reveal" data-delay="0">
           <div class="max-w-2xl">
             <h1 class="text-[25px] md:text-[29px] font-extrabold text-slate-900 leading-tight">Manajemen Pengguna &amp;<br>Hak Akses (RBAC)</h1>
-            <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">Kelola akun pengguna, penetapan peran (role-based access control), hak otorisasi gudang, dan pemantauan status keaktifan staf sistem inventaris Hub Cakung DC-01.</p>
+            <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">Kelola akun pengguna, penetapan peran (role-based access control), hak otorisasi gudang, dan pemantauan status keaktifan staf sistem inventaris {{ auth()->user()->selectedHub->name ?? 'multi-hub' }}.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5 flex-none">
-            <button class="ai-btn ai-btn-secondary" data-toast="Data user diekspor ke Excel (demo).">
-              <i data-lucide="download" class="w-4 h-4"></i> Export Data User
-            </button>
-            <button class="ai-btn ai-btn-secondary" data-toast="Membuka Konfigurasi Peran & Role...">
+            <a href="{{ route('admin.pengguna.export', request()->only(['q','role','status','hub','division','sort','dir'])) }}" class="ai-btn ai-btn-secondary">
+              <i data-lucide="download" class="w-4 h-4"></i> Export Data User (CSV)
+            </a>
+            <button type="button" class="ai-btn ai-btn-secondary opacity-60 cursor-not-allowed" title="Halaman konfigurasi role belum memiliki view/endpoint terpisah." disabled>
               <i data-lucide="shield" class="w-4 h-4"></i> Konfigurasi Peran &amp; Role
             </button>
             <button class="ai-btn ai-btn-primary" data-modal-open="modalTambahUser">
@@ -287,14 +305,14 @@
               <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center">
                 <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
               </div>
-              <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100">+4 Akun Baru (Bulan Ini)</span>
+              <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100">+{{ $stats['new_this_month'] }} Bulan Ini</span>
             </div>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-[30px] font-extrabold text-slate-900 leading-none"><span data-count="48">0</span></span>
+              <span class="text-[30px] font-extrabold text-slate-900 leading-none">{{ number_format($stats['total'], 0, ',', '.') }}</span>
               <span class="text-[13px] font-bold text-slate-400">Akun</span>
             </div>
             <div class="text-[13px] font-bold text-slate-700 mt-1.5">Total Pengguna Terdaftar</div>
-            <div class="text-[11.5px] text-slate-500 mt-0.5">Tersebar di 6 divisi operasional &amp; gudang</div>
+            <div class="text-[11.5px] text-slate-500 mt-0.5">Tersebar di {{ $divisions->count() }} divisi &amp; {{ $hubs->count() }} hub</div>
           </div>
 
           <div class="ai-card ai-card-hover p-5 ai-reveal" data-delay="80">
@@ -302,14 +320,14 @@
               <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center">
                 <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
               </div>
-              <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100">Shift Pagi Berjalan</span>
+              <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100">30 Menit Terakhir</span>
             </div>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-[30px] font-extrabold text-slate-900 leading-none"><span data-count="18">0</span></span>
+              <span class="text-[30px] font-extrabold text-slate-900 leading-none">{{ $stats['online'] }}</span>
               <span class="text-[13px] font-bold text-slate-400">Staf</span>
             </div>
-            <div class="text-[13px] font-bold text-slate-700 mt-1.5">Pengguna Aktif (Online)</div>
-            <div class="text-[11.5px] text-slate-500 mt-0.5">Hub Cakung DC-01 &amp; Head Office</div>
+            <div class="text-[13px] font-bold text-slate-700 mt-1.5">Pengguna Online</div>
+            <div class="text-[11.5px] text-slate-500 mt-0.5">Berdasarkan registry user_sessions</div>
           </div>
 
           <div class="ai-card ai-card-hover p-5 ai-reveal" data-delay="160">
@@ -317,14 +335,14 @@
               <div class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center">
                 <i data-lucide="lock" class="w-5 h-5 text-amber-500"></i>
               </div>
-              <span class="ai-badge bg-amber-50 text-amber-700 border border-amber-100">Perlu Otorisasi Admin</span>
+              <span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200">2FA Belum Tersedia</span>
             </div>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-[30px] font-extrabold text-slate-900 leading-none"><span data-count="3">0</span></span>
+              <span class="text-[30px] font-extrabold text-slate-900 leading-none">—</span>
               <span class="text-[13px] font-bold text-slate-400">Akun</span>
             </div>
             <div class="text-[13px] font-bold text-slate-700 mt-1.5">Menunggu Verifikasi / 2FA</div>
-            <div class="text-[11.5px] text-slate-500 mt-0.5">Staf baru rotasi divisi inbound/outbound</div>
+            <div class="text-[11.5px] text-slate-500 mt-0.5">Infrastruktur 2FA belum tersedia</div>
           </div>
 
           <div class="ai-card ai-card-hover p-5 ai-reveal" data-delay="240">
@@ -332,43 +350,74 @@
               <div class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center">
                 <i data-lucide="user-x" class="w-5 h-5 text-red-500"></i>
               </div>
-              <span class="ai-badge bg-red-50 text-red-600 border border-red-100">Audit Keamanan Berkala</span>
+              <span class="ai-badge bg-red-50 text-red-600 border border-red-100">Nonaktif</span>
             </div>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-[30px] font-extrabold text-slate-900 leading-none"><span data-count="2">0</span></span>
+              <span class="text-[30px] font-extrabold text-slate-900 leading-none">{{ $stats['inactive'] }}</span>
               <span class="text-[13px] font-bold text-slate-400">Akun</span>
             </div>
             <div class="text-[13px] font-bold text-slate-700 mt-1.5">Akun Nonaktif / Ditangguhkan</div>
-            <div class="text-[11.5px] text-slate-500 mt-0.5">1 mutasi luar kota, 1 masa cuti</div>
+            <div class="text-[11.5px] text-slate-500 mt-0.5">{{ $stats['active'] }} akun aktif saat ini</div>
           </div>
         </div>
 
         <!-- ============ PILL PERAN ============ -->
-        <div data-tabs="peran" class="flex flex-wrap gap-2 mb-4 ai-reveal" data-delay="120">
-          <button class="ai-pill ai-pill-active" data-tab="semua">Semua Peran (48)</button>
-          <button class="ai-pill" data-tab="superadmin">Super Admin (3)</button>
-          <button class="ai-pill" data-tab="kepala">Kepala Gudang / DC Manager (5)</button>
-          <button class="ai-pill" data-tab="supervisor">Supervisor Logistik (8)</button>
-          <button class="ai-pill" data-tab="admin">Admin Purchasing &amp; Inbound (12)</button>
-          <button class="ai-pill" data-tab="picker">Picker &amp; Checker Outbound (14)</button>
-          <button class="ai-pill" data-tab="auditor">Internal Auditor &amp; Finance (3)</button>
+        <div class="flex flex-wrap gap-2 mb-4 ai-reveal" data-delay="120">
+          @php
+            $filterQuery = request()->except(['role', 'page']);
+          @endphp
+          <a href="{{ route('admin.pengguna', $filterQuery) }}" class="ai-pill {{ !request('role') ? 'ai-pill-active' : '' }}">Semua Peran ({{ $stats['total'] }})</a>
+          @foreach($roles as $role)
+            <a href="{{ route('admin.pengguna', array_merge($filterQuery, ['role' => $role->code])) }}"
+               class="ai-pill {{ request('role') === $role->code ? 'ai-pill-active' : '' }}">
+              {{ $role->name }} ({{ $role->users_count }})
+            </a>
+          @endforeach
         </div>
 
         <!-- ============ SEARCH + FILTER ============ -->
-        <div class="ai-card p-3.5 mb-4 ai-reveal" data-delay="160">
+        <form method="GET" action="{{ route('admin.pengguna') }}" class="ai-card p-3.5 mb-4 ai-reveal" data-delay="160">
           <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
             <div class="relative flex-1">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input id="cariUser" class="ai-input !pl-10" placeholder="Cari nama pengguna, NIK/ID staf, email," />
+              <input id="cariUser" name="q" value="{{ request('q') }}" class="ai-input !pl-10" placeholder="Cari nama pengguna, username, NIP, atau email" />
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <button class="ai-btn ai-btn-secondary !text-[12px]" data-toast="Filter Divisi dibuka: Semua Divisi.">Divisi: <span class="font-extrabold">Semua Divisi</span> <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
-              <button class="ai-btn ai-btn-secondary !text-[12px]" data-toast="Filter Status dibuka: Semua Status.">Status: <span class="font-extrabold">Semua Status</span> <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
-              <button class="ai-btn ai-btn-secondary !text-[12px]" data-toast="Filter Akses Hub: Cakung DC-01.">Akses Hub: <span class="font-extrabold">Cakung DC-01</span> <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
-              <button class="ai-btn ai-btn-secondary !text-[12px]" id="btnResetFilter"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Filter</button>
-              <button class="ai-btn ai-btn-soft !text-[12px]" data-toast="Menu Tindakan Massal dibuka."><i data-lucide="list-checks" class="w-3.5 h-3.5"></i> Tindakan Massal</button>
+              <select name="division" class="ai-input !w-auto !py-2 !text-[12px]">
+                <option value="">Semua Divisi</option>
+                @foreach($divisions as $division)
+                  <option value="{{ $division->id }}" @selected((string) request('division') === (string) $division->id)>{{ $division->nama }}</option>
+                @endforeach
+              </select>
+              <select name="status" class="ai-input !w-auto !py-2 !text-[12px]">
+                <option value="">Semua Status</option>
+                <option value="active" @selected(request('status') === 'active')>Aktif</option>
+                <option value="inactive" @selected(request('status') === 'inactive')>Nonaktif</option>
+              </select>
+              <select name="hub" class="ai-input !w-auto !py-2 !text-[12px]">
+                <option value="">Semua Hub</option>
+                @foreach($hubs as $hub)
+                  <option value="{{ $hub->id }}" @selected((string) request('hub') === (string) $hub->id)>{{ $hub->name }}</option>
+                @endforeach
+              </select>
+              <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
+              <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
+              <button type="submit" class="ai-btn ai-btn-soft !text-[12px]"><i data-lucide="filter" class="w-3.5 h-3.5"></i> Terapkan</button>
+              <a href="{{ route('admin.pengguna') }}" class="ai-btn ai-btn-secondary !text-[12px]"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Filter</a>
             </div>
           </div>
+        </form>
+
+        <form id="bulkForm" method="POST" action="{{ route('admin.pengguna.bulk') }}">
+          @csrf
+          <input type="hidden" name="action" id="bulkAction" value="activate">
+        </form>
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="text-[12px] font-bold text-slate-500">Tindakan massal:</span>
+          <button type="button" class="ai-btn ai-btn-secondary !py-1.5 !text-[11.5px]" data-bulk="activate"><i class="fas fa-user-check"></i> Aktifkan</button>
+          <button type="button" class="ai-btn ai-btn-secondary !py-1.5 !text-[11.5px]" data-bulk="deactivate"><i class="fas fa-user-slash"></i> Nonaktifkan</button>
+          <button type="button" class="ai-btn ai-btn-secondary !py-1.5 !text-[11.5px] !text-red-600" data-bulk="delete"><i class="fas fa-trash"></i> Hapus</button>
+          <span class="text-[11px] text-slate-400">Centang baris terlebih dahulu.</span>
         </div>
 
         <!-- ============ TABEL PENGGUNA ============ -->
@@ -388,255 +437,117 @@
                 </tr>
               </thead>
               <tbody id="tabelUser">
-                <!-- Budi Santoso -->
-                <tr data-peran="superadmin">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-blue-600 text-white text-[12px] font-bold flex items-center justify-center flex-none shadow-md shadow-blue-600/25">BS</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Budi Santoso, S.T.</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2021-001</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">budi.santoso@astroinventory.co</div>
+                @forelse($users as $u)
+                  @php
+                    $initials = strtoupper(mb_substr($u->nama_lengkap, 0, 1) . mb_substr((string) strtok((string) $u->nama_lengkap, ' '), 0, 0));
+                    $parts = preg_split('/\s+/', trim($u->nama_lengkap));
+                    if (count($parts) > 1) { $initials = strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[1], 0, 1)); }
+                    $roleColor = match($u->role?->code) {
+                      'super_admin' => 'bg-purple-50 text-purple-700 border-purple-100',
+                      'kepala_gudang' => 'bg-blue-50 text-blue-700 border-blue-100',
+                      'hr' => 'bg-teal-50 text-teal-700 border-teal-100',
+                      'pegawai' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                      default => 'bg-amber-50 text-amber-700 border-amber-100',
+                    };
+                  @endphp
+                  <tr data-peran="{{ $u->role?->code }}">
+                    <td><input type="checkbox" form="bulkForm" name="user_ids[]" value="{{ $u->id }}" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white text-[12px] font-bold flex items-center justify-center flex-none shadow-md shadow-blue-600/25">{{ $initials }}</div>
+                        <div class="min-w-0">
+                          <div class="text-[13px] font-bold text-slate-800">{{ $u->nama_lengkap }}</div>
+                          <div class="text-[11px] text-slate-500 mt-0.5">NIP: {{ $u->nip ?: '-' }}</div>
+                          <div class="text-[11px] text-slate-500 truncate max-w-[210px]">{{ $u->email }}</div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-purple-50 text-purple-700 border border-purple-100"><i data-lucide="shield" class="w-3 h-3"></i> Super Admin</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">IT &amp; Sistem Operasional</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Hub Cakung DC-01 &amp; Nasional</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><i data-lucide="key-round" class="w-3 h-3"></i> Hardware Key / OTP</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="flex items-center gap-1.5 text-[12.5px] font-bold text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-none"></span> Sedang Aktif Sekarang</div>
-                  </td>
-                  <td><span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Budi Santoso dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Riwayat aktivitas Budi Santoso dibuka."><i data-lucide="history" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Ir. Bambang Sugiarto -->
-                <tr data-peran="kepala">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-700 text-[12px] font-bold flex items-center justify-center flex-none">BS</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Ir. Bambang Sugiarto</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2019-014</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">bambang.s@astroinventory.cor</div>
+                    </td>
+                    <td>
+                      <span class="ai-badge border {{ $roleColor }}"><i data-lucide="shield" class="w-3 h-3"></i> {{ $u->role?->name ?? 'Tanpa peran' }}</span>
+                    </td>
+                    <td class="min-w-[150px]">
+                      <div class="text-[12.5px] font-semibold text-slate-700">{{ $u->division?->nama ?? 'Belum ditetapkan' }}</div>
+                      <div class="text-[11px] text-slate-500 mt-0.5">{{ $u->selectedHub?->name ?? 'Belum memilih hub' }}</div>
+                    </td>
+                    <td>
+                      <span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><i data-lucide="lock" class="w-3 h-3"></i> Belum tersedia</span>
+                    </td>
+                    <td class="min-w-[130px]">
+                      @if($u->last_login_at)
+                        <div class="text-[12.5px] font-semibold text-slate-700">{{ $u->last_login_at->diffForHumans() }}</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">{{ $u->last_login_at->format('d M Y H:i') }}</div>
+                      @else
+                        <div class="text-[12.5px] font-semibold text-slate-500">Belum pernah login</div>
+                      @endif
+                    </td>
+                    <td>
+                      @if($u->status === 'active')
+                        <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</span>
+                      @else
+                        <span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Nonaktif</span>
+                      @endif
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-0.5 text-slate-400">
+                        <button type="button" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center"
+                          data-edit-user="{{ $u->id }}"
+                          data-update-url="{{ route('admin.pengguna.update', $u) }}"
+                          data-nama="{{ $u->nama_lengkap }}"
+                          data-username="{{ $u->username }}"
+                          data-email="{{ $u->email }}"
+                          data-nip="{{ $u->nip }}"
+                          data-phone="{{ $u->phone }}"
+                          data-role="{{ $u->role_id }}"
+                          data-division="{{ $u->division_id }}"
+                          data-hub="{{ $u->selected_hub_id }}"
+                          data-status="{{ $u->status }}"
+                          title="Ubah data pengguna"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                        <button type="button" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center"
+                          data-history-url="{{ route('admin.pengguna.activity', $u) }}" title="Riwayat aktivitas"><i data-lucide="history" class="w-4 h-4"></i></button>
+                        <form method="POST" action="{{ route('admin.pengguna.toggle-status', $u) }}" class="inline">
+                          @csrf
+                          <button type="submit" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" title="{{ $u->status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}"><i data-lucide="power" class="w-4 h-4"></i></button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.pengguna.destroy', $u) }}" class="inline" onsubmit="return confirm('Hapus akun {{ $u->nama_lengkap }}?')">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit" class="w-8 h-8 rounded-lg hover:bg-red-50 hover:text-red-600 flex items-center justify-center" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </form>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100"><i data-lucide="warehouse" class="w-3 h-3"></i> Kepala Gudang DC</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">Operasional &amp; Pergudangan</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Hub Cakung DC-01</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><i data-lucide="smartphone" class="w-3 h-3"></i> Google Authenticator</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">12 menit yang lalu</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Verifikasi Inbound #IN-889</div>
-                  </td>
-                  <td><span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Ir. Bambang Sugiarto dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Riwayat aktivitas Ir. Bambang Sugiarto dibuka."><i data-lucide="history" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Maya Anggraini -->
-                <tr data-peran="auditor">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 text-[12px] font-bold flex items-center justify-center flex-none">MA</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Maya Anggraini, S.E.</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2022-045</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">maya.anggraini@astroinventory.</div>
+                    </td>
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="8" class="text-center py-10">
+                      <div class="flex flex-col items-center gap-2">
+                        <i data-lucide="users" class="w-8 h-8 text-slate-300"></i>
+                        <div class="text-[13px] font-bold text-slate-500">Tidak ada pengguna yang cocok</div>
+                        <div class="text-[11.5px] text-slate-400">Coba ubah kata kunci pencarian atau filter peran.</div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-amber-50 text-amber-700 border border-amber-100"><i data-lucide="badge-check" class="w-3 h-3"></i> Internal Auditor &amp; Finance</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">Finance, Asset &amp; Compliance</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Head Office &amp; Multi-Hub</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><i data-lucide="shield-check" class="w-3 h-3"></i> 2FA Aktif (Authenticator)</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">45 menit yang lalu</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Review Stok Opname Q3</div>
-                  </td>
-                  <td><span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Maya Anggraini dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Riwayat aktivitas Maya Anggraini dibuka."><i data-lucide="history" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Adrian Pratama -->
-                <tr data-peran="supervisor">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 text-[12px] font-bold flex items-center justify-center flex-none">AP</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Adrian Pratama</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2023-089</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">adrian.p@astroinventory.com</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-blue-50 text-blue-700 border border-blue-100"><i data-lucide="send" class="w-3 h-3"></i> Supervisor Logistik</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">Outbound &amp; Dispatching</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Hub Cakung DC-01</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><i data-lucide="shield-check" class="w-3 h-3"></i> 2FA Aktif (Authenticator)</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">1 jam yang lalu</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Approval Surat Jalan DO-402</div>
-                  </td>
-                  <td><span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Adrian Pratama dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Riwayat aktivitas Adrian Pratama dibuka."><i data-lucide="history" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Dedi Kurniawan -->
-                <tr data-peran="admin">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 text-[12px] font-bold flex items-center justify-center flex-none">DK</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Dedi Kurniawan</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2024-112</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">dedi.kurniawan@astroinventory.</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-emerald-50 text-emerald-700 border border-emerald-100"><i data-lucide="clipboard-check" class="w-3 h-3"></i> Admin Inbound &amp; QC</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">Penerimaan &amp; Receiving</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Hub Cakung DC-01</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-amber-50 text-amber-700 border border-amber-100"><i data-lucide="clock" class="w-3 h-3"></i> Menunggu Aktivasi</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">Hari ini, 08:30 WIB</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Login Pertama Kali (Setup Akun)</div>
-                  </td>
-                  <td><span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Menunggu Verifikasi</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Email aktivasi dikirim ulang ke Dedi Kurniawan."><i data-lucide="mail" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Dedi Kurniawan dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Hendra Kusuma -->
-                <tr data-peran="picker">
-                  <td><input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-blue-600" /></td>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 text-[12px] font-bold flex items-center justify-center flex-none">HK</div>
-                      <div class="min-w-0">
-                        <div class="text-[13px] font-bold text-slate-800">Hendra Kusuma</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">NIK: AST-2020-038</div>
-                        <div class="text-[11px] text-slate-500 truncate max-w-[210px]">hendra.kusuma@astroinventory</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><i data-lucide="shield" class="w-3 h-3"></i> Safety Officer &amp; Checker</span>
-                  </td>
-                  <td class="min-w-[150px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">HSE &amp; Pengawasan Gudang</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Hub Cakung DC-01</div>
-                  </td>
-                  <td>
-                    <span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><i data-lucide="lock" class="w-3 h-3"></i> Dinonaktifkan Sementara</span>
-                  </td>
-                  <td class="min-w-[130px]">
-                    <div class="text-[12.5px] font-semibold text-slate-700">3 hari yang lalu</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">Login Terakhir via Web Mobile</div>
-                  </td>
-                  <td><span class="ai-badge bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Ditangguhkan (Cuti)</span></td>
-                  <td>
-                    <div class="flex items-center gap-0.5 text-slate-400">
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Status keaktifan Hendra Kusuma diperbarui."><i data-lucide="power" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Mode edit profil Hendra Kusuma dibuka."><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                      <button class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-blue-600 flex items-center justify-center" data-toast="Menu aksi tambahan dibuka."><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Empty state -->
-                <tr id="barisKosongUser" style="display:none">
-                  <td colspan="8" class="text-center py-10">
-                    <div class="flex flex-col items-center gap-2">
-                      <i data-lucide="users" class="w-8 h-8 text-slate-300"></i>
-                      <div class="text-[13px] font-bold text-slate-500">Tidak ada pengguna yang cocok</div>
-                      <div class="text-[11.5px] text-slate-400">Coba ubah kata kunci pencarian atau filter peran.</div>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                @endforelse
               </tbody>
             </table>
           </div>
 
           <div class="flex flex-col md:flex-row items-center justify-between gap-3 px-4 py-3.5 bg-slate-50/80 border-t border-slate-100">
             <div class="flex flex-wrap items-center gap-3 text-[12px] text-slate-500 font-medium">
-              <span>Menampilkan 1-6 dari <span class="font-bold text-slate-700">48</span> Pengguna</span>
-              <span class="flex items-center gap-2">Baris:
-                <select class="ai-input !w-auto !py-1.5 !px-2.5 !text-[12px]"><option>10 per halaman</option><option>25 per halaman</option><option>50 per halaman</option></select>
-              </span>
+              <span>Menampilkan {{ $users->firstItem() ?? 0 }}-{{ $users->lastItem() ?? 0 }} dari <span class="font-bold text-slate-700">{{ $users->total() }}</span> Pengguna</span>
+              <form method="GET" action="{{ route('admin.pengguna') }}" class="flex items-center gap-2">
+                @foreach(request()->except('per_page', 'page') as $key => $value)
+                  <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <span>Baris:</span>
+                <select name="per_page" class="ai-input !w-auto !py-1.5 !px-2.5 !text-[12px]" onchange="this.form.submit()">
+                  @foreach([10, 25, 50] as $size)
+                    <option value="{{ $size }}" @selected((int) request('per_page', 10) === $size)>{{ $size }} per halaman</option>
+                  @endforeach
+                </select>
+              </form>
             </div>
             <div class="flex items-center gap-1.5">
-              <button class="ai-btn ai-btn-secondary !py-1.5 !px-3 !text-[12px] opacity-50" data-toast="Halaman sebelumnya"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Sebelumnya</button>
-              <button class="w-8 h-8 rounded-lg bg-blue-600 text-white text-[12.5px] font-bold flex items-center justify-center">1</button>
-              <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 text-[12.5px] font-semibold flex items-center justify-center hover:bg-slate-100" data-toast="Halaman 2">2</button>
-              <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 text-[12.5px] font-semibold flex items-center justify-center hover:bg-slate-100" data-toast="Halaman 3">3</button>
-              <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 text-[12.5px] font-semibold flex items-center justify-center hover:bg-slate-100" data-toast="Halaman 4">4</button>
-              <button class="ai-btn ai-btn-secondary !py-1.5 !px-3 !text-[12px]" data-toast="Halaman berikutnya">Berikutnya <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+              {{ $users->links() }}
             </div>
           </div>
         </div>
@@ -649,9 +560,9 @@
               <h3 class="text-[14.5px] font-extrabold text-slate-900">Role-Based Access Control (RBAC)</h3>
             </div>
             <p class="text-[12.5px] text-slate-500 leading-relaxed">Hierarki izin hak akses membatasi tindakan otorisasi pengeluaran, penyesuaian stok opname, dan master data sesuai tingkatan jabatan untuk mencegah kecurangan data inventaris.</p>
-            <button class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5" data-toast="Membuka Matriks Peran & Wewenang...">
-              Lihat Matriks Peran &amp; Wewenang <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </button>
+            <a href="{{ route('admin.pengaturan') }}" class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5">
+              Buka Pengaturan Sistem <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
           </div>
 
           <div class="ai-card ai-card-hover p-5 ai-reveal" data-delay="80">
@@ -660,9 +571,9 @@
               <h3 class="text-[14.5px] font-extrabold text-slate-900">Kebijakan Autentikasi 2FA &amp; Password</h3>
             </div>
             <p class="text-[12.5px] text-slate-500 leading-relaxed">Wajib mengaktifkan autentikasi dua faktor (2FA) untuk seluruh akun berpangkat Supervisor ke atas. Rotasi password berkala setiap 90 hari sesuai standar audit ISO 27001.</p>
-            <button class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5" data-toast="Membuka Kelola Kebijakan Sandi...">
-              Kelola Kebijakan Sandi <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </button>
+            <a href="{{ route('admin.pengaturan') }}" class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5">
+              Buka Pengaturan Keamanan <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
           </div>
 
           <div class="ai-card ai-card-hover p-5 ai-reveal" data-delay="160">
@@ -671,9 +582,9 @@
               <h3 class="text-[14.5px] font-extrabold text-slate-900">Audit Log Jejak Digital Staf</h3>
             </div>
             <p class="text-[12.5px] text-slate-500 leading-relaxed">Setiap perubahan status akun, login tidak lazim, reset password, dan pemberian privilege admin dicatat secara permanen dalam Log Aktivitas Forensik sistem.</p>
-            <button class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5" data-toast="Membuka Log Audit Pengguna...">
+            <a href="{{ route('admin.log-aktivitas') }}" class="text-[12.5px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-3.5">
               Buka Log Audit Pengguna <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </button>
+            </a>
           </div>
         </div>
 
@@ -695,58 +606,92 @@
       </div>
       <button data-modal-close class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button>
     </div>
-    <div class="px-6 py-5 space-y-3.5">
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Nama Lengkap</label>
-          <input class="ai-input" placeholder="cth: Rian Hidayat" />
+    <form id="formUser" method="POST" action="{{ route('admin.pengguna.store') }}">
+      @csrf
+      <input type="hidden" name="_method" id="formUserMethod" value="POST" disabled>
+      <div class="px-6 py-5 space-y-3.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Nama Lengkap</label>
+            <input name="nama_lengkap" id="inputNama" value="{{ old('nama_lengkap') }}" class="ai-input" placeholder="cth: Rian Hidayat" required />
+          </div>
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">NIP / ID Staf</label>
+            <input name="nip" id="inputNip" value="{{ old('nip') }}" class="ai-input" placeholder="AST-2026-xxx" required />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Username</label>
+            <input name="username" id="inputUsername" value="{{ old('username') }}" class="ai-input" placeholder="rian.hidayat" required />
+          </div>
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Nomor Telepon</label>
+            <input name="phone" id="inputPhone" value="{{ old('phone') }}" class="ai-input" placeholder="0812xxxxxxx" />
+          </div>
         </div>
         <div>
-          <label class="text-[12px] font-bold text-slate-600 block mb-1.5">NIK / ID Staf</label>
-          <input class="ai-input" placeholder="AST-2026-xxx" />
+          <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Email Korporat</label>
+          <input type="email" name="email" id="inputEmail" value="{{ old('email') }}" class="ai-input" placeholder="nama@astroinventory.com" required />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Peran &amp; Hak Akses</label>
+            <select name="role_id" id="selectRole" class="ai-input" required>
+              <option value="">Pilih peran</option>
+              @foreach($roles as $role)
+                <option value="{{ $role->id }}" @selected((string) old('role_id') === (string) $role->id)>{{ $role->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Divisi</label>
+            <select name="division_id" id="selectDivision" class="ai-input">
+              <option value="">Belum ditetapkan</option>
+              @foreach($divisions as $division)
+                <option value="{{ $division->id }}" @selected((string) old('division_id') === (string) $division->id)>{{ $division->nama }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Hub Penugasan</label>
+            <select name="selected_hub_id" id="selectHub" class="ai-input">
+              <option value="">Belum memilih hub</option>
+              @foreach($hubs as $hub)
+                <option value="{{ $hub->id }}" @selected((string) old('selected_hub_id') === (string) $hub->id)>{{ $hub->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Status Akun</label>
+            <select name="status" id="selectStatus" class="ai-input" required>
+              <option value="active" @selected(old('status') === 'active')>Aktif</option>
+              <option value="inactive" @selected(old('status') === 'inactive')>Nonaktif</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Password <span id="passwordHint" class="font-normal text-slate-400">(wajib)</span></label>
+            <input type="password" name="password" id="inputPassword" class="ai-input" autocomplete="new-password" />
+          </div>
+          <div>
+            <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Konfirmasi Password</label>
+            <input type="password" name="password_confirmation" id="inputPasswordConfirm" class="ai-input" autocomplete="new-password" />
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-2.5 text-[11.5px] text-amber-700">
+          <i class="fas fa-triangle-exclamation mr-1"></i>
+          Verifikasi 2FA belum tersedia pada sistem ini dan tidak dapat diaktifkan dari form ini.
         </div>
       </div>
-      <div>
-        <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Email Korporat</label>
-        <input type="email" class="ai-input" placeholder="nama@astroinventory.com" />
+      <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+        <button type="button" class="ai-btn ai-btn-secondary" data-modal-close>Batal</button>
+        <button type="submit" class="ai-btn ai-btn-primary" id="btnSimpanUser"><i data-lucide="check" class="w-4 h-4"></i> <span id="btnSimpanUserLabel">Buat Akun</span></button>
       </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Peran &amp; Hak Akses</label>
-          <select class="ai-input">
-            <option>Admin Inbound &amp; QC</option>
-            <option>Supervisor Logistik</option>
-            <option>Kepala Gudang DC</option>
-            <option>Admin Purchasing &amp; Inbound</option>
-            <option>Picker &amp; Checker Outbound</option>
-            <option>Internal Auditor &amp; Finance</option>
-            <option>Super Admin</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Divisi &amp; Penugasan</label>
-          <select class="ai-input">
-            <option>Penerimaan &amp; Receiving — Hub Cakung DC-01</option>
-            <option>Outbound &amp; Dispatching — Hub Cakung DC-01</option>
-            <option>Operasional &amp; Pergudangan — Hub Cakung DC-01</option>
-            <option>IT &amp; Sistem Operasional — Nasional</option>
-            <option>Finance, Asset &amp; Compliance — Head Office</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="text-[12px] font-bold text-slate-600 block mb-1.5">Metode 2FA Awal</label>
-        <div class="flex flex-wrap gap-2">
-          <button class="ai-pill ai-pill-active !py-1.5 !px-4 !text-[12px]">Google Authenticator</button>
-          <button class="ai-pill !py-1.5 !px-4 !text-[12px]">Hardware Key / OTP</button>
-          <button class="ai-pill !py-1.5 !px-4 !text-[12px]">Aktivasi Nanti</button>
-        </div>
-      </div>
-    </div>
-    <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
-      <button class="ai-btn ai-btn-secondary" data-modal-close>Batal</button>
-      <button class="ai-btn ai-btn-primary" id="btnSimpanUser"><i data-lucide="check" class="w-4 h-4"></i> Buat Akun &amp; Kirim Undangan</button>
-    </div>
+    </form>
   </div>
 </div>
 
@@ -954,77 +899,144 @@
 
 
 
+<!-- ============ MODAL: RIWAYAT AKTIVITAS ============ -->
+<div id="modalRiwayat" class="ai-modal-overlay" style="display:none">
+  <div class="ai-modal">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div>
+        <div class="text-[15px] font-extrabold text-slate-900" id="riwayatTitle">Riwayat Aktivitas Pengguna</div>
+        <div class="text-[11.5px] text-slate-500">Sumber: audit_logs &amp; user_sessions</div>
+      </div>
+      <button type="button" data-modal-close class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button>
+    </div>
+    <div id="riwayatContent" class="px-6 py-5 text-[12.5px] text-slate-500">Memuat...</div>
+  </div>
+</div>
+
 <script>
     (function () {
       "use strict";
+      /* ---------- Modal Tambah / Ubah Pengguna ---------- */
+      var modal = document.getElementById('modalTambahUser');
+      var form = document.getElementById('formUser');
+      var methodField = document.getElementById('formUserMethod');
+      var createAction = form.getAttribute('action');
+      var titleEl = modal.querySelector('.text-\\[15px\\].font-extrabold');
+      var subtitleEl = modal.querySelector('.text-\\[11\\.5px\\]');
+      var passwordHint = document.getElementById('passwordHint');
+      var saveLabel = document.getElementById('btnSimpanUserLabel');
 
-      /* ---------- Modal Tambah Pengguna ---------- */
+      function openModal(m) {
+        m.style.display = 'flex';
+        requestAnimationFrame(function () { m.classList.add('ai-open'); });
+      }
+      function closeModal(m) {
+        m.classList.remove('ai-open');
+        setTimeout(function () { m.style.display = 'none'; }, 250);
+      }
+
       document.querySelectorAll('[data-modal-open]').forEach(function (b) {
         b.addEventListener('click', function () {
-          var m = document.getElementById(b.getAttribute('data-modal-open'));
-          m.style.display = 'flex';
-          requestAnimationFrame(function () { m.classList.add('ai-open'); });
+          resetCreateForm();
+          openModal(modal);
         });
       });
       document.querySelectorAll('[data-modal-close]').forEach(function (b) {
         b.addEventListener('click', function () {
           var m = b.closest('.ai-modal-overlay');
-          m.classList.remove('ai-open');
-          setTimeout(function () { m.style.display = 'none'; }, 250);
+          if (m) closeModal(m);
         });
       });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          document.querySelectorAll('.ai-modal-overlay').forEach(function (m) {
-            m.classList.remove('ai-open'); m.style.display = 'none';
-          });
+          document.querySelectorAll('.ai-modal-overlay').forEach(function (m) { closeModal(m); });
         }
       });
 
-      var btnUser = document.getElementById('btnSimpanUser');
-      if (btnUser) btnUser.addEventListener('click', function () {
-        var m = document.getElementById('modalTambahUser');
-        m.classList.remove('ai-open'); setTimeout(function () { m.style.display = 'none'; }, 250);
-        window.aiToast('Akun pengguna dibuat & undangan setup terkirim via email.', 'success');
-      });
-
-      /* ---------- Filter pill peran + search ---------- */
-      var tbody = document.getElementById('tabelUser');
-      var cari = document.getElementById('cariUser');
-      var kosong = document.getElementById('barisKosongUser');
-      var peranAktif = 'semua';
-
-      function terapkanFilter() {
-        var kata = cari ? cari.value.trim().toLowerCase() : '';
-        var tampil = 0;
-        tbody.querySelectorAll('tr[data-peran]').forEach(function (r) {
-          var cocokPeran = peranAktif === 'semua' || r.getAttribute('data-peran') === peranAktif;
-          var cocokCari = !kata || r.textContent.toLowerCase().indexOf(kata) > -1;
-          var ok = cocokPeran && cocokCari;
-          r.style.display = ok ? '' : 'none';
-          if (ok) tampil++;
-        });
-        if (kosong) kosong.style.display = tampil ? 'none' : '';
+      function resetCreateForm() {
+        form.reset();
+        form.setAttribute('action', createAction);
+        methodField.value = 'POST';
+        methodField.disabled = true;
+        titleEl.textContent = 'Tambah Pengguna Baru';
+        subtitleEl.textContent = 'Registrasi akun staf & penetapan peran RBAC';
+        passwordHint.textContent = '(wajib)';
+        saveLabel.textContent = 'Buat Akun';
+        document.getElementById('inputPassword').required = true;
       }
 
-      document.querySelectorAll('[data-tabs="peran"] [data-tab]').forEach(function (pill) {
-        pill.addEventListener('click', function () {
-          peranAktif = pill.getAttribute('data-tab');
-          terapkanFilter();
+      document.querySelectorAll('[data-edit-user]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var d = button.dataset;
+          form.setAttribute('action', d.updateUrl);
+          methodField.value = 'PUT';
+          methodField.disabled = false;
+          document.getElementById('inputNama').value = d.nama || '';
+          document.getElementById('inputUsername').value = d.username || '';
+          document.getElementById('inputEmail').value = d.email || '';
+          document.getElementById('inputNip').value = d.nip || '';
+          document.getElementById('inputPhone').value = d.phone || '';
+          document.getElementById('selectRole').value = d.role || '';
+          document.getElementById('selectDivision').value = d.division || '';
+          document.getElementById('selectHub').value = d.hub || '';
+          document.getElementById('selectStatus').value = d.status || 'active';
+          document.getElementById('inputPassword').value = '';
+          document.getElementById('inputPasswordConfirm').value = '';
+          document.getElementById('inputPassword').required = false;
+          titleEl.textContent = 'Ubah Data Pengguna';
+          subtitleEl.textContent = 'Perbarui identitas, peran, penugasan, atau status akun';
+          passwordHint.textContent = '(kosongkan bila tidak diubah)';
+          saveLabel.textContent = 'Simpan Perubahan';
+          openModal(modal);
         });
       });
-      if (cari) cari.addEventListener('input', terapkanFilter);
 
-      var btnReset = document.getElementById('btnResetFilter');
-      if (btnReset) btnReset.addEventListener('click', function () {
-        peranAktif = 'semua';
-        if (cari) cari.value = '';
-        document.querySelectorAll('[data-tabs="peran"] [data-tab]').forEach(function (p) {
-          p.classList.toggle('ai-pill-active', p.getAttribute('data-tab') === 'semua');
+      /* ---------- Riwayat aktivitas ---------- */
+      var riwayatModal = document.getElementById('modalRiwayat');
+      function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
-        terapkanFilter();
-        window.aiToast('Filter telah direset ke pengaturan awal.', 'info');
+      }
+      document.querySelectorAll('[data-history-url]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var content = document.getElementById('riwayatContent');
+          content.innerHTML = 'Memuat...';
+          openModal(riwayatModal);
+          fetch(button.dataset.historyUrl, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (payload) {
+              document.getElementById('riwayatTitle').textContent = 'Riwayat Aktivitas: ' + (payload.user ? payload.user.nama_lengkap : '');
+              var logs = (payload.audit_logs || []).map(function (log) {
+                return '<div class="border border-slate-100 rounded-xl p-3 mb-2"><div class="flex items-center justify-between gap-2"><div class="font-bold text-slate-800">' + esc(log.description || log.action) + '</div><span class="text-[11px] text-slate-400">' + esc(log.created_at || '') + '</span></div><div class="text-[11px] text-slate-500 mt-1">Aksi: ' + esc(log.action) + ' • Hasil: ' + esc(log.result) + '</div></div>';
+              }).join('');
+              var sessions = (payload.sessions || []).map(function (s) {
+                return '<div class="border border-slate-100 rounded-xl p-3 mb-2"><div class="font-bold text-slate-800">' + esc(s.device_name || 'Perangkat') + ' • ' + esc(s.browser || '-') + '</div><div class="text-[11px] text-slate-500 mt-1">' + esc(s.platform || '-') + ' • IP ' + esc(s.ip_address || '-') + ' • ' + esc(s.status || '-') + ' • ' + esc(s.last_activity_at || '-') + '</div></div>';
+              }).join('');
+              content.innerHTML = '<div class="text-[12px] font-extrabold text-slate-700 mb-2">Jejak Audit</div>' + (logs || '<div class="text-slate-400 mb-4">Belum ada jejak audit.</div>') + '<div class="text-[12px] font-extrabold text-slate-700 mt-4 mb-2">Sesi Perangkat</div>' + (sessions || '<div class="text-slate-400">Belum ada sesi tercatat.</div>');
+            })
+            .catch(function () { content.innerHTML = '<div class="text-red-600">Gagal memuat riwayat aktivitas.</div>'; });
+        });
       });
+
+      /* ---------- Tindakan massal ---------- */
+      document.querySelectorAll('[data-bulk]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var action = button.dataset.bulk;
+          var checked = document.querySelectorAll('#tabelUser input[name="user_ids[]"]:checked');
+          if (!checked.length) { window.aiToast('Centang minimal satu pengguna terlebih dahulu.', 'warn'); return; }
+          var labels = { activate: 'mengaktifkan', deactivate: 'menonaktifkan', delete: 'menghapus' };
+          if (!confirm('Yakin ' + labels[action] + ' ' + checked.length + ' pengguna terpilih?')) return;
+          document.getElementById('bulkAction').value = action;
+          document.getElementById('bulkForm').submit();
+        });
+      });
+
+      /* Buka modal otomatis saat validasi gagal */
+      @if($errors->any())
+        resetCreateForm();
+        openModal(modal);
+      @endif
     })();
 </script>
 

@@ -134,8 +134,16 @@ class HubSelectionController extends Controller
             return redirect()->route('admin.dashboard')->with('success', $message);
         }
 
+        if ($user->isKepalaGudang()) {
+            return redirect()->route('kepalagudang.dashboard')->with('success', $message);
+        }
+
         if ($user->isHR()) {
             return redirect()->route('hr.dashboard')->with('success', $message);
+        }
+
+        if ($user->isPegawai()) {
+            return redirect()->route('pegawai.dashboard')->with('success', $message);
         }
 
         if ($user->isAuditor()) {

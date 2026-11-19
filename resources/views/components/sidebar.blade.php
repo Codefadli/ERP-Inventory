@@ -2,7 +2,7 @@
 <aside class="w-64 bg-white border-r border-gray-200 hidden lg:block overflow-y-auto">
     <nav class="p-3">
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Menu Utama</p>
-        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.dashboard' : (auth()->user()->isKepalaGudang() ? 'gudang.dashboard' : (auth()->user()->isHR() ? 'hr.dashboard' : (auth()->user()->isPegawai() ? 'pegawai.dashboard' : 'audit.dashboard')))) }}" class="nav-link {{ (request()->routeIs('dashboard') || request()->routeIs('*.dashboard')) ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.dashboard' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.dashboard' : (auth()->user()->isHR() ? 'hr.dashboard' : (auth()->user()->isPegawai() ? 'pegawai.dashboard' : 'audit.dashboard')))) }}" class="nav-link {{ (request()->routeIs('dashboard') || request()->routeIs('*.dashboard')) ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium mb-1">
             <i class="fas fa-th-large w-4"></i>
             <span>Dashboard</span>
         </a>
@@ -81,12 +81,12 @@
 
         @if(auth()->user()->isKepalaGudang())
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Master Data & Inventaris</p>
-        <a href="{{ route('gudang.data-barang') }}" class="nav-link {{ request()->routeIs('gudang.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.data-barang') }}" class="nav-link {{ request()->routeIs('kepalagudang.data-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-boxes w-4"></i>
             <span>Data Barang</span>
         </a>
-        <a href="{{ route('gudang.data-gudang-lokasi') }}"
-            class="nav-link {{ request()->routeIs('gudang.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.data-gudang-lokasi') }}"
+            class="nav-link {{ request()->routeIs('kepalagudang.data-gudang-lokasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-warehouse w-4"></i>
             <span>Data Gudang & Lokasi</span>
         </a>
@@ -100,7 +100,7 @@
             <i class="fas fa-truck w-4"></i>
             <span>Barang Keluar</span>
         </a>
-        <a href="{{ route('gudang.mutasi-barang') }}" class="nav-link {{ request()->routeIs('gudang.mutasi-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.mutasi-barang') }}" class="nav-link {{ request()->routeIs('kepalagudang.mutasi-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-exchange-alt w-4"></i>
             <span>Mutasi Barang</span>
         </a>
@@ -108,12 +108,12 @@
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Stok Opname</span>
         </a>
-        <a href="{{ route('gudang.persetujuan-barang') }}"
-            class="nav-link {{ request()->routeIs('gudang.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.persetujuan-barang') }}"
+            class="nav-link {{ request()->routeIs('kepalagudang.persetujuan-barang') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-clipboard-check w-4"></i>
             <span>Persetujuan Barang</span>
         </a>
-        <a href="{{ route('gudang.laporan') }}" class="nav-link {{ request()->routeIs('gudang.laporan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.laporan') }}" class="nav-link {{ request()->routeIs('kepalagudang.laporan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-chart-bar w-4"></i>
             <span>Laporan & Analitik</span>
         </a>
@@ -214,15 +214,15 @@
 
         <!-- Common Menu for All Roles -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Pengaturan & Akun</p>
-        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.notifikasi' : (auth()->user()->isKepalaGudang() ? 'gudang.notifikasi' : (auth()->user()->isHR() ? 'hr.notifikasi' : (auth()->user()->isPegawai() ? 'pegawai.notifikasi' : 'audit.notifikasi')))) }}" class="nav-link {{ request()->routeIs('*.notifikasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.notifikasi' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.notifikasi' : (auth()->user()->isHR() ? 'hr.notifikasi' : (auth()->user()->isPegawai() ? 'pegawai.notifikasi' : 'audit.notifikasi')))) }}" class="nav-link {{ request()->routeIs('*.notifikasi') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-bell w-4"></i>
             <span>Notifikasi</span>
         </a>
-        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.pengaturan' : (auth()->user()->isKepalaGudang() ? 'gudang.pengaturan' : (auth()->user()->isHR() ? 'hr.pengaturan' : (auth()->user()->isPegawai() ? 'pegawai.pengaturan' : 'audit.pengaturan')))) }}" class="nav-link {{ request()->routeIs('*.pengaturan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.pengaturan' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.pengaturan' : (auth()->user()->isHR() ? 'hr.pengaturan' : (auth()->user()->isPegawai() ? 'pegawai.pengaturan' : 'audit.pengaturan')))) }}" class="nav-link {{ request()->routeIs('*.pengaturan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-cog w-4"></i>
             <span>Pengaturan</span>
         </a>
-        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.profile' : (auth()->user()->isKepalaGudang() ? 'gudang.profile' : (auth()->user()->isHR() ? 'hr.profile' : (auth()->user()->isPegawai() ? 'pegawai.profile' : 'audit.profile')))) }}" class="nav-link {{ request()->routeIs('*.profile') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.profile' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.profile' : (auth()->user()->isHR() ? 'hr.profile' : (auth()->user()->isPegawai() ? 'pegawai.profile' : 'audit.profile')))) }}" class="nav-link {{ request()->routeIs('*.profile') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-user w-4"></i>
             <span>Profil Saya</span>
         </a>
