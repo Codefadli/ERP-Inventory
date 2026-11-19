@@ -45,11 +45,11 @@
         </a>
 
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-masuk' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-masuk' : (auth()->user()->isHR() ? 'hr.barang-masuk' : (auth()->user()->isPegawai() ? 'pegawai.barang-masuk' : 'audit.barang-masuk')))) }}" class="nav-link {{ request()->routeIs('*.barang-masuk') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-down w-4"></i>
             <span>Barang Masuk</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-keluar' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-keluar' : (auth()->user()->isHR() ? 'hr.barang-keluar' : (auth()->user()->isPegawai() ? 'pegawai.barang-keluar' : 'audit.barang-keluar')))) }}" class="nav-link {{ request()->routeIs('*.barang-keluar') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
@@ -92,11 +92,11 @@
         </a>
 
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional & Transaksi</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.barang-masuk') }}" class="nav-link {{ request()->routeIs('kepalagudang.barang-masuk') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck-loading w-4"></i>
             <span>Barang Masuk</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route('kepalagudang.barang-keluar') }}" class="nav-link {{ request()->routeIs('kepalagudang.barang-keluar') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-truck w-4"></i>
             <span>Barang Keluar</span>
         </a>
@@ -152,11 +152,11 @@
         @if(auth()->user()->isPegawai())
         <!-- Pegawai Menu -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Operasional Gudang</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-masuk' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-masuk' : (auth()->user()->isHR() ? 'hr.barang-masuk' : (auth()->user()->isPegawai() ? 'pegawai.barang-masuk' : 'audit.barang-masuk')))) }}" class="nav-link {{ request()->routeIs('*.barang-masuk') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-down w-4"></i>
             <span>Barang Masuk</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-keluar' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-keluar' : (auth()->user()->isHR() ? 'hr.barang-keluar' : (auth()->user()->isPegawai() ? 'pegawai.barang-keluar' : 'audit.barang-keluar')))) }}" class="nav-link {{ request()->routeIs('*.barang-keluar') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
@@ -182,11 +182,11 @@
         @if(auth()->user()->isAuditor())
         <!-- Auditor Menu -->
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2 mt-4">Audit & Pemeriksaan</p>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-masuk' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-masuk' : (auth()->user()->isHR() ? 'hr.barang-masuk' : (auth()->user()->isPegawai() ? 'pegawai.barang-masuk' : 'audit.barang-masuk')))) }}" class="nav-link {{ request()->routeIs('*.barang-masuk') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-down w-4"></i>
             <span>Barang Masuk</span>
         </a>
-        <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
+        <a href="{{ route(auth()->user()->isSuperAdmin() ? 'admin.barang-keluar' : (auth()->user()->isKepalaGudang() ? 'kepalagudang.barang-keluar' : (auth()->user()->isHR() ? 'hr.barang-keluar' : (auth()->user()->isPegawai() ? 'pegawai.barang-keluar' : 'audit.barang-keluar')))) }}" class="nav-link {{ request()->routeIs('*.barang-keluar') ? 'active' : '' }} flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 mb-1">
             <i class="fas fa-arrow-up w-4"></i>
             <span>Barang Keluar</span>
         </a>
